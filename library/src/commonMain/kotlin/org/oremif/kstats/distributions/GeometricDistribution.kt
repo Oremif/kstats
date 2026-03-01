@@ -1,0 +1,46 @@
+package org.oremif.kstats.distributions
+
+import kotlin.math.*
+import kotlin.random.Random
+
+public data class GeometricDistribution(
+    val probability: Double
+) : DiscreteDistribution {
+
+    init {
+        require(probability > 0.0 && probability <= 1.0) { "probability must be in (0, 1], got $probability" }
+    }
+
+    private val p = probability
+    private val q = 1.0 - p
+
+    // k = number of failures before first success (0-indexed)
+    override fun pmf(k: Int): Double {
+        if (k < 0) return 0.0
+        return p * q.pow(k)
+    }
+
+    override fun logPmf(k: Int): Double {
+        if (k < 0) return Double.NEGATIVE_INFINITY
+        return ln(p) + k * ln(q)
+    }
+
+    override fun cdf(k: Int): Double {
+        if (k < 0) return 0.0
+        return 1.0 - q.pow(k + 1)
+    }
+
+    override fun quantile(p: Double): Int {
+        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p == 0.0) return 0
+        if (p == 1.0) return Int.MAX_VALUE
+        return ceil(ln(1.0 - p) / ln(q) - 1.0).toInt().coerceAtLeast(0)
+    }
+
+    override val mean: Double get() = q / p
+    override val variance: Double get() = q / (p * p)
+
+    override fun sample(random: Random): Int {
+        return floor(ln(random.nextDouble()) / ln(q)).toInt()
+    }
+}

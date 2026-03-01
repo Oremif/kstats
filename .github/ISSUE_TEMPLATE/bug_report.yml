@@ -1,0 +1,18 @@
+name: Bug Report
+description: Report a bug in kstats
+labels: ["bug"]
+body:
+  - type: textarea
+    id: bug
+    attributes:
+      label: Bug Report
+      value: |
+        ## Description
+
+
+        ## Expected behavior
+
+
+        ## Actual behavior
+    validations:
+      required: true
