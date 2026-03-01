@@ -1,0 +1,286 @@
+---
+title: "Descriptive Statistics"
+description: "Summary statistics, central tendency, dispersion, quantiles, shape measures, frequency analysis, and streaming calculations in kstats-core."
+---
+
+[//]: # (<!---IMPORT org.oremif.kstats.samples.DocsSamples-->)
+[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
+
+`kstats-core` provides descriptive statistics as extension functions on `DoubleArray` and `Iterable<Double>`. It also includes `Int` and `Long` overloads for the most common operations.
+
+## Summary Snapshot
+
+`describe()` is the fastest way to get a complete picture of a sample. It returns a `DescriptiveStatistics` object combining count, center, spread, quartiles, shape, and standard error.
+
+[//]: # (<!---FUN coreSummarySnapshot-->)
+
+```kotlin
+val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
+val stats = data.describe()
+
+stats.count              // 8
+stats.mean               // 5.0
+stats.median             // 4.5
+stats.standardDeviation  // 2.1380
+stats.variance           // 4.5714
+stats.q1                 // 4.0
+stats.q3                 // 5.5
+stats.interquartileRange // 1.5
+stats.skewness           // 0.6563
+stats.kurtosis           // -0.1640
+stats.range              // 7.0
+stats.standardError      // 0.7559
+```
+
+[//]: # (<!---END-->)
+
+<Note>
+`variance()` and `standardDeviation()` use the **sample** formula (dividing by $n - 1$) by default. Pass `PopulationKind.POPULATION` to use the population formula (dividing by $n$).
+</Note>
+
+## Central Tendency
+
+Different notions of "center" suit different data shapes. `mean()` is the arithmetic average, `median()` is the positional center, `mode()` returns the most frequent values, and the trimmed and weighted variants handle outliers and importance weights.
+
+[//]: # (<!---FUN coreCentralTendency-->)
+
+```kotlin
+val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
+
+data.mean()                    // 5.0
+data.median()                  // 4.5
+data.toList().mode()           // {4.0}
+
+data.trimmedMean(0.1)          // 4.8333 — trims 10% from each tail
+
+val positive = doubleArrayOf(1.0, 2.0, 4.0, 8.0)
+positive.geometricMean()       // 2.8284
+positive.harmonicMean()        // 2.1333
+
+val values = doubleArrayOf(1.0, 2.0, 3.0)
+val weights = doubleArrayOf(3.0, 1.0, 1.0)
+values.weightedMean(weights)   // 1.6
+```
+
+[//]: # (<!---END-->)
+
+- **Geometric mean** — use for growth rates and ratios. Requires all positive values.
+- **Harmonic mean** — use for rates and speed averages. Requires all positive values.
+- **Trimmed mean** — drops a proportion from each tail before averaging. Robust to outliers.
+- **Weighted mean** — each observation contributes proportionally to its weight.
+
+<Accordion title="Math details">
+$$
+\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i
+$$
+
+$$
+\bar{x}_{\text{geo}} = \left(\prod_{i=1}^{n} x_i\right)^{1/n}
+$$
+
+$$
+\bar{x}_{\text{harm}} = \frac{n}{\sum_{i=1}^{n} \frac{1}{x_i}}
+$$
+
+$$
+\bar{x}_w = \frac{\sum_{i=1}^{n} w_i x_i}{\sum_{i=1}^{n} w_i}
+$$
+
+The trimmed mean drops $\lfloor p \cdot n \rfloor$ observations from each end of the sorted sample, then computes the arithmetic mean of the remaining values.
+</Accordion>
+
+## Dispersion
+
+Spread measures describe how far values deviate from the center.
+
+[//]: # (<!---FUN coreDispersion-->)
+
+```kotlin
+val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
+
+data.variance()                                    // 4.5714 (sample)
+data.variance(PopulationKind.POPULATION)            // 4.0
+data.standardDeviation()                            // 2.1380
+data.range()                                        // 7.0
+data.interquartileRange()                           // 1.5
+data.meanAbsoluteDeviation()                        // 1.5
+
+data.trimmedVariance(0.1)                           // trimmed sample variance
+
+data.semiVariance(5.0, SemiVarianceDirection.DOWNSIDE) // 1.7143
+data.semiVariance(5.0, SemiVarianceDirection.UPSIDE)   // 2.8571
+```
+
+[//]: # (<!---END-->)
+
+<Note>
+`semiVariance` measures variability on one side of a threshold. `DOWNSIDE` captures risk below the threshold; `UPSIDE` captures variability above it.
+</Note>
+
+<Accordion title="Math details">
+$$
+s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2, \qquad
+s = \sqrt{s^2}, \qquad
+SE = \frac{s}{\sqrt{n}}
+$$
+
+$$
+\text{MAD} = \frac{1}{n}\sum_{i=1}^{n}|x_i - \bar{x}|
+$$
+
+$$
+\text{SemiVar}_{\text{down}}(t) = \frac{1}{n-1}\sum_{x_i < t}(x_i - t)^2
+$$
+</Accordion>
+
+## Quantiles and Position
+
+Quantiles split the data at specified probability thresholds. `percentile()` takes a value on the 0–100 scale; `quantile()` takes a value on the 0–1 scale.
+
+[//]: # (<!---FUN coreQuantiles-->)
+
+```kotlin
+val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+
+data.quantile(0.5)         // 5.5 (median)
+data.quantile(0.25)        // 3.25 (Q1)
+data.percentile(90.0)      // 9.1 (90th percentile)
+
+val (q1, median, q3) = data.quartiles()
+// q1 = 3.25, median = 5.5, q3 = 7.75
+```
+
+[//]: # (<!---END-->)
+
+<Tip>
+`quantile()` supports a `QuantileInterpolation` parameter with options: `LINEAR` (default), `LOWER`, `HIGHER`, `NEAREST`, and `MIDPOINT`. These control how the value is interpolated when the quantile falls between two data points.
+</Tip>
+
+<Accordion title="Math details">
+With linear interpolation (the default), the quantile at probability $p$ for sorted data $x_{(1)}, \ldots, x_{(n)}$ is computed as:
+
+$$
+Q(p) = x_{(\lfloor h \rfloor)} + (h - \lfloor h \rfloor)(x_{(\lceil h \rceil)} - x_{(\lfloor h \rfloor)})
+$$
+
+where $h = p(n - 1) + 1$.
+</Accordion>
+
+## Shape and Moments
+
+Shape measures describe asymmetry and tail weight beyond what the mean and variance capture.
+
+[//]: # (<!---FUN coreShape-->)
+
+```kotlin
+val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
+
+data.skewness()            // 0.6563 — positive: right tail is longer
+data.kurtosis()            // -0.1640 — negative excess: lighter tails than normal
+data.kurtosis(excess = false) // raw kurtosis (not centered at 0)
+
+data.centralMoment(2)      // 4.0 (equals population variance)
+data.centralMoment(3)      // 5.25
+data.centralMoment(4)      // 44.5
+
+data.kStatistic(1)          // 5.0 (equals mean)
+data.kStatistic(2)          // 4.5714 (equals sample variance)
+```
+
+[//]: # (<!---END-->)
+
+Skewness near zero suggests symmetry. Positive skewness indicates a longer right tail; negative indicates a longer left tail. Excess kurtosis near zero is similar to a normal distribution; positive values indicate heavier tails.
+
+<Warning>
+`kurtosis()` returns **excess kurtosis** by default (`excess = true`), meaning the value is shifted so that a normal distribution has excess kurtosis of 0. Pass `excess = false` for the raw fourth standardized moment.
+</Warning>
+
+<Accordion title="Math details">
+$$
+g_1 = \frac{n}{(n-1)(n-2)} \sum_{i=1}^{n} \left(\frac{x_i - \bar{x}}{s}\right)^3
+$$
+
+$$
+g_2 = \frac{n(n+1)}{(n-1)(n-2)(n-3)} \sum_{i=1}^{n} \left(\frac{x_i - \bar{x}}{s}\right)^4 - \frac{3(n-1)^2}{(n-2)(n-3)}
+$$
+
+The $r$-th central moment is $\mu_r = \frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^r$. K-statistics ($k_r$) are unbiased estimators of the corresponding cumulants.
+</Accordion>
+
+## Frequency Analysis
+
+The `Frequency` class counts occurrences, proportions, and cumulative frequencies for any `Comparable` type. `frequencyTable()` groups numeric data into equal-width bins.
+
+[//]: # (<!---FUN coreFrequency-->)
+
+```kotlin
+val freq = listOf("a", "a", "b", "b", "b", "c").toFrequency()
+freq.totalCount            // 6
+freq.count("b")            // 3
+freq.proportion("b")       // 0.5
+freq.cumulativeCount("b")  // 5 (a=2 + b=3)
+freq.mode                  // {b}
+```
+
+[//]: # (<!---END-->)
+
+[//]: # (<!---FUN coreFrequencyTable-->)
+
+```kotlin
+val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+val bins = data.asIterable().frequencyTable(3)
+// Each FrequencyBin has: range, count, relativeFrequency, cumulativeFrequency
+bins[0].count              // number of values in the first bin
+bins[0].relativeFrequency  // proportion of total
+```
+
+[//]: # (<!---END-->)
+
+<Tip>
+`Frequency` works with any `Comparable` type — strings, enums, integers, or custom classes. For numeric binning, use `frequencyTable()` with either a bin count or a bin width.
+</Tip>
+
+## Streaming Statistics
+
+`OnlineStatistics` computes mean, variance, skewness, and kurtosis incrementally without storing the full sample. Values can be added one at a time or in batches.
+
+[//]: # (<!---FUN coreStreaming-->)
+
+```kotlin
+val online = OnlineStatistics()
+online.addAll(doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0))
+
+online.count               // 8
+online.mean                // 5.0
+online.sum                 // 40.0
+online.min                 // 2.0
+online.max                 // 9.0
+online.variance()          // 4.5714 (sample)
+online.standardDeviation() // 2.1380
+online.skewness()          // 0.6563
+
+// Add more data later
+online.add(3.0)
+online.count               // 9
+online.mean                // 4.7778
+```
+
+[//]: # (<!---END-->)
+
+Use `OnlineStatistics` when data arrives incrementally (streaming, event-driven systems) or when buffering the full sample in memory is impractical.
+
+<Accordion title="Math details">
+`OnlineStatistics` uses Welford's algorithm with the Terriberry extension for numerically stable single-pass computation of higher-order moments. The algorithm updates running sums of powers of deviations from the current mean, avoiding the catastrophic cancellation that affects naive two-pass formulas on large datasets.
+</Accordion>
+
+## Error Handling
+
+<Warning>
+Empty arrays throw `InsufficientDataException`. Functions that require at least two observations (variance, standard deviation, skewness) throw `InsufficientDataException` for single-element input. Functions requiring positive data (`geometricMean`, `harmonicMean`) throw `InvalidParameterException` for non-positive values.
+</Warning>
+
+## API Reference
+
+<Card title="Full API Reference" icon="book-open" href="https://oremif.github.io/kstats">
+  Browse all public types, functions, parameter overloads, and return types in the Dokka-generated reference.
+</Card>

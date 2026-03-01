@@ -1,0 +1,149 @@
+---
+title: "Sampling & Transformation"
+description: "Rangbildung, z-Score-Normalisierung, Min-Max-Skalierung, Binning, Häufigkeitstabellen, Bootstrap, Zufallsstichproben und gewichteter Würfel in kstats-sampling."
+---
+
+[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
+
+`kstats-sampling` stellt Vorverarbeitungs- und Resampling-Werkzeuge bereit, die am Rand eines Analyse-Workflows stehen. Das Modul deckt zwei Bereiche ab: die Transformation numerischer Daten und das Ziehen von Zufallsstichproben.
+
+## Datentransformation
+
+### Rangbildung
+
+`rank()` ersetzt numerische Werte durch ihre geordneten Positionen. Die Behandlung von Bindungen wird über den Parameter `TieMethod` gesteuert.
+
+[//]: # (<!---FUN sampRanking-->)
+
+```kotlin
+val data = doubleArrayOf(3.0, 1.0, 4.0, 1.0, 5.0)
+
+data.rank()                        // [3.0, 1.5, 4.0, 1.5, 5.0]
+data.rank(TieMethod.MIN)           // [3.0, 1.0, 4.0, 1.0, 5.0]
+data.rank(TieMethod.MAX)           // [3.0, 2.0, 4.0, 2.0, 5.0]
+data.rank(TieMethod.DENSE)         // [2.0, 1.0, 3.0, 1.0, 4.0]
+data.rank(TieMethod.ORDINAL)       // [3.0, 1.0, 4.0, 2.0, 5.0]
+
+data.percentileRank()              // ranks scaled to 0-100
+```
+
+[//]: # (<!---END-->)
+
+<Tip>
+`TieMethod`-Optionen:
+- `AVERAGE` (Standard) — gebundene Werte teilen sich den Mittelwert ihrer Ränge
+- `MIN` — alle gebundenen Werte erhalten den niedrigsten Rang
+- `MAX` — alle gebundenen Werte erhalten den höchsten Rang
+- `DENSE` — wie MIN, aber ohne Lücken in der Rangfolge
+- `ORDINAL` — gebundene Werte erhalten aufeinanderfolgende Ränge basierend auf ihrer Position in der Eingabe
+</Tip>
+
+### Normalisierung
+
+Zwei gängige Skalierungsverfahren: z-Score-Standardisierung (Mittelwert 0, Standardabweichung 1) und Min-Max-Skalierung.
+
+[//]: # (<!---FUN sampNormalization-->)
+
+```kotlin
+val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+
+data.zScore()                      // [-1.2649, -0.6325, 0.0, 0.6325, 1.2649]
+
+data.minMaxNormalize()             // [0.0, 0.25, 0.5, 0.75, 1.0]
+data.minMaxNormalize(0.0, 100.0)   // [0.0, 25.0, 50.0, 75.0, 100.0]
+```
+
+[//]: # (<!---END-->)
+
+`zScore()` ist geeignet, wenn die nachfolgende Methode standardisierte Eingaben voraussetzt. `minMaxNormalize()` skaliert standardmäßig auf [0, 1] oder auf einen benutzerdefinierten Bereich.
+
+<Accordion title="Mathematische Details">
+$$
+z_i = \frac{x_i - \bar{x}}{s}
+$$
+
+$$
+x_i' = \frac{x_i - x_{\min}}{x_{\max} - x_{\min}} \cdot (\text{newMax} - \text{newMin}) + \text{newMin}
+$$
+</Accordion>
+
+### Binning
+
+`bin()` gruppiert Werte in gleich breite Intervalle und gibt die Elemente jedes Bins zurück. `frequencyTable()` liefert Intervallgrenzen, Häufigkeiten, relative Häufigkeiten und kumulative Häufigkeiten.
+
+[//]: # (<!---FUN sampBinning-->)
+
+```kotlin
+val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+
+// By bin count
+val bins = data.asIterable().bin(3)
+bins.size                          // 3
+bins[0].range                      // interval of the first bin
+bins[0].items                      // values that fall in the first bin
+bins[0].count                      // number of values
+
+// By bin width
+val wideBins = data.asIterable().bin(5.0)
+
+// Frequency table -- counts and proportions instead of items
+val freq = data.asIterable().frequencyTable(3)
+freq[0].count                      // number of values in the first bin
+freq[0].relativeFrequency          // proportion of total
+freq[0].cumulativeFrequency        // running total of relative frequencies
+```
+
+[//]: # (<!---END-->)
+
+`bin()` gibt die tatsächlichen Elemente zurück, die in jedes Intervall fallen — nützlich für die Weiterverarbeitung. `frequencyTable()` liefert zusammenfassende Statistiken pro Bin — nützlich für histogrammartige Berichte.
+
+<Note>
+Sowohl `bin()` als auch `frequencyTable()` akzeptieren entweder eine **Bin-Anzahl** (Anzahl der Bins) oder eine **Bin-Breite** (Größe jedes Intervalls). Die Variante `binByDouble()` nimmt eine `valueSelector`-Funktion entgegen und ermöglicht so das Binning nicht-numerischer Sammlungen anhand einer numerischen Eigenschaft.
+</Note>
+
+## Sampling und Zufall
+
+### Zufalls- und Bootstrap-Stichproben
+
+`randomSample()` zieht ohne Zurücklegen. `bootstrapSample()` zieht mit Zurücklegen — dasselbe Element kann mehrfach vorkommen.
+
+[//]: # (<!---FUN sampRandomBootstrap-->)
+
+```kotlin
+val items = listOf("A", "B", "C", "D", "E")
+
+items.randomSample(3, Random(42))     // 3 distinct items
+items.bootstrapSample(6, Random(42))  // 6 items, may have repeats
+```
+
+[//]: # (<!---END-->)
+
+<Note>
+`randomSample()` zieht **ohne Zurücklegen** — jedes Element kommt höchstens einmal vor. Die Stichprobengröße darf die Größe der Sammlung nicht überschreiten.
+
+`bootstrapSample()` zieht **mit Zurücklegen** — die Stichprobengröße kann größer als die Sammlung sein. Dies ist die Grundlage des Bootstrap-Resamplings zur Schätzung von Konfidenzintervallen und Standardfehlern.
+</Note>
+
+### Gewichtete Zufallsergebnisse
+
+`WeightedCoin` simuliert einen verzerrten Münzwurf. `WeightedDice` simuliert eine gewichtete Zufallsauswahl aus einer Menge von Ergebnissen.
+
+[//]: # (<!---FUN sampWeightedRandom-->)
+
+```kotlin
+val coin = WeightedCoin(probability = 0.7)
+coin.flip()                        // true with 70% probability
+
+val dice = WeightedDice(mapOf("A" to 3.0, "B" to 1.0))
+dice.roll()                        // "A" with 75% probability, "B" with 25%
+```
+
+[//]: # (<!---END-->)
+
+Die Gewichte müssen sich nicht zu 1 summieren — sie werden intern normalisiert. `WeightedDice` funktioniert mit jedem Typ als Ergebnis.
+
+## API-Referenz
+
+<Card title="Vollständige API-Referenz" icon="book-open" href="https://oremif.github.io/kstats">
+  Alle Sampling-Funktionen, Transformations-Werkzeuge und Parameterüberladungen in der Dokka-generierten Referenz durchsuchen.
+</Card>

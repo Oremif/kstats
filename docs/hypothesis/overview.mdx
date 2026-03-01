@@ -1,0 +1,339 @@
+---
+title: "Hypothesis Tests"
+description: "t-tests, ANOVA, chi-squared, Fisher exact, Mann-Whitney, Wilcoxon, normality tests, and variance homogeneity tests in kstats-hypothesis."
+---
+
+[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
+
+`kstats-hypothesis` provides statistical tests organized by the question they answer. Most functions return a `TestResult`; `oneWayAnova()` returns an `AnovaResult` with the full ANOVA table.
+
+## Reading a Test Result
+
+Every test produces a result with a consistent shape. The `statistic` is the computed test value, `pValue` is the probability of observing a result at least as extreme under the null hypothesis, and `isSignificant()` compares the p-value to a threshold.
+
+[//]: # (<!---FUN hypTestResult-->)
+
+```kotlin
+val sample = doubleArrayOf(5.0, 6.0, 7.0, 5.5, 6.5)
+val result = tTest(sample, mu = 5.0)
+
+result.testName          // "One-Sample T-Test"
+result.statistic         // 2.8284
+result.pValue            // 0.0474
+result.degreesOfFreedom  // 4.0
+result.isSignificant()   // true (p < 0.05)
+result.confidenceInterval // (5.02, 6.98)
+```
+
+[//]: # (<!---END-->)
+
+<Note>
+`isSignificant()` defaults to $\alpha = 0.05$. Pass a different threshold explicitly: `result.isSignificant(alpha = 0.01)`.
+</Note>
+
+<Note>
+Set `alternative` explicitly for one-sided tests. The default is `Alternative.TWO_SIDED`. Using `Alternative.GREATER` tests whether the sample mean exceeds the reference value; `Alternative.LESS` tests whether it falls below.
+</Note>
+
+## Is my sample mean different from a reference value?
+
+The one-sample t-test compares the mean of a single sample against a known or hypothesized value.
+
+[//]: # (<!---FUN hypOneSample-->)
+
+```kotlin
+val sample = doubleArrayOf(5.1, 4.9, 5.3, 5.0, 4.8)
+
+// Two-sided: is the mean different from 5.0?
+val two = tTest(sample, mu = 5.0)
+two.statistic            // t value
+two.pValue               // two-sided p-value
+
+// One-sided: is the mean greater than 5.0?
+val one = tTest(sample, mu = 5.0, alternative = Alternative.GREATER)
+one.pValue               // one-sided p-value
+```
+
+[//]: # (<!---END-->)
+
+<Tip>
+Use `Alternative.GREATER` or `Alternative.LESS` for directional hypotheses instead of halving a two-sided p-value. The confidence interval adjusts accordingly.
+</Tip>
+
+## Are two groups different?
+
+### Two-sample t-test
+
+Compares the means of two independent samples. Welch's t-test (unequal variances) is the default.
+
+[//]: # (<!---FUN hypTwoSample-->)
+
+```kotlin
+val group1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+val group2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+
+val result = tTest(group1, group2)
+result.statistic         // -5.0
+result.pValue            // 0.0011
+result.isSignificant()   // true
+```
+
+[//]: # (<!---END-->)
+
+<Warning>
+`equalVariances` is `false` by default, meaning Welch's t-test is used. Set `equalVariances = true` only after confirming equal variances with `leveneTest()` or `bartlettTest()`.
+</Warning>
+
+### Paired t-test
+
+Compares two related measurements (before/after, left/right) on the same subjects.
+
+[//]: # (<!---FUN hypPaired-->)
+
+```kotlin
+val before = doubleArrayOf(200.0, 190.0, 210.0, 180.0, 195.0)
+val after  = doubleArrayOf(190.0, 180.0, 195.0, 170.0, 185.0)
+
+val result = pairedTTest(before, after)
+result.statistic         // positive t (before > after)
+result.pValue            // p-value for the difference
+result.isSignificant()   // true if the change is significant
+```
+
+[//]: # (<!---END-->)
+
+### Mann-Whitney U test
+
+Non-parametric alternative to the two-sample t-test. Compares ranks instead of means.
+
+[//]: # (<!---FUN hypMannWhitney-->)
+
+```kotlin
+val group1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+val group2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+
+val result = mannWhitneyUTest(group1, group2)
+result.statistic         // U = 0.0
+result.pValue            // < 0.02
+result.isSignificant()   // true
+```
+
+[//]: # (<!---END-->)
+
+### Wilcoxon signed-rank test
+
+Non-parametric alternative to the paired t-test. Tests whether paired differences are symmetrically distributed around zero.
+
+[//]: # (<!---FUN hypWilcoxon-->)
+
+```kotlin
+val before = doubleArrayOf(10.0, 12.0, 14.0, 16.0, 18.0)
+val after  = doubleArrayOf(8.0, 9.0, 11.0, 12.0, 13.0)
+
+val result = wilcoxonSignedRankTest(before, after)
+result.statistic         // W+ = 15.0
+result.pValue            // p-value with continuity correction
+```
+
+[//]: # (<!---END-->)
+
+## Are three or more groups different?
+
+### One-way ANOVA
+
+Tests whether the means of three or more groups differ. Returns `AnovaResult` with the full ANOVA table.
+
+[//]: # (<!---FUN hypAnova-->)
+
+```kotlin
+val g1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+val g2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+val g3 = doubleArrayOf(11.0, 12.0, 13.0, 14.0, 15.0)
+
+val anova = oneWayAnova(g1, g2, g3)
+anova.fStatistic         // 50.0
+anova.pValue             // < 0.00001
+anova.dfBetween          // 2
+anova.dfWithin           // 12
+anova.ssBetween          // 250.0
+anova.ssWithin           // 30.0
+anova.msBetween          // 125.0
+anova.msWithin           // 2.5
+```
+
+[//]: # (<!---END-->)
+
+<Note>
+ANOVA assumes normality within each group and equal variances across groups. Check normality with `shapiroWilkTest()` and equal variances with `leveneTest()` or `bartlettTest()` before running ANOVA.
+</Note>
+
+### Friedman test
+
+Non-parametric alternative to repeated-measures ANOVA. Compares ranks across matched groups.
+
+[//]: # (<!---FUN hypFriedman-->)
+
+```kotlin
+val treatment1 = doubleArrayOf(5.0, 6.0, 7.0, 5.5, 6.5)
+val treatment2 = doubleArrayOf(4.0, 5.0, 6.0, 4.5, 5.5)
+val treatment3 = doubleArrayOf(7.0, 8.0, 9.0, 7.5, 8.5)
+
+val result = friedmanTest(treatment1, treatment2, treatment3)
+result.statistic         // Friedman chi-squared
+result.pValue            // p-value
+```
+
+[//]: # (<!---END-->)
+
+## Is my data normally distributed?
+
+Four normality tests are available. Each returns a `TestResult` — a significant result (low p-value) indicates evidence against normality.
+
+[//]: # (<!---FUN hypNormality-->)
+
+```kotlin
+val sample = doubleArrayOf(
+    -1.2, -0.5, 0.0, 0.5, 1.2, 0.3, -0.1, 0.8, -0.4, 0.6,
+    -0.8, 0.2, 0.9, -0.3, 0.4, -0.6, 1.0, -0.9, 0.1, 0.7
+)
+
+shapiroWilkTest(sample).pValue       // high p → consistent with normality
+andersonDarlingTest(sample).pValue   // high p → consistent with normality
+dagostinoPearsonTest(sample).pValue  // combines skewness and kurtosis tests
+jarqueBeraTest(sample).pValue        // asymptotic test based on skewness and kurtosis
+```
+
+[//]: # (<!---END-->)
+
+<Tip>
+Shapiro-Wilk is the most common choice and generally the most powerful for small-to-moderate samples (n &lt; 5000). Anderson-Darling is more sensitive to deviations in the tails. D'Agostino-Pearson and Jarque-Bera are faster for large samples.
+</Tip>
+
+## Do my observed counts match expected proportions?
+
+### Chi-squared goodness-of-fit
+
+Tests whether observed counts match expected frequencies.
+
+[//]: # (<!---FUN hypChiSquared-->)
+
+```kotlin
+val observed = intArrayOf(50, 30, 20)
+val expected = doubleArrayOf(40.0, 40.0, 20.0)
+
+val result = chiSquaredTest(observed, expected)
+result.statistic         // 5.0
+result.pValue            // 0.0821
+result.isSignificant()   // false at α = 0.05
+```
+
+[//]: # (<!---END-->)
+
+### G-test
+
+Likelihood-ratio alternative to the chi-squared test. Often preferred for small expected counts.
+
+[//]: # (<!---FUN hypGTest-->)
+
+```kotlin
+val observed = intArrayOf(50, 30, 20)
+val expected = doubleArrayOf(40.0, 40.0, 20.0)
+
+val result = gTest(observed, expected)
+result.statistic         // G statistic
+result.pValue            // p-value
+```
+
+[//]: # (<!---END-->)
+
+### Binomial test
+
+Tests whether the observed proportion of successes matches a hypothesized probability.
+
+[//]: # (<!---FUN hypBinomial-->)
+
+```kotlin
+val result = binomialTest(successes = 60, trials = 100, probability = 0.5)
+result.pValue            // p-value for H₀: p = 0.5
+result.isSignificant()   // true if 60/100 is significantly different from 0.5
+```
+
+[//]: # (<!---END-->)
+
+### Fisher exact test
+
+Exact test for 2×2 contingency tables. Preferred over chi-squared for small samples.
+
+[//]: # (<!---FUN hypFisher-->)
+
+```kotlin
+// 2×2 table: [[10, 30], [20, 40]]
+val result = fisherExactTest(arrayOf(intArrayOf(10, 30), intArrayOf(20, 40)))
+result.pValue            // exact p-value
+result.isSignificant()   // true or false
+```
+
+[//]: # (<!---END-->)
+
+<Warning>
+Fisher exact test is designed for small contingency tables. For larger tables, use `chiSquaredTest()` with a chi-squared test of independence.
+</Warning>
+
+## Do my groups have equal variances?
+
+Variance homogeneity is an assumption of ANOVA and some t-test variants. Three tests are available:
+
+[//]: # (<!---FUN hypVarianceHomogeneity-->)
+
+```kotlin
+val g1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+val g2 = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
+val g3 = doubleArrayOf(1.0, 3.0, 5.0, 7.0, 9.0)
+
+leveneTest(g1, g2, g3).pValue         // robust to non-normality
+bartlettTest(g1, g2, g3).pValue       // most powerful when normality holds
+flignerKilleenTest(g1, g2, g3).pValue // rank-based, robust to outliers
+```
+
+[//]: # (<!---END-->)
+
+<Tip>
+Levene's test is the safest default — it is robust to non-normality. Use Bartlett's test only when the data within each group is approximately normal (Bartlett is more powerful in that case). Fligner-Killeen is the most robust to outliers.
+</Tip>
+
+## Does my sample match a reference distribution?
+
+### Kolmogorov-Smirnov test
+
+The two-sample KS test compares whether two samples come from the same continuous distribution.
+
+[//]: # (<!---FUN hypKolmogorovSmirnov-->)
+
+```kotlin
+val sample1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+val sample2 = doubleArrayOf(1.5, 2.5, 3.5, 4.5, 5.5)
+
+val result = kolmogorovSmirnovTest(sample1, sample2)
+result.statistic         // D = max difference between ECDFs
+result.pValue            // p-value
+```
+
+[//]: # (<!---END-->)
+
+## The Alternative Enum
+
+`Alternative` controls the direction of the test:
+
+| Value | Meaning |
+| --- | --- |
+| `TWO_SIDED` | Test whether the parameter differs from the reference in either direction (default) |
+| `GREATER` | Test whether the parameter exceeds the reference |
+| `LESS` | Test whether the parameter is below the reference |
+
+Directional alternatives are supported by `tTest`, `pairedTTest`, `mannWhitneyUTest`, `wilcoxonSignedRankTest`, and `binomialTest`.
+
+## API Reference
+
+<Card title="Full API Reference" icon="book-open" href="https://oremif.github.io/kstats">
+  Browse all test functions, result types, and parameter overloads in the Dokka-generated reference.
+</Card>

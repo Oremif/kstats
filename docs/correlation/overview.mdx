@@ -1,0 +1,208 @@
+---
+title: "Correlation & Regression"
+description: "Pearson, Spearman, Kendall tau, partial correlation, point-biserial, matrices, covariance, and simple linear regression in kstats-correlation."
+---
+
+[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.DocsSamples-->)
+
+`kstats-correlation` covers two related tasks: measuring the strength of association between variables, and modeling a linear relationship. The module is split into two sections reflecting this distinction.
+
+## Correlation
+
+### Pearson Correlation
+
+Measures the strength and direction of the **linear** association between two numeric variables. The coefficient ranges from -1 (perfect negative) to +1 (perfect positive).
+
+[//]: # (<!---FUN corrPearson-->)
+
+```kotlin
+val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+val y = doubleArrayOf(2.1, 3.9, 6.2, 7.8, 10.1)
+
+val r = pearsonCorrelation(x, y)
+r.coefficient            // 0.9987
+r.pValue                 // 0.0001
+r.n                      // 5
+```
+
+[//]: # (<!---END-->)
+
+Use Pearson when both variables are continuous and the relationship is approximately linear. Sensitive to outliers.
+
+### Spearman Correlation
+
+Applies Pearson correlation to the **ranks** of the data. Measures monotonic association — whether the variables tend to increase together, regardless of linearity.
+
+[//]: # (<!---FUN corrSpearman-->)
+
+```kotlin
+val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
+val y = doubleArrayOf(2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0)
+
+val r = spearmanCorrelation(x, y)
+r.coefficient            // 1.0 — perfect monotonic relationship
+r.pValue                 // 0.0
+```
+
+[//]: # (<!---END-->)
+
+Use Spearman when the relationship is monotonic but not necessarily linear, or when the data contains outliers.
+
+### Kendall Tau
+
+Counts concordant and discordant pairs to measure ordinal association. More robust than Spearman for small samples and heavy ties.
+
+[//]: # (<!---FUN corrKendall-->)
+
+```kotlin
+val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+val y = doubleArrayOf(1.0, 3.0, 2.0, 5.0, 4.0)
+
+val tau = kendallTau(x, y)
+tau.coefficient          // 0.6
+tau.pValue               // p-value for tau
+```
+
+[//]: # (<!---END-->)
+
+<Tip>
+The Kendall tau implementation runs in $O(n \log n)$ time using a merge-sort–based algorithm, making it efficient for large datasets.
+</Tip>
+
+### Point-Biserial Correlation
+
+Measures the association between a **binary** variable (coded as 0/1 integers) and a **continuous** variable. Equivalent to Pearson correlation when one variable is dichotomous.
+
+[//]: # (<!---FUN corrPointBiserial-->)
+
+```kotlin
+val binary     = intArrayOf(0, 0, 0, 1, 1, 1, 1)
+val continuous = doubleArrayOf(1.0, 2.0, 1.5, 4.0, 5.0, 4.5, 3.5)
+
+val r = pointBiserialCorrelation(binary, continuous)
+r.coefficient            // positive — group 1 has higher values
+r.pValue                 // p-value
+```
+
+[//]: # (<!---END-->)
+
+Use when one variable is naturally binary: treatment/control, pass/fail, male/female.
+
+### Partial Correlation
+
+Measures the association between two variables **after controlling for** a third variable. Removes the effect of the confounding variable.
+
+[//]: # (<!---FUN corrPartial-->)
+
+```kotlin
+val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+val y = doubleArrayOf(2.0, 4.0, 5.0, 4.0, 5.0)
+val z = doubleArrayOf(1.0, 1.0, 2.0, 3.0, 3.0)
+
+val r = partialCorrelation(x, y, z)
+r.coefficient            // correlation between x and y, controlling for z
+r.pValue                 // p-value
+```
+
+[//]: # (<!---END-->)
+
+Use when a third variable might explain the apparent relationship between the first two.
+
+### Correlation and Covariance Matrices
+
+For multi-variable analysis, build pairwise matrices. Each cell $(i, j)$ contains the correlation (or covariance) between variables $i$ and $j$.
+
+[//]: # (<!---FUN corrMatrices-->)
+
+```kotlin
+val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+val y = doubleArrayOf(2.1, 3.9, 6.2, 7.8, 10.1)
+val z = doubleArrayOf(5.0, 4.0, 3.0, 2.0, 1.0)
+
+val corr = correlationMatrix(x, y, z)
+corr[0][1]               // Pearson r between x and y ≈ 0.9987
+corr[0][2]               // Pearson r between x and z = -1.0
+
+val cov = covarianceMatrix(x, y, z)
+cov[0][0]                // variance of x = 2.5
+cov[0][1]                // covariance of x and y
+```
+
+[//]: # (<!---END-->)
+
+### Choosing a Correlation Method
+
+| Use case | Function |
+| --- | --- |
+| Linear association between two numeric variables | `pearsonCorrelation()` |
+| Monotonic association, robust to outliers | `spearmanCorrelation()` |
+| Ordinal association with explicit tie handling | `kendallTau()` |
+| Binary vs continuous variable | `pointBiserialCorrelation()` |
+| Association after removing the effect of a third variable | `partialCorrelation()` |
+| Pairwise summaries for many variables | `correlationMatrix()`, `covarianceMatrix()` |
+
+<Accordion title="Math details">
+**Pearson:**
+$$
+r = \frac{\sum_i (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_i (x_i - \bar{x})^2 \sum_i (y_i - \bar{y})^2}}
+$$
+
+**Spearman:** Pearson correlation applied to ranks.
+
+**Kendall tau-b:**
+$$
+\tau_b = \frac{C - D}{\sqrt{(C + D + T_X)(C + D + T_Y)}}
+$$
+
+where $C$ = concordant pairs, $D$ = discordant pairs, $T_X$ = pairs tied only on X, $T_Y$ = pairs tied only on Y.
+
+**Partial correlation:**
+$$
+r_{xy \cdot z} = \frac{r_{xy} - r_{xz} \cdot r_{yz}}{\sqrt{(1 - r_{xz}^2)(1 - r_{yz}^2)}}
+$$
+</Accordion>
+
+## Regression
+
+### Simple Linear Regression
+
+Fits the line $\hat{y} = \beta_0 + \beta_1 x$ to the data using ordinary least squares. The result includes the slope, intercept, goodness-of-fit ($R^2$), standard errors, residuals, and a prediction function.
+
+[//]: # (<!---FUN corrRegression-->)
+
+```kotlin
+val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+val y = doubleArrayOf(2.1, 3.9, 6.2, 7.8, 10.1)
+
+val model = simpleLinearRegression(x, y)
+model.slope                  // 1.99
+model.intercept              // 0.06
+model.rSquared               // 0.9973
+model.standardErrorSlope     // standard error of the slope estimate
+model.standardErrorIntercept // standard error of the intercept estimate
+model.n                      // 5
+model.residuals              // [0.05, -0.07, 0.15, -0.17, 0.05]
+
+// Prediction
+model.predict(6.0)           // 11.99
+model.predict(doubleArrayOf(6.0, 7.0, 8.0)) // batch prediction
+```
+
+[//]: # (<!---END-->)
+
+<Accordion title="Math details">
+$$
+\hat{\beta}_1 = \frac{\sum_i (x_i - \bar{x})(y_i - \bar{y})}{\sum_i (x_i - \bar{x})^2}, \qquad
+\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}
+$$
+
+$$
+R^2 = 1 - \frac{\sum_i (y_i - \hat{y}_i)^2}{\sum_i (y_i - \bar{y})^2}
+$$
+</Accordion>
+
+## API Reference
+
+<Card title="Full API Reference" icon="book-open" href="https://oremif.github.io/kstats">
+  Browse all correlation functions, result types, and parameter overloads in the Dokka-generated reference.
+</Card>

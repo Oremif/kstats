@@ -1,0 +1,195 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "kstats",
+  "description": "Kotlin Multiplatform statistics toolkit for descriptive analysis, distributions, hypothesis testing, correlation, and sampling.",
+  "variables": {
+    "kstats-version": "0.3.0"
+  },
+  "colors": {
+    "primary": "#29323D",
+    "light": "#CDD1D4",
+    "dark": "#697078"
+  },
+  "favicon": {
+    "light": "/images/logo-light.svg",
+    "dark": "/images/logo-dark.svg"
+  },
+  "logo": {
+    "light": "/images/logo-wordmark-light.svg",
+    "dark": "/images/logo-wordmark-dark.svg"
+  },
+  "fonts": {
+    "heading": {
+      "family": "Inter",
+      "weight": 700
+    },
+    "body": {
+      "family": "Inter",
+      "weight": 400
+    }
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "background": {
+    "decoration": "grid"
+  },
+  "styling": {
+    "eyebrows": "breadcrumbs",
+    "latex": true,
+    "codeblocks": "system"
+  },
+  "seo": {
+    "indexing": "navigable",
+    "metatags": {
+      "google-site-verification": "rljhJmtDt4HUwpQLsCyKXOIPdzBECqSPQrepA6X6T1I",
+      "og:site_name": "kstats"
+    }
+  },
+  "metadata": {
+    "timestamp": true
+  },
+  "search": {
+    "prompt": "Search kstats docs..."
+  },
+  "appearance": {
+    "default": "dark"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/Oremif/kstats"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/Oremif/kstats"
+    },
+    "links": [
+      {
+        "header": "Resources",
+        "items": [
+          {
+            "label": "Maven Central",
+            "href": "https://central.sonatype.com/artifact/org.oremif/kstats-core"
+          },
+          {
+            "label": "License (Apache 2.0)",
+            "href": "https://github.com/Oremif/kstats/blob/master/LICENSE"
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "languages": [
+      {
+        "language": "en",
+        "versions": [
+          {
+            "version": "0.3.0",
+            "tabs": [
+              {
+                "tab": "Documentation",
+                "groups": [
+                  {
+                    "group": "Getting Started",
+                    "pages": [
+                      "getting-started/introduction",
+                      "getting-started/installation",
+                      "getting-started/quickstart"
+                    ]
+                  },
+                  {
+                    "group": "Modules",
+                    "pages": [
+                      "core/overview",
+                      "distributions/overview",
+                      "hypothesis/overview",
+                      "correlation/overview",
+                      "sampling/overview"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "Guides",
+                "groups": [
+                  {
+                    "group": "How-To Guides",
+                    "pages": [
+                      "guides/how-to/choosing-a-distribution",
+                      "guides/how-to/testing-assumptions",
+                      "guides/how-to/ab-testing",
+                      "guides/how-to/quality-control",
+                      "guides/how-to/exploratory-analysis",
+                      "guides/how-to/building-a-pipeline"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "API Reference",
+                "href": "https://oremif.github.io/kstats"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "de",
+        "versions": [
+          {
+            "version": "0.3.0",
+            "tabs": [
+              {
+                "tab": "Dokumentation",
+                "groups": [
+                  {
+                    "group": "Getting Started",
+                    "pages": [
+                      "de/getting-started/introduction",
+                      "de/getting-started/installation",
+                      "de/getting-started/quickstart"
+                    ]
+                  },
+                  {
+                    "group": "Module",
+                    "pages": [
+                      "de/core/overview",
+                      "de/distributions/overview",
+                      "de/hypothesis/overview",
+                      "de/correlation/overview",
+                      "de/sampling/overview"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "Guides",
+                "groups": [
+                  {
+                    "group": "How-To Guides",
+                    "pages": [
+                      "de/guides/how-to/choosing-a-distribution",
+                      "de/guides/how-to/testing-assumptions",
+                      "de/guides/how-to/ab-testing",
+                      "de/guides/how-to/quality-control",
+                      "de/guides/how-to/exploratory-analysis",
+                      "de/guides/how-to/building-a-pipeline"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "API Reference",
+                "href": "https://oremif.github.io/kstats"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

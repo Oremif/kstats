@@ -1,0 +1,198 @@
+---
+title: "Quality Control"
+description: "Detect anomalies, set control limits, and monitor process stability using statistical methods."
+---
+
+[//]: # (<!---IMPORT org.oremif.kstats.samples.DocsSamples-->)
+[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
+[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
+[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.DocsSamples-->)
+
+This guide uses temperature sensor readings from a manufacturing line to demonstrate anomaly detection, control limit computation, and process stability testing.
+
+## Process Data
+
+[//]: # (<!---FUN qcProcessData-->)
+
+```kotlin
+// Temperature readings (°C) from sensor on production line
+val sensorReadings = doubleArrayOf(
+    155.2, 154.8, 156.1, 155.5, 154.3, 155.9, 155.0, 156.3, 154.7, 155.4,
+    155.8, 154.5, 156.0, 155.3, 154.9, 155.7, 155.1, 156.2, 154.6, 155.6,
+    155.3, 154.4, 155.8, 162.5, 155.1, 155.7, 154.2, 155.5, 155.9, 141.3
+)
+// Two potential outliers: 162.5 and 141.3
+```
+
+[//]: # (<!---END-->)
+
+## Anomaly Detection
+
+### Baseline statistics
+
+[//]: # (<!---FUN qcBaselineStats-->)
+
+```kotlin
+val summary = sensorReadings.describe()
+
+summary.mean
+summary.standardDeviation
+summary.min // check for unusually low values
+summary.max // check for unusually high values
+summary.interquartileRange
+```
+
+[//]: # (<!---END-->)
+
+### Z-score method
+
+Flag readings more than 3 standard deviations from the mean.
+
+[//]: # (<!---FUN qcZScore-->)
+
+```kotlin
+val zScores = sensorReadings.zScore()
+
+val anomalyIndices = zScores.indices.filter { kotlin.math.abs(zScores[it]) > 3.0 }
+val anomalies = anomalyIndices.map { sensorReadings[it] }
+```
+
+[//]: # (<!---END-->)
+
+### Percentile-based detection
+
+Flag readings outside the 1st and 99th percentiles.
+
+[//]: # (<!---FUN qcPercentileDetection-->)
+
+```kotlin
+val lowerBound = sensorReadings.quantile(0.01)
+val upperBound = sensorReadings.quantile(0.99)
+
+val outliers = sensorReadings.filter { it < lowerBound || it > upperBound }
+```
+
+[//]: # (<!---END-->)
+
+## Control Limits
+
+Compute mean ± 3σ boundaries.
+
+[//]: # (<!---FUN qcControlLimits-->)
+
+```kotlin
+val centerLine = sensorReadings.mean()
+val sigma = sensorReadings.standardDeviation()
+
+val upperControlLimit = centerLine + 3 * sigma
+val lowerControlLimit = centerLine - 3 * sigma
+
+val outOfControl = sensorReadings.filter { it > upperControlLimit || it < lowerControlLimit }
+```
+
+[//]: # (<!---END-->)
+
+## Batch Stability
+
+Compare readings from two production batches to verify the process has not shifted.
+
+[//]: # (<!---FUN qcBatchStability-->)
+
+```kotlin
+val morningBatch = doubleArrayOf(
+    155.2, 154.8, 156.1, 155.5, 154.3, 155.9, 155.0, 156.3, 154.7, 155.4
+)
+val eveningBatch = doubleArrayOf(
+    155.8, 154.5, 156.0, 155.3, 154.9, 155.7, 155.1, 156.2, 154.6, 155.6
+)
+
+// Check normality
+shapiroWilkTest(morningBatch).pValue
+shapiroWilkTest(eveningBatch).pValue
+
+// Check variance homogeneity
+leveneTest(morningBatch, eveningBatch).pValue
+
+// Compare means
+val batchComparison = tTest(morningBatch, eveningBatch)
+batchComparison.pValue
+batchComparison.isSignificant() // false means no significant shift
+```
+
+[//]: # (<!---END-->)
+
+### Multiple batches
+
+[//]: # (<!---FUN qcMultipleBatches-->)
+
+```kotlin
+val batch1 = doubleArrayOf(155.2, 154.8, 156.1, 155.5, 154.3)
+val batch2 = doubleArrayOf(155.9, 155.0, 156.3, 154.7, 155.4)
+val batch3 = doubleArrayOf(155.8, 154.5, 156.0, 155.3, 154.9)
+
+val anova = oneWayAnova(batch1, batch2, batch3)
+anova.fStatistic
+anova.pValue
+```
+
+[//]: # (<!---END-->)
+
+## Distribution Fit
+
+Verify that readings follow the expected distribution.
+
+[//]: # (<!---FUN qcDistributionFit-->)
+
+```kotlin
+// Exclude known outliers for fitting
+val cleanReadings = sensorReadings.filter { it in 150.0..160.0 }.toDoubleArray()
+
+val fitted = NormalDistribution(
+    mu = cleanReadings.mean(),
+    sigma = cleanReadings.standardDeviation()
+)
+
+val ks = kolmogorovSmirnovTest(cleanReadings, fitted)
+ks.pValue // high p-value supports the normal process model
+```
+
+[//]: # (<!---END-->)
+
+<Tip>
+After fitting a process distribution, use `quantile()` to set thresholds:
+`fitted.quantile(0.001)` and `fitted.quantile(0.999)` give 99.8% coverage bounds.
+</Tip>
+
+## Multi-Parameter Monitoring
+
+When monitoring several sensors, check correlations between them.
+
+[//]: # (<!---FUN qcMultiParameter-->)
+
+```kotlin
+val temperatureSensor = doubleArrayOf(
+    155.2, 154.8, 156.1, 155.5, 154.3, 155.9, 155.0, 156.3, 154.7, 155.4
+)
+val pressureSensor = doubleArrayOf(
+    2.12, 2.08, 2.15, 2.11, 2.05, 2.14, 2.09, 2.16, 2.07, 2.10
+)
+val flowRateSensor = doubleArrayOf(
+    45.1, 44.8, 45.5, 45.2, 44.5, 45.4, 44.9, 45.6, 44.7, 45.3
+)
+
+temperatureSensor.describe()
+pressureSensor.describe()
+flowRateSensor.describe()
+
+// Correlation matrix — identifies linked parameters
+val matrix = correlationMatrix(temperatureSensor, pressureSensor, flowRateSensor)
+// matrix[0][1] = temperature-pressure correlation
+// matrix[0][2] = temperature-flow correlation
+// matrix[1][2] = pressure-flow correlation
+```
+
+[//]: # (<!---END-->)
+
+<Note>
+Strong correlations between sensor readings can indicate shared root causes when one parameter drifts out of control.
+</Note>

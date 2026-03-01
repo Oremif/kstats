@@ -1,0 +1,76 @@
+---
+title: "Introduction"
+description: "kstats ist eine abhängigkeitsfreie Kotlin-Multiplatform-Statistikbibliothek für deskriptive Statistik, Verteilungen, Hypothesentests, Korrelation und Stichprobenziehung."
+---
+
+[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
+
+kstats ist eine abhängigkeitsfreie Kotlin-Multiplatform-Statistikbibliothek. Sie deckt deskriptive Statistik, Wahrscheinlichkeitsverteilungen, Hypothesentests, Korrelation und Regression sowie Stichprobenziehung ab — alles, was für quantitative Analysen in Kotlin benötigt wird.
+
+[//]: # (<!---FUN introOverview-->)
+
+```kotlin
+val sample = doubleArrayOf(2.0, 4.0, 4.0, 5.0, 7.0, 9.0)
+
+val summary = sample.describe()
+summary.mean              // 5.1667
+summary.standardDeviation // 2.4833
+
+val normality = shapiroWilkTest(sample)
+normality.pValue          // 0.8933
+
+val fitted = NormalDistribution(mu = summary.mean, sigma = summary.standardDeviation)
+fitted.cdf(6.0)           // 0.6335
+```
+
+[//]: # (<!---END-->)
+
+## Module
+
+<CardGroup cols={2}>
+  <Card title="Deskriptive Statistik" icon="chart-column" href="/de/core/overview">
+    Mittelwert, Median, Varianz, Quantile, Momente, Häufigkeitstabellen, Streaming-Statistiken und `describe()`-Zusammenfassungen.
+  </Card>
+  <Card title="Wahrscheinlichkeitsverteilungen" icon="activity" href="/de/distributions/overview">
+    18 stetige und 10 diskrete Verteilungen mit einer einheitlichen API: pdf/pmf, cdf, quantile und Sampling.
+  </Card>
+  <Card title="Hypothesentests" icon="flask-conical" href="/de/hypothesis/overview">
+    t-Tests, ANOVA, Chi-Quadrat, Fisher-Exakt, Mann-Whitney, Wilcoxon, Shapiro-Wilk und weitere.
+  </Card>
+  <Card title="Korrelation & Regression" icon="git-compare-arrows" href="/de/correlation/overview">
+    Pearson, Spearman, Kendall-Tau, partielle Korrelation, Matrizen und einfache lineare Regression.
+  </Card>
+  <Card title="Sampling & Transformation" icon="shuffle" href="/de/sampling/overview">
+    Rangbildung, z-Score-Normalisierung, Min-Max-Skalierung, Binning, Bootstrap und gewichtetes Sampling.
+  </Card>
+</CardGroup>
+
+## Unterstützte Zielplattformen
+
+| Plattform | Ziele |
+| --- | --- |
+| JVM | `jvm` |
+| Android | `android` |
+| Android Native | `androidNativeArm32`, `androidNativeArm64`, `androidNativeX86`, `androidNativeX64` |
+| iOS | `iosX64`, `iosArm64`, `iosSimulatorArm64` |
+| macOS | `macosArm64` |
+| Linux | `linuxArm64`, `linuxX64` |
+| Windows | `mingwX64` |
+| watchOS | `watchosArm32`, `watchosArm64`, `watchosDeviceArm64`, `watchosSimulatorArm64` |
+| tvOS | `tvosArm64`, `tvosSimulatorArm64` |
+| JS | `js` (Browser, Node.js) |
+| Wasm | `wasmJs`, `wasmWasi` |
+
+## Nächste Schritte
+
+<CardGroup cols={3}>
+  <Card title="Installation" icon="package" href="/de/getting-started/installation">
+    BOM oder einzelnes Modul zu einem Gradle-KTS-Projekt hinzufügen.
+  </Card>
+  <Card title="Quickstart" icon="play" href="/de/getting-started/quick-start">
+    Eine Zusammenfassung berechnen, eine Verteilung anpassen und einen Hypothesentest durchführen.
+  </Card>
+  <Card title="A/B Testing" icon="git-compare-arrows" href="/de/guides/how-to/ab-testing">
+    Ein vollständiger A/B-Test mit Voraussetzungsprüfungen und Gruppenvergleich.
+  </Card>
+</CardGroup>

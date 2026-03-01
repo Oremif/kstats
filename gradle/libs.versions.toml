@@ -1,0 +1,32 @@
+[versions]
+kstats = "0.3.0"
+
+agp = "9.1.0"
+kotlin = "2.3.20"
+android-minSdk = "24"
+android-compileSdk = "36"
+vanniktechMavenPublish = "0.36.0"
+dokka = "2.2.0-Beta"
+bcv = "0.18.1"
+
+korro = "0.1.6"
+kotlinxBenchmark = "0.4.16"
+
+commonsMath3 = "3.6.1"
+
+[libraries]
+# build logic plugins
+kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+android-kotlin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+vanniktech-maven-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktechMavenPublish" }
+dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+binary-compatibility-validator = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "bcv" }
+
+# Benchmark dependencies
+kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
+commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commonsMath3" }
+
+[plugins]
+korro = { id = "io.github.devcrocod.korro", version.ref = "korro" }
+kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kotlinxBenchmark" }
+kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }

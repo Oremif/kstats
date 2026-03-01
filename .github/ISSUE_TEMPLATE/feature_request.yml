@@ -1,0 +1,15 @@
+name: Feature Request
+description: Suggest a new feature for kstats
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: feature
+    attributes:
+      label: Feature Request
+      value: |
+        ## Problem
+
+
+        ## Proposed solution
+    validations:
+      required: true

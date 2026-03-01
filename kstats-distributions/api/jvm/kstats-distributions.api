@@ -1,0 +1,692 @@
+public final class org/oremif/kstats/distributions/BernoulliDistribution : org/oremif/kstats/distributions/DiscreteDistribution {
+	public fun <init> (D)V
+	public fun cdf (D)D
+	public fun cdf (I)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getProbability ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPmf (I)D
+	public fun pmf (I)D
+	public fun quantile (D)D
+	public fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+
+public final class org/oremif/kstats/distributions/BetaBinomialDistribution : org/oremif/kstats/distributions/DiscreteDistribution {
+	public fun <init> (IDD)V
+	public fun cdf (D)D
+	public fun cdf (I)D
+	public final fun getAlpha ()D
+	public final fun getBeta ()D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public final fun getTrials ()I
+	public fun getVariance ()D
+	public fun logPmf (I)D
+	public fun pmf (I)D
+	public fun quantile (D)D
+	public fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+
+public final class org/oremif/kstats/distributions/BetaDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public static final field Companion Lorg/oremif/kstats/distributions/BetaDistribution$Companion;
+	public fun <init> (DD)V
+	public fun cdf (D)D
+	public final fun getAlpha ()D
+	public final fun getBeta ()D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/BetaDistribution$Companion {
+	public final fun getSTANDARD ()Lorg/oremif/kstats/distributions/BetaDistribution;
+}
+
+public final class org/oremif/kstats/distributions/BinomialDistribution : org/oremif/kstats/distributions/DiscreteDistribution {
+	public fun <init> (ID)V
+	public fun cdf (D)D
+	public fun cdf (I)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getProbability ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public final fun getTrials ()I
+	public fun getVariance ()D
+	public fun logPmf (I)D
+	public fun pmf (I)D
+	public fun quantile (D)D
+	public fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+
+public final class org/oremif/kstats/distributions/CauchyDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public static final field Companion Lorg/oremif/kstats/distributions/CauchyDistribution$Companion;
+	public fun <init> ()V
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public final fun getLocation ()D
+	public fun getMean ()D
+	public final fun getScale ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/CauchyDistribution$Companion {
+	public final fun getSTANDARD ()Lorg/oremif/kstats/distributions/CauchyDistribution;
+}
+
+public final class org/oremif/kstats/distributions/ChiSquaredDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public fun <init> (D)V
+	public fun cdf (D)D
+	public final fun getDegreesOfFreedom ()D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public abstract interface class org/oremif/kstats/distributions/ContinuousDistribution : org/oremif/kstats/distributions/Distribution {
+	public abstract fun cdf (D)D
+	public fun getEntropy ()D
+	public abstract fun logPdf (D)D
+	public abstract fun pdf (D)D
+	public abstract fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public abstract fun sample (Lkotlin/random/Random;)D
+}
+
+public final class org/oremif/kstats/distributions/ContinuousDistribution$DefaultImpls {
+	public static fun getEntropy (Lorg/oremif/kstats/distributions/ContinuousDistribution;)D
+	public static fun getStandardDeviation (Lorg/oremif/kstats/distributions/ContinuousDistribution;)D
+	public static fun sample (Lorg/oremif/kstats/distributions/ContinuousDistribution;ILkotlin/random/Random;)[D
+	public static fun sf (Lorg/oremif/kstats/distributions/ContinuousDistribution;D)D
+}
+
+public abstract interface class org/oremif/kstats/distributions/DiscreteDistribution : org/oremif/kstats/distributions/Distribution {
+	public fun cdf (D)D
+	public abstract fun cdf (I)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getSkewness ()D
+	public abstract fun logPmf (I)D
+	public abstract fun pmf (I)D
+	public fun quantile (D)D
+	public abstract fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public abstract fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+
+public final class org/oremif/kstats/distributions/DiscreteDistribution$DefaultImpls {
+	public static fun cdf (Lorg/oremif/kstats/distributions/DiscreteDistribution;D)D
+	public static fun getEntropy (Lorg/oremif/kstats/distributions/DiscreteDistribution;)D
+	public static fun getKurtosis (Lorg/oremif/kstats/distributions/DiscreteDistribution;)D
+	public static fun getSkewness (Lorg/oremif/kstats/distributions/DiscreteDistribution;)D
+	public static fun getStandardDeviation (Lorg/oremif/kstats/distributions/DiscreteDistribution;)D
+	public static fun quantile (Lorg/oremif/kstats/distributions/DiscreteDistribution;D)D
+	public static fun sample (Lorg/oremif/kstats/distributions/DiscreteDistribution;ILkotlin/random/Random;)[I
+	public static fun sf (Lorg/oremif/kstats/distributions/DiscreteDistribution;D)D
+	public static fun sf (Lorg/oremif/kstats/distributions/DiscreteDistribution;I)D
+}
+
+public abstract interface class org/oremif/kstats/distributions/Distribution {
+	public abstract fun cdf (D)D
+	public abstract fun getEntropy ()D
+	public abstract fun getKurtosis ()D
+	public abstract fun getMean ()D
+	public abstract fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public abstract fun getVariance ()D
+	public abstract fun quantile (D)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/Distribution$DefaultImpls {
+	public static fun getStandardDeviation (Lorg/oremif/kstats/distributions/Distribution;)D
+	public static fun sf (Lorg/oremif/kstats/distributions/Distribution;D)D
+}
+
+public final class org/oremif/kstats/distributions/ExponentialDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public static final field Companion Lorg/oremif/kstats/distributions/ExponentialDistribution$Companion;
+	public fun <init> ()V
+	public fun <init> (D)V
+	public synthetic fun <init> (DILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getRate ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/ExponentialDistribution$Companion {
+	public final fun getSTANDARD ()Lorg/oremif/kstats/distributions/ExponentialDistribution;
+}
+
+public final class org/oremif/kstats/distributions/FDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public fun <init> (DD)V
+	public fun cdf (D)D
+	public final fun getDfDenominator ()D
+	public final fun getDfNumerator ()D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/GammaDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getRate ()D
+	public final fun getShape ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/GeometricDistribution : org/oremif/kstats/distributions/DiscreteDistribution {
+	public fun <init> (D)V
+	public fun cdf (D)D
+	public fun cdf (I)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getProbability ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPmf (I)D
+	public fun pmf (I)D
+	public fun quantile (D)D
+	public fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+
+public final class org/oremif/kstats/distributions/GumbelDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public static final field Companion Lorg/oremif/kstats/distributions/GumbelDistribution$Companion;
+	public fun <init> ()V
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public final fun getBeta ()D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getMu ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/GumbelDistribution$Companion {
+	public final fun getSTANDARD ()Lorg/oremif/kstats/distributions/GumbelDistribution;
+}
+
+public final class org/oremif/kstats/distributions/HypergeometricDistribution : org/oremif/kstats/distributions/DiscreteDistribution {
+	public fun <init> (III)V
+	public fun cdf (D)D
+	public fun cdf (I)D
+	public final fun getDraws ()I
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getPopulation ()I
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public final fun getSuccesses ()I
+	public fun getVariance ()D
+	public fun logPmf (I)D
+	public fun pmf (I)D
+	public fun quantile (D)D
+	public fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+
+public final class org/oremif/kstats/distributions/LaplaceDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public static final field Companion Lorg/oremif/kstats/distributions/LaplaceDistribution$Companion;
+	public fun <init> ()V
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getMu ()D
+	public final fun getScale ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/LaplaceDistribution$Companion {
+	public final fun getSTANDARD ()Lorg/oremif/kstats/distributions/LaplaceDistribution;
+}
+
+public final class org/oremif/kstats/distributions/LevyDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public static final field Companion Lorg/oremif/kstats/distributions/LevyDistribution$Companion;
+	public fun <init> ()V
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public final fun getC ()D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getMu ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/LevyDistribution$Companion {
+	public final fun getSTANDARD ()Lorg/oremif/kstats/distributions/LevyDistribution;
+}
+
+public final class org/oremif/kstats/distributions/LogNormalDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public fun <init> ()V
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getMu ()D
+	public final fun getSigma ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/LogarithmicDistribution : org/oremif/kstats/distributions/DiscreteDistribution {
+	public fun <init> (D)V
+	public fun cdf (D)D
+	public fun cdf (I)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getProbability ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPmf (I)D
+	public fun pmf (I)D
+	public fun quantile (D)D
+	public fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+
+public final class org/oremif/kstats/distributions/LogisticDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public static final field Companion Lorg/oremif/kstats/distributions/LogisticDistribution$Companion;
+	public fun <init> ()V
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getMu ()D
+	public final fun getScale ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/LogisticDistribution$Companion {
+	public final fun getSTANDARD ()Lorg/oremif/kstats/distributions/LogisticDistribution;
+}
+
+public final class org/oremif/kstats/distributions/NakagamiDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public fun <init> (DD)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getMu ()D
+	public final fun getOmega ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/NegativeBinomialDistribution : org/oremif/kstats/distributions/DiscreteDistribution {
+	public fun <init> (ID)V
+	public fun cdf (D)D
+	public fun cdf (I)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getProbability ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public final fun getSuccesses ()I
+	public fun getVariance ()D
+	public fun logPmf (I)D
+	public fun pmf (I)D
+	public fun quantile (D)D
+	public fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+
+public final class org/oremif/kstats/distributions/NormalDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public static final field Companion Lorg/oremif/kstats/distributions/NormalDistribution$Companion;
+	public fun <init> ()V
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getMu ()D
+	public final fun getSigma ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/NormalDistribution$Companion {
+	public final fun getSTANDARD ()Lorg/oremif/kstats/distributions/NormalDistribution;
+}
+
+public final class org/oremif/kstats/distributions/ParetoDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public static final field Companion Lorg/oremif/kstats/distributions/ParetoDistribution$Companion;
+	public fun <init> ()V
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getScale ()D
+	public final fun getShape ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/ParetoDistribution$Companion {
+	public final fun getSTANDARD ()Lorg/oremif/kstats/distributions/ParetoDistribution;
+}
+
+public final class org/oremif/kstats/distributions/PoissonDistribution : org/oremif/kstats/distributions/DiscreteDistribution {
+	public fun <init> (D)V
+	public fun cdf (D)D
+	public fun cdf (I)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getRate ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPmf (I)D
+	public fun pmf (I)D
+	public fun quantile (D)D
+	public fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+
+public final class org/oremif/kstats/distributions/StudentTDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public fun <init> (D)V
+	public fun cdf (D)D
+	public final fun getDegreesOfFreedom ()D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/TriangularDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public fun <init> (DDD)V
+	public fun cdf (D)D
+	public final fun getA ()D
+	public final fun getB ()D
+	public final fun getC ()D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/UniformDiscreteDistribution : org/oremif/kstats/distributions/DiscreteDistribution {
+	public fun <init> (II)V
+	public fun cdf (D)D
+	public fun cdf (I)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public final fun getMax ()I
+	public fun getMean ()D
+	public final fun getMin ()I
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPmf (I)D
+	public fun pmf (I)D
+	public fun quantile (D)D
+	public fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+
+public final class org/oremif/kstats/distributions/UniformDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public static final field Companion Lorg/oremif/kstats/distributions/UniformDistribution$Companion;
+	public fun <init> ()V
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public final fun getMax ()D
+	public fun getMean ()D
+	public final fun getMin ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/UniformDistribution$Companion {
+	public final fun getSTANDARD ()Lorg/oremif/kstats/distributions/UniformDistribution;
+}
+
+public final class org/oremif/kstats/distributions/WeibullDistribution : org/oremif/kstats/distributions/ContinuousDistribution {
+	public fun <init> (DD)V
+	public synthetic fun <init> (DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cdf (D)D
+	public fun getEntropy ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getScale ()D
+	public final fun getShape ()D
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPdf (D)D
+	public fun pdf (D)D
+	public fun quantile (D)D
+	public fun sample (ILkotlin/random/Random;)[D
+	public fun sample (Lkotlin/random/Random;)D
+	public fun sf (D)D
+}
+
+public final class org/oremif/kstats/distributions/ZipfDistribution : org/oremif/kstats/distributions/DiscreteDistribution {
+	public fun <init> (ID)V
+	public fun cdf (D)D
+	public fun cdf (I)D
+	public fun getEntropy ()D
+	public final fun getExponent ()D
+	public fun getKurtosis ()D
+	public fun getMean ()D
+	public final fun getNumberOfElements ()I
+	public fun getSkewness ()D
+	public fun getStandardDeviation ()D
+	public fun getVariance ()D
+	public fun logPmf (I)D
+	public fun pmf (I)D
+	public fun quantile (D)D
+	public fun quantileInt (D)I
+	public fun sample (ILkotlin/random/Random;)[I
+	public fun sample (Lkotlin/random/Random;)I
+	public fun sf (D)D
+	public fun sf (I)D
+}
+

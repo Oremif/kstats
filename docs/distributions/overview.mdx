@@ -1,0 +1,645 @@
+---
+title: "Probability Distributions"
+description: "18 continuous and 10 discrete probability distributions with a shared API for density, CDF, quantiles, and sampling in kstats-distributions."
+---
+
+[//]: # (<!---IMPORT org.oremif.kstats.distributions.samples.DocsSamples-->)
+
+`kstats-distributions` provides a unified API for continuous and discrete probability models. Every distribution supports the same workflow: construct with parameters, inspect statistical properties, evaluate probabilities, compute quantiles, and draw random samples.
+
+## Working with a Distribution
+
+[//]: # (<!---FUN distWorkingWithDistribution-->)
+
+```kotlin
+val normal = NormalDistribution(mu = 0.0, sigma = 1.0)
+
+// Statistical properties
+normal.mean                  // 0.0
+normal.variance              // 1.0
+normal.standardDeviation     // 1.0
+normal.skewness              // 0.0
+normal.kurtosis              // 0.0
+normal.entropy               // 1.4189
+
+// Evaluate
+normal.pdf(0.0)              // 0.3989 — density at x = 0
+normal.cdf(1.96)             // 0.9750 — P(X ≤ 1.96)
+normal.sf(1.96)              // 0.0250 — P(X > 1.96) = 1 - cdf
+
+// Invert
+normal.quantile(0.975)       // 1.9600 — value at the 97.5th percentile
+
+// Sample
+normal.sample(Random(42))           // single random draw
+normal.sample(5, Random(42))        // 5 random draws
+```
+
+[//]: # (<!---END-->)
+
+## Shared API
+
+Every distribution implements common statistical properties: `mean`, `variance`, `standardDeviation`, `skewness`, `kurtosis`, and `entropy`.
+
+The evaluation methods differ between continuous and discrete distributions:
+
+| Operation | Continuous | Discrete |
+| --- | --- | --- |
+| Point value | `pdf(x)` — density | `pmf(k)` — exact probability |
+| Log point value | `logPdf(x)` | `logPmf(k)` |
+| Cumulative | `cdf(x)` — $P(X \le x)$ | `cdf(k)` — $P(X \le k)$ |
+| Upper tail | `sf(x)` — $P(X > x)$ | `sf(k)` — $P(X > k)$ |
+| Quantile | `quantile(p)` → `Double` | `quantileInt(p)` → `Int` |
+| Sample | `sample(random)` → `Double` | `sample(random)` → `Int` |
+| Batch sample | `sample(n, random)` → `DoubleArray` | `sample(n, random)` → `IntArray` |
+
+<Note>
+Constructors validate parameters eagerly. Invalid values (negative standard deviation, probability outside [0, 1], non-positive degrees of freedom) throw `InvalidParameterException` at construction time, not at evaluation.
+</Note>
+
+## Continuous Distributions
+
+<Tabs>
+  <Tab title="Symmetric / General-Purpose">
+    <AccordionGroup>
+      <Accordion title="NormalDistribution(mu, sigma)">
+        The Gaussian distribution. Models data that clusters symmetrically around a mean with a characteristic bell-shaped curve.
+
+        **Parameters:** `mu` — mean, `sigma` — standard deviation (must be positive)
+
+[//]: # (<!---FUN distNormal-->)
+
+```kotlin
+val d = NormalDistribution(mu = 100.0, sigma = 15.0)
+d.mean       // 100.0
+d.cdf(115.0) // 0.8413
+d.quantile(0.975) // 129.3994
+```
+
+[//]: # (<!---END-->)
+
+        Use when data is approximately symmetric and unbounded.
+      </Accordion>
+
+      <Accordion title="StudentTDistribution(degreesOfFreedom)">
+        Heavier tails than the normal distribution. Approaches the normal as degrees of freedom increase.
+
+        **Parameters:** `df` — degrees of freedom (must be positive)
+
+[//]: # (<!---FUN distStudentT-->)
+
+```kotlin
+val d = StudentTDistribution(degreesOfFreedom = 10.0)
+d.mean       // 0.0
+d.cdf(2.228) // ≈ 0.975
+d.quantile(0.975) // 2.2281
+```
+
+[//]: # (<!---END-->)
+
+        Use for confidence intervals and t-tests when the sample size is small.
+      </Accordion>
+
+      <Accordion title="LogisticDistribution(mu, scale)">
+        Similar shape to the normal but with heavier tails. The CDF has a closed-form logistic function.
+
+        **Parameters:** `location` — center, `scale` — spread parameter (must be positive)
+
+[//]: # (<!---FUN distLogistic-->)
+
+```kotlin
+val d = LogisticDistribution(mu = 0.0, scale = 1.0)
+d.mean       // 0.0
+d.cdf(0.0)   // 0.5
+d.pdf(0.0)   // 0.25
+```
+
+[//]: # (<!---END-->)
+
+        Use when a closed-form CDF is needed or data has slightly heavier tails than normal.
+      </Accordion>
+
+      <Accordion title="CauchyDistribution(location, scale)">
+        Extremely heavy tails. The mean and variance are undefined.
+
+        **Parameters:** `location` — center (median), `scale` — half-width at half-maximum (must be positive)
+
+[//]: # (<!---FUN distCauchy-->)
+
+```kotlin
+val d = CauchyDistribution(location = 0.0, scale = 1.0)
+d.pdf(0.0)        // 0.3183
+d.cdf(0.0)        // 0.5
+d.quantile(0.75)  // 1.0
+```
+
+[//]: # (<!---END-->)
+
+        Use for data with extreme outliers where the mean is not a meaningful summary.
+      </Accordion>
+
+      <Accordion title="LaplaceDistribution(mu, scale)">
+        Double-exponential distribution. Sharper peak and heavier tails than the normal.
+
+        **Parameters:** `location` — center (mean and median), `scale` — spread parameter (must be positive)
+
+[//]: # (<!---FUN distLaplace-->)
+
+```kotlin
+val d = LaplaceDistribution(mu = 0.0, scale = 1.0)
+d.mean       // 0.0
+d.variance   // 2.0
+d.pdf(0.0)   // 0.5
+```
+
+[//]: # (<!---END-->)
+
+        Use for data with a sharp peak at the center and exponential tails.
+      </Accordion>
+    </AccordionGroup>
+  </Tab>
+
+  <Tab title="Positive Real-Valued">
+    <AccordionGroup>
+      <Accordion title="ExponentialDistribution(rate)">
+        Models the time between events in a Poisson process. Memoryless property.
+
+        **Parameters:** `rate` — event rate, the reciprocal of the mean (must be positive)
+
+[//]: # (<!---FUN distExponential-->)
+
+```kotlin
+val d = ExponentialDistribution(rate = 2.0)
+d.mean       // 0.5
+d.cdf(1.0)   // 0.8647
+d.quantile(0.5) // 0.3466
+```
+
+[//]: # (<!---END-->)
+
+        Use for waiting times, durations, and inter-arrival times.
+      </Accordion>
+
+      <Accordion title="GammaDistribution(shape, rate)">
+        Generalizes the exponential distribution. Models the sum of independent exponential random variables.
+
+        **Parameters:** `shape` — shape parameter $k$ (must be positive), `scale` — scale parameter $\theta$ (must be positive)
+
+[//]: # (<!---FUN distGamma-->)
+
+```kotlin
+val d = GammaDistribution(shape = 2.0, rate = 0.5)
+d.mean       // 4.0
+d.variance   // 8.0
+d.cdf(4.0)   // 0.5940
+```
+
+[//]: # (<!---END-->)
+
+        Use for positive continuous data with right skew, such as aggregate waiting times or rainfall amounts.
+      </Accordion>
+
+      <Accordion title="WeibullDistribution(shape, scale)">
+        Flexible distribution for reliability and survival analysis.
+
+        **Parameters:** `shape` — shape $k$ (must be positive), `scale` — scale $\lambda$ (must be positive)
+
+[//]: # (<!---FUN distWeibull-->)
+
+```kotlin
+val d = WeibullDistribution(shape = 1.5, scale = 1.0)
+d.mean       // 0.9027
+d.cdf(1.0)   // 0.6321
+```
+
+[//]: # (<!---END-->)
+
+        Use for time-to-failure data, wind speed modeling, and survival analysis.
+      </Accordion>
+
+      <Accordion title="LogNormalDistribution(mu, sigma)">
+        The logarithm of the variable is normally distributed. Always positive, right-skewed.
+
+        **Parameters:** `mu` — mean of the log, `sigma` — standard deviation of the log (must be positive)
+
+[//]: # (<!---FUN distLogNormal-->)
+
+```kotlin
+val d = LogNormalDistribution(mu = 0.0, sigma = 1.0)
+d.mean          // 1.6487
+d.quantile(0.5) // 1.0
+d.cdf(1.0)      // 0.5
+```
+
+[//]: # (<!---END-->)
+
+        Use for multiplicative processes: stock prices, biological measurements, file sizes.
+      </Accordion>
+
+      <Accordion title="NakagamiDistribution(mu, omega)">
+        Models the magnitude of multi-path fading in wireless communications.
+
+        **Parameters:** `shape` — shape $m \ge 0.5$, `spread` — spread $\Omega$ (must be positive)
+
+[//]: # (<!---FUN distNakagami-->)
+
+```kotlin
+val d = NakagamiDistribution(mu = 1.0, omega = 1.0)
+d.mean       // 0.8862
+d.variance   // 0.2146
+```
+
+[//]: # (<!---END-->)
+
+        Use for signal envelope modeling in fading channels.
+      </Accordion>
+
+      <Accordion title="LevyDistribution(mu, c)">
+        Heavy-tailed distribution with infinite mean. A special case of the stable distribution.
+
+        **Parameters:** `location` — shift parameter, `scale` — scale parameter (must be positive)
+
+[//]: # (<!---FUN distLevy-->)
+
+```kotlin
+val d = LevyDistribution(mu = 0.0, c = 1.0)
+d.cdf(1.0)   // 0.3173
+d.sf(1.0)    // 0.6827
+```
+
+[//]: # (<!---END-->)
+
+        Use for extreme-value modeling with very heavy right tails.
+      </Accordion>
+    </AccordionGroup>
+  </Tab>
+
+  <Tab title="Bounded">
+    <AccordionGroup>
+      <Accordion title="BetaDistribution(alpha, beta)">
+        Defined on [0, 1]. Flexible shape controlled by two parameters.
+
+        **Parameters:** `alpha` — shape $\alpha$ (must be positive), `beta` — shape $\beta$ (must be positive)
+
+[//]: # (<!---FUN distBeta-->)
+
+```kotlin
+val d = BetaDistribution(alpha = 2.0, beta = 5.0)
+d.mean       // 0.2857
+d.cdf(0.3)   // 0.5798
+d.pdf(0.2)   // 2.4576
+```
+
+[//]: # (<!---END-->)
+
+        Use for proportions, probabilities, and bounded data on [0, 1].
+      </Accordion>
+
+      <Accordion title="UniformDistribution(min, max)">
+        Equal probability across the interval [a, b].
+
+        **Parameters:** `a` — lower bound, `b` — upper bound (must satisfy `a < b`)
+
+[//]: # (<!---FUN distUniform-->)
+
+```kotlin
+val d = UniformDistribution(min = 0.0, max = 10.0)
+d.mean       // 5.0
+d.variance   // 8.3333
+d.cdf(3.0)   // 0.3
+```
+
+[//]: # (<!---END-->)
+
+        Use when all values in a range are equally likely.
+      </Accordion>
+
+      <Accordion title="TriangularDistribution(a, b, c)">
+        Bounded distribution with a peak at the mode. Defined by minimum, maximum, and mode.
+
+        **Parameters:** `a` — minimum, `b` — maximum, `c` — mode (must satisfy `a ≤ c ≤ b`)
+
+[//]: # (<!---FUN distTriangular-->)
+
+```kotlin
+val d = TriangularDistribution(a = 0.0, b = 10.0, c = 3.0)
+d.mean       // 4.3333
+d.cdf(3.0)   // 0.3
+```
+
+[//]: # (<!---END-->)
+
+        Use for rough estimates when only the minimum, maximum, and most likely value are known.
+      </Accordion>
+    </AccordionGroup>
+  </Tab>
+
+  <Tab title="Extreme Value / Heavy-Tailed">
+    <AccordionGroup>
+      <Accordion title="ParetoDistribution(shape, scale)">
+        Power-law distribution. Models phenomena where a small fraction of values account for a large share of the total.
+
+        **Parameters:** `xm` — minimum value (scale, must be positive), `alpha` — shape (tail index, must be positive)
+
+[//]: # (<!---FUN distPareto-->)
+
+```kotlin
+val d = ParetoDistribution(shape = 2.0, scale = 1.0)
+d.mean       // 2.0
+d.cdf(2.0)   // 0.75
+```
+
+[//]: # (<!---END-->)
+
+        Use for wealth distributions, city populations, and file sizes.
+      </Accordion>
+
+      <Accordion title="GumbelDistribution(mu, beta)">
+        Extreme value distribution (Type I). Models the maximum of a sample from many distributions.
+
+        **Parameters:** `location` — mode, `scale` — spread (must be positive)
+
+[//]: # (<!---FUN distGumbel-->)
+
+```kotlin
+val d = GumbelDistribution(mu = 0.0, beta = 1.0)
+d.mean       // 0.5772
+d.cdf(0.0)   // 0.3679
+```
+
+[//]: # (<!---END-->)
+
+        Use for extreme-value analysis: maximum temperatures, flood levels, structural loads.
+      </Accordion>
+
+      <Accordion title="ChiSquaredDistribution(degreesOfFreedom)">
+        The distribution of the sum of squares of standard normal random variables. Central to chi-squared tests and confidence intervals for variance.
+
+        **Parameters:** `df` — degrees of freedom (must be positive)
+
+[//]: # (<!---FUN distChiSquared-->)
+
+```kotlin
+val d = ChiSquaredDistribution(degreesOfFreedom = 5.0)
+d.mean       // 5.0
+d.variance   // 10.0
+d.cdf(11.07) // ≈ 0.95
+```
+
+[//]: # (<!---END-->)
+
+        Use internally by chi-squared tests or for direct variance inference.
+      </Accordion>
+
+      <Accordion title="FDistribution(dfNumerator, dfDenominator)">
+        Ratio of two chi-squared variables divided by their degrees of freedom. Central to F-tests and ANOVA.
+
+        **Parameters:** `df1` — numerator degrees of freedom (must be positive), `df2` — denominator degrees of freedom (must be positive)
+
+[//]: # (<!---FUN distF-->)
+
+```kotlin
+val d = FDistribution(dfNumerator = 5.0, dfDenominator = 10.0)
+d.mean       // 1.25
+d.cdf(3.33)  // ≈ 0.95
+```
+
+[//]: # (<!---END-->)
+
+        Use internally by ANOVA and F-tests.
+      </Accordion>
+    </AccordionGroup>
+  </Tab>
+</Tabs>
+
+## Discrete Distributions
+
+<Tabs>
+  <Tab title="Count / Event">
+    <AccordionGroup>
+      <Accordion title="PoissonDistribution(rate)">
+        Models the number of events in a fixed interval when events occur independently at a constant rate.
+
+        **Parameters:** `lambda` — expected number of events (must be positive)
+
+[//]: # (<!---FUN distPoisson-->)
+
+```kotlin
+val d = PoissonDistribution(rate = 3.0)
+d.mean          // 3.0
+d.pmf(5)        // 0.1008
+d.cdf(5)        // 0.9161
+d.quantileInt(0.95) // 6
+```
+
+[//]: # (<!---END-->)
+
+        Use for count data: defects per batch, arrivals per hour, events per day.
+      </Accordion>
+
+      <Accordion title="BinomialDistribution(trials, probability)">
+        Models the number of successes in a fixed number of independent Bernoulli trials.
+
+        **Parameters:** `trials` — number of trials (must be non-negative), `probability` — success probability per trial (must be in [0, 1])
+
+[//]: # (<!---FUN distBinomial-->)
+
+```kotlin
+val d = BinomialDistribution(trials = 10, probability = 0.3)
+d.mean          // 3.0
+d.pmf(3)        // 0.2668
+d.cdf(3)        // 0.6496
+d.quantileInt(0.5) // 3
+```
+
+[//]: # (<!---END-->)
+
+        Use for yes/no experiments repeated a known number of times.
+      </Accordion>
+
+      <Accordion title="NegativeBinomialDistribution(successes, probability)">
+        Models the number of failures before achieving a specified number of successes.
+
+        **Parameters:** `r` — number of successes (must be positive), `p` — success probability (must be in (0, 1])
+
+[//]: # (<!---FUN distNegativeBinomial-->)
+
+```kotlin
+val d = NegativeBinomialDistribution(successes = 5, probability = 0.5)
+d.mean          // 5.0
+d.variance      // 10.0
+d.pmf(3)        // probability of exactly 3 failures before 5 successes
+```
+
+[//]: # (<!---END-->)
+
+        Use for over-dispersed count data or modeling the number of trials until a target is reached.
+      </Accordion>
+
+      <Accordion title="GeometricDistribution(probability)">
+        Models the number of trials until the first success. A special case of the negative binomial.
+
+        **Parameters:** `probability` — success probability per trial (must be in (0, 1])
+
+[//]: # (<!---FUN distGeometric-->)
+
+```kotlin
+val d = GeometricDistribution(probability = 0.3)
+d.mean          // 3.3333
+d.pmf(1)        // 0.3
+d.cdf(3)        // 0.657
+```
+
+[//]: # (<!---END-->)
+
+        Use for "how many tries until it works" questions.
+      </Accordion>
+    </AccordionGroup>
+  </Tab>
+
+  <Tab title="Sampling / Compound">
+    <AccordionGroup>
+      <Accordion title="HypergeometricDistribution(population, successes, draws)">
+        Models the number of successes in draws without replacement from a finite population.
+
+        **Parameters:** `populationSize` — total population, `successStates` — number of success items, `trials` — number of draws
+
+[//]: # (<!---FUN distHypergeometric-->)
+
+```kotlin
+val d = HypergeometricDistribution(population = 50, successes = 10, draws = 5)
+d.mean          // 1.0
+d.pmf(2)        // probability of exactly 2 successes in 5 draws
+```
+
+[//]: # (<!---END-->)
+
+        Use when sampling without replacement matters: quality control, card games, lottery problems.
+      </Accordion>
+
+      <Accordion title="BetaBinomialDistribution(trials, alpha, beta)">
+        Compound distribution where the success probability follows a Beta distribution. More variance than a standard binomial.
+
+        **Parameters:** `trials` — number of trials, `alpha` — Beta shape parameter, `beta` — Beta shape parameter
+
+[//]: # (<!---FUN distBetaBinomial-->)
+
+```kotlin
+val d = BetaBinomialDistribution(trials = 10, alpha = 2.0, beta = 3.0)
+d.mean          // 4.0
+d.pmf(4)        // probability of exactly 4 successes
+```
+
+[//]: # (<!---END-->)
+
+        Use for over-dispersed binomial data where the success probability varies.
+      </Accordion>
+    </AccordionGroup>
+  </Tab>
+
+  <Tab title="Simple / Uniform">
+    <AccordionGroup>
+      <Accordion title="BernoulliDistribution(probability)">
+        A single trial with two outcomes: success (1) or failure (0). The simplest discrete distribution.
+
+        **Parameters:** `probability` — success probability (must be in [0, 1])
+
+[//]: # (<!---FUN distBernoulli-->)
+
+```kotlin
+val d = BernoulliDistribution(probability = 0.7)
+d.mean          // 0.7
+d.pmf(1)        // 0.7
+d.pmf(0)        // 0.3
+```
+
+[//]: # (<!---END-->)
+
+        Use for coin-flip–like binary outcomes.
+      </Accordion>
+
+      <Accordion title="UniformDiscreteDistribution(min, max)">
+        Equal probability for each integer in [a, b].
+
+        **Parameters:** `a` — lower bound, `b` — upper bound (must satisfy `a ≤ b`)
+
+[//]: # (<!---FUN distUniformDiscrete-->)
+
+```kotlin
+val d = UniformDiscreteDistribution(min = 1, max = 6)
+d.mean          // 3.5
+d.pmf(3)        // 0.1667
+d.cdf(3)        // 0.5
+```
+
+[//]: # (<!---END-->)
+
+        Use for fair dice, uniform random integer selection.
+      </Accordion>
+    </AccordionGroup>
+  </Tab>
+
+  <Tab title="Heavy-Tailed / Rank">
+    <AccordionGroup>
+      <Accordion title="ZipfDistribution(numberOfElements, exponent)">
+        Power-law distribution over ranks 1 through n. Frequency is inversely proportional to rank.
+
+        **Parameters:** `n` — number of elements (must be positive), `s` — exponent (must be positive)
+
+[//]: # (<!---FUN distZipf-->)
+
+```kotlin
+val d = ZipfDistribution(numberOfElements = 100, exponent = 1.0)
+d.pmf(1)        // probability of rank 1 (the most common)
+d.pmf(100)      // probability of rank 100 (the least common)
+```
+
+[//]: # (<!---END-->)
+
+        Use for word frequencies, city sizes, and website traffic distributions.
+      </Accordion>
+
+      <Accordion title="LogarithmicDistribution(probability)">
+        Also known as the log-series distribution. Models the number of species with a given abundance.
+
+        **Parameters:** `p` — parameter in (0, 1)
+
+[//]: # (<!---FUN distLogarithmic-->)
+
+```kotlin
+val d = LogarithmicDistribution(probability = 0.5)
+d.mean          // 1.4427
+d.pmf(1)        // 0.7213
+d.pmf(2)        // 0.1803
+```
+
+[//]: # (<!---END-->)
+
+        Use for species abundance data and similar long-tailed count distributions.
+      </Accordion>
+    </AccordionGroup>
+  </Tab>
+</Tabs>
+
+## Choosing a Distribution
+
+<Note>
+When unsure, start with `NormalDistribution` for continuous data and `PoissonDistribution` for counts. These are the most common defaults and serve as reasonable baselines.
+</Note>
+
+| Data shape | Start with |
+| --- | --- |
+| Symmetric real-valued data | `NormalDistribution`, `StudentTDistribution`, `LogisticDistribution` |
+| Positive real-valued data | `ExponentialDistribution`, `GammaDistribution`, `WeibullDistribution`, `LogNormalDistribution` |
+| Data bounded on [0, 1] | `BetaDistribution` |
+| Bounded on a known interval | `UniformDistribution`, `TriangularDistribution` |
+| Counts and event totals | `PoissonDistribution`, `BinomialDistribution`, `NegativeBinomialDistribution` |
+| Counts without replacement | `HypergeometricDistribution` |
+| Heavy-tailed data | `CauchyDistribution`, `ParetoDistribution`, `LevyDistribution` |
+| Rank-frequency data | `ZipfDistribution`, `LogarithmicDistribution` |
+
+## API Reference
+
+<Card title="Full API Reference" icon="book-open" href="https://oremif.github.io/kstats">
+  Browse all distribution constructors, methods, and properties in the Dokka-generated reference.
+</Card>

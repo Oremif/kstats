@@ -1,0 +1,76 @@
+---
+title: "Introduction"
+description: "kstats is a zero-dependency Kotlin Multiplatform statistics library covering descriptive stats, distributions, hypothesis tests, correlation, and sampling."
+---
+
+[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
+
+kstats is a zero-dependency Kotlin Multiplatform statistics library. It covers descriptive statistics, probability distributions, hypothesis testing, correlation and regression, and sampling — everything needed for quantitative analysis in Kotlin.
+
+[//]: # (<!---FUN introOverview-->)
+
+```kotlin
+val sample = doubleArrayOf(2.0, 4.0, 4.0, 5.0, 7.0, 9.0)
+
+val summary = sample.describe()
+summary.mean              // 5.1667
+summary.standardDeviation // 2.4833
+
+val normality = shapiroWilkTest(sample)
+normality.pValue          // 0.8933
+
+val fitted = NormalDistribution(mu = summary.mean, sigma = summary.standardDeviation)
+fitted.cdf(6.0)           // 0.6335
+```
+
+[//]: # (<!---END-->)
+
+## Modules
+
+<CardGroup cols={2}>
+  <Card title="Descriptive Statistics" icon="chart-column" href="/core/overview">
+    Mean, median, variance, quantiles, moments, frequency tables, streaming stats, and `describe()` summaries.
+  </Card>
+  <Card title="Probability Distributions" icon="activity" href="/distributions/overview">
+    18 continuous and 10 discrete distributions with a shared API: pdf/pmf, cdf, quantile, and sampling.
+  </Card>
+  <Card title="Hypothesis Tests" icon="flask-conical" href="/hypothesis/overview">
+    t-tests, ANOVA, chi-squared, Fisher exact, Mann-Whitney, Wilcoxon, Shapiro-Wilk, and more.
+  </Card>
+  <Card title="Correlation & Regression" icon="git-compare-arrows" href="/correlation/overview">
+    Pearson, Spearman, Kendall tau, partial correlation, matrices, and simple linear regression.
+  </Card>
+  <Card title="Sampling & Transformation" icon="shuffle" href="/sampling/overview">
+    Ranking, z-score normalization, min-max scaling, binning, bootstrap, and weighted sampling.
+  </Card>
+</CardGroup>
+
+## Supported Targets
+
+| Platform | Targets |
+| --- | --- |
+| JVM | `jvm` |
+| Android | `android` |
+| Android Native | `androidNativeArm32`, `androidNativeArm64`, `androidNativeX86`, `androidNativeX64` |
+| iOS | `iosX64`, `iosArm64`, `iosSimulatorArm64` |
+| macOS | `macosArm64` |
+| Linux | `linuxArm64`, `linuxX64` |
+| Windows | `mingwX64` |
+| watchOS | `watchosArm32`, `watchosArm64`, `watchosDeviceArm64`, `watchosSimulatorArm64` |
+| tvOS | `tvosArm64`, `tvosSimulatorArm64` |
+| JS | `js` (browser, Node.js) |
+| Wasm | `wasmJs`, `wasmWasi` |
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card title="Installation" icon="package" href="/getting-started/installation">
+    Add the BOM or a single module to a Gradle KTS project.
+  </Card>
+  <Card title="Quick Start" icon="play" href="/getting-started/quick-start">
+    Run a summary, fit a distribution, and execute a hypothesis test.
+  </Card>
+  <Card title="A/B Testing" icon="git-compare-arrows" href="/guides/how-to/ab-testing">
+    Walk through a complete A/B test with assumption checks and group comparison.
+  </Card>
+</CardGroup>

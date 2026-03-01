@@ -1,0 +1,286 @@
+---
+title: "Deskriptive Statistik"
+description: "Zusammenfassende Statistiken, Lagemaße, Streuungsmaße, Quantile, Formkennzahlen, Häufigkeitsanalyse und Streaming-Berechnungen in kstats-core."
+---
+
+[//]: # (<!---IMPORT org.oremif.kstats.samples.DocsSamples-->)
+[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
+
+`kstats-core` stellt deskriptive Statistiken als Erweiterungsfunktionen auf `DoubleArray` und `Iterable<Double>` bereit. Zusätzlich sind `Int`- und `Long`-Überladungen für die gängigsten Operationen verfügbar.
+
+## Zusammenfassung auf einen Blick
+
+`describe()` ist der schnellste Weg, ein vollständiges Bild einer Stichprobe zu erhalten. Die Methode gibt ein `DescriptiveStatistics`-Objekt zurück, das Anzahl, Lagemaße, Streuung, Quartile, Formkennzahlen und Standardfehler kombiniert.
+
+[//]: # (<!---FUN coreSummarySnapshot-->)
+
+```kotlin
+val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
+val stats = data.describe()
+
+stats.count              // 8
+stats.mean               // 5.0
+stats.median             // 4.5
+stats.standardDeviation  // 2.1380
+stats.variance           // 4.5714
+stats.q1                 // 4.0
+stats.q3                 // 5.5
+stats.interquartileRange // 1.5
+stats.skewness           // 0.6563
+stats.kurtosis           // -0.1640
+stats.range              // 7.0
+stats.standardError      // 0.7559
+```
+
+[//]: # (<!---END-->)
+
+<Note>
+`variance()` und `standardDeviation()` verwenden standardmäßig die **Stichprobenformel** (Division durch $n - 1$). Übergeben Sie `PopulationKind.POPULATION`, um die Populationsformel (Division durch $n$) zu verwenden.
+</Note>
+
+## Lagemaße
+
+Verschiedene Begriffe von „Mitte" passen zu verschiedenen Datenformen. `mean()` ist das arithmetische Mittel, `median()` ist der Positionsmittelwert, `mode()` gibt die häufigsten Werte zurück, und die getrimmten sowie gewichteten Varianten behandeln Ausreißer und Gewichtungen.
+
+[//]: # (<!---FUN coreCentralTendency-->)
+
+```kotlin
+val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
+
+data.mean()                    // 5.0
+data.median()                  // 4.5
+data.toList().mode()           // {4.0}
+
+data.trimmedMean(0.1)          // 4.8333 — trims 10% from each tail
+
+val positive = doubleArrayOf(1.0, 2.0, 4.0, 8.0)
+positive.geometricMean()       // 2.8284
+positive.harmonicMean()        // 2.1333
+
+val values = doubleArrayOf(1.0, 2.0, 3.0)
+val weights = doubleArrayOf(3.0, 1.0, 1.0)
+values.weightedMean(weights)   // 1.6
+```
+
+[//]: # (<!---END-->)
+
+- **Geometrisches Mittel** — geeignet für Wachstumsraten und Verhältnisse. Erfordert ausschließlich positive Werte.
+- **Harmonisches Mittel** — geeignet für Raten und Geschwindigkeitsdurchschnitte. Erfordert ausschließlich positive Werte.
+- **Getrimmtes Mittel** — entfernt einen Anteil von jedem Ende, bevor der Durchschnitt berechnet wird. Robust gegenüber Ausreißern.
+- **Gewichtetes Mittel** — jede Beobachtung trägt proportional zu ihrem Gewicht bei.
+
+<Accordion title="Mathematische Details">
+$$
+\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i
+$$
+
+$$
+\bar{x}_{\text{geo}} = \left(\prod_{i=1}^{n} x_i\right)^{1/n}
+$$
+
+$$
+\bar{x}_{\text{harm}} = \frac{n}{\sum_{i=1}^{n} \frac{1}{x_i}}
+$$
+
+$$
+\bar{x}_w = \frac{\sum_{i=1}^{n} w_i x_i}{\sum_{i=1}^{n} w_i}
+$$
+
+Das getrimmte Mittel entfernt $\lfloor p \cdot n \rfloor$ Beobachtungen von jedem Ende der sortierten Stichprobe und berechnet anschließend das arithmetische Mittel der verbleibenden Werte.
+</Accordion>
+
+## Streuungsmaße
+
+Streuungsmaße beschreiben, wie weit die Werte vom Zentrum abweichen.
+
+[//]: # (<!---FUN coreDispersion-->)
+
+```kotlin
+val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
+
+data.variance()                                    // 4.5714 (sample)
+data.variance(PopulationKind.POPULATION)            // 4.0
+data.standardDeviation()                            // 2.1380
+data.range()                                        // 7.0
+data.interquartileRange()                           // 1.5
+data.meanAbsoluteDeviation()                        // 1.5
+
+data.trimmedVariance(0.1)                           // trimmed sample variance
+
+data.semiVariance(5.0, SemiVarianceDirection.DOWNSIDE) // 1.7143
+data.semiVariance(5.0, SemiVarianceDirection.UPSIDE)   // 2.8571
+```
+
+[//]: # (<!---END-->)
+
+<Note>
+`semiVariance` misst die Variabilität auf einer Seite eines Schwellenwerts. `DOWNSIDE` erfasst das Risiko unterhalb des Schwellenwerts; `UPSIDE` erfasst die Variabilität oberhalb davon.
+</Note>
+
+<Accordion title="Mathematische Details">
+$$
+s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2, \qquad
+s = \sqrt{s^2}, \qquad
+SE = \frac{s}{\sqrt{n}}
+$$
+
+$$
+\text{MAD} = \frac{1}{n}\sum_{i=1}^{n}|x_i - \bar{x}|
+$$
+
+$$
+\text{SemiVar}_{\text{down}}(t) = \frac{1}{n-1}\sum_{x_i < t}(x_i - t)^2
+$$
+</Accordion>
+
+## Quantile und Position
+
+Quantile teilen die Daten an bestimmten Wahrscheinlichkeitsschwellen. `percentile()` erwartet einen Wert auf der Skala 0–100; `quantile()` erwartet einen Wert auf der Skala 0–1.
+
+[//]: # (<!---FUN coreQuantiles-->)
+
+```kotlin
+val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+
+data.quantile(0.5)         // 5.5 (median)
+data.quantile(0.25)        // 3.25 (Q1)
+data.percentile(90.0)      // 9.1 (90th percentile)
+
+val (q1, median, q3) = data.quartiles()
+// q1 = 3.25, median = 5.5, q3 = 7.75
+```
+
+[//]: # (<!---END-->)
+
+<Tip>
+`quantile()` unterstützt einen `QuantileInterpolation`-Parameter mit den Optionen: `LINEAR` (Standard), `LOWER`, `HIGHER`, `NEAREST` und `MIDPOINT`. Diese steuern, wie der Wert interpoliert wird, wenn das Quantil zwischen zwei Datenpunkten liegt.
+</Tip>
+
+<Accordion title="Mathematische Details">
+Bei linearer Interpolation (Standardverfahren) wird das Quantil an der Wahrscheinlichkeit $p$ für sortierte Daten $x_{(1)}, \ldots, x_{(n)}$ wie folgt berechnet:
+
+$$
+Q(p) = x_{(\lfloor h \rfloor)} + (h - \lfloor h \rfloor)(x_{(\lceil h \rceil)} - x_{(\lfloor h \rfloor)})
+$$
+
+wobei $h = p(n - 1) + 1$.
+</Accordion>
+
+## Form und Momente
+
+Formkennzahlen beschreiben Asymmetrie und Randschwere über Mittelwert und Varianz hinaus.
+
+[//]: # (<!---FUN coreShape-->)
+
+```kotlin
+val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
+
+data.skewness()            // 0.6563 — positive: right tail is longer
+data.kurtosis()            // -0.1640 — negative excess: lighter tails than normal
+data.kurtosis(excess = false) // raw kurtosis (not centered at 0)
+
+data.centralMoment(2)      // 4.0 (equals population variance)
+data.centralMoment(3)      // 5.25
+data.centralMoment(4)      // 44.5
+
+data.kStatistic(1)          // 5.0 (equals mean)
+data.kStatistic(2)          // 4.5714 (equals sample variance)
+```
+
+[//]: # (<!---END-->)
+
+Eine Schiefe nahe null deutet auf Symmetrie hin. Positive Schiefe weist auf einen längeren rechten Rand hin; negative auf einen längeren linken Rand. Exzess-Kurtosis nahe null ähnelt einer Normalverteilung; positive Werte deuten auf schwerere Ränder hin.
+
+<Warning>
+`kurtosis()` gibt standardmäßig die **Exzess-Kurtosis** zurück (`excess = true`), d.h. der Wert ist so verschoben, dass eine Normalverteilung eine Exzess-Kurtosis von 0 hat. Übergeben Sie `excess = false` für das rohe vierte standardisierte Moment.
+</Warning>
+
+<Accordion title="Mathematische Details">
+$$
+g_1 = \frac{n}{(n-1)(n-2)} \sum_{i=1}^{n} \left(\frac{x_i - \bar{x}}{s}\right)^3
+$$
+
+$$
+g_2 = \frac{n(n+1)}{(n-1)(n-2)(n-3)} \sum_{i=1}^{n} \left(\frac{x_i - \bar{x}}{s}\right)^4 - \frac{3(n-1)^2}{(n-2)(n-3)}
+$$
+
+Das $r$-te zentrale Moment ist $\mu_r = \frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^r$. K-Statistiken ($k_r$) sind erwartungstreue Schätzer der entsprechenden Kumulanten.
+</Accordion>
+
+## Häufigkeitsanalyse
+
+Die Klasse `Frequency` zählt Vorkommen, Anteile und kumulative Häufigkeiten für beliebige `Comparable`-Typen. `frequencyTable()` gruppiert numerische Daten in gleich breite Klassen.
+
+[//]: # (<!---FUN coreFrequency-->)
+
+```kotlin
+val freq = listOf("a", "a", "b", "b", "b", "c").toFrequency()
+freq.totalCount            // 6
+freq.count("b")            // 3
+freq.proportion("b")       // 0.5
+freq.cumulativeCount("b")  // 5 (a=2 + b=3)
+freq.mode                  // {b}
+```
+
+[//]: # (<!---END-->)
+
+[//]: # (<!---FUN coreFrequencyTable-->)
+
+```kotlin
+val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+val bins = data.asIterable().frequencyTable(3)
+// Each FrequencyBin has: range, count, relativeFrequency, cumulativeFrequency
+bins[0].count              // number of values in the first bin
+bins[0].relativeFrequency  // proportion of total
+```
+
+[//]: # (<!---END-->)
+
+<Tip>
+`Frequency` funktioniert mit jedem `Comparable`-Typ — Strings, Enums, Ganzzahlen oder eigene Klassen. Für numerische Klasseneinteilung verwenden Sie `frequencyTable()` mit einer Klassenanzahl oder einer Klassenbreite.
+</Tip>
+
+## Streaming-Statistiken
+
+`OnlineStatistics` berechnet Mittelwert, Varianz, Schiefe und Kurtosis inkrementell, ohne die gesamte Stichprobe zu speichern. Werte können einzeln oder als Stapel hinzugefügt werden.
+
+[//]: # (<!---FUN coreStreaming-->)
+
+```kotlin
+val online = OnlineStatistics()
+online.addAll(doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0))
+
+online.count               // 8
+online.mean                // 5.0
+online.sum                 // 40.0
+online.min                 // 2.0
+online.max                 // 9.0
+online.variance()          // 4.5714 (sample)
+online.standardDeviation() // 2.1380
+online.skewness()          // 0.6563
+
+// Add more data later
+online.add(3.0)
+online.count               // 9
+online.mean                // 4.7778
+```
+
+[//]: # (<!---END-->)
+
+Verwenden Sie `OnlineStatistics`, wenn Daten inkrementell eintreffen (Streaming, ereignisgesteuerte Systeme) oder wenn das Speichern der gesamten Stichprobe im Arbeitsspeicher nicht praktikabel ist.
+
+<Accordion title="Mathematische Details">
+`OnlineStatistics` verwendet Welfords Algorithmus mit der Terriberry-Erweiterung für numerisch stabile Einpass-Berechnung höherer Momente. Der Algorithmus aktualisiert laufende Summen von Potenzen der Abweichungen vom aktuellen Mittelwert und vermeidet so die katastrophale Auslöschung, die naive Zweipass-Formeln bei großen Datensätzen betrifft.
+</Accordion>
+
+## Fehlerbehandlung
+
+<Warning>
+Leere Arrays lösen eine `InsufficientDataException` aus. Funktionen, die mindestens zwei Beobachtungen erfordern (Varianz, Standardabweichung, Schiefe), lösen bei Eingaben mit nur einem Element eine `InsufficientDataException` aus. Funktionen, die positive Daten erfordern (`geometricMean`, `harmonicMean`), lösen bei nicht-positiven Werten eine `InvalidParameterException` aus.
+</Warning>
+
+## API-Referenz
+
+<Card title="Vollständige API-Referenz" icon="book-open" href="https://oremif.github.io/kstats">
+  Durchsuchen Sie alle öffentlichen Typen, Funktionen, Parameterüberladungen und Rückgabetypen in der Dokka-generierten Referenz.
+</Card>

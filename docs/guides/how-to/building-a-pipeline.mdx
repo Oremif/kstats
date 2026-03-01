@@ -1,0 +1,194 @@
+---
+title: "Building a Statistics Pipeline"
+description: "Organize kstats calls into reusable functions for repeatable analysis workflows."
+---
+
+[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.PipelineSamples-->)
+[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.PipelineSamples-->)
+
+As analysis grows beyond one-off calls, wrapping kstats functions into typed pipeline functions keeps the workflow repeatable and the results structured.
+
+## Result Types
+
+[//]: # (<!---FUN pipelineResultTypes-->)
+
+```kotlin
+data class AssumptionCheck(
+    val normalityPValue: Double,
+    val isNormal: Boolean,
+    val varianceEqualityPValue: Double,
+    val isVarianceEqual: Boolean
+)
+
+data class GroupComparison(
+    val testName: String,
+    val pValue: Double,
+    val isSignificant: Boolean,
+    val confidenceInterval: Pair<Double, Double>?
+)
+
+data class AnalysisReport(
+    val controlSummary: DescriptiveStatistics,
+    val treatmentSummary: DescriptiveStatistics,
+    val assumptions: AssumptionCheck,
+    val comparison: GroupComparison
+)
+```
+
+[//]: # (<!---END-->)
+
+## Check Assumptions
+
+[//]: # (<!---FUN pipelineCheckAssumptions-->)
+
+```kotlin
+fun checkAssumptions(
+    control: DoubleArray,
+    treatment: DoubleArray,
+    alpha: Double = 0.05
+): AssumptionCheck {
+    val controlNormality = shapiroWilkTest(control)
+    val treatmentNormality = shapiroWilkTest(treatment)
+    val normality = minOf(controlNormality.pValue, treatmentNormality.pValue)
+
+    val variance = leveneTest(control, treatment)
+
+    return AssumptionCheck(
+        normalityPValue = normality,
+        isNormal = normality >= alpha,
+        varianceEqualityPValue = variance.pValue,
+        isVarianceEqual = variance.pValue >= alpha
+    )
+}
+```
+
+[//]: # (<!---END-->)
+
+## Compare Groups
+
+Select the test automatically based on the assumption check.
+
+[//]: # (<!---FUN pipelineCompareGroups-->)
+
+```kotlin
+fun compareGroups(
+    control: DoubleArray,
+    treatment: DoubleArray,
+    assumptions: AssumptionCheck,
+    alpha: Double = 0.05
+): GroupComparison {
+    val result = if (assumptions.isNormal) {
+        tTest(control, treatment, equalVariances = assumptions.isVarianceEqual)
+    } else {
+        mannWhitneyUTest(control, treatment)
+    }
+
+    return GroupComparison(
+        testName = result.testName,
+        pValue = result.pValue,
+        isSignificant = result.isSignificant(alpha),
+        confidenceInterval = result.confidenceInterval
+    )
+}
+```
+
+[//]: # (<!---END-->)
+
+## Full Report
+
+[//]: # (<!---FUN pipelineFullReport-->)
+
+```kotlin
+fun analyze(
+    control: DoubleArray,
+    treatment: DoubleArray,
+    alpha: Double = 0.05
+): AnalysisReport {
+    val assumptions = checkAssumptions(control, treatment, alpha)
+    val comparison = compareGroups(control, treatment, assumptions, alpha)
+
+    return AnalysisReport(
+        controlSummary = control.describe(),
+        treatmentSummary = treatment.describe(),
+        assumptions = assumptions,
+        comparison = comparison
+    )
+}
+```
+
+[//]: # (<!---END-->)
+
+## Usage
+
+[//]: # (<!---FUN pipelineUsage-->)
+
+```kotlin
+val pageLoadControl = doubleArrayOf(
+    1.23, 1.45, 1.31, 1.52, 1.38, 1.41, 1.29, 1.47, 1.35, 1.44,
+    1.33, 1.50, 1.27, 1.42, 1.36, 1.48, 1.30, 1.46, 1.39, 1.43
+)
+val pageLoadTreatment = doubleArrayOf(
+    1.10, 1.25, 1.18, 1.32, 1.15, 1.22, 1.12, 1.28, 1.19, 1.26,
+    1.14, 1.30, 1.11, 1.24, 1.17, 1.29, 1.13, 1.27, 1.20, 1.23
+)
+
+val report = analyze(pageLoadControl, pageLoadTreatment)
+
+report.controlSummary.mean
+report.treatmentSummary.mean
+report.assumptions.isNormal
+report.assumptions.isVarianceEqual
+report.comparison.testName
+report.comparison.pValue
+report.comparison.isSignificant
+report.comparison.confidenceInterval
+```
+
+[//]: # (<!---END-->)
+
+## Extending the Pipeline
+
+Add correlation analysis between metrics:
+
+[//]: # (<!---FUN pipelineExtended-->)
+
+```kotlin
+data class ExtendedReport(
+    val base: AnalysisReport,
+    val correlationCoefficient: Double,
+    val correlationPValue: Double,
+    val regressionSlope: Double,
+    val regressionRSquared: Double
+)
+
+fun analyzeWithCorrelation(
+    control: DoubleArray,
+    treatment: DoubleArray,
+    metricX: DoubleArray,
+    metricY: DoubleArray
+): ExtendedReport {
+    val base = analyze(control, treatment)
+    val correlation = pearsonCorrelation(metricX, metricY)
+    val regression = simpleLinearRegression(metricX, metricY)
+
+    return ExtendedReport(
+        base = base,
+        correlationCoefficient = correlation.coefficient,
+        correlationPValue = correlation.pValue,
+        regressionSlope = regression.slope,
+        regressionRSquared = regression.rSquared
+    )
+}
+```
+
+[//]: # (<!---END-->)
+
+## Module Responsibilities
+
+| Pipeline stage | Module | Key functions |
+| --- | --- | --- |
+| Normalize, rank, bin, resample | `kstats-sampling` | `zScore()`, `rank()`, `bin()`, `bootstrapSample()` |
+| Summarize | `kstats-core` | `describe()`, `mean()`, `quantile()` |
+| Check assumptions, compare groups | `kstats-hypothesis` | `shapiroWilkTest()`, `leveneTest()`, `tTest()` |
+| Model relationships | `kstats-correlation` | `pearsonCorrelation()`, `simpleLinearRegression()` |
+| Estimate probabilities | `kstats-distributions` | `NormalDistribution()`, `cdf()`, `quantile()` |

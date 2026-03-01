@@ -1,0 +1,326 @@
+public final class org/oremif/kstats/core/MathUtilsKt {
+	public static final field EULER_MASCHERONI D
+	public static final fun beta (DD)D
+	public static final fun digamma (D)D
+	public static final fun erf (D)D
+	public static final fun erfInv (D)D
+	public static final fun erfc (D)D
+	public static final fun erfcInv (D)D
+	public static final fun gamma (D)D
+	public static final fun gcd (JJ)J
+	public static final fun generalizedHarmonic (ID)D
+	public static final fun lcm (JJ)J
+	public static final fun lnBeta (DD)D
+	public static final fun lnCombination (II)D
+	public static final fun lnFactorial (I)D
+	public static final fun lnGamma (D)D
+	public static final fun lnPermutation (II)D
+	public static final fun regularizedBeta (DDD)D
+	public static final fun regularizedGammaP (DD)D
+	public static final fun regularizedGammaQ (DD)D
+	public static final fun trigamma (D)D
+}
+
+public final class org/oremif/kstats/core/QuantileKt {
+	public static final fun findQuantile (DLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;DDD)D
+	public static synthetic fun findQuantile$default (DLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;DDDILjava/lang/Object;)D
+}
+
+public final class org/oremif/kstats/core/SecureRandomKt {
+	public static final fun secureRandom ()Lkotlin/random/Random;
+}
+
+public final class org/oremif/kstats/core/exceptions/ConvergenceException : org/oremif/kstats/core/exceptions/KStatsException {
+	public fun <init> (Ljava/lang/String;ID)V
+	public final fun getIterations ()I
+	public final fun getLastEstimate ()D
+}
+
+public final class org/oremif/kstats/core/exceptions/DegenerateDataException : org/oremif/kstats/core/exceptions/KStatsException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class org/oremif/kstats/core/exceptions/InsufficientDataException : org/oremif/kstats/core/exceptions/KStatsException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class org/oremif/kstats/core/exceptions/InvalidParameterException : org/oremif/kstats/core/exceptions/KStatsException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public class org/oremif/kstats/core/exceptions/KStatsException : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class org/oremif/kstats/descriptive/CentralTendencyKt {
+	public static final fun geometricMean (Ljava/lang/Iterable;)D
+	public static final fun geometricMean (Lkotlin/sequences/Sequence;)D
+	public static final fun geometricMean ([D)D
+	public static final fun harmonicMean (Ljava/lang/Iterable;)D
+	public static final fun harmonicMean (Lkotlin/sequences/Sequence;)D
+	public static final fun harmonicMean ([D)D
+	public static final fun mean (Ljava/lang/Iterable;)D
+	public static final fun mean (Lkotlin/sequences/Sequence;)D
+	public static final fun mean ([D)D
+	public static final fun median (Ljava/lang/Iterable;)D
+	public static final fun median (Lkotlin/sequences/Sequence;)D
+	public static final fun median ([D)D
+	public static final fun mode (Ljava/lang/Iterable;)Ljava/util/Set;
+	public static final fun trimmedMean (Ljava/lang/Iterable;D)D
+	public static final fun trimmedMean (Lkotlin/sequences/Sequence;D)D
+	public static final fun trimmedMean ([DD)D
+	public static final fun weightedMean (Ljava/lang/Iterable;Ljava/lang/Iterable;)D
+	public static final fun weightedMean ([D[D)D
+}
+
+public final class org/oremif/kstats/descriptive/DescriptiveStatistics {
+	public fun <init> (JDDDDDDDDDDDDDD)V
+	public final fun component1 ()J
+	public final fun component10 ()D
+	public final fun component11 ()D
+	public final fun component12 ()D
+	public final fun component13 ()D
+	public final fun component14 ()D
+	public final fun component15 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()D
+	public final fun component6 ()D
+	public final fun component7 ()D
+	public final fun component8 ()D
+	public final fun component9 ()D
+	public final fun copy (JDDDDDDDDDDDDDD)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/descriptive/DescriptiveStatistics;JDDDDDDDDDDDDDDILjava/lang/Object;)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCount ()J
+	public final fun getInterquartileRange ()D
+	public final fun getKurtosis ()D
+	public final fun getMax ()D
+	public final fun getMean ()D
+	public final fun getMedian ()D
+	public final fun getMin ()D
+	public final fun getQ1 ()D
+	public final fun getQ3 ()D
+	public final fun getRange ()D
+	public final fun getSkewness ()D
+	public final fun getStandardDeviation ()D
+	public final fun getStandardError ()D
+	public final fun getSum ()D
+	public final fun getVariance ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/oremif/kstats/descriptive/DispersionKt {
+	public static final fun coefficientOfVariation (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun coefficientOfVariation (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun coefficientOfVariation ([DLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun coefficientOfVariation$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun coefficientOfVariation$default (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun coefficientOfVariation$default ([DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static final fun interquartileRange (Ljava/lang/Iterable;)D
+	public static final fun interquartileRange (Lkotlin/sequences/Sequence;)D
+	public static final fun interquartileRange ([D)D
+	public static final fun meanAbsoluteDeviation (Ljava/lang/Iterable;)D
+	public static final fun meanAbsoluteDeviation (Lkotlin/sequences/Sequence;)D
+	public static final fun meanAbsoluteDeviation ([D)D
+	public static final fun medianAbsoluteDeviation (Ljava/lang/Iterable;)D
+	public static final fun medianAbsoluteDeviation (Lkotlin/sequences/Sequence;)D
+	public static final fun medianAbsoluteDeviation ([D)D
+	public static final fun range (Ljava/lang/Iterable;)D
+	public static final fun range (Lkotlin/sequences/Sequence;)D
+	public static final fun range ([D)D
+	public static final fun semiVariance (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/SemiVarianceDirection;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun semiVariance (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/SemiVarianceDirection;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun semiVariance (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/SemiVarianceDirection;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun semiVariance (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/SemiVarianceDirection;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun semiVariance ([DDLorg/oremif/kstats/descriptive/SemiVarianceDirection;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun semiVariance$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/SemiVarianceDirection;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun semiVariance$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/SemiVarianceDirection;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun semiVariance$default (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/SemiVarianceDirection;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun semiVariance$default (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/SemiVarianceDirection;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun semiVariance$default ([DDLorg/oremif/kstats/descriptive/SemiVarianceDirection;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static final fun standardDeviation (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun standardDeviation (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun standardDeviation ([DLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun standardDeviation$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun standardDeviation$default (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun standardDeviation$default ([DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static final fun standardError (Ljava/lang/Iterable;)D
+	public static final fun standardError (Lkotlin/sequences/Sequence;)D
+	public static final fun standardError ([D)D
+	public static final fun trimmedStd (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun trimmedStd (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun trimmedStd ([DDLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun trimmedStd$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun trimmedStd$default (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun trimmedStd$default ([DDLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static final fun trimmedVariance (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun trimmedVariance (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun trimmedVariance ([DDLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun trimmedVariance$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun trimmedVariance$default (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun trimmedVariance$default ([DDLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static final fun variance (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun variance (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun variance ([DLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun variance$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun variance$default (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun variance$default ([DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+}
+
+public final class org/oremif/kstats/descriptive/Frequency {
+	public fun <init> ()V
+	public final fun add (Ljava/lang/Comparable;)V
+	public final fun add (Ljava/lang/Comparable;J)V
+	public final fun addAll (Ljava/lang/Iterable;)V
+	public final fun clear ()V
+	public final fun count (Ljava/lang/Comparable;)J
+	public final fun cumulativeCount (Ljava/lang/Comparable;)J
+	public final fun cumulativeProportion (Ljava/lang/Comparable;)D
+	public final fun getEntries ()Ljava/util/List;
+	public final fun getMode ()Ljava/util/Set;
+	public final fun getTotalCount ()J
+	public final fun getUniqueCount ()I
+	public final fun getValues ()Ljava/util/List;
+	public final fun proportion (Ljava/lang/Comparable;)D
+}
+
+public final class org/oremif/kstats/descriptive/FrequencyEntry {
+	public fun <init> (Ljava/lang/Object;J)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()J
+	public final fun copy (Ljava/lang/Object;J)Lorg/oremif/kstats/descriptive/FrequencyEntry;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/descriptive/FrequencyEntry;Ljava/lang/Object;JILjava/lang/Object;)Lorg/oremif/kstats/descriptive/FrequencyEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCount ()J
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/oremif/kstats/descriptive/FrequencyKt {
+	public static final fun toFrequency (Ljava/lang/Iterable;)Lorg/oremif/kstats/descriptive/Frequency;
+}
+
+public final class org/oremif/kstats/descriptive/IntStatistics {
+	public static final fun describeOfInt (Ljava/lang/Iterable;)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
+	public static final fun meanOfInt (Ljava/lang/Iterable;)D
+	public static final fun medianOfInt (Ljava/lang/Iterable;)D
+	public static final fun percentileOfInt (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static synthetic fun percentileOfInt$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static final fun standardDeviationOfInt (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun standardDeviationOfInt$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static final fun varianceOfInt (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun varianceOfInt$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+}
+
+public final class org/oremif/kstats/descriptive/LongStatistics {
+	public static final fun describeOfLong (Ljava/lang/Iterable;)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
+	public static final fun meanOfLong (Ljava/lang/Iterable;)D
+	public static final fun medianOfLong (Ljava/lang/Iterable;)D
+	public static final fun percentileOfLong (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static synthetic fun percentileOfLong$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static final fun standardDeviationOfLong (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun standardDeviationOfLong$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static final fun varianceOfLong (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun varianceOfLong$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+}
+
+public final class org/oremif/kstats/descriptive/MomentsKt {
+	public static final fun centralMoment (Ljava/lang/Iterable;I)D
+	public static final fun centralMoment (Lkotlin/sequences/Sequence;I)D
+	public static final fun centralMoment ([DI)D
+	public static final fun kStatistic (Ljava/lang/Iterable;I)D
+	public static final fun kStatistic (Lkotlin/sequences/Sequence;I)D
+	public static final fun kStatistic ([DI)D
+}
+
+public final class org/oremif/kstats/descriptive/OnlineStatistics {
+	public fun <init> ()V
+	public final fun add (D)V
+	public final fun addAll (Ljava/lang/Iterable;)V
+	public final fun addAll ([D)V
+	public final fun clear ()V
+	public final fun getCount ()J
+	public final fun getMax ()D
+	public final fun getMean ()D
+	public final fun getMin ()D
+	public final fun getSum ()D
+	public final fun kurtosis (Lorg/oremif/kstats/descriptive/PopulationKind;Z)D
+	public static synthetic fun kurtosis$default (Lorg/oremif/kstats/descriptive/OnlineStatistics;Lorg/oremif/kstats/descriptive/PopulationKind;ZILjava/lang/Object;)D
+	public final fun skewness (Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun skewness$default (Lorg/oremif/kstats/descriptive/OnlineStatistics;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public final fun standardDeviation (Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun standardDeviation$default (Lorg/oremif/kstats/descriptive/OnlineStatistics;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public final fun variance (Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun variance$default (Lorg/oremif/kstats/descriptive/OnlineStatistics;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+}
+
+public final class org/oremif/kstats/descriptive/PopulationKind : java/lang/Enum {
+	public static final field POPULATION Lorg/oremif/kstats/descriptive/PopulationKind;
+	public static final field SAMPLE Lorg/oremif/kstats/descriptive/PopulationKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/descriptive/PopulationKind;
+	public static fun values ()[Lorg/oremif/kstats/descriptive/PopulationKind;
+}
+
+public final class org/oremif/kstats/descriptive/QuantileInterpolation : java/lang/Enum {
+	public static final field HIGHER Lorg/oremif/kstats/descriptive/QuantileInterpolation;
+	public static final field LINEAR Lorg/oremif/kstats/descriptive/QuantileInterpolation;
+	public static final field LOWER Lorg/oremif/kstats/descriptive/QuantileInterpolation;
+	public static final field MIDPOINT Lorg/oremif/kstats/descriptive/QuantileInterpolation;
+	public static final field NEAREST Lorg/oremif/kstats/descriptive/QuantileInterpolation;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/descriptive/QuantileInterpolation;
+	public static fun values ()[Lorg/oremif/kstats/descriptive/QuantileInterpolation;
+}
+
+public final class org/oremif/kstats/descriptive/QuantilesKt {
+	public static final fun percentile (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static final fun percentile (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static final fun percentile ([DDLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static synthetic fun percentile$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static synthetic fun percentile$default (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static synthetic fun percentile$default ([DDLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static final fun quantile (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static final fun quantile (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static final fun quantile ([DDLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static synthetic fun quantile$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static synthetic fun quantile$default (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static synthetic fun quantile$default ([DDLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static final fun quartiles (Ljava/lang/Iterable;)Lkotlin/Triple;
+	public static final fun quartiles (Lkotlin/sequences/Sequence;)Lkotlin/Triple;
+	public static final fun quartiles ([D)Lkotlin/Triple;
+}
+
+public final class org/oremif/kstats/descriptive/SemiVarianceDirection : java/lang/Enum {
+	public static final field DOWNSIDE Lorg/oremif/kstats/descriptive/SemiVarianceDirection;
+	public static final field UPSIDE Lorg/oremif/kstats/descriptive/SemiVarianceDirection;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/descriptive/SemiVarianceDirection;
+	public static fun values ()[Lorg/oremif/kstats/descriptive/SemiVarianceDirection;
+}
+
+public final class org/oremif/kstats/descriptive/ShapeKt {
+	public static final fun kurtosis (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;Z)D
+	public static final fun kurtosis (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;Z)D
+	public static final fun kurtosis ([DLorg/oremif/kstats/descriptive/PopulationKind;Z)D
+	public static synthetic fun kurtosis$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ZILjava/lang/Object;)D
+	public static synthetic fun kurtosis$default (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;ZILjava/lang/Object;)D
+	public static synthetic fun kurtosis$default ([DLorg/oremif/kstats/descriptive/PopulationKind;ZILjava/lang/Object;)D
+	public static final fun skewness (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun skewness (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static final fun skewness ([DLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun skewness$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun skewness$default (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static synthetic fun skewness$default ([DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+}
+
+public final class org/oremif/kstats/descriptive/SummaryStatisticsKt {
+	public static final fun describe (Ljava/lang/Iterable;)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
+	public static final fun describe ([D)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
+}
+
