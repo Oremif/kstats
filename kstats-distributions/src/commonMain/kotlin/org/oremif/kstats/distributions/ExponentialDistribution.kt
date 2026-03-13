@@ -23,13 +23,14 @@ public data class ExponentialDistribution(
     override fun quantile(p: Double): Double {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 1.0) return Double.POSITIVE_INFINITY
-        return -ln(1.0 - p) / rate
+        return -ln1p(-p) / rate
     }
 
     override val mean: Double get() = 1.0 / rate
     override val variance: Double get() = 1.0 / (rate * rate)
     override val skewness: Double get() = 2.0
     override val kurtosis: Double get() = 6.0 // excess
+    override val entropy: Double = 1.0 - ln(rate)
 
     override fun sample(random: Random): Double = -ln(random.nextDouble()) / rate
 

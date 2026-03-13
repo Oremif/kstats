@@ -56,6 +56,33 @@ class NormalDistributionTest {
         assertEquals(4.0, d.variance, tol)
         assertEquals(2.0, d.standardDeviation, tol)
     }
+
+    @Test
+    fun testEntropy() {
+        // scipy: stats.norm(0, 1).entropy() = 1.418938533204673
+        assertEquals(1.418938533204673, std.entropy, 1e-12)
+        // scipy: stats.norm(5, 2).entropy() = 2.112085713764618
+        val d = NormalDistribution(5.0, 2.0)
+        assertEquals(2.112085713764618, d.entropy, 1e-12)
+    }
+
+    @Test
+    fun testLogPdfConsistency() {
+        for (x in listOf(-3.0, -1.0, 0.0, 1.0, 3.0)) {
+            assertEquals(std.pdf(x), exp(std.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
+        }
+        val d = NormalDistribution(5.0, 2.0)
+        for (x in listOf(0.0, 3.0, 5.0, 7.0, 10.0)) {
+            assertEquals(d.pdf(x), exp(d.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
+        }
+    }
+
+    @Test
+    fun testSfConsistency() {
+        for (x in listOf(-3.0, -1.0, 0.0, 1.0, 3.0)) {
+            assertEquals(1.0, std.sf(x) + std.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
+        }
+    }
 }
 
 class StudentTDistributionTest {
@@ -146,6 +173,32 @@ class UniformDistributionTest {
         val u = UniformDistribution(2.0, 8.0)
         assertEquals(5.0, u.quantile(0.5), tol)
     }
+
+    @Test
+    fun testEntropy() {
+        // scipy: stats.uniform(0, 10).entropy() = 2.302585092994046
+        val u1 = UniformDistribution(0.0, 10.0)
+        assertEquals(2.302585092994046, u1.entropy, 1e-12)
+        // scipy: stats.uniform(2, 6).entropy() = 1.791759469228055
+        val u2 = UniformDistribution(2.0, 8.0)
+        assertEquals(1.791759469228055, u2.entropy, 1e-12)
+    }
+
+    @Test
+    fun testLogPdfConsistency() {
+        val u = UniformDistribution(0.0, 10.0)
+        for (x in listOf(0.0, 2.5, 5.0, 7.5, 10.0)) {
+            assertEquals(u.pdf(x), exp(u.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
+        }
+    }
+
+    @Test
+    fun testSfConsistency() {
+        val u = UniformDistribution(0.0, 10.0)
+        for (x in listOf(-1.0, 0.0, 5.0, 10.0, 11.0)) {
+            assertEquals(1.0, u.sf(x) + u.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
+        }
+    }
 }
 
 class ExponentialDistributionTest {
@@ -168,6 +221,41 @@ class ExponentialDistributionTest {
     fun testMean() {
         val e = ExponentialDistribution(0.5)
         assertEquals(2.0, e.mean, tol)
+    }
+
+    @Test
+    fun testEntropy() {
+        // scipy: stats.expon(scale=1).entropy() = 1.0
+        val e1 = ExponentialDistribution(1.0)
+        assertEquals(1.0, e1.entropy, 1e-12)
+        // scipy: stats.expon(scale=2).entropy() = 1.693147180559945
+        val e2 = ExponentialDistribution(0.5)
+        assertEquals(1.693147180559945, e2.entropy, 1e-12)
+    }
+
+    @Test
+    fun testQuantilePrecisionNearOne() {
+        val e = ExponentialDistribution(1.0)
+        // scipy: stats.expon.ppf(1 - 1e-15) = 34.539575992340879
+        assertEquals(34.539575992340879, e.quantile(1.0 - 1e-15), 1e-6)
+        // scipy: stats.expon.ppf(1 - 1e-10) = 23.025850847200090
+        assertEquals(23.025850847200090, e.quantile(1.0 - 1e-10), 1e-6)
+    }
+
+    @Test
+    fun testLogPdfConsistency() {
+        val e = ExponentialDistribution(2.0)
+        for (x in listOf(0.0, 0.5, 1.0, 2.0, 5.0)) {
+            assertEquals(e.pdf(x), exp(e.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
+        }
+    }
+
+    @Test
+    fun testSfConsistency() {
+        val e = ExponentialDistribution(2.0)
+        for (x in listOf(-1.0, 0.0, 0.5, 1.0, 5.0)) {
+            assertEquals(1.0, e.sf(x) + e.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
+        }
     }
 }
 

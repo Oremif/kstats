@@ -35,6 +35,7 @@ public data class UniformDistribution(
     override val variance: Double get() = range * range / 12.0
     override val skewness: Double get() = 0.0
     override val kurtosis: Double get() = -6.0 / 5.0 // excess
+    override val entropy: Double = ln(range)
 
     override fun sample(random: Random): Double = min + random.nextDouble() * range
 

@@ -46,6 +46,7 @@ public data class NormalDistribution(
     override val standardDeviation: Double get() = sigma
     override val skewness: Double get() = 0.0
     override val kurtosis: Double get() = 0.0 // excess kurtosis
+    override val entropy: Double = 0.5 * ln(2.0 * PI * E * sigma * sigma)
 
     override fun sample(random: Random): Double {
         // Box-Muller transform
