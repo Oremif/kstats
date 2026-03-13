@@ -1,9 +1,11 @@
 package org.oremif.kstats.distributions
 
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.exp
+import kotlin.math.ln
+import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class NormalDistributionTest {
     private val std = NormalDistribution.STANDARD
