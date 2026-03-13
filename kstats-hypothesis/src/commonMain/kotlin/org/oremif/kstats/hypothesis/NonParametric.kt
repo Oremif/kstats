@@ -189,12 +189,152 @@ public fun kolmogorovSmirnovTest(
     )
 }
 
+// Royston AS R94 polynomial coefficients for Shapiro-Wilk test.
+// Source: Royston P. (1995) "Remark AS R94", Applied Statistics 44(4), pp.547-551.
+// Matching R's swilk.c implementation (GPL-2+, based on AS181/R94).
+
+// Polynomial for a[n-1] correction, n >= 4, evaluated at 1/sqrt(n)
+private val SW_C1 = doubleArrayOf(0.0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056)
+
+// Polynomial for a[n-2] correction, n >= 6, evaluated at 1/sqrt(n)
+private val SW_C2 = doubleArrayOf(0.0, 0.042981, -0.293762, -1.752461, 5.682633, -3.582633)
+
+// P-value mean polynomial for 4 <= n <= 11, evaluated at n
+private val SW_C3 = doubleArrayOf(0.544, -0.39978, 0.025054, -6.714e-4)
+
+// P-value log-sigma polynomial for 4 <= n <= 11, evaluated at n
+private val SW_C4 = doubleArrayOf(1.3822, -0.77857, 0.062767, -0.0020322)
+
+// P-value mean polynomial for n >= 12, evaluated at ln(n)
+private val SW_C5 = doubleArrayOf(-1.5861, -0.31082, -0.083751, 0.0038915)
+
+// P-value log-sigma polynomial for n >= 12, evaluated at ln(n)
+private val SW_C6 = doubleArrayOf(-0.4803, -0.082676, 0.0030302)
+
+// Gamma polynomial for p-value transform, 4 <= n <= 11, evaluated at n
+private val SW_G = doubleArrayOf(-2.273, 0.459)
+
 /**
- * Shapiro-Wilk test for normality (simplified version for n <= 5000).
+ * Evaluate polynomial with coefficients in ascending power order using Horner's method.
+ * Computes: coeffs[0] + coeffs[1]*x + coeffs[2]*x^2 + ... + coeffs[n-1]*x^(n-1)
+ */
+private fun swPoly(coeffs: DoubleArray, x: Double): Double {
+    var result = coeffs[0]
+    if (coeffs.size > 1) {
+        var p = x * coeffs[coeffs.size - 1]
+        for (j in coeffs.size - 2 downTo 1) {
+            p = (p + coeffs[j]) * x
+        }
+        result += p
+    }
+    return result
+}
+
+/**
+ * Compute Shapiro-Wilk coefficients using Royston AS R94 algorithm.
+ * Returns a full antisymmetric coefficient array of size n: a[i] = -a[n-1-i].
+ */
+private fun shapiroWilkCoefficients(n: Int): DoubleArray {
+    val nn2 = n / 2
+    val a = DoubleArray(n)
+
+    if (n == 3) {
+        a[2] = 1.0 / sqrt(2.0)
+        a[0] = -a[2]
+        return a
+    }
+
+    val normal = NormalDistribution.STANDARD
+    val an = n.toDouble()
+    val an25 = an + 0.25
+
+    // Expected normal order statistics (first half only, since m is antisymmetric)
+    val m = DoubleArray(nn2) { i -> normal.quantile((i + 1.0 - 0.375) / an25) }
+    val summ2 = 2.0 * m.sumOf { it * it }
+    val ssumm2 = sqrt(summ2)
+    val rsn = 1.0 / sqrt(an)
+
+    // Corrected extreme coefficient from polynomial approximation
+    val a1 = swPoly(SW_C1, rsn) - m[0] / ssumm2
+
+    val fac: Double
+    val i1: Int
+    if (n > 5) {
+        // Second extreme coefficient correction
+        val a2 = -m[1] / ssumm2 + swPoly(SW_C2, rsn)
+        fac = sqrt(
+            (summ2 - 2.0 * m[0] * m[0] - 2.0 * m[1] * m[1]) /
+                (1.0 - 2.0 * a1 * a1 - 2.0 * a2 * a2)
+        )
+        a[n - 2] = a2
+        a[1] = -a2
+        i1 = 2
+    } else {
+        // n = 4 or 5: only the most extreme coefficient is corrected
+        fac = sqrt((summ2 - 2.0 * m[0] * m[0]) / (1.0 - 2.0 * a1 * a1))
+        i1 = 1
+    }
+
+    // Set extreme coefficients
+    a[n - 1] = a1
+    a[0] = -a1
+
+    // Middle coefficients: normalized expected order statistics
+    for (i in i1 until nn2) {
+        a[n - 1 - i] = m[i] / (-fac)
+        a[i] = -a[n - 1 - i]
+    }
+
+    return a
+}
+
+/**
+ * Compute Shapiro-Wilk p-value using Royston AS R94 approximation.
+ * Three different transforms depending on n: n=3 (exact), 4<=n<=11, n>=12.
+ */
+private fun shapiroWilkPValue(w: Double, n: Int): Double {
+    val normal = NormalDistribution.STANDARD
+
+    if (n == 3) {
+        val pi6 = 6.0 / PI
+        val stqr = asin(sqrt(0.75)) // pi/3
+        return maxOf(0.0, pi6 * (asin(sqrt(w)) - stqr))
+    }
+
+    val w1 = 1.0 - w
+
+    val y: Double
+    val mu: Double
+    val sigma: Double
+
+    if (n <= 11) {
+        val gamma = swPoly(SW_G, n.toDouble())
+        val logW1 = ln(w1)
+        if (logW1 >= gamma) return 0.0
+        y = -ln(gamma - logW1)
+        mu = swPoly(SW_C3, n.toDouble())
+        sigma = exp(swPoly(SW_C4, n.toDouble()))
+    } else {
+        y = ln(w1)
+        val lnN = ln(n.toDouble())
+        mu = swPoly(SW_C5, lnN)
+        sigma = exp(swPoly(SW_C6, lnN))
+    }
+
+    val z = (y - mu) / sigma
+    return normal.sf(z)
+}
+
+/**
+ * Shapiro-Wilk test for normality using Royston's AS R94 algorithm.
+ *
+ * Tests the null hypothesis that the data was drawn from a normal distribution.
+ * Valid for sample sizes 3 <= n <= 5000.
  */
 public fun shapiroWilkTest(sample: DoubleArray): TestResult {
     val n = sample.size
     if (n < 3) throw InsufficientDataException("Shapiro-Wilk test requires at least 3 elements")
+    if (n > 5000) throw InvalidParameterException("Shapiro-Wilk test requires at most 5000 elements")
 
     val sorted = sample.sortedArray()
     val mean = sorted.average()
@@ -213,27 +353,16 @@ public fun shapiroWilkTest(sample: DoubleArray): TestResult {
         )
     }
 
-    // Compute the Shapiro-Wilk coefficients using normal order statistics approximation
-    val normal = NormalDistribution.STANDARD
-    val m = DoubleArray(n) { i -> normal.quantile((i + 1.0 - 0.375) / (n + 0.25)) }
-    var mSumSq = 0.0
-    for (mi in m) mSumSq += mi * mi
-    val c = 1.0 / sqrt(mSumSq)
-    val a = DoubleArray(n) { i -> c * m[i] }
+    val a = shapiroWilkCoefficients(n)
 
-    // Compute W
+    // Compute W statistic
     var numerator = 0.0
     for (i in 0 until n) {
         numerator += a[i] * sorted[i]
     }
-    val w = (numerator * numerator) / s2
+    val w = (numerator * numerator / s2).coerceIn(0.0, 1.0)
 
-    // Approximate p-value using normal transformation (Royston's approximation, simplified)
-    val lnN = kotlin.math.ln(n.toDouble())
-    val mu1 = -1.2725 + 1.0521 * lnN
-    val sigma1 = 1.0308 - 0.26758 * lnN
-    val z = (kotlin.math.ln(1.0 - w) - mu1) / sigma1
-    val pValue = NormalDistribution.STANDARD.sf(z)
+    val pValue = shapiroWilkPValue(w, n)
 
     return TestResult(
         testName = "Shapiro-Wilk Test",

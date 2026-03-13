@@ -27,11 +27,12 @@ public fun fisherExactTest(
 
     val pValue = when (alternative) {
         Alternative.TWO_SIDED -> {
+            val pObserved = exp(logPObserved)
             var p = 0.0
             for (i in minA..maxA) {
-                val logPi = hypergeometricLogPmf(i, a + b, a + c, n)
-                if (logPi <= logPObserved + 1e-10) {
-                    p += exp(logPi)
+                val pi = exp(hypergeometricLogPmf(i, a + b, a + c, n))
+                if (pi <= pObserved * (1.0 + 1e-7)) {
+                    p += pi
                 }
             }
             p
