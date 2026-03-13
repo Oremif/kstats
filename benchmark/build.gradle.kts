@@ -9,7 +9,10 @@ allOpen {
 }
 
 dependencies {
-    implementation(project(":library"))
+    implementation(project(":kstats-core"))
+    implementation(project(":kstats-distributions"))
+    implementation(project(":kstats-hypothesis"))
+    implementation(project(":kstats-correlation"))
     implementation(libs.kotlinx.benchmark.runtime)
     implementation(libs.commons.math3)
 }

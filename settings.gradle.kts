@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google()
         mavenCentral()
@@ -14,5 +15,10 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "kstats"
-include(":library")
+include(":kstats-bom")
+include(":kstats-core")
+include(":kstats-distributions")
+include(":kstats-hypothesis")
+include(":kstats-correlation")
+include(":kstats-sampling")
 include(":benchmark")
