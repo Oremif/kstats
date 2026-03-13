@@ -36,14 +36,32 @@ public data class HypergeometricDistribution(
         return lnCombination(bigK, k) + lnCombination(bigN - bigK, n - k) - lnCombination(bigN, n)
     }
 
+    private fun logSumPmf(range: IntRange): Double {
+        var maxLog = Double.NEGATIVE_INFINITY
+        var sumExp = 0.0
+        for (i in range) {
+            val lp = logPmf(i)
+            if (lp > maxLog) {
+                sumExp = sumExp * exp(maxLog - lp) + 1.0
+                maxLog = lp
+            } else {
+                sumExp += exp(lp - maxLog)
+            }
+        }
+        return if (maxLog == Double.NEGATIVE_INFINITY) Double.NEGATIVE_INFINITY
+        else maxLog + ln(sumExp)
+    }
+
     override fun cdf(k: Int): Double {
         if (k < kMin) return 0.0
         if (k >= kMax) return 1.0
-        var sum = 0.0
-        for (i in kMin..k) {
-            sum += pmf(i)
-        }
-        return sum.coerceAtMost(1.0)
+        return exp(logSumPmf(kMin..k)).coerceIn(0.0, 1.0)
+    }
+
+    override fun sf(k: Int): Double {
+        if (k < kMin) return 1.0
+        if (k >= kMax) return 0.0
+        return exp(logSumPmf((k + 1)..kMax)).coerceIn(0.0, 1.0)
     }
 
     override fun quantileInt(p: Double): Int {

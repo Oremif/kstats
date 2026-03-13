@@ -1848,8 +1848,8 @@ class HypergeometricDistributionTest {
     @Test
     fun testCdfKnownValues() {
         val d = HypergeometricDistribution(50, 20, 10)
-        assertEquals(0.139038657380907, d.cdf(2), 1e-8)
-        assertEquals(0.645026889882208, d.cdf(4), 1e-8)
+        assertEquals(0.139038657380907, d.cdf(2), 1e-10)
+        assertEquals(0.645026889882208, d.cdf(4), 1e-10)
     }
 
     @Test
@@ -1862,7 +1862,7 @@ class HypergeometricDistributionTest {
     @Test
     fun testSfKnownValues() {
         val d = HypergeometricDistribution(50, 20, 10)
-        assertEquals(0.354973110117792, d.sf(4), 1e-8)
+        assertEquals(0.354973110117792, d.sf(4), 1e-10)
     }
 
     // --- Quantile ---
@@ -1978,6 +1978,38 @@ class HypergeometricDistributionTest {
             val cdfVal = d.cdf(k)
             assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
             prev = cdfVal
+        }
+    }
+
+    // --- Large parameters (naive summation underflows) ---
+
+    @Test
+    fun testCdfLargeParameters() {
+        val d = HypergeometricDistribution(1000, 500, 300)
+        // scipy: stats.hypergeom(1000, 500, 300).cdf(k)
+        assertEquals(2.243836272440083e-05, d.cdf(120), 1e-10)
+        assertEquals(9.488468056336551e-02, d.cdf(140), 1e-10)
+        assertEquals(5.275037540386245e-01, d.cdf(150), 1e-10)
+        assertEquals(9.263829302706118e-01, d.cdf(160), 1e-10)
+        assertEquals(9.999877784284262e-01, d.cdf(180), 1e-10)
+    }
+
+    @Test
+    fun testSfLargeParameters() {
+        val d = HypergeometricDistribution(1000, 500, 300)
+        // scipy: stats.hypergeom(1000, 500, 300).sf(k)
+        assertEquals(9.999775616372757e-01, d.sf(120), 1e-10)
+        assertEquals(9.051153194366346e-01, d.sf(140), 1e-10)
+        assertEquals(4.724962459613756e-01, d.sf(150), 1e-10)
+        assertEquals(7.361706972938824e-02, d.sf(160), 1e-10)
+        assertEquals(1.222157157383291e-05, d.sf(180), 1e-10)
+    }
+
+    @Test
+    fun testSfPlusCdfEqualsOneLargeParams() {
+        val d = HypergeometricDistribution(1000, 500, 300)
+        for (k in listOf(120, 140, 150, 160, 180)) {
+            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-12, "sf($k) + cdf($k) ≈ 1")
         }
     }
 }
