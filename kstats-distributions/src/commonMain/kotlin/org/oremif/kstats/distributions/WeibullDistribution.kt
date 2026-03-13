@@ -40,11 +40,16 @@ public data class WeibullDistribution(
         return 1.0 - exp(-(x / lambda).pow(k))
     }
 
+    override fun sf(x: Double): Double {
+        if (x <= 0.0) return 1.0
+        return exp(-(x / lambda).pow(k))
+    }
+
     override fun quantile(p: Double): Double {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
         if (p == 1.0) return Double.POSITIVE_INFINITY
-        return lambda * (-ln(1.0 - p)).pow(1.0 / k)
+        return lambda * (-ln1p(-p)).pow(1.0 / k)
     }
 
     override val mean: Double get() = lambda * gamma(1.0 + 1.0 / k)
@@ -68,6 +73,11 @@ public data class WeibullDistribution(
         val g4 = gamma(1.0 + 4.0 / k)
         val mu2 = g2 - g1 * g1
         return (-6.0 * g1 * g1 * g1 * g1 + 12.0 * g1 * g1 * g2 - 3.0 * g2 * g2 - 4.0 * g1 * g3 + g4) / (mu2 * mu2) - 3.0
+    }
+
+    override val entropy: Double get() {
+        val eulerMascheroni = 0.5772156649015329
+        return eulerMascheroni * (1.0 - 1.0 / k) + ln(lambda / k) + 1.0
     }
 
     override fun sample(random: Random): Double = quantile(random.nextDouble())

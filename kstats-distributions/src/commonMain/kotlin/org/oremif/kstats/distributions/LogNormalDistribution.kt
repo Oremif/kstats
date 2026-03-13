@@ -34,6 +34,11 @@ public data class LogNormalDistribution(
         return normal.cdf(ln(x))
     }
 
+    override fun sf(x: Double): Double {
+        if (x <= 0.0) return 1.0
+        return normal.sf(ln(x))
+    }
+
     override fun quantile(p: Double): Double {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
@@ -54,6 +59,8 @@ public data class LogNormalDistribution(
         val s2 = sigma * sigma
         return exp(4.0 * s2) + 2.0 * exp(3.0 * s2) + 3.0 * exp(2.0 * s2) - 6.0
     }
+
+    override val entropy: Double get() = mu + 0.5 + ln(sigma) + 0.5 * ln(2.0 * PI)
 
     override fun sample(random: Random): Double = exp(normal.sample(random))
 }

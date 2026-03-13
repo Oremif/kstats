@@ -77,6 +77,8 @@ public data class GammaDistribution(
         return x
     }
 
+    // entropy requires digamma function (deferred to MATH-001)
+
     override val mean: Double get() = shape / rate
     override val variance: Double get() = shape / (rate * rate)
     override val skewness: Double get() = 2.0 / sqrt(shape)

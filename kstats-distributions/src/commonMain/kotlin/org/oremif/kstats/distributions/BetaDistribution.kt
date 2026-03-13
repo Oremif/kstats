@@ -42,6 +42,14 @@ public data class BetaDistribution(
         return regularizedBeta(x, alpha, beta)
     }
 
+    override fun sf(x: Double): Double {
+        if (x <= 0.0) return 1.0
+        if (x >= 1.0) return 0.0
+        return regularizedBeta(1.0 - x, beta, alpha)
+    }
+
+    // entropy requires digamma function (deferred to MATH-001)
+
     override fun quantile(p: Double): Double {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
