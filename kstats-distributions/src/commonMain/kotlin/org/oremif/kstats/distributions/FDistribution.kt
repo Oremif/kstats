@@ -37,6 +37,11 @@ public data class FDistribution(
         return regularizedBeta(d1 * x / (d1 * x + d2), d1 / 2, d2 / 2)
     }
 
+    override fun sf(x: Double): Double {
+        if (x <= 0.0) return 1.0
+        return regularizedBeta(d2 / (d1 * x + d2), d2 / 2, d1 / 2)
+    }
+
     override fun quantile(p: Double): Double {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0

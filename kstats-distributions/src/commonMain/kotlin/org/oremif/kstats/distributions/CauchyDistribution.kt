@@ -25,6 +25,13 @@ public data class CauchyDistribution(
 
     override fun cdf(x: Double): Double = 0.5 + atan((x - location) / scale) / PI
 
+    override fun sf(x: Double): Double {
+        val z = (x - location) / scale
+        return if (z > 0) atan(1.0 / z) / PI else 0.5 - atan(z) / PI
+    }
+
+    override val entropy: Double get() = ln(4.0 * PI * scale)
+
     override fun quantile(p: Double): Double {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return Double.NEGATIVE_INFINITY

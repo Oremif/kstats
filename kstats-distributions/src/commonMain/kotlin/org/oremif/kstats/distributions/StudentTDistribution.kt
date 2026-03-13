@@ -32,6 +32,12 @@ public data class StudentTDistribution(
         return if (x >= 0) 1.0 - 0.5 * ib else 0.5 * ib
     }
 
+    override fun sf(x: Double): Double {
+        val t2 = x * x
+        val ib = regularizedBeta(df / (df + t2), df / 2, 0.5)
+        return if (x >= 0) 0.5 * ib else 1.0 - 0.5 * ib
+    }
+
     override fun quantile(p: Double): Double {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return Double.NEGATIVE_INFINITY

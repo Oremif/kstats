@@ -71,6 +71,9 @@ public data class ChiSquaredDistribution(
         return x
     }
 
+    // entropy = halfDf + ln(2) + lnGamma(halfDf) + (1 - halfDf) * digamma(halfDf)
+    // Deferred until digamma is available (MATH-001)
+
     override val mean: Double get() = df
     override val variance: Double get() = 2.0 * df
     override val skewness: Double get() = sqrt(8.0 / df)
