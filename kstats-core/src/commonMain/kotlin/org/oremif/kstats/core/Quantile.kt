@@ -14,7 +14,7 @@ private const val RELATIVE_TOLERANCE = 1e-12
  * Phase 2: Bisection fallback if Newton fails or pdf is zero (up to 100 iterations).
  * Phase 3: Throws ConvergenceException if neither phase converges.
  */
-internal fun findQuantile(
+public fun findQuantile(
     p: Double,
     cdf: (Double) -> Double,
     pdf: (Double) -> Double,

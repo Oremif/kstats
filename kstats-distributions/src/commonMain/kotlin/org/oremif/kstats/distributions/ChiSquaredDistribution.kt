@@ -1,7 +1,6 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.*
-import org.oremif.kstats.core.exceptions.ConvergenceException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
@@ -42,33 +41,14 @@ public data class ChiSquaredDistribution(
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
         if (p == 1.0) return Double.POSITIVE_INFINITY
-
-        // Wilson-Hilferty initial approximation
-        var x = if (df > 2) {
+        val guess = if (df > 2) {
             val z = NormalDistribution.STANDARD.quantile(p)
             val w = 2.0 / (9.0 * df)
             df * (1.0 - w + z * sqrt(w)).pow(3.0).coerceAtLeast(0.001)
         } else {
             df * 0.5
         }
-
-        // Newton's method
-        var converged = false
-        for (i in 0..49) {
-            val cdfVal = cdf(x)
-            val pdfVal = pdf(x)
-            if (pdfVal == 0.0) { converged = true; break }
-            val delta = (cdfVal - p) / pdfVal
-            x = (x - delta).coerceAtLeast(1e-15)
-            if (abs(delta) < 1e-12 * x) { converged = true; break }
-        }
-        if (!converged) throw ConvergenceException(
-            "ChiSquared quantile did not converge for p=$p after 50 iterations",
-            iterations = 50,
-            lastEstimate = x
-        )
-
-        return x
+        return findQuantile(p, ::cdf, ::pdf, guess, lowerBound = 1e-15)
     }
 
     // entropy = halfDf + ln(2) + lnGamma(halfDf) + (1 - halfDf) * digamma(halfDf)

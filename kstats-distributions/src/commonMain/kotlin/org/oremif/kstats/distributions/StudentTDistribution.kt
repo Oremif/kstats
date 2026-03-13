@@ -1,7 +1,6 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.*
-import org.oremif.kstats.core.exceptions.ConvergenceException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
@@ -43,27 +42,7 @@ public data class StudentTDistribution(
         if (p == 0.0) return Double.NEGATIVE_INFINITY
         if (p == 1.0) return Double.POSITIVE_INFINITY
         if (p == 0.5) return 0.0
-
-        // Newton's method using normal quantile as initial guess
-        val normal = NormalDistribution.STANDARD
-        var t = normal.quantile(p)
-
-        var converged = false
-        for (i in 0..29) {
-            val cdfVal = cdf(t)
-            val pdfVal = pdf(t)
-            if (pdfVal == 0.0) { converged = true; break }
-            val delta = (cdfVal - p) / pdfVal
-            t -= delta
-            if (abs(delta) < 1e-12 * abs(t).coerceAtLeast(1.0)) { converged = true; break }
-        }
-        if (!converged) throw ConvergenceException(
-            "StudentT quantile did not converge for p=$p after 30 iterations",
-            iterations = 30,
-            lastEstimate = t
-        )
-
-        return t
+        return findQuantile(p, ::cdf, ::pdf, NormalDistribution.STANDARD.quantile(p))
     }
 
     override val mean: Double get() = if (df > 1) 0.0 else Double.NaN

@@ -1,7 +1,6 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.*
-import org.oremif.kstats.core.exceptions.ConvergenceException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
@@ -47,34 +46,14 @@ public data class GammaDistribution(
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
         if (p == 1.0) return Double.POSITIVE_INFINITY
-
-        // Initial guess using Wilson-Hilferty or chi-squared approximation
-        var x = if (shape >= 1.0) {
+        val guess = if (shape >= 1.0) {
             val z = NormalDistribution.STANDARD.quantile(p)
             val w = 2.0 / (9.0 * shape)
             (shape * (1.0 - w + z * sqrt(w)).pow(3.0)).coerceAtLeast(0.001) / rate
         } else {
-            // For small shape, use a simple guess
             (shape * p.pow(1.0 / shape)) / rate
         }
-
-        // Newton's method
-        var converged = false
-        for (i in 0..49) {
-            val cdfVal = cdf(x)
-            val pdfVal = pdf(x)
-            if (pdfVal == 0.0) { converged = true; break }
-            val delta = (cdfVal - p) / pdfVal
-            x = (x - delta).coerceAtLeast(1e-15)
-            if (abs(delta) < 1e-12 * x) { converged = true; break }
-        }
-        if (!converged) throw ConvergenceException(
-            "Gamma quantile did not converge for p=$p after 50 iterations",
-            iterations = 50,
-            lastEstimate = x
-        )
-
-        return x
+        return findQuantile(p, ::cdf, ::pdf, guess, lowerBound = 1e-15)
     }
 
     // entropy requires digamma function (deferred to MATH-001)

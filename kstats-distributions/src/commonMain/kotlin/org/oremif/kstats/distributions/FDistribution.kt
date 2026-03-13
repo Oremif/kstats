@@ -1,7 +1,6 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.*
-import org.oremif.kstats.core.exceptions.ConvergenceException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
@@ -46,27 +45,7 @@ public data class FDistribution(
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
         if (p == 1.0) return Double.POSITIVE_INFINITY
-
-        // Initial guess
-        var x = d2 / (d2 - 2.0).coerceAtLeast(0.1) // near mean for df2 > 2
-
-        // Newton's method
-        var converged = false
-        for (i in 0..49) {
-            val cdfVal = cdf(x)
-            val pdfVal = pdf(x)
-            if (pdfVal == 0.0) { converged = true; break }
-            val delta = (cdfVal - p) / pdfVal
-            x = (x - delta).coerceAtLeast(1e-15)
-            if (abs(delta) < 1e-12 * x) { converged = true; break }
-        }
-        if (!converged) throw ConvergenceException(
-            "F quantile did not converge for p=$p after 50 iterations",
-            iterations = 50,
-            lastEstimate = x
-        )
-
-        return x
+        return findQuantile(p, ::cdf, ::pdf, d2 / (d2 - 2.0).coerceAtLeast(0.1), lowerBound = 1e-15)
     }
 
     override val mean: Double get() = if (d2 > 2) d2 / (d2 - 2) else Double.NaN
