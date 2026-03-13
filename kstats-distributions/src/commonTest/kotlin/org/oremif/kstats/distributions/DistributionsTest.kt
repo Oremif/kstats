@@ -10,6 +10,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
+private fun trapezoidalIntegral(pdf: (Double) -> Double, a: Double, b: Double, n: Int = 100_000): Double {
+    val h = (b - a) / n
+    var sum = 0.5 * (pdf(a) + pdf(b))
+    for (i in 1 until n) {
+        sum += pdf(a + i * h)
+    }
+    return sum * h
+}
+
 class NormalDistributionTest {
     private val std = NormalDistribution.STANDARD
     private val tol = 1e-6
@@ -105,6 +114,38 @@ class NormalDistributionTest {
         // Deep tail: sf(8) for standard normal
         // scipy: sf(8) ≈ 6.22096e-16
         assertEquals(6.22096057427174e-16, std.sf(8.0), 1e-25)
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = NormalDistribution.STANDARD
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = NormalDistribution(5.0, 2.0)
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(100_000, rng)
+        val sampleMean = samples.average()
+        assertEquals(d.mean, sampleMean, 0.05, "sample mean ≈ ${d.mean}")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = NormalDistribution.STANDARD
+        var prev = 0.0
+        for (x in (-4..4).map { it * 0.5 }) {
+            val cdfVal = d.cdf(x)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
     }
 }
 
@@ -277,8 +318,8 @@ class CauchyDistributionTest {
     fun testSampleMedian() {
         val d = CauchyDistribution(3.0, 2.0) // median = location = 3
         val rng = kotlin.random.Random(42)
-        val samples = d.sample(10000, rng).sorted()
-        val sampleMedian = samples[5000]
+        val samples = d.sample(100_000, rng).sorted()
+        val sampleMedian = samples[50000]
         assertEquals(3.0, sampleMedian, 1.0, "sample median ≈ 3")
     }
 
@@ -319,6 +360,16 @@ class CauchyDistributionTest {
         val d3 = CauchyDistribution(1e15, 1.0)
         // scipy: cdf(1e15) = 0.5
         assertEquals(0.5, d3.cdf(1e15), 1e-10)
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = CauchyDistribution.STANDARD
+        val eps = 0.01
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 }
 
@@ -492,9 +543,11 @@ class StudentTDistributionTest {
     fun testSampleStats() {
         val t = StudentTDistribution(30.0) // mean=0, var=30/28≈1.071
         val rng = kotlin.random.Random(42)
-        val samples = t.sample(10000, rng)
+        val samples = t.sample(100_000, rng)
         val sampleMean = samples.average()
         assertEquals(0.0, sampleMean, 0.1, "sample mean ≈ 0")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(t.variance, sampleVar, maxOf(t.variance * 0.1, 0.05), "sample variance ≈ ${t.variance}")
     }
 
     @Test
@@ -531,6 +584,16 @@ class StudentTDistributionTest {
         assertEquals(0.967930142978463, d2.cdf(100.0), 1e-4)
         // mean is NaN for df <= 1
         assertTrue(d2.mean.isNaN())
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = StudentTDistribution(5.0)
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 }
 
@@ -710,9 +773,11 @@ class ChiSquaredDistributionTest {
     fun testSampleStats() {
         val d = ChiSquaredDistribution(10.0) // mean=10
         val rng = kotlin.random.Random(42)
-        val samples = d.sample(10000, rng)
+        val samples = d.sample(100_000, rng)
         val sampleMean = samples.average()
         assertEquals(10.0, sampleMean, 0.5, "sample mean ≈ 10")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
     }
 
     @Test
@@ -744,6 +809,16 @@ class ChiSquaredDistributionTest {
         val d2 = ChiSquaredDistribution(0.1)
         // scipy: cdf(0.01) ≈ 0.787966
         assertEquals(0.787965781308072, d2.cdf(0.01), 1e-4)
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = ChiSquaredDistribution(5.0)
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 }
 
@@ -924,9 +999,11 @@ class FDistributionTest {
     fun testSampleStats() {
         val f = FDistribution(5.0, 10.0) // mean=1.25
         val rng = kotlin.random.Random(42)
-        val samples = f.sample(10000, rng)
+        val samples = f.sample(100_000, rng)
         val sampleMean = samples.average()
         assertEquals(1.25, sampleMean, 0.15, "sample mean ≈ 1.25")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(f.variance, sampleVar, maxOf(f.variance * 0.1, 0.05), "sample variance ≈ ${f.variance}")
     }
 
     @Test
@@ -959,6 +1036,16 @@ class FDistributionTest {
         val d2 = FDistribution(0.5, 0.5)
         // scipy: cdf(1.0) = 0.5 by symmetry
         assertEquals(0.5, d2.cdf(1.0), 1e-6)
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = FDistribution(5.0, 10.0)
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 }
 
@@ -1025,6 +1112,46 @@ class UniformDistributionTest {
         val d3 = UniformDistribution(1e15, 1e15 + 1.0)
         assertEquals(1e15 + 0.5, d3.mean, 1.0)
         assertEquals(0.5, d3.cdf(1e15 + 0.5), 1e-10)
+    }
+
+    @Test
+    fun testCdfQuantileRoundTrip() {
+        val d = UniformDistribution(0.0, 10.0)
+        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
+            assertEquals(p, d.cdf(d.quantile(p)), 1e-10, "cdf(quantile($p)) ≈ $p")
+        }
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = UniformDistribution(0.0, 10.0)
+        var prev = 0.0
+        for (x in (-1..11).map { it.toDouble() }) {
+            val cdfVal = d.cdf(x)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = UniformDistribution(0.0, 10.0)
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(100_000, rng)
+        val sampleMean = samples.average()
+        assertEquals(d.mean, sampleMean, 0.05, "sample mean ≈ ${d.mean}")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = UniformDistribution(0.0, 10.0)
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 }
 
@@ -1101,6 +1228,46 @@ class ExponentialDistributionTest {
         // Deep tail: sf(40) for Exp(1) = exp(-40) ≈ 4.248e-18
         val d3 = ExponentialDistribution(1.0)
         assertEquals(exp(-40.0), d3.sf(40.0), 1e-28)
+    }
+
+    @Test
+    fun testCdfQuantileRoundTrip() {
+        val d = ExponentialDistribution(2.0)
+        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
+            assertEquals(p, d.cdf(d.quantile(p)), 1e-10, "cdf(quantile($p)) ≈ $p")
+        }
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = ExponentialDistribution(2.0)
+        var prev = 0.0
+        for (x in (0..10).map { it * 0.5 }) {
+            val cdfVal = d.cdf(x)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = ExponentialDistribution(2.0)
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(100_000, rng)
+        val sampleMean = samples.average()
+        assertEquals(d.mean, sampleMean, 0.05, "sample mean ≈ ${d.mean}")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = ExponentialDistribution(2.0)
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 }
 
@@ -1262,9 +1429,12 @@ class BernoulliDistributionTest {
     fun testSampleStats() {
         val d = BernoulliDistribution(0.7)
         val rng = kotlin.random.Random(42)
-        val samples = d.sample(10000, rng)
-        val sampleMean = samples.map { it.toDouble() }.average()
+        val samples = d.sample(100_000, rng)
+        val doubles = samples.map { it.toDouble() }
+        val sampleMean = doubles.average()
         assertEquals(0.7, sampleMean, 0.03, "sample mean ≈ 0.7")
+        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
     }
 
     @Test
@@ -1283,6 +1453,34 @@ class BernoulliDistributionTest {
         val d2 = BernoulliDistribution(1.0 - 1e-15)
         assertEquals(1.0 - 1e-15, d2.pmf(1), 1e-14)
         assertTrue(d2.logPmf(0).isFinite())
+    }
+
+    @Test
+    fun testCdfQuantileRoundTrip() {
+        val d = BernoulliDistribution(0.7)
+        for (p in listOf(0.1, 0.25, 0.5, 0.75, 0.9)) {
+            val k = d.quantileInt(p)
+            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
+            if (k > 0) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
+        }
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = BernoulliDistribution(0.7)
+        var prev = 0.0
+        for (k in -1..2) {
+            val cdfVal = d.cdf(k)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
+    }
+
+    @Test
+    fun testPmfSumsToOne() {
+        val d = BernoulliDistribution(0.7)
+        val total = (0..1).sumOf { d.pmf(it) }
+        assertEquals(1.0, total, 1e-10)
     }
 }
 
@@ -1458,9 +1656,12 @@ class BinomialDistributionTest {
     fun testSampleStats() {
         val d = BinomialDistribution(10, 0.3)
         val rng = kotlin.random.Random(42)
-        val samples = d.sample(10000, rng)
-        val sampleMean = samples.map { it.toDouble() }.average()
+        val samples = d.sample(100_000, rng)
+        val doubles = samples.map { it.toDouble() }
+        val sampleMean = doubles.average()
         assertEquals(3.0, sampleMean, 0.15, "sample mean ≈ 3.0")
+        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
     }
 
     @Test
@@ -1490,6 +1691,13 @@ class BinomialDistributionTest {
         assertEquals(0.583039760629257, d2.cdf(10), 1e-3)
         // scipy: pmf(10) = 0.125173
         assertEquals(0.125172636650239, d2.pmf(10), 1e-3)
+    }
+
+    @Test
+    fun testPmfSumsToOne() {
+        val d = BinomialDistribution(10, 0.3)
+        val total = (0..10).sumOf { d.pmf(it) }
+        assertEquals(1.0, total, 1e-10)
     }
 }
 
@@ -1628,9 +1836,12 @@ class PoissonDistributionTest {
     fun testSampleStats() {
         val d = PoissonDistribution(3.0)
         val rng = kotlin.random.Random(42)
-        val samples = d.sample(10000, rng)
-        val sampleMean = samples.map { it.toDouble() }.average()
+        val samples = d.sample(100_000, rng)
+        val doubles = samples.map { it.toDouble() }
+        val sampleMean = doubles.average()
         assertEquals(3.0, sampleMean, 0.15, "sample mean ≈ 3.0")
+        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
     }
 
     @Test
@@ -1661,6 +1872,14 @@ class PoissonDistributionTest {
         assertEquals(1.0, d2.pmf(0), 1e-9)
         // scipy: sf(0) ≈ 1e-10
         assertEquals(1e-10, d2.sf(0), 1e-15)
+    }
+
+    @Test
+    fun testPmfSumsToOne() {
+        val d = PoissonDistribution(3.0)
+        val upper = d.quantileInt(1.0 - 1e-10)
+        val total = (0..upper).sumOf { d.pmf(it) }
+        assertEquals(1.0, total, 1e-10)
     }
 }
 
@@ -1808,9 +2027,12 @@ class GeometricDistributionTest {
     fun testSampleStats() {
         val d = GeometricDistribution(0.3)
         val rng = kotlin.random.Random(42)
-        val samples = d.sample(10000, rng)
-        val sampleMean = samples.map { it.toDouble() }.average()
+        val samples = d.sample(100_000, rng)
+        val doubles = samples.map { it.toDouble() }
+        val sampleMean = doubles.average()
         assertEquals(2.333, sampleMean, 0.2, "sample mean ≈ 2.333")
+        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
     }
 
     @Test
@@ -1838,6 +2060,14 @@ class GeometricDistributionTest {
         assertEquals(0.999, d2.pmf(0), 1e-15)
         // pmf(10) = 0.999 * 0.001^10 ≈ 9.99e-31
         assertTrue(d2.pmf(10) > 0.0 && d2.pmf(10) < 1e-29)
+    }
+
+    @Test
+    fun testPmfSumsToOne() {
+        val d = GeometricDistribution(0.3)
+        val upper = d.quantileInt(1.0 - 1e-10)
+        val total = (0..upper).sumOf { d.pmf(it) }
+        assertEquals(1.0, total, 1e-10)
     }
 }
 
@@ -2005,9 +2235,12 @@ class NegativeBinomialDistributionTest {
     fun testSampleStats() {
         val d = NegativeBinomialDistribution(5, 0.4)
         val rng = kotlin.random.Random(42)
-        val samples = d.sample(10000, rng)
-        val sampleMean = samples.map { it.toDouble() }.average()
+        val samples = d.sample(100_000, rng)
+        val doubles = samples.map { it.toDouble() }
+        val sampleMean = doubles.average()
         assertEquals(7.5, sampleMean, 0.4, "sample mean ≈ 7.5")
+        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
     }
 
     @Test
@@ -2019,6 +2252,24 @@ class NegativeBinomialDistributionTest {
             assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
             prev = cdfVal
         }
+    }
+
+    @Test
+    fun testCdfQuantileRoundTrip() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
+            val k = d.quantileInt(p)
+            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
+            if (k > 0) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
+        }
+    }
+
+    @Test
+    fun testPmfSumsToOne() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        val upper = d.quantileInt(1.0 - 1e-10)
+        val total = (0..upper).sumOf { d.pmf(it) }
+        assertEquals(1.0, total, 1e-10)
     }
 }
 
@@ -2157,9 +2408,12 @@ class HypergeometricDistributionTest {
     fun testSampleStats() {
         val d = HypergeometricDistribution(50, 20, 10)
         val rng = kotlin.random.Random(42)
-        val samples = d.sample(10000, rng)
-        val sampleMean = samples.map { it.toDouble() }.average()
+        val samples = d.sample(100_000, rng)
+        val doubles = samples.map { it.toDouble() }
+        val sampleMean = doubles.average()
         assertEquals(4.0, sampleMean, 0.15, "sample mean ≈ 4.0")
+        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
     }
 
     @Test
@@ -2203,6 +2457,23 @@ class HypergeometricDistributionTest {
         for (k in listOf(120, 140, 150, 160, 180)) {
             assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-12, "sf($k) + cdf($k) ≈ 1")
         }
+    }
+
+    @Test
+    fun testCdfQuantileRoundTrip() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
+            val k = d.quantileInt(p)
+            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
+            if (k > 0) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
+        }
+    }
+
+    @Test
+    fun testPmfSumsToOne() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        val total = (0..10).sumOf { d.pmf(it) }
+        assertEquals(1.0, total, 1e-10)
     }
 }
 
@@ -2361,9 +2632,12 @@ class UniformDiscreteDistributionTest {
     fun testSampleStats() {
         val d = UniformDiscreteDistribution(1, 6)
         val rng = kotlin.random.Random(42)
-        val samples = d.sample(10000, rng)
-        val sampleMean = samples.map { it.toDouble() }.average()
+        val samples = d.sample(100_000, rng)
+        val doubles = samples.map { it.toDouble() }
+        val sampleMean = doubles.average()
         assertEquals(3.5, sampleMean, 0.15, "sample mean ≈ 3.5")
+        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
     }
 
     @Test
@@ -2375,6 +2649,23 @@ class UniformDiscreteDistributionTest {
             assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
             prev = cdfVal
         }
+    }
+
+    @Test
+    fun testCdfQuantileRoundTrip() {
+        val d = UniformDiscreteDistribution(1, 6)
+        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
+            val k = d.quantileInt(p)
+            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
+            if (k > 0) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
+        }
+    }
+
+    @Test
+    fun testPmfSumsToOne() {
+        val d = UniformDiscreteDistribution(1, 6)
+        val total = (1..6).sumOf { d.pmf(it) }
+        assertEquals(1.0, total, 1e-10)
     }
 }
 
@@ -2553,9 +2844,11 @@ class GammaDistributionTest {
     fun testSampleStats() {
         val g = GammaDistribution(5.0, 0.5) // mean=10, var=20
         val rng = kotlin.random.Random(42)
-        val samples = g.sample(10000, rng)
+        val samples = g.sample(100_000, rng)
         val sampleMean = samples.average()
         assertEquals(10.0, sampleMean, 0.5, "sample mean ≈ 10")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(g.variance, sampleVar, maxOf(g.variance * 0.1, 0.05), "sample variance ≈ ${g.variance}")
     }
 
     @Test
@@ -2573,6 +2866,16 @@ class GammaDistributionTest {
     fun testEntropyNaN() {
         // entropy requires digamma (deferred to MATH-001)
         assertTrue(GammaDistribution(2.0, 1.0).entropy.isNaN())
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = GammaDistribution(2.0, 1.0)
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 }
 
@@ -2757,9 +3060,11 @@ class BetaDistributionTest {
     fun testSampleStats() {
         val b = BetaDistribution(2.0, 5.0) // mean=0.2857
         val rng = kotlin.random.Random(42)
-        val samples = b.sample(10000, rng)
+        val samples = b.sample(100_000, rng)
         val sampleMean = samples.average()
         assertEquals(0.2857, sampleMean, 0.02, "sample mean ≈ 0.2857")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(b.variance, sampleVar, maxOf(b.variance * 0.1, 0.05), "sample variance ≈ ${b.variance}")
     }
 
     @Test
@@ -2801,6 +3106,16 @@ class BetaDistributionTest {
         assertEquals(0.000999001, d3.mean, 1e-6)
         // scipy: cdf(0.01) = 0.975893
         assertEquals(0.975892711294802, d3.cdf(0.01), 1e-4)
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = BetaDistribution(2.0, 5.0)
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 }
 
@@ -3004,9 +3319,11 @@ class WeibullDistributionTest {
     fun testSampleStats() {
         val w = WeibullDistribution(1.5, 2.0) // mean ≈ 1.805
         val rng = kotlin.random.Random(42)
-        val samples = w.sample(10000, rng)
+        val samples = w.sample(100_000, rng)
         val sampleMean = samples.average()
         assertEquals(1.805, sampleMean, 0.1, "sample mean ≈ 1.805")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(w.variance, sampleVar, maxOf(w.variance * 0.1, 0.05), "sample variance ≈ ${w.variance}")
     }
 
     @Test
@@ -3018,6 +3335,16 @@ class WeibullDistributionTest {
             assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
             prev = cdfVal
         }
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = WeibullDistribution(1.5, 2.0)
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 }
 
@@ -3191,9 +3518,11 @@ class LogNormalDistributionTest {
     fun testSampleStats() {
         val d = LogNormalDistribution(0.0, 1.0) // mean ≈ 1.649
         val rng = kotlin.random.Random(42)
-        val samples = d.sample(10000, rng)
+        val samples = d.sample(100_000, rng)
         val sampleMean = samples.average()
         assertEquals(1.649, sampleMean, 0.15, "sample mean ≈ 1.649")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
     }
 
     @Test
@@ -3230,5 +3559,15 @@ class LogNormalDistributionTest {
         val d3 = LogNormalDistribution(50.0, 1.0)
         // scipy: cdf(exp(50)) = 0.5
         assertEquals(0.5, d3.cdf(exp(50.0)), 1e-10)
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = LogNormalDistribution(0.0, 1.0)
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 }
