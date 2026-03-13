@@ -39,7 +39,7 @@ public data class NegativeBinomialDistribution(
         return sum.coerceAtMost(1.0)
     }
 
-    override fun quantile(p: Double): Int {
+    override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         var cumulative = 0.0
         var k = 0

@@ -31,7 +31,7 @@ public data class PoissonDistribution(
         return regularizedGammaQ((k + 1).toDouble(), lambda)
     }
 
-    override fun quantile(p: Double): Int {
+    override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0
         // Search from the mean

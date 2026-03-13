@@ -24,6 +24,17 @@ public data class WeibullDistribution(
         return (k / lambda) * (x / lambda).pow(k - 1.0) * exp(-(x / lambda).pow(k))
     }
 
+    override fun logPdf(x: Double): Double {
+        if (x < 0.0) return Double.NEGATIVE_INFINITY
+        if (x == 0.0) return when {
+            k < 1.0 -> Double.POSITIVE_INFINITY
+            k == 1.0 -> -ln(lambda)
+            else -> Double.NEGATIVE_INFINITY
+        }
+        val xNorm = x / lambda
+        return ln(k / lambda) + (k - 1.0) * ln(xNorm) - xNorm.pow(k)
+    }
+
     override fun cdf(x: Double): Double {
         if (x <= 0.0) return 0.0
         return 1.0 - exp(-(x / lambda).pow(k))

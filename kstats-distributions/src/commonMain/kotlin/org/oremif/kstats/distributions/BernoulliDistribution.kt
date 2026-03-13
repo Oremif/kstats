@@ -34,7 +34,7 @@ public data class BernoulliDistribution(
         else -> 1.0
     }
 
-    override fun quantile(p: Double): Int {
+    override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         return if (p <= q) 0 else 1
     }

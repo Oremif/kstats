@@ -37,7 +37,7 @@ public data class BinomialDistribution(
         return regularizedBeta(1.0 - p, (n - k).toDouble(), (k + 1).toDouble())
     }
 
-    override fun quantile(p: Double): Int {
+    override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0
         if (p == 1.0) return n

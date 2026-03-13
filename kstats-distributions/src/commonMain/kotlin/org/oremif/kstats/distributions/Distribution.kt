@@ -13,15 +13,3 @@ public sealed interface Distribution {
     public fun sf(x: Double): Double = 1.0 - cdf(x)
     public fun quantile(p: Double): Double
 }
-
-internal class StubDistribution(
-    override val mean: Double = 0.0,
-    override val variance: Double = 1.0,
-    override val skewness: Double = 0.0,
-    override val kurtosis: Double = 0.0,
-    override val entropy: Double = 0.0,
-    private val cdfValue: Double = 0.5,
-) : Distribution {
-    override fun cdf(x: Double): Double = cdfValue
-    override fun quantile(p: Double): Double = p
-}
