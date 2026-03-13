@@ -11,20 +11,29 @@ public fun Iterable<Double>.skewness(kind: PopulationKind = SAMPLE): Double {
     val n = list.size
     if (n < 3) throw InsufficientDataException("Skewness requires at least 3 elements")
 
-    val m = list.mean()
+    // Pass 1 — Welford mean + M2
+    var count = 0
+    var mean = 0.0
     var m2 = 0.0
-    var m3 = 0.0
     for (x in list) {
-        val d = x - m
-        m2 += d * d
-        m3 += d * d * d
+        count++
+        val delta = x - mean
+        mean += delta / count
+        val delta2 = x - mean
+        m2 += delta * delta2
     }
 
     val variance = m2 / n
     if (variance == 0.0) return 0.0
     val sd = sqrt(variance)
 
-    val g1 = (m3 / n) / (sd * sd * sd)
+    // Pass 2 — normalized z³ accumulation (overflow-safe)
+    var sumZ3 = 0.0
+    for (x in list) {
+        val z = (x - mean) / sd
+        sumZ3 += z * z * z
+    }
+    val g1 = sumZ3 / n
 
     return if (kind == SAMPLE) {
         // Adjusted Fisher-Pearson standardized moment coefficient
@@ -44,20 +53,31 @@ public fun Iterable<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Bool
     val n = list.size
     if (n < 4) throw InsufficientDataException("Kurtosis requires at least 4 elements")
 
-    val m = list.mean()
+    // Pass 1 — Welford mean + M2
+    var count = 0
+    var mean = 0.0
     var m2 = 0.0
-    var m4 = 0.0
     for (x in list) {
-        val d = x - m
-        val d2 = d * d
-        m2 += d2
-        m4 += d2 * d2
+        count++
+        val delta = x - mean
+        mean += delta / count
+        val delta2 = x - mean
+        m2 += delta * delta2
     }
 
     val variance = m2 / n
     if (variance == 0.0) return if (excess) -3.0 else 0.0
 
-    val g2 = (m4 / n) / (variance * variance)
+    val sd = sqrt(variance)
+
+    // Pass 2 — normalized z⁴ accumulation (overflow-safe)
+    var sumZ4 = 0.0
+    for (x in list) {
+        val z = (x - mean) / sd
+        val z2 = z * z
+        sumZ4 += z2 * z2
+    }
+    val g2 = sumZ4 / n
 
     val result = if (kind == SAMPLE) {
         // Excess kurtosis with sample correction

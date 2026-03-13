@@ -167,7 +167,7 @@ private fun gammaSeriesP(a: Double, x: Double): Double {
 private fun gammaContinuedFractionQ(a: Double, x: Double): Double {
     val lnPrefix = a * ln(x) - x - lnGamma(a)
     // Modified Lentz's method
-    var b0 = x + 1.0 - a
+    val b0 = x + 1.0 - a
     var c = 1.0 / 1e-30
     var d = 1.0 / b0
     var h = d
@@ -248,7 +248,7 @@ public fun erfInv(x: Double): Double {
 
     // Newton's method refinements for high precision
     val twoOverSqrtPi = 2.0 / sqrt(PI)
-    for (i in 0..3) {
+    (0..3).forEach { _ ->
         val err = erf(p) - a
         p -= err / (twoOverSqrtPi * exp(-p * p))
     }
@@ -268,4 +268,17 @@ public fun lnCombination(n: Int, k: Int): Double {
     if (n < 0 || k < 0 || k > n) throw InvalidParameterException("lnCombination requires 0 <= k <= n, got n=$n, k=$k")
     if (k == 0 || k == n) return 0.0
     return lnFactorial(n) - lnFactorial(k) - lnFactorial(n - k)
+}
+
+// ── Compensated summation (Neumaier) ────────────────────────────────────
+
+internal fun DoubleArray.compensatedSum(): Double {
+    var sum = 0.0
+    var compensation = 0.0
+    for (x in this) {
+        val t = sum + x
+        compensation += if (abs(sum) >= abs(x)) (sum - t) + x else (x - t) + sum
+        sum = t
+    }
+    return sum + compensation
 }

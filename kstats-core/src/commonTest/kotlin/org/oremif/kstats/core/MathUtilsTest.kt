@@ -1,11 +1,13 @@
 package org.oremif.kstats.core
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.exp
+import kotlin.math.ln
+import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class MathUtilsTest {
 
@@ -51,7 +53,8 @@ class MathUtilsTest {
         // B(0.5, 0.5) = pi
         assertEquals(PI, beta(0.5, 0.5), PRECISE_TOLERANCE)
         // B(a, b) = Gamma(a)*Gamma(b)/Gamma(a+b)
-        val a = 2.0; val b = 3.0
+        val a = 2.0
+        val b = 3.0
         val expected = gamma(a) * gamma(b) / gamma(a + b)
         assertEquals(expected, beta(a, b), PRECISE_TOLERANCE)
     }
@@ -84,7 +87,8 @@ class MathUtilsTest {
 
     @Test
     fun testRegularizedGammaPQComplementary() {
-        val a = 3.0; val x = 2.5
+        val a = 3.0
+        val x = 2.5
         val p = regularizedGammaP(a, x)
         val q = regularizedGammaQ(a, x)
         assertEquals(1.0, p + q, PRECISE_TOLERANCE)
@@ -112,7 +116,12 @@ class MathUtilsTest {
         // erfInv(erf(x)) ≈ x for various x values
         for (x in listOf(0.1, 0.3, 0.5, 0.75, 1.0, 1.5)) {
             val erfX = erf(x)
-            assertEquals(x, erfInv(erfX), ITERATIVE_TOLERANCE, "erfInv(erf($x)) should ≈ $x, erf($x)=$erfX, erfInv=${ erfInv(erfX) }")
+            assertEquals(
+                x,
+                erfInv(erfX),
+                ITERATIVE_TOLERANCE,
+                "erfInv(erf($x)) should ≈ $x, erf($x)=$erfX, erfInv=${erfInv(erfX)}"
+            )
         }
     }
 
@@ -138,5 +147,39 @@ class MathUtilsTest {
     fun testLnCombinationInvalid() {
         assertFailsWith<InvalidParameterException> { lnCombination(3, 5) }
         assertFailsWith<InvalidParameterException> { lnCombination(-1, 0) }
+    }
+
+    // ── Compensated sum (Neumaier) ───────────────────────────────────────
+
+    @Test
+    fun testCompensatedSumPathological() {
+        // Naive sum gives 0.0 due to catastrophic cancellation; compensated gives 1.0
+        val data = doubleArrayOf(1e16, 1.0, -1e16)
+        assertEquals(1.0, data.compensatedSum(), 0.0)
+    }
+
+    @Test
+    fun testCompensatedSumLargeOffsetSmallDiffs() {
+        // 1000 values: 1e15 + 0, 1e15 + 1, ..., 1e15 + 999
+        val data = DoubleArray(1000) { i -> 1e15 + i.toDouble() }
+        // Exact sum = 1000 * 1e15 + (0 + 1 + ... + 999) = 1e18 + 499500
+        val expected = 1e18 + 499500.0
+        assertEquals(expected, data.compensatedSum(), 0.0)
+    }
+
+    @Test
+    fun testCompensatedSumEmpty() {
+        assertEquals(0.0, doubleArrayOf().compensatedSum(), 0.0)
+    }
+
+    @Test
+    fun testCompensatedSumSingleElement() {
+        assertEquals(42.0, doubleArrayOf(42.0).compensatedSum(), 0.0)
+    }
+
+    @Test
+    fun testCompensatedSumNormalCase() {
+        val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        assertEquals(15.0, data.compensatedSum(), 0.0)
     }
 }
