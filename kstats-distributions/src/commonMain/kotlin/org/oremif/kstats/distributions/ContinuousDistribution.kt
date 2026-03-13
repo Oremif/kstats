@@ -68,11 +68,11 @@ public interface ContinuousDistribution : Distribution {
     /**
      * Returns the quantile (inverse CDF) for the given probability [p].
      *
-     * The quantile function returns the smallest value [x] such that `cdf(x) >= p`.
+     * The quantile function returns the smallest value x such that `cdf(x) >= p`.
      * It is the inverse of the cumulative distribution function.
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
-     * @return the value [x] at which `cdf(x) = p`.
+     * @return the value x at which `cdf(x) = p`.
      */
     override fun quantile(p: Double): Double
 

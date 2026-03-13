@@ -94,12 +94,12 @@ public interface DiscreteDistribution : Distribution {
     /**
      * Returns the quantile (inverse CDF) for the given probability [p] as an [Int].
      *
-     * The quantile function returns the smallest integer [k] such that `cdf(k) >= p`.
+     * The quantile function returns the smallest integer k such that `cdf(k) >= p`.
      * This is the type-safe integer variant — use [quantile] for [Double] compatibility
      * with the [Distribution] interface.
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
-     * @return the smallest integer [k] at which `cdf(k) >= p`.
+     * @return the smallest integer k at which `cdf(k) >= p`.
      */
     public fun quantileInt(p: Double): Int
 
