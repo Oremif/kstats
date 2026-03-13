@@ -41,6 +41,18 @@ public data class GeometricDistribution(
     override val mean: Double get() = q / p
     override val variance: Double get() = q / (p * p)
 
+    override val skewness: Double get() = (2.0 - p) / sqrt(q)
+    override val kurtosis: Double get() = 6.0 + p * p / q
+    override val entropy: Double get() {
+        if (p == 1.0) return 0.0
+        return (-q * ln(q) - p * ln(p)) / p
+    }
+
+    override fun sf(k: Int): Double {
+        if (k < 0) return 1.0
+        return q.pow(k + 1)
+    }
+
     override fun sample(random: Random): Int {
         return floor(ln(random.nextDouble()) / ln(q)).toInt()
     }

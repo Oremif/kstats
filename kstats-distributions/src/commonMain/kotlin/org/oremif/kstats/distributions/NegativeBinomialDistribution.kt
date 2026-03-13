@@ -2,7 +2,9 @@ package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.lnCombination
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.*
+import kotlin.math.exp
+import kotlin.math.ln
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 public data class NegativeBinomialDistribution(
@@ -22,11 +24,13 @@ public data class NegativeBinomialDistribution(
     // k = number of failures before r-th success
     override fun pmf(k: Int): Double {
         if (k < 0) return 0.0
+        if (p == 1.0) return if (k == 0) 1.0 else 0.0
         return exp(logPmf(k))
     }
 
     override fun logPmf(k: Int): Double {
         if (k < 0) return Double.NEGATIVE_INFINITY
+        if (p == 1.0) return if (k == 0) 0.0 else Double.NEGATIVE_INFINITY
         return lnCombination(k + r - 1, k) + r * ln(p) + k * ln(q)
     }
 
@@ -54,6 +58,24 @@ public data class NegativeBinomialDistribution(
 
     override val mean: Double get() = r * q / p
     override val variance: Double get() = r * q / (p * p)
+
+    override val skewness: Double get() = (2.0 - p) / sqrt(r.toDouble() * q)
+    override val kurtosis: Double get() = 6.0 / r + p * p / (r * q)
+    override val entropy: Double get() {
+        var h = 0.0
+        var cumP = 0.0
+        var k = 0
+        while (cumP < 1.0 - 1e-15) {
+            val pk = pmf(k)
+            if (pk > 0.0) {
+                h -= pk * ln(pk)
+                cumP += pk
+            }
+            k++
+            if (k > 100_000) break
+        }
+        return h
+    }
 
     override fun sample(random: Random): Int {
         // Sum of r geometric(p) random variables

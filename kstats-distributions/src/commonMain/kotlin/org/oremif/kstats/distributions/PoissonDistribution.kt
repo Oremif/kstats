@@ -44,6 +44,29 @@ public data class PoissonDistribution(
     override val mean: Double get() = lambda
     override val variance: Double get() = lambda
 
+    override val skewness: Double get() = 1.0 / sqrt(lambda)
+    override val kurtosis: Double get() = 1.0 / lambda
+    override val entropy: Double get() {
+        var h = 0.0
+        var cumP = 0.0
+        var k = 0
+        while (cumP < 1.0 - 1e-15) {
+            val pk = pmf(k)
+            if (pk > 0.0) {
+                h -= pk * ln(pk)
+                cumP += pk
+            }
+            k++
+            if (k > 100_000) break
+        }
+        return h
+    }
+
+    override fun sf(k: Int): Double {
+        if (k < 0) return 1.0
+        return regularizedGammaP((k + 1).toDouble(), lambda)
+    }
+
     override fun sample(random: Random): Int {
         // Knuth's algorithm for small lambda
         if (lambda < 30) {

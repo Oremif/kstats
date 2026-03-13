@@ -1,6 +1,7 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
+import kotlin.math.ceil
 import kotlin.math.ln
 import kotlin.random.Random
 
@@ -27,11 +28,20 @@ public data class UniformDiscreteDistribution(
 
     override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
-        return (min + (p * n).toInt()).coerceAtMost(max)
+        if (p == 0.0) return min
+        return (min + ceil(p * n).toInt() - 1).coerceIn(min, max)
     }
 
     override val mean: Double get() = (min + max) / 2.0
     override val variance: Double get() = (n.toDouble() * n - 1.0) / 12.0
+
+    override val skewness: Double get() = 0.0
+    override val kurtosis: Double get() {
+        if (n == 1) return Double.NaN
+        val nd = n.toDouble()
+        return -6.0 * (nd * nd + 1.0) / (5.0 * (nd * nd - 1.0))
+    }
+    override val entropy: Double get() = ln(n.toDouble())
 
     override fun sample(random: Random): Int = random.nextInt(min, max + 1)
 }

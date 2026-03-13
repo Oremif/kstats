@@ -51,6 +51,32 @@ public data class BinomialDistribution(
     override val mean: Double get() = n * p
     override val variance: Double get() = n * p * (1.0 - p)
 
+    override val skewness: Double get() {
+        val q = 1.0 - p
+        if (n == 0 || p == 0.0 || p == 1.0) return Double.NaN
+        return (1.0 - 2.0 * p) / sqrt(n.toDouble() * p * q)
+    }
+    override val kurtosis: Double get() {
+        val q = 1.0 - p
+        if (n == 0 || p == 0.0 || p == 1.0) return Double.NaN
+        return (1.0 - 6.0 * p * q) / (n.toDouble() * p * q)
+    }
+    override val entropy: Double get() {
+        if (n == 0) return 0.0
+        var h = 0.0
+        for (k in 0..n) {
+            val pk = pmf(k)
+            if (pk > 0.0) h -= pk * ln(pk)
+        }
+        return h
+    }
+
+    override fun sf(k: Int): Double {
+        if (k < 0) return 1.0
+        if (k >= n) return 0.0
+        return regularizedBeta(p, (k + 1).toDouble(), (n - k).toDouble())
+    }
+
     override fun sample(random: Random): Int {
         // For small n, direct simulation
         if (n < 25) {

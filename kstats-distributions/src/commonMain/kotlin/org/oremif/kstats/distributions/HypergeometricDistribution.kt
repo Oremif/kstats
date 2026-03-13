@@ -2,7 +2,9 @@ package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.lnCombination
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.*
+import kotlin.math.exp
+import kotlin.math.ln
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 public data class HypergeometricDistribution(
@@ -57,9 +59,38 @@ public data class HypergeometricDistribution(
     override val mean: Double get() = n.toDouble() * bigK / bigN
     override val variance: Double get() {
         val nd = n.toDouble()
-        val Nd = bigN.toDouble()
-        val Kd = bigK.toDouble()
-        return nd * Kd * (Nd - Kd) * (Nd - nd) / (Nd * Nd * (Nd - 1.0))
+        val bigNd = bigN.toDouble()
+        val bigKd = bigK.toDouble()
+        return nd * bigKd * (bigNd - bigKd) * (bigNd - nd) / (bigNd * bigNd * (bigNd - 1.0))
+    }
+
+    override val skewness: Double get() {
+        if (bigN < 3) return Double.NaN
+        val bigNd = bigN.toDouble()
+        val bigKd = bigK.toDouble()
+        val nd = n.toDouble()
+        return (bigNd - 2.0 * bigKd) * (bigNd - 2.0 * nd) * sqrt(bigNd - 1.0) /
+            ((bigNd - 2.0) * sqrt(nd * bigKd * (bigNd - bigKd) * (bigNd - nd)))
+    }
+
+    override val kurtosis: Double get() {
+        if (bigN < 4) return Double.NaN
+        val bigNd = bigN.toDouble()
+        val bigKd = bigK.toDouble()
+        val nd = n.toDouble()
+        val num = (bigNd - 1.0) * bigNd * bigNd * (bigNd * (bigNd + 1.0) - 6.0 * bigKd * (bigNd - bigKd) - 6.0 * nd * (bigNd - nd)) +
+            6.0 * nd * bigKd * (bigNd - bigKd) * (bigNd - nd) * (5.0 * bigNd - 6.0)
+        val den = nd * bigKd * (bigNd - bigKd) * (bigNd - nd) * (bigNd - 2.0) * (bigNd - 3.0)
+        return num / den
+    }
+
+    override val entropy: Double get() {
+        var h = 0.0
+        for (k in kMin..kMax) {
+            val pk = pmf(k)
+            if (pk > 0.0) h -= pk * ln(pk)
+        }
+        return h
     }
 
     override fun sample(random: Random): Int {

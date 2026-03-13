@@ -983,76 +983,1129 @@ class ExponentialDistributionTest {
     }
 }
 
+class BernoulliDistributionTest {
+
+    // --- Basic correctness (scipy 15-digit refs) ---
+
+    @Test
+    fun testPmfKnownValues() {
+        val d = BernoulliDistribution(0.7)
+        // scipy: stats.bernoulli(0.7).pmf(k)
+        assertEquals(0.3, d.pmf(0), 1e-15)
+        assertEquals(0.7, d.pmf(1), 1e-15)
+        assertEquals(0.0, d.pmf(2), 1e-15)
+        assertEquals(0.0, d.pmf(-1), 1e-15)
+    }
+
+    @Test
+    fun testCdfKnownValues() {
+        val d = BernoulliDistribution(0.7)
+        assertEquals(0.0, d.cdf(-1), 1e-15)
+        assertEquals(0.3, d.cdf(0), 1e-15)
+        assertEquals(1.0, d.cdf(1), 1e-15)
+        assertEquals(1.0, d.cdf(5), 1e-15)
+    }
+
+    @Test
+    fun testLogPmfKnownValues() {
+        val d = BernoulliDistribution(0.7)
+        // scipy: stats.bernoulli(0.7).logpmf(k)
+        assertEquals(-1.20397280432594, d.logPmf(0), 1e-12)
+        assertEquals(-0.356674943938732, d.logPmf(1), 1e-12)
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(2))
+    }
+
+    @Test
+    fun testSfKnownValues() {
+        val d = BernoulliDistribution(0.7)
+        assertEquals(0.7, d.sf(0), 1e-15)
+        assertEquals(0.0, d.sf(1), 1e-15)
+    }
+
+    // --- Quantile ---
+
+    @Test
+    fun testQuantileIntKnownValues() {
+        val d = BernoulliDistribution(0.7)
+        assertEquals(0, d.quantileInt(0.25))
+        assertEquals(1, d.quantileInt(0.5))
+        assertEquals(1, d.quantileInt(0.75))
+        assertEquals(0, d.quantileInt(0.0))
+        assertEquals(1, d.quantileInt(1.0))
+    }
+
+    // --- Moments ---
+
+    @Test
+    fun testMoments() {
+        val d = BernoulliDistribution(0.7)
+        assertEquals(0.7, d.mean, 1e-15)
+        assertEquals(0.21, d.variance, 1e-15)
+        // scipy: stats.bernoulli(0.7).stats(moments='sk')
+        assertEquals(-0.87287156094397, d.skewness, 1e-12)
+        assertEquals(-1.23809523809524, d.kurtosis, 1e-12)
+    }
+
+    @Test
+    fun testMomentsSymmetric() {
+        val d = BernoulliDistribution(0.5)
+        assertEquals(0.0, d.skewness, 1e-15)
+        assertEquals(-2.0, d.kurtosis, 1e-12)
+    }
+
+    @Test
+    fun testMomentsP03() {
+        val d = BernoulliDistribution(0.3)
+        assertEquals(0.872871560943969, d.skewness, 1e-12)
+        assertEquals(-1.23809523809524, d.kurtosis, 1e-12)
+    }
+
+    // --- Entropy ---
+
+    @Test
+    fun testEntropy() {
+        // scipy: stats.bernoulli(0.7).entropy()
+        assertEquals(0.610864302054894, BernoulliDistribution(0.7).entropy, 1e-12)
+        assertEquals(0.693147180559945, BernoulliDistribution(0.5).entropy, 1e-12)
+        assertEquals(0.610864302054894, BernoulliDistribution(0.3).entropy, 1e-12)
+    }
+
+    @Test
+    fun testEntropyDegenerate() {
+        assertEquals(0.0, BernoulliDistribution(0.0).entropy, 1e-15)
+        assertEquals(0.0, BernoulliDistribution(1.0).entropy, 1e-15)
+    }
+
+    // --- Edge cases ---
+
+    @Test
+    fun testDegenerateP0() {
+        val d = BernoulliDistribution(0.0)
+        assertEquals(1.0, d.pmf(0), 1e-15)
+        assertEquals(0.0, d.pmf(1), 1e-15)
+        assertEquals(0.0, d.mean, 1e-15)
+        assertEquals(0.0, d.variance, 1e-15)
+    }
+
+    @Test
+    fun testDegenerateP1() {
+        val d = BernoulliDistribution(1.0)
+        assertEquals(0.0, d.pmf(0), 1e-15)
+        assertEquals(1.0, d.pmf(1), 1e-15)
+        assertEquals(1.0, d.mean, 1e-15)
+        assertEquals(0.0, d.variance, 1e-15)
+    }
+
+    @Test
+    fun testSkewnessKurtosisDegenerate() {
+        assertTrue(BernoulliDistribution(0.0).skewness.isNaN())
+        assertTrue(BernoulliDistribution(1.0).skewness.isNaN())
+        assertTrue(BernoulliDistribution(0.0).kurtosis.isNaN())
+        assertTrue(BernoulliDistribution(1.0).kurtosis.isNaN())
+    }
+
+    // --- Invalid input ---
+
+    @Test
+    fun testInvalidParameters() {
+        assertFailsWith<InvalidParameterException> { BernoulliDistribution(-0.1) }
+        assertFailsWith<InvalidParameterException> { BernoulliDistribution(1.1) }
+    }
+
+    @Test
+    fun testQuantileInvalidP() {
+        val d = BernoulliDistribution(0.5)
+        assertFailsWith<InvalidParameterException> { d.quantileInt(-0.1) }
+        assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
+    }
+
+    // --- Property-based ---
+
+    @Test
+    fun testExpLogPmfConsistency() {
+        val d = BernoulliDistribution(0.7)
+        for (k in listOf(0, 1)) {
+            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-15, "exp(logPmf($k)) ≈ pmf($k)")
+        }
+    }
+
+    @Test
+    fun testSfPlusCdfEqualsOne() {
+        val d = BernoulliDistribution(0.7)
+        for (k in -1..2) {
+            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-15, "sf($k) + cdf($k) ≈ 1")
+        }
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = BernoulliDistribution(0.7)
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(10000, rng)
+        val sampleMean = samples.map { it.toDouble() }.average()
+        assertEquals(0.7, sampleMean, 0.03, "sample mean ≈ 0.7")
+    }
+}
+
 class BinomialDistributionTest {
-    private val tol = 1e-6
+
+    // --- Basic correctness (scipy 15-digit refs) ---
 
     @Test
-    fun testPmfKnown() {
-        val b = BinomialDistribution(10, 0.3)
-        // R: dbinom(3, 10, 0.3) = 0.2668279
-        assertEquals(0.2668279, b.pmf(3), tol)
+    fun testPmfKnownValues() {
+        val d = BinomialDistribution(10, 0.3)
+        // scipy: stats.binom(10, 0.3).pmf(k)
+        assertEquals(0.0282475249, d.pmf(0), 1e-10)
+        assertEquals(0.266827932, d.pmf(3), 1e-9)
+        assertEquals(0.1029193452, d.pmf(5), 1e-10)
+        assertEquals(5.9049e-06, d.pmf(10), 1e-10)
+        assertEquals(0.0, d.pmf(-1), 1e-15)
+        assertEquals(0.0, d.pmf(11), 1e-15)
     }
 
     @Test
-    fun testCdfKnown() {
-        val b = BinomialDistribution(10, 0.3)
-        // R: pbinom(3, 10, 0.3) = 0.6496107
-        assertEquals(0.6496107, b.cdf(3), tol)
+    fun testCdfKnownValues() {
+        val d = BinomialDistribution(10, 0.3)
+        assertEquals(0.0282475249, d.cdf(0), 1e-10)
+        assertEquals(0.6496107184, d.cdf(3), 1e-10)
+        assertEquals(0.9526510126, d.cdf(5), 1e-10)
+        assertEquals(1.0, d.cdf(10), 1e-15)
+        assertEquals(0.0, d.cdf(-1), 1e-15)
     }
 
     @Test
-    fun testMean() {
-        val b = BinomialDistribution(20, 0.4)
-        assertEquals(8.0, b.mean, tol)
+    fun testLogPmfKnownValues() {
+        val d = BinomialDistribution(10, 0.3)
+        assertEquals(-1.32115127776689, d.logPmf(3), 1e-10)
+        assertEquals(-3.56674943938732, d.logPmf(0), 1e-10)
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(-1))
+    }
+
+    @Test
+    fun testSfKnownValues() {
+        val d = BinomialDistribution(10, 0.3)
+        // scipy: stats.binom(10, 0.3).sf(k)
+        assertEquals(0.3503892816, d.sf(3), 1e-10)
+        assertEquals(0.0473489874, d.sf(5), 1e-10)
+        assertEquals(1.0, d.sf(-1), 1e-15)
+        assertEquals(0.0, d.sf(10), 1e-15)
+    }
+
+    // --- Quantile ---
+
+    @Test
+    fun testQuantileIntKnownValues() {
+        val d = BinomialDistribution(10, 0.3)
+        // scipy: stats.binom(10, 0.3).ppf(p)
+        assertEquals(2, d.quantileInt(0.25))
+        assertEquals(3, d.quantileInt(0.5))
+        assertEquals(4, d.quantileInt(0.75))
+        assertEquals(7, d.quantileInt(0.99))
+        assertEquals(0, d.quantileInt(0.0))
+        assertEquals(10, d.quantileInt(1.0))
+    }
+
+    // --- Moments ---
+
+    @Test
+    fun testMoments() {
+        val d = BinomialDistribution(10, 0.3)
+        assertEquals(3.0, d.mean, 1e-15)
+        assertEquals(2.1, d.variance, 1e-15)
+        // scipy: stats.binom(10, 0.3).stats(moments='sk')
+        assertEquals(0.276026223736942, d.skewness, 1e-12)
+        assertEquals(-0.123809523809524, d.kurtosis, 1e-12)
+    }
+
+    @Test
+    fun testMomentsSymmetric() {
+        val d = BinomialDistribution(20, 0.5)
+        assertEquals(0.0, d.skewness, 1e-12)
+        assertEquals(-0.1, d.kurtosis, 1e-12)
+    }
+
+    // --- Entropy ---
+
+    @Test
+    fun testEntropy() {
+        // scipy: stats.binom(10, 0.3).entropy()
+        assertEquals(1.77907878409006, BinomialDistribution(10, 0.3).entropy, 1e-8)
+        // scipy: stats.binom(20, 0.5).entropy()
+        assertEquals(2.22342391581026, BinomialDistribution(20, 0.5).entropy, 1e-8)
+    }
+
+    @Test
+    fun testEntropyDegenerate() {
+        assertEquals(0.0, BinomialDistribution(0, 0.5).entropy, 1e-15)
+    }
+
+    // --- Edge cases ---
+
+    @Test
+    fun testDegenerateN0() {
+        val d = BinomialDistribution(0, 0.5)
+        assertEquals(1.0, d.pmf(0), 1e-15)
+        assertEquals(0.0, d.pmf(1), 1e-15)
+        assertEquals(0.0, d.mean, 1e-15)
+    }
+
+    @Test
+    fun testDegenerateP0() {
+        val d = BinomialDistribution(10, 0.0)
+        assertEquals(1.0, d.pmf(0), 1e-15)
+        assertEquals(0.0, d.pmf(1), 1e-15)
+    }
+
+    @Test
+    fun testDegenerateP1() {
+        val d = BinomialDistribution(10, 1.0)
+        assertEquals(0.0, d.pmf(0), 1e-15)
+        assertEquals(1.0, d.pmf(10), 1e-15)
+    }
+
+    @Test
+    fun testSkewnessKurtosisDegenerate() {
+        assertTrue(BinomialDistribution(0, 0.5).skewness.isNaN())
+        assertTrue(BinomialDistribution(10, 0.0).skewness.isNaN())
+        assertTrue(BinomialDistribution(10, 1.0).skewness.isNaN())
+        assertTrue(BinomialDistribution(0, 0.5).kurtosis.isNaN())
+    }
+
+    // --- Invalid input ---
+
+    @Test
+    fun testInvalidParameters() {
+        assertFailsWith<InvalidParameterException> { BinomialDistribution(-1, 0.5) }
+        assertFailsWith<InvalidParameterException> { BinomialDistribution(10, -0.1) }
+        assertFailsWith<InvalidParameterException> { BinomialDistribution(10, 1.1) }
+    }
+
+    @Test
+    fun testQuantileInvalidP() {
+        val d = BinomialDistribution(10, 0.3)
+        assertFailsWith<InvalidParameterException> { d.quantileInt(-0.1) }
+        assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
+    }
+
+    // --- Property-based ---
+
+    @Test
+    fun testCdfQuantileRoundTrip() {
+        val d = BinomialDistribution(10, 0.3)
+        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
+            val k = d.quantileInt(p)
+            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
+            if (k > 0) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
+        }
+    }
+
+    @Test
+    fun testExpLogPmfConsistency() {
+        val d = BinomialDistribution(10, 0.3)
+        for (k in 0..10) {
+            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-12, "exp(logPmf($k)) ≈ pmf($k)")
+        }
+    }
+
+    @Test
+    fun testSfPlusCdfEqualsOne() {
+        val d = BinomialDistribution(10, 0.3)
+        for (k in -1..11) {
+            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-12, "sf($k) + cdf($k) ≈ 1")
+        }
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = BinomialDistribution(10, 0.3)
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(10000, rng)
+        val sampleMean = samples.map { it.toDouble() }.average()
+        assertEquals(3.0, sampleMean, 0.15, "sample mean ≈ 3.0")
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = BinomialDistribution(10, 0.3)
+        var prev = 0.0
+        for (k in 0..10) {
+            val cdfVal = d.cdf(k)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
     }
 }
 
 class PoissonDistributionTest {
-    private val tol = 1e-6
+
+    // --- Basic correctness (scipy 15-digit refs) ---
 
     @Test
-    fun testPmfKnown() {
-        val p = PoissonDistribution(3.0)
-        // R: dpois(2, 3) = 0.2240418
-        assertEquals(0.2240418, p.pmf(2), tol)
+    fun testPmfKnownValues() {
+        val d = PoissonDistribution(3.0)
+        // scipy: stats.poisson(3).pmf(k)
+        assertEquals(0.0497870683678639, d.pmf(0), 1e-12)
+        assertEquals(0.224041807655388, d.pmf(2), 1e-12)
+        assertEquals(0.224041807655388, d.pmf(3), 1e-12)
+        assertEquals(0.100818813444925, d.pmf(5), 1e-12)
+        assertEquals(0.0, d.pmf(-1), 1e-15)
     }
 
     @Test
-    fun testMean() {
-        val p = PoissonDistribution(5.0)
-        assertEquals(5.0, p.mean, tol)
-        assertEquals(5.0, p.variance, tol)
-    }
-}
-
-class BernoulliDistributionTest {
-    @Test
-    fun testPmf() {
-        val b = BernoulliDistribution(0.7)
-        assertEquals(0.3, b.pmf(0), 1e-10)
-        assertEquals(0.7, b.pmf(1), 1e-10)
-        assertEquals(0.0, b.pmf(2), 1e-10)
+    fun testCdfKnownValues() {
+        val d = PoissonDistribution(3.0)
+        assertEquals(0.049787068367864, d.cdf(0), 1e-10)
+        assertEquals(0.423190081126843, d.cdf(2), 1e-10)
+        assertEquals(0.916082057968696, d.cdf(5), 1e-10)
+        assertEquals(0.0, d.cdf(-1), 1e-15)
     }
 
     @Test
-    fun testMean() {
-        assertEquals(0.7, BernoulliDistribution(0.7).mean, 1e-10)
+    fun testLogPmfKnownValues() {
+        val d = PoissonDistribution(3.0)
+        assertEquals(-1.49592260322373, d.logPmf(2), 1e-10)
+        assertEquals(-2.2944302994415, d.logPmf(5), 1e-10)
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(-1))
+    }
+
+    @Test
+    fun testSfKnownValues() {
+        val d = PoissonDistribution(3.0)
+        // scipy: stats.poisson(3).sf(k)
+        assertEquals(0.576809918873156, d.sf(2), 1e-10)
+        assertEquals(0.0839179420313035, d.sf(5), 1e-10)
+        assertEquals(1.0, d.sf(-1), 1e-15)
+    }
+
+    @Test
+    fun testSfLambda10() {
+        val d = PoissonDistribution(10.0)
+        assertEquals(0.416960249807015, d.sf(10), 1e-10)
+    }
+
+    // --- Quantile ---
+
+    @Test
+    fun testQuantileIntKnownValues() {
+        val d = PoissonDistribution(3.0)
+        assertEquals(2, d.quantileInt(0.25))
+        assertEquals(3, d.quantileInt(0.5))
+        assertEquals(4, d.quantileInt(0.75))
+        assertEquals(8, d.quantileInt(0.99))
+        assertEquals(0, d.quantileInt(0.0))
+    }
+
+    // --- Moments ---
+
+    @Test
+    fun testMoments() {
+        val d = PoissonDistribution(3.0)
+        assertEquals(3.0, d.mean, 1e-15)
+        assertEquals(3.0, d.variance, 1e-15)
+        // scipy: stats.poisson(3).stats(moments='sk')
+        assertEquals(0.577350269189626, d.skewness, 1e-12)
+        assertEquals(0.333333333333333, d.kurtosis, 1e-12)
+    }
+
+    @Test
+    fun testMomentsLambda10() {
+        val d = PoissonDistribution(10.0)
+        assertEquals(0.316227766016838, d.skewness, 1e-12)
+        assertEquals(0.1, d.kurtosis, 1e-12)
+    }
+
+    // --- Entropy ---
+
+    @Test
+    fun testEntropy() {
+        // scipy: stats.poisson(3).entropy()
+        assertEquals(1.93147019814857, PoissonDistribution(3.0).entropy, 1e-8)
+        // scipy: stats.poisson(10).entropy()
+        assertEquals(2.56140993527491, PoissonDistribution(10.0).entropy, 1e-8)
+    }
+
+    // --- Invalid input ---
+
+    @Test
+    fun testInvalidParameters() {
+        assertFailsWith<InvalidParameterException> { PoissonDistribution(0.0) }
+        assertFailsWith<InvalidParameterException> { PoissonDistribution(-1.0) }
+    }
+
+    @Test
+    fun testQuantileInvalidP() {
+        val d = PoissonDistribution(3.0)
+        assertFailsWith<InvalidParameterException> { d.quantileInt(-0.1) }
+        assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
+    }
+
+    // --- Property-based ---
+
+    @Test
+    fun testCdfQuantileRoundTrip() {
+        val d = PoissonDistribution(3.0)
+        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
+            val k = d.quantileInt(p)
+            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
+            if (k > 0) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
+        }
+    }
+
+    @Test
+    fun testExpLogPmfConsistency() {
+        val d = PoissonDistribution(3.0)
+        for (k in 0..10) {
+            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-12, "exp(logPmf($k)) ≈ pmf($k)")
+        }
+    }
+
+    @Test
+    fun testSfPlusCdfEqualsOne() {
+        val d = PoissonDistribution(3.0)
+        for (k in -1..15) {
+            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-12, "sf($k) + cdf($k) ≈ 1")
+        }
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = PoissonDistribution(3.0)
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(10000, rng)
+        val sampleMean = samples.map { it.toDouble() }.average()
+        assertEquals(3.0, sampleMean, 0.15, "sample mean ≈ 3.0")
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = PoissonDistribution(3.0)
+        var prev = 0.0
+        for (k in 0..20) {
+            val cdfVal = d.cdf(k)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
     }
 }
 
 class GeometricDistributionTest {
+
+    // --- Basic correctness (scipy 15-digit refs, using nbinom(1, p)) ---
+
     @Test
-    fun testPmf() {
-        val g = GeometricDistribution(0.5)
-        // P(X=0) = 0.5, P(X=1) = 0.25
-        assertEquals(0.5, g.pmf(0), 1e-10)
-        assertEquals(0.25, g.pmf(1), 1e-10)
+    fun testPmfKnownValues() {
+        val d = GeometricDistribution(0.3)
+        // scipy: stats.nbinom(1, 0.3).pmf(k)
+        assertEquals(0.3, d.pmf(0), 1e-15)
+        assertEquals(0.21, d.pmf(1), 1e-15)
+        assertEquals(0.147, d.pmf(2), 1e-15)
+        assertEquals(0.050421, d.pmf(5), 1e-10)
+        assertEquals(0.0, d.pmf(-1), 1e-15)
     }
 
     @Test
-    fun testMean() {
-        val g = GeometricDistribution(0.25)
-        assertEquals(3.0, g.mean, 1e-10) // (1-p)/p = 0.75/0.25 = 3
+    fun testCdfKnownValues() {
+        val d = GeometricDistribution(0.3)
+        assertEquals(0.3, d.cdf(0), 1e-15)
+        assertEquals(0.657, d.cdf(2), 1e-12)
+        assertEquals(0.882351, d.cdf(5), 1e-10)
+        assertEquals(0.0, d.cdf(-1), 1e-15)
+    }
+
+    @Test
+    fun testLogPmfKnownValues() {
+        val d = GeometricDistribution(0.3)
+        assertEquals(-1.20397280432594, d.logPmf(0), 1e-12)
+        assertEquals(-1.9173226922034, d.logPmf(2), 1e-10)
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(-1))
+    }
+
+    @Test
+    fun testSfKnownValues() {
+        val d = GeometricDistribution(0.3)
+        // scipy: stats.nbinom(1, 0.3).sf(k)
+        assertEquals(0.7, d.sf(0), 1e-15)
+        assertEquals(0.343, d.sf(2), 1e-12)
+        assertEquals(0.117649, d.sf(5), 1e-10)
+        assertEquals(1.0, d.sf(-1), 1e-15)
+    }
+
+    // --- Quantile ---
+
+    @Test
+    fun testQuantileIntKnownValues() {
+        val d = GeometricDistribution(0.3)
+        assertEquals(0, d.quantileInt(0.25))
+        assertEquals(1, d.quantileInt(0.5))
+        assertEquals(3, d.quantileInt(0.75))
+        assertEquals(0, d.quantileInt(0.0))
+    }
+
+    // --- Moments ---
+
+    @Test
+    fun testMoments() {
+        val d = GeometricDistribution(0.3)
+        assertEquals(2.33333333333333, d.mean, 1e-10)
+        assertEquals(7.77777777777778, d.variance, 1e-10)
+        // scipy: stats.nbinom(1, 0.3).stats(moments='sk')
+        assertEquals(2.03188863586847, d.skewness, 1e-10)
+        assertEquals(6.12857142857143, d.kurtosis, 1e-10)
+    }
+
+    @Test
+    fun testMomentsP05() {
+        val d = GeometricDistribution(0.5)
+        assertEquals(2.12132034355964, d.skewness, 1e-10)
+        assertEquals(6.5, d.kurtosis, 1e-10)
+    }
+
+    // --- Entropy ---
+
+    @Test
+    fun testEntropy() {
+        // scipy: stats.nbinom(1, 0.3).entropy()
+        assertEquals(2.03621434018294, GeometricDistribution(0.3).entropy, 1e-10)
+        assertEquals(1.38629436111989, GeometricDistribution(0.5).entropy, 1e-10)
+    }
+
+    @Test
+    fun testEntropyDegenerate() {
+        assertEquals(0.0, GeometricDistribution(1.0).entropy, 1e-15)
+    }
+
+    // --- Edge cases ---
+
+    @Test
+    fun testP1Degenerate() {
+        val d = GeometricDistribution(1.0)
+        assertEquals(1.0, d.pmf(0), 1e-15)
+        assertEquals(0.0, d.pmf(1), 1e-15)
+        assertEquals(0.0, d.mean, 1e-15)
+    }
+
+    // --- Invalid input ---
+
+    @Test
+    fun testInvalidParameters() {
+        assertFailsWith<InvalidParameterException> { GeometricDistribution(0.0) }
+        assertFailsWith<InvalidParameterException> { GeometricDistribution(-0.1) }
+        assertFailsWith<InvalidParameterException> { GeometricDistribution(1.1) }
+    }
+
+    @Test
+    fun testQuantileInvalidP() {
+        val d = GeometricDistribution(0.5)
+        assertFailsWith<InvalidParameterException> { d.quantileInt(-0.1) }
+        assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
+    }
+
+    // --- Property-based ---
+
+    @Test
+    fun testCdfQuantileRoundTrip() {
+        val d = GeometricDistribution(0.3)
+        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
+            val k = d.quantileInt(p)
+            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
+            if (k > 0) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
+        }
+    }
+
+    @Test
+    fun testExpLogPmfConsistency() {
+        val d = GeometricDistribution(0.3)
+        for (k in 0..10) {
+            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-12, "exp(logPmf($k)) ≈ pmf($k)")
+        }
+    }
+
+    @Test
+    fun testSfPlusCdfEqualsOne() {
+        val d = GeometricDistribution(0.3)
+        for (k in -1..15) {
+            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-12, "sf($k) + cdf($k) ≈ 1")
+        }
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = GeometricDistribution(0.3)
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(10000, rng)
+        val sampleMean = samples.map { it.toDouble() }.average()
+        assertEquals(2.333, sampleMean, 0.2, "sample mean ≈ 2.333")
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = GeometricDistribution(0.3)
+        var prev = 0.0
+        for (k in 0..20) {
+            val cdfVal = d.cdf(k)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
+    }
+}
+
+class NegativeBinomialDistributionTest {
+
+    // --- Basic correctness (scipy 15-digit refs) ---
+
+    @Test
+    fun testPmfKnownValues() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        // scipy: stats.nbinom(5, 0.4).pmf(k)
+        assertEquals(0.01024, d.pmf(0), 1e-10)
+        assertEquals(0.0774144, d.pmf(3), 1e-10)
+        assertEquals(0.1003290624, d.pmf(5), 1e-10)
+        assertEquals(0.061979281588224, d.pmf(10), 1e-10)
+        assertEquals(0.0, d.pmf(-1), 1e-15)
+    }
+
+    @Test
+    fun testCdfKnownValues() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        assertEquals(0.01024, d.cdf(0), 1e-10)
+        assertEquals(0.1736704, d.cdf(3), 1e-8)
+        assertEquals(0.3668967424, d.cdf(5), 1e-8)
+        assertEquals(0.782722294349824, d.cdf(10), 1e-6)
+        assertEquals(0.0, d.cdf(-1), 1e-15)
+    }
+
+    @Test
+    fun testLogPmfKnownValues() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        assertEquals(-2.55858246917933, d.logPmf(3), 1e-10)
+        assertEquals(-2.29929987124925, d.logPmf(5), 1e-10)
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(-1))
+    }
+
+    @Test
+    fun testSfKnownValues() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        assertEquals(0.6331032576, d.sf(5), 1e-8)
+        assertEquals(0.217277705650176, d.sf(10), 1e-6)
+    }
+
+    // --- Quantile ---
+
+    @Test
+    fun testQuantileIntKnownValues() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        assertEquals(4, d.quantileInt(0.25))
+        assertEquals(7, d.quantileInt(0.5))
+        assertEquals(10, d.quantileInt(0.75))
+    }
+
+    // --- Moments ---
+
+    @Test
+    fun testMoments() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        assertEquals(7.5, d.mean, 1e-10)
+        assertEquals(18.75, d.variance, 1e-10)
+        // scipy: stats.nbinom(5, 0.4).stats(moments='sk')
+        assertEquals(0.923760430703401, d.skewness, 1e-10)
+        assertEquals(1.25333333333333, d.kurtosis, 1e-10)
+    }
+
+    @Test
+    fun testMomentsR1P05() {
+        val d = NegativeBinomialDistribution(1, 0.5)
+        // Same as Geometric(0.5)
+        assertEquals(2.12132034355964, d.skewness, 1e-10)
+        assertEquals(6.5, d.kurtosis, 1e-10)
+    }
+
+    // --- Entropy ---
+
+    @Test
+    fun testEntropy() {
+        // scipy: stats.nbinom(5, 0.4).entropy()
+        assertEquals(2.80603593100731, NegativeBinomialDistribution(5, 0.4).entropy, 1e-6)
+        // scipy: stats.nbinom(1, 0.5).entropy()
+        assertEquals(1.38629436111989, NegativeBinomialDistribution(1, 0.5).entropy, 1e-8)
+    }
+
+    // --- Edge cases ---
+
+    @Test
+    fun testPmfAtZero() {
+        val d = NegativeBinomialDistribution(3, 0.5)
+        // pmf(0) = p^r = 0.5^3 = 0.125
+        assertEquals(0.125, d.pmf(0), 1e-15)
+    }
+
+    @Test
+    fun testP1Degenerate() {
+        val d = NegativeBinomialDistribution(5, 1.0)
+        assertEquals(1.0, d.pmf(0), 1e-15)
+        assertEquals(0.0, d.pmf(1), 1e-15)
+        assertEquals(0.0, d.mean, 1e-15)
+    }
+
+    // --- Invalid input ---
+
+    @Test
+    fun testInvalidParameters() {
+        assertFailsWith<InvalidParameterException> { NegativeBinomialDistribution(0, 0.5) }
+        assertFailsWith<InvalidParameterException> { NegativeBinomialDistribution(-1, 0.5) }
+        assertFailsWith<InvalidParameterException> { NegativeBinomialDistribution(5, 0.0) }
+        assertFailsWith<InvalidParameterException> { NegativeBinomialDistribution(5, -0.1) }
+        assertFailsWith<InvalidParameterException> { NegativeBinomialDistribution(5, 1.1) }
+    }
+
+    @Test
+    fun testQuantileInvalidP() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        assertFailsWith<InvalidParameterException> { d.quantileInt(-0.1) }
+        assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
+    }
+
+    // --- Property-based ---
+
+    @Test
+    fun testExpLogPmfConsistency() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        for (k in 0..15) {
+            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-12, "exp(logPmf($k)) ≈ pmf($k)")
+        }
+    }
+
+    @Test
+    fun testSfPlusCdfEqualsOne() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        for (k in -1..20) {
+            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-10, "sf($k) + cdf($k) ≈ 1")
+        }
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(10000, rng)
+        val sampleMean = samples.map { it.toDouble() }.average()
+        assertEquals(7.5, sampleMean, 0.4, "sample mean ≈ 7.5")
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        var prev = 0.0
+        for (k in 0..30) {
+            val cdfVal = d.cdf(k)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
+    }
+}
+
+class HypergeometricDistributionTest {
+
+    // --- Basic correctness (scipy 15-digit refs) ---
+
+    @Test
+    fun testPmfKnownValues() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        // scipy: stats.hypergeom(50, 20, 10).pmf(k)
+        assertEquals(0.108257947418883, d.pmf(2), 1e-10)
+        assertEquals(0.280058603105371, d.pmf(4), 1e-10)
+        assertEquals(0.215085007184925, d.pmf(5), 1e-10)
+        assertEquals(0.0, d.pmf(-1), 1e-15)
+        assertEquals(0.0, d.pmf(11), 1e-15)
+    }
+
+    @Test
+    fun testCdfKnownValues() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        assertEquals(0.139038657380907, d.cdf(2), 1e-8)
+        assertEquals(0.645026889882208, d.cdf(4), 1e-8)
+    }
+
+    @Test
+    fun testLogPmfKnownValues() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        assertEquals(-1.27275640090751, d.logPmf(4), 1e-10)
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(-1))
+    }
+
+    @Test
+    fun testSfKnownValues() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        assertEquals(0.354973110117792, d.sf(4), 1e-8)
+    }
+
+    // --- Quantile ---
+
+    @Test
+    fun testQuantileIntKnownValues() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        assertEquals(3, d.quantileInt(0.25))
+        assertEquals(4, d.quantileInt(0.5))
+        assertEquals(5, d.quantileInt(0.75))
+    }
+
+    // --- Moments ---
+
+    @Test
+    fun testMoments() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        assertEquals(4.0, d.mean, 1e-10)
+        assertEquals(1.95918367346939, d.variance, 1e-10)
+        // scipy: stats.hypergeom(50, 20, 10).stats(moments='sk')
+        assertEquals(0.08930431353897, d.skewness, 1e-8)
+        assertEquals(-0.131621232269504, d.kurtosis, 1e-6)
+    }
+
+    @Test
+    fun testMomentsN20K7n12() {
+        val d = HypergeometricDistribution(20, 7, 12)
+        assertEquals(4.2, d.mean, 1e-10)
+        assertEquals(1.14947368421053, d.variance, 1e-10)
+        assertEquals(-0.0621812179560988, d.skewness, 1e-8)
+        assertEquals(-0.15266106442577, d.kurtosis, 1e-6)
+    }
+
+    // --- Entropy ---
+
+    @Test
+    fun testEntropy() {
+        // scipy: stats.hypergeom(50, 20, 10).entropy()
+        assertEquals(1.75382387925846, HypergeometricDistribution(50, 20, 10).entropy, 1e-8)
+        // scipy: stats.hypergeom(20, 7, 12).entropy()
+        assertEquals(1.48738058584421, HypergeometricDistribution(20, 7, 12).entropy, 1e-8)
+    }
+
+    // --- Edge cases ---
+
+    @Test
+    fun testSkewnessSmallN() {
+        assertTrue(HypergeometricDistribution(2, 1, 1).skewness.isNaN())
+    }
+
+    @Test
+    fun testKurtosisSmallN() {
+        assertTrue(HypergeometricDistribution(3, 1, 1).kurtosis.isNaN())
+    }
+
+    @Test
+    fun testDeterministicDraw() {
+        // n=K=N → always get all successes
+        val d = HypergeometricDistribution(5, 5, 5)
+        assertEquals(1.0, d.pmf(5), 1e-15)
+        assertEquals(0.0, d.pmf(4), 1e-15)
+    }
+
+    // --- Invalid input ---
+
+    @Test
+    fun testInvalidParameters() {
+        assertFailsWith<InvalidParameterException> { HypergeometricDistribution(-1, 5, 5) }
+        assertFailsWith<InvalidParameterException> { HypergeometricDistribution(10, 11, 5) }
+        assertFailsWith<InvalidParameterException> { HypergeometricDistribution(10, 5, 11) }
+        assertFailsWith<InvalidParameterException> { HypergeometricDistribution(10, -1, 5) }
+    }
+
+    @Test
+    fun testQuantileInvalidP() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        assertFailsWith<InvalidParameterException> { d.quantileInt(-0.1) }
+        assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
+    }
+
+    // --- Property-based ---
+
+    @Test
+    fun testExpLogPmfConsistency() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        for (k in 0..10) {
+            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-12, "exp(logPmf($k)) ≈ pmf($k)")
+        }
+    }
+
+    @Test
+    fun testSfPlusCdfEqualsOne() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        for (k in -1..11) {
+            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-10, "sf($k) + cdf($k) ≈ 1")
+        }
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(10000, rng)
+        val sampleMean = samples.map { it.toDouble() }.average()
+        assertEquals(4.0, sampleMean, 0.15, "sample mean ≈ 4.0")
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = HypergeometricDistribution(50, 20, 10)
+        var prev = 0.0
+        for (k in 0..10) {
+            val cdfVal = d.cdf(k)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
+    }
+}
+
+class UniformDiscreteDistributionTest {
+
+    // --- Basic correctness (scipy 15-digit refs) ---
+
+    @Test
+    fun testPmfKnownValues() {
+        val d = UniformDiscreteDistribution(1, 6) // dice
+        // scipy: stats.randint(1, 7).pmf(k)
+        assertEquals(0.166666666666667, d.pmf(1), 1e-12)
+        assertEquals(0.166666666666667, d.pmf(3), 1e-12)
+        assertEquals(0.166666666666667, d.pmf(6), 1e-12)
+        assertEquals(0.0, d.pmf(0), 1e-15)
+        assertEquals(0.0, d.pmf(7), 1e-15)
+    }
+
+    @Test
+    fun testCdfKnownValues() {
+        val d = UniformDiscreteDistribution(1, 6)
+        assertEquals(0.166666666666667, d.cdf(1), 1e-12)
+        assertEquals(0.5, d.cdf(3), 1e-12)
+        assertEquals(1.0, d.cdf(6), 1e-15)
+        assertEquals(0.0, d.cdf(0), 1e-15)
+    }
+
+    @Test
+    fun testLogPmfKnownValues() {
+        val d = UniformDiscreteDistribution(1, 6)
+        assertEquals(-1.79175946922805, d.logPmf(3), 1e-12)
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(0))
+    }
+
+    @Test
+    fun testSfKnownValues() {
+        val d = UniformDiscreteDistribution(1, 6)
+        assertEquals(0.5, d.sf(3), 1e-12)
+        assertEquals(0.0, d.sf(6), 1e-15)
+    }
+
+    // --- Quantile ---
+
+    @Test
+    fun testQuantileIntKnownValues() {
+        val d = UniformDiscreteDistribution(1, 6)
+        assertEquals(2, d.quantileInt(0.25))
+        assertEquals(3, d.quantileInt(0.5))
+        assertEquals(6, d.quantileInt(0.99))
+        assertEquals(1, d.quantileInt(0.0))
+    }
+
+    // --- Moments ---
+
+    @Test
+    fun testMoments() {
+        val d = UniformDiscreteDistribution(1, 6)
+        assertEquals(3.5, d.mean, 1e-12)
+        assertEquals(2.91666666666667, d.variance, 1e-10)
+        assertEquals(0.0, d.skewness, 1e-15)
+        // scipy: stats.randint(1, 7).stats(moments='k')
+        assertEquals(-1.26857142857143, d.kurtosis, 1e-10)
+    }
+
+    @Test
+    fun testMoments0To9() {
+        val d = UniformDiscreteDistribution(0, 9)
+        assertEquals(4.5, d.mean, 1e-12)
+        assertEquals(8.25, d.variance, 1e-10)
+        assertEquals(0.0, d.skewness, 1e-15)
+        assertEquals(-1.22424242424242, d.kurtosis, 1e-10)
+    }
+
+    // --- Entropy ---
+
+    @Test
+    fun testEntropy() {
+        // scipy: stats.randint(1, 7).entropy() = ln(6)
+        assertEquals(1.79175946922805, UniformDiscreteDistribution(1, 6).entropy, 1e-12)
+        // scipy: stats.randint(0, 10).entropy() = ln(10)
+        assertEquals(2.30258509299405, UniformDiscreteDistribution(0, 9).entropy, 1e-12)
+    }
+
+    @Test
+    fun testEntropyDegenerate() {
+        assertEquals(0.0, UniformDiscreteDistribution(5, 5).entropy, 1e-15)
+    }
+
+    // --- Edge cases ---
+
+    @Test
+    fun testDegenerateSinglePoint() {
+        val d = UniformDiscreteDistribution(5, 5)
+        assertEquals(1.0, d.pmf(5), 1e-15)
+        assertEquals(0.0, d.pmf(4), 1e-15)
+        assertEquals(5.0, d.mean, 1e-15)
+        assertEquals(0.0, d.variance, 1e-15)
+    }
+
+    @Test
+    fun testKurtosisDegenerate() {
+        assertTrue(UniformDiscreteDistribution(5, 5).kurtosis.isNaN())
+    }
+
+    // --- Invalid input ---
+
+    @Test
+    fun testInvalidParameters() {
+        assertFailsWith<InvalidParameterException> { UniformDiscreteDistribution(5, 4) }
+    }
+
+    @Test
+    fun testQuantileInvalidP() {
+        val d = UniformDiscreteDistribution(1, 6)
+        assertFailsWith<InvalidParameterException> { d.quantileInt(-0.1) }
+        assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
+    }
+
+    // --- Property-based ---
+
+    @Test
+    fun testExpLogPmfConsistency() {
+        val d = UniformDiscreteDistribution(1, 6)
+        for (k in 1..6) {
+            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-15, "exp(logPmf($k)) ≈ pmf($k)")
+        }
+    }
+
+    @Test
+    fun testSfPlusCdfEqualsOne() {
+        val d = UniformDiscreteDistribution(1, 6)
+        for (k in 0..7) {
+            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-15, "sf($k) + cdf($k) ≈ 1")
+        }
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = UniformDiscreteDistribution(1, 6)
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(10000, rng)
+        val sampleMean = samples.map { it.toDouble() }.average()
+        assertEquals(3.5, sampleMean, 0.15, "sample mean ≈ 3.5")
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = UniformDiscreteDistribution(1, 6)
+        var prev = 0.0
+        for (k in 1..6) {
+            val cdfVal = d.cdf(k)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
     }
 }
 

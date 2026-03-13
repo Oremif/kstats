@@ -2,6 +2,7 @@ package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ln
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 public data class BernoulliDistribution(
@@ -40,6 +41,13 @@ public data class BernoulliDistribution(
 
     override val mean: Double get() = p
     override val variance: Double get() = p * q
+
+    override val skewness: Double get() = if (p == 0.0 || p == 1.0) Double.NaN else (1.0 - 2.0 * p) / sqrt(p * q)
+    override val kurtosis: Double get() = if (p == 0.0 || p == 1.0) Double.NaN else (1.0 - 6.0 * p * q) / (p * q)
+    override val entropy: Double get() = when {
+        p == 0.0 || p == 1.0 -> 0.0
+        else -> -p * ln(p) - q * ln(q)
+    }
 
     override fun sample(random: Random): Int = if (random.nextDouble() < p) 1 else 0
 }
