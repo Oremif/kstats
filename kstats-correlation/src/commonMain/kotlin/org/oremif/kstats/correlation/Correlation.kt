@@ -43,10 +43,19 @@ public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult
         return CorrelationResult(Double.NaN, Double.NaN, n)
     }
 
-    val r = sxy / sqrt(sxx * syy)
+    val rawR = sxy / sqrt(sxx * syy)
+    if (rawR.isNaN()) {
+        return CorrelationResult(Double.NaN, Double.NaN, n)
+    }
+    val r = rawR.coerceIn(-1.0, 1.0)
 
     // t-test for correlation significance
-    val t = r * sqrt((n - 2).toDouble() / (1.0 - r * r))
+    // Use (1-r)(1+r) instead of (1-r²) to avoid catastrophic cancellation when r → ±1
+    val oneMinusR2 = (1.0 - r) * (1.0 + r)
+    if (oneMinusR2 == 0.0) {
+        return CorrelationResult(r, 0.0, n)
+    }
+    val t = r * sqrt((n - 2).toDouble() / oneMinusR2)
     val dist = StudentTDistribution((n - 2).toDouble())
     val pValue = 2.0 * dist.sf(abs(t))
 
