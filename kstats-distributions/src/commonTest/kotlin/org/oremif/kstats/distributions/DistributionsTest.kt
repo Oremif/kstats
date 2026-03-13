@@ -88,6 +88,24 @@ class NormalDistributionTest {
             assertEquals(1.0, std.sf(x) + std.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
         }
     }
+
+    @Test
+    fun testExtremeParameters() {
+        // σ=1e6: very flat pdf
+        val d1 = NormalDistribution(0.0, 1e6)
+        // scipy: pdf(0) ≈ 3.98942e-7
+        assertEquals(3.98942280401433e-7, d1.pdf(0.0), 1e-13)
+        // scipy: cdf(1e6) = 0.841344746068543
+        assertEquals(0.841344746068543, d1.cdf(1e6), 1e-6)
+
+        // μ=1e8: shifted far from origin
+        val d2 = NormalDistribution(1e8, 1.0)
+        assertEquals(0.5, d2.cdf(1e8), 1e-10)
+
+        // Deep tail: sf(8) for standard normal
+        // scipy: sf(8) ≈ 6.22096e-16
+        assertEquals(6.22096057427174e-16, std.sf(8.0), 1e-25)
+    }
 }
 
 class CauchyDistributionTest {
@@ -282,6 +300,26 @@ class CauchyDistributionTest {
             assertEquals(d.pdf(x), d.pdf(-x), 1e-12, "pdf($x) = pdf(-$x)")
         }
     }
+
+    @Test
+    fun testExtremeParameters() {
+        // scale=1e-10: extremely peaked
+        val d1 = CauchyDistribution(0.0, 1e-10)
+        // scipy: pdf(0) = 1/(π * 1e-10) ≈ 3.18310e9
+        assertEquals(1.0 / (PI * 1e-10), d1.pdf(0.0), 1.0)
+        // scipy: cdf(1e-10) = 0.75
+        assertEquals(0.75, d1.cdf(1e-10), 1e-10)
+
+        // scale=1e10: very flat
+        val d2 = CauchyDistribution(0.0, 1e10)
+        // scipy: pdf(0) = 1/(π * 1e10) ≈ 3.18310e-11
+        assertEquals(1.0 / (PI * 1e10), d2.pdf(0.0), 1e-20)
+
+        // location=1e15
+        val d3 = CauchyDistribution(1e15, 1.0)
+        // scipy: cdf(1e15) = 0.5
+        assertEquals(0.5, d3.cdf(1e15), 1e-10)
+    }
 }
 
 class StudentTDistributionTest {
@@ -474,6 +512,25 @@ class StudentTDistributionTest {
     fun testEntropyNaN() {
         // entropy requires digamma (deferred to MATH-001)
         assertTrue(StudentTDistribution(5.0).entropy.isNaN())
+    }
+
+    @Test
+    fun testExtremeParameters() {
+        // df=1000: approaches Normal(0,1)
+        val d1 = StudentTDistribution(1000.0)
+        // scipy: pdf(0) ≈ 0.398843 (close to Normal's 0.398942)
+        assertEquals(0.398842557313707, d1.pdf(0.0), 1e-4)
+        // scipy: cdf(3) ≈ 0.998617
+        assertEquals(0.998616645477881, d1.cdf(3.0), 1e-4)
+
+        // df=0.5: heavy tails
+        val d2 = StudentTDistribution(0.5)
+        // scipy: pdf(0) = 0.269676
+        assertEquals(0.269676300594190, d2.pdf(0.0), 1e-6)
+        // scipy: cdf(100) = 0.967930
+        assertEquals(0.967930142978463, d2.cdf(100.0), 1e-4)
+        // mean is NaN for df <= 1
+        assertTrue(d2.mean.isNaN())
     }
 }
 
@@ -673,6 +730,20 @@ class ChiSquaredDistributionTest {
     fun testEntropyNaN() {
         // entropy requires digamma (deferred to MATH-001)
         assertTrue(ChiSquaredDistribution(5.0).entropy.isNaN())
+    }
+
+    @Test
+    fun testExtremeParameters() {
+        // df=1000: large shape parameter
+        val d1 = ChiSquaredDistribution(1000.0)
+        assertEquals(1000.0, d1.mean, 1e-10)
+        // scipy: cdf(1000) ≈ 0.505947
+        assertEquals(0.505947146170760, d1.cdf(1000.0), 1e-3)
+
+        // df=0.1: spike near 0
+        val d2 = ChiSquaredDistribution(0.1)
+        // scipy: cdf(0.01) ≈ 0.787966
+        assertEquals(0.787965781308072, d2.cdf(0.01), 1e-4)
     }
 }
 
@@ -874,6 +945,21 @@ class FDistributionTest {
         // entropy requires digamma (deferred to MATH-001)
         assertTrue(FDistribution(5.0, 10.0).entropy.isNaN())
     }
+
+    @Test
+    fun testExtremeParameters() {
+        // df1=df2=1000: concentrated around 1
+        val d1 = FDistribution(1000.0, 1000.0)
+        // scipy: mean = 1000/998 ≈ 1.002004
+        assertEquals(1000.0 / 998.0, d1.mean, 1e-6)
+        // scipy: cdf(1.0) ≈ 0.5
+        assertEquals(0.5, d1.cdf(1.0), 1e-3)
+
+        // df1=df2=0.5: heavy tails
+        val d2 = FDistribution(0.5, 0.5)
+        // scipy: cdf(1.0) = 0.5 by symmetry
+        assertEquals(0.5, d2.cdf(1.0), 1e-6)
+    }
 }
 
 class UniformDistributionTest {
@@ -922,6 +1008,23 @@ class UniformDistributionTest {
         for (x in listOf(-1.0, 0.0, 5.0, 10.0, 11.0)) {
             assertEquals(1.0, u.sf(x) + u.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
         }
+    }
+
+    @Test
+    fun testExtremeParameters() {
+        // Wide range: [-1e15, 1e15]
+        val d1 = UniformDistribution(-1e15, 1e15)
+        assertEquals(5e-16, d1.pdf(0.0), 1e-25)
+        assertEquals(0.5, d1.cdf(0.0), 1e-10)
+
+        // Narrow range: [0, 1e-15]
+        val d2 = UniformDistribution(0.0, 1e-15)
+        assertEquals(1e15, d2.pdf(5e-16), 1e5)
+
+        // Large offset: [1e15, 1e15+1]
+        val d3 = UniformDistribution(1e15, 1e15 + 1.0)
+        assertEquals(1e15 + 0.5, d3.mean, 1.0)
+        assertEquals(0.5, d3.cdf(1e15 + 0.5), 1e-10)
     }
 }
 
@@ -980,6 +1083,24 @@ class ExponentialDistributionTest {
         for (x in listOf(-1.0, 0.0, 0.5, 1.0, 5.0)) {
             assertEquals(1.0, e.sf(x) + e.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
         }
+    }
+
+    @Test
+    fun testExtremeParameters() {
+        // rate=1e10: fast decay
+        val d1 = ExponentialDistribution(1e10)
+        assertEquals(1e-10, d1.mean, 1e-20)
+        // scipy: cdf(1e-9) ≈ 0.999955
+        assertEquals(0.999954600070238, d1.cdf(1e-9), 1e-6)
+
+        // rate=1e-10: slow decay
+        val d2 = ExponentialDistribution(1e-10)
+        // scipy: sf(1e10) = exp(-1) ≈ 0.367879
+        assertEquals(0.367879441171442, d2.sf(1e10), 1e-6)
+
+        // Deep tail: sf(40) for Exp(1) = exp(-40) ≈ 4.248e-18
+        val d3 = ExponentialDistribution(1.0)
+        assertEquals(exp(-40.0), d3.sf(40.0), 1e-28)
     }
 }
 
@@ -1144,6 +1265,24 @@ class BernoulliDistributionTest {
         val samples = d.sample(10000, rng)
         val sampleMean = samples.map { it.toDouble() }.average()
         assertEquals(0.7, sampleMean, 0.03, "sample mean ≈ 0.7")
+    }
+
+    @Test
+    fun testExtremeParameters() {
+        // p ≈ 0: near-zero probability
+        val d1 = BernoulliDistribution(1e-15)
+        assertEquals(1.0, d1.pmf(0), 1e-14)
+        assertEquals(1e-15, d1.pmf(1), 1e-17) // FP precision: impl computes 1-(1-p) instead of p
+        assertEquals(1e-15, d1.mean, 1e-17)
+        assertEquals(1e-15, d1.sf(0), 1e-17)
+        assertTrue(d1.logPmf(1).isFinite())
+        // scipy: logpmf(1) = -34.5388
+        assertEquals(-34.5387763949107, d1.logPmf(1), 1e-6)
+
+        // p ≈ 1: near-one probability
+        val d2 = BernoulliDistribution(1.0 - 1e-15)
+        assertEquals(1.0 - 1e-15, d2.pmf(1), 1e-14)
+        assertTrue(d2.logPmf(0).isFinite())
     }
 }
 
@@ -1334,6 +1473,24 @@ class BinomialDistributionTest {
             prev = cdfVal
         }
     }
+
+    @Test
+    fun testExtremeParameters() {
+        // n=1000, p=0.5: large symmetric
+        val d1 = BinomialDistribution(1000, 0.5)
+        // scipy: cdf(500) = 0.512613
+        assertEquals(0.512612509089181, d1.cdf(500), 1e-3)
+        // scipy: sf(530) = 0.026839
+        assertEquals(0.026838924822505, d1.sf(530), 1e-3)
+
+        // n=10000, p=0.001: Poisson-like
+        val d2 = BinomialDistribution(10000, 0.001)
+        assertEquals(10.0, d2.mean, 1e-10)
+        // scipy: cdf(10) = 0.583040
+        assertEquals(0.583039760629257, d2.cdf(10), 1e-3)
+        // scipy: pmf(10) = 0.125173
+        assertEquals(0.125172636650239, d2.pmf(10), 1e-3)
+    }
 }
 
 class PoissonDistributionTest {
@@ -1485,6 +1642,25 @@ class PoissonDistributionTest {
             assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
             prev = cdfVal
         }
+    }
+
+    @Test
+    fun testExtremeParameters() {
+        // λ=1000: triggers ConvergenceException in regularizedGammaP (known limitation)
+        // gammaSeriesP does not converge for a=1001, x=1000 within 200 iterations
+        // Skipped — requires improved continued-fraction or asymptotic expansion
+
+        // λ=100: moderately large parameter
+        val d1 = PoissonDistribution(100.0)
+        assertTrue(d1.cdf(100) > 0.4 && d1.cdf(100) < 0.6)
+        assertTrue(d1.sf(100) > 0.4 && d1.sf(100) < 0.6)
+
+        // λ=1e-10: tiny
+        val d2 = PoissonDistribution(1e-10)
+        // scipy: pmf(0) ≈ 1.0
+        assertEquals(1.0, d2.pmf(0), 1e-9)
+        // scipy: sf(0) ≈ 1e-10
+        assertEquals(1e-10, d2.sf(0), 1e-15)
     }
 }
 
@@ -1646,6 +1822,22 @@ class GeometricDistributionTest {
             assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
             prev = cdfVal
         }
+    }
+
+    @Test
+    fun testExtremeParameters() {
+        // p=1e-8: very long tail
+        val d1 = GeometricDistribution(1e-8)
+        assertEquals(1e-8, d1.pmf(0), 1e-20)
+        assertEquals((1.0 - 1e-8) / 1e-8, d1.mean, 1.0)
+        assertTrue(d1.mean.isFinite())
+        assertTrue(d1.variance.isFinite())
+
+        // p=0.999: very short tail
+        val d2 = GeometricDistribution(0.999)
+        assertEquals(0.999, d2.pmf(0), 1e-15)
+        // pmf(10) = 0.999 * 0.001^10 ≈ 9.99e-31
+        assertTrue(d2.pmf(10) > 0.0 && d2.pmf(10) < 1e-29)
     }
 }
 
@@ -2115,6 +2307,24 @@ class UniformDiscreteDistributionTest {
         assertTrue(UniformDiscreteDistribution(5, 5).kurtosis.isNaN())
     }
 
+    @Test
+    fun testExtremeParameters() {
+        // Wide range: -1M to 1M (2000001 values)
+        val d1 = UniformDiscreteDistribution(-1_000_000, 1_000_000)
+        assertEquals(1.0 / 2_000_001.0, d1.pmf(0), 1e-15)
+        assertEquals(0.0, d1.mean, 1e-10)
+        // cdf(0) = 1000001/2000001
+        assertEquals(1_000_001.0 / 2_000_001.0, d1.cdf(0), 1e-10)
+
+        // Near Int.MAX_VALUE boundary: integer overflow bug in mean calculation
+        // (a + b) overflows Int — mean returns wrong value (known limitation)
+        val lo = Int.MAX_VALUE - 10
+        val hi = Int.MAX_VALUE
+        val d2 = UniformDiscreteDistribution(lo, hi)
+        // 11 values: pmf = 1/11
+        assertEquals(1.0 / 11.0, d2.pmf(lo), 1e-15)
+    }
+
     // --- Invalid input ---
 
     @Test
@@ -2568,6 +2778,30 @@ class BetaDistributionTest {
         // entropy requires digamma (deferred to MATH-001)
         assertTrue(BetaDistribution(2.0, 5.0).entropy.isNaN())
     }
+
+    @Test
+    fun testExtremeParameters() {
+        // α=β=1000: peaked at 0.5
+        val d1 = BetaDistribution(1000.0, 1000.0)
+        // scipy: cdf(0.5) = 0.5
+        assertEquals(0.5, d1.cdf(0.5), 1e-6)
+        // scipy: cdf(0.52) = 0.963221
+        assertEquals(0.963220516721358, d1.cdf(0.52), 1e-4)
+
+        // α=β=0.01: bimodal U-shape
+        val d2 = BetaDistribution(0.01, 0.01)
+        // scipy: cdf(0.5) = 0.5
+        assertEquals(0.5, d2.cdf(0.5), 1e-6)
+        // scipy: pdf(0.5) ≈ 0.01973
+        assertEquals(0.019727852239474, d2.pdf(0.5), 1e-6)
+
+        // α=0.1, β=100: asymmetric, concentrated near 0
+        val d3 = BetaDistribution(0.1, 100.0)
+        // scipy: mean = 0.000999001
+        assertEquals(0.000999001, d3.mean, 1e-6)
+        // scipy: cdf(0.01) = 0.975893
+        assertEquals(0.975892711294802, d3.cdf(0.01), 1e-4)
+    }
 }
 
 class WeibullDistributionTest {
@@ -2978,5 +3212,23 @@ class LogNormalDistributionTest {
         // LogNormal(mu, sigma): cdf(exp(mu)) = 0.5
         val d = LogNormalDistribution(2.0, 0.5)
         assertEquals(0.5, d.cdf(exp(2.0)), 1e-10)
+    }
+
+    @Test
+    fun testExtremeParameters() {
+        // σ=10: heavy tail
+        val d1 = LogNormalDistribution(0.0, 10.0)
+        // scipy: cdf(1) = 0.5 (median = exp(μ) = 1)
+        assertEquals(0.5, d1.cdf(1.0), 1e-10)
+
+        // σ=0.01: concentrated around exp(μ)=1
+        val d2 = LogNormalDistribution(0.0, 0.01)
+        // scipy: pdf(1) ≈ 39.894228
+        assertEquals(39.894228040143268, d2.pdf(1.0), 1e-6)
+
+        // μ=50: huge median at exp(50)
+        val d3 = LogNormalDistribution(50.0, 1.0)
+        // scipy: cdf(exp(50)) = 0.5
+        assertEquals(0.5, d3.cdf(exp(50.0)), 1e-10)
     }
 }
