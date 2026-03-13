@@ -1,5 +1,6 @@
 package org.oremif.kstats.core
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -37,8 +38,8 @@ class MathUtilsTest {
 
     @Test
     fun testLnGammaRequiresPositive() {
-        assertFailsWith<IllegalArgumentException> { lnGamma(0.0) }
-        assertFailsWith<IllegalArgumentException> { lnGamma(-1.0) }
+        assertFailsWith<InvalidParameterException> { lnGamma(0.0) }
+        assertFailsWith<InvalidParameterException> { lnGamma(-1.0) }
     }
 
     // ── Beta function ───────────────────────────────────────────────────
@@ -135,7 +136,7 @@ class MathUtilsTest {
 
     @Test
     fun testLnCombinationInvalid() {
-        assertFailsWith<IllegalArgumentException> { lnCombination(3, 5) }
-        assertFailsWith<IllegalArgumentException> { lnCombination(-1, 0) }
+        assertFailsWith<InvalidParameterException> { lnCombination(3, 5) }
+        assertFailsWith<InvalidParameterException> { lnCombination(-1, 0) }
     }
 }

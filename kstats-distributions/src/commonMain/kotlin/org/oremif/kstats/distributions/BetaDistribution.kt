@@ -1,6 +1,8 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.*
+import org.oremif.kstats.core.exceptions.ConvergenceException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -10,8 +12,8 @@ public data class BetaDistribution(
 ) : ContinuousDistribution {
 
     init {
-        require(alpha > 0.0) { "alpha must be positive, got $alpha" }
-        require(beta > 0.0) { "beta must be positive, got $beta" }
+        if (alpha <= 0.0) throw InvalidParameterException("alpha must be positive, got $alpha")
+        if (beta <= 0.0) throw InvalidParameterException("beta must be positive, got $beta")
     }
 
     override fun pdf(x: Double): Double {
@@ -41,21 +43,27 @@ public data class BetaDistribution(
     }
 
     override fun quantile(p: Double): Double {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
         if (p == 1.0) return 1.0
 
         // Newton's method with initial guess
         var x = alpha / (alpha + beta) // start at the mean
 
+        var converged = false
         for (i in 0..49) {
             val cdfVal = cdf(x)
             val pdfVal = pdf(x)
-            if (pdfVal == 0.0) break
+            if (pdfVal == 0.0) { converged = true; break }
             val delta = (cdfVal - p) / pdfVal
             x = (x - delta).coerceIn(1e-15, 1.0 - 1e-15)
-            if (abs(delta) < 1e-12) break
+            if (abs(delta) < 1e-12) { converged = true; break }
         }
+        if (!converged) throw ConvergenceException(
+            "Beta quantile did not converge for p=$p after 50 iterations",
+            iterations = 50,
+            lastEstimate = x
+        )
 
         return x
     }

@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -9,7 +10,7 @@ public data class LogNormalDistribution(
 ) : ContinuousDistribution {
 
     init {
-        require(sigma > 0.0) { "sigma must be positive, got $sigma" }
+        if (sigma <= 0.0) throw InvalidParameterException("sigma must be positive, got $sigma")
     }
 
     private val normal = NormalDistribution(mu, sigma)
@@ -34,7 +35,7 @@ public data class LogNormalDistribution(
     }
 
     override fun quantile(p: Double): Double {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
         if (p == 1.0) return Double.POSITIVE_INFINITY
         return exp(normal.quantile(p))

@@ -1,6 +1,8 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.*
+import org.oremif.kstats.core.exceptions.ConvergenceException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -9,7 +11,7 @@ public data class StudentTDistribution(
 ) : ContinuousDistribution {
 
     init {
-        require(degreesOfFreedom > 0.0) { "Degrees of freedom must be positive, got $degreesOfFreedom" }
+        if (degreesOfFreedom <= 0.0) throw InvalidParameterException("Degrees of freedom must be positive, got $degreesOfFreedom")
     }
 
     private val df = degreesOfFreedom
@@ -31,7 +33,7 @@ public data class StudentTDistribution(
     }
 
     override fun quantile(p: Double): Double {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return Double.NEGATIVE_INFINITY
         if (p == 1.0) return Double.POSITIVE_INFINITY
         if (p == 0.5) return 0.0
@@ -40,14 +42,20 @@ public data class StudentTDistribution(
         val normal = NormalDistribution.STANDARD
         var t = normal.quantile(p)
 
+        var converged = false
         for (i in 0..29) {
             val cdfVal = cdf(t)
             val pdfVal = pdf(t)
-            if (pdfVal == 0.0) break
+            if (pdfVal == 0.0) { converged = true; break }
             val delta = (cdfVal - p) / pdfVal
             t -= delta
-            if (abs(delta) < 1e-12 * abs(t).coerceAtLeast(1.0)) break
+            if (abs(delta) < 1e-12 * abs(t).coerceAtLeast(1.0)) { converged = true; break }
         }
+        if (!converged) throw ConvergenceException(
+            "StudentT quantile did not converge for p=$p after 30 iterations",
+            iterations = 30,
+            lastEstimate = t
+        )
 
         return t
     }

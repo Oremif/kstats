@@ -1,5 +1,6 @@
 package org.oremif.kstats.descriptive
 
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.math.sqrt
 
 public data class DescriptiveStatistics(
@@ -22,7 +23,7 @@ public data class DescriptiveStatistics(
 
 public fun Iterable<Double>.describe(): DescriptiveStatistics {
     val list = toList()
-    require(list.size >= 4) { "describe() requires at least 4 elements" }
+    if (list.size < 4) throw InsufficientDataException("describe() requires at least 4 elements")
 
     val sorted = list.sorted()
     val n = sorted.size

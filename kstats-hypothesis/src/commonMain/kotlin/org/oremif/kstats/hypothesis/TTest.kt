@@ -1,5 +1,7 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.descriptive.standardDeviation
 import org.oremif.kstats.distributions.StudentTDistribution
@@ -15,7 +17,7 @@ public fun tTest(
     alternative: Alternative = Alternative.TWO_SIDED,
     confidenceLevel: Double = 0.95
 ): TestResult {
-    require(sample.size >= 2) { "Sample must have at least 2 elements" }
+    if (sample.size < 2) throw InsufficientDataException("Sample must have at least 2 elements")
 
     val n = sample.size
     val mean = sample.mean()
@@ -56,8 +58,8 @@ public fun tTest(
     equalVariances: Boolean = false,
     confidenceLevel: Double = 0.95
 ): TestResult {
-    require(sample1.size >= 2) { "Sample 1 must have at least 2 elements" }
-    require(sample2.size >= 2) { "Sample 2 must have at least 2 elements" }
+    if (sample1.size < 2) throw InsufficientDataException("Sample 1 must have at least 2 elements")
+    if (sample2.size < 2) throw InsufficientDataException("Sample 2 must have at least 2 elements")
 
     val n1 = sample1.size.toDouble()
     val n2 = sample2.size.toDouble()
@@ -117,8 +119,8 @@ public fun pairedTTest(
     alternative: Alternative = Alternative.TWO_SIDED,
     confidenceLevel: Double = 0.95
 ): TestResult {
-    require(sample1.size == sample2.size) { "Samples must have the same size" }
-    require(sample1.size >= 2) { "Samples must have at least 2 elements" }
+    if (sample1.size != sample2.size) throw InvalidParameterException("Samples must have the same size")
+    if (sample1.size < 2) throw InsufficientDataException("Samples must have at least 2 elements")
 
     val differences = DoubleArray(sample1.size) { sample1[it] - sample2[it] }
     val result = tTest(differences, mu = 0.0, alternative = alternative, confidenceLevel = confidenceLevel)

@@ -1,5 +1,6 @@
 package org.oremif.kstats.core
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 
 // ── Lanczos coefficients for ln(Gamma) ──────────────────────────────────────
@@ -19,7 +20,7 @@ private val LANCZOS_COEFFICIENTS = doubleArrayOf(
 private const val LANCZOS_G = 7.0
 
 public fun lnGamma(x: Double): Double {
-    require(x > 0.0) { "lnGamma requires x > 0, got $x" }
+    if (x <= 0.0) throw InvalidParameterException("lnGamma requires x > 0, got $x")
     if (x < 0.5) {
         // Reflection formula: Gamma(x)*Gamma(1-x) = pi/sin(pi*x)
         return ln(PI / sin(PI * x)) - lnGamma(1.0 - x)
@@ -38,7 +39,7 @@ public fun gamma(x: Double): Double = exp(lnGamma(x))
 // ── Beta function ───────────────────────────────────────────────────────────
 
 public fun lnBeta(a: Double, b: Double): Double {
-    require(a > 0.0 && b > 0.0) { "lnBeta requires a > 0 and b > 0, got a=$a, b=$b" }
+    if (a <= 0.0 || b <= 0.0) throw InvalidParameterException("lnBeta requires a > 0 and b > 0, got a=$a, b=$b")
     return lnGamma(a) + lnGamma(b) - lnGamma(a + b)
 }
 
@@ -50,7 +51,7 @@ private const val BETA_MAX_ITERATIONS = 200
 private const val BETA_EPSILON = 1e-14
 
 public fun regularizedBeta(x: Double, a: Double, b: Double): Double {
-    require(a > 0.0 && b > 0.0) { "regularizedBeta requires a > 0 and b > 0" }
+    if (a <= 0.0 || b <= 0.0) throw InvalidParameterException("regularizedBeta requires a > 0 and b > 0")
     if (x <= 0.0) return 0.0
     if (x >= 1.0) return 1.0
 
@@ -69,6 +70,7 @@ public fun regularizedBeta(x: Double, a: Double, b: Double): Double {
     d = 1.0 / d
     var result = d
 
+    var converged = false
     for (m in 1..BETA_MAX_ITERATIONS) {
         // even step
         val mDouble = m.toDouble()
@@ -92,7 +94,14 @@ public fun regularizedBeta(x: Double, a: Double, b: Double): Double {
         val delta = d * c
         result *= delta
 
-        if (abs(delta - 1.0) < BETA_EPSILON) break
+        if (abs(delta - 1.0) < BETA_EPSILON) {
+            converged = true
+            break
+        }
+    }
+
+    checkConvergence(converged, BETA_MAX_ITERATIONS, prefactor * result) {
+        "regularizedBeta did not converge for x=$x, a=$a, b=$b after $BETA_MAX_ITERATIONS iterations"
     }
 
     return prefactor * result
@@ -108,7 +117,7 @@ private const val GAMMA_EPSILON = 1e-14
  * Uses series expansion for x < a+1, continued fraction otherwise.
  */
 public fun regularizedGammaP(a: Double, x: Double): Double {
-    require(a > 0.0) { "regularizedGammaP requires a > 0, got $a" }
+    if (a <= 0.0) throw InvalidParameterException("regularizedGammaP requires a > 0, got $a")
     if (x < 0.0) return 0.0
     if (x == 0.0) return 0.0
 
@@ -125,7 +134,7 @@ public fun regularizedGammaP(a: Double, x: Double): Double {
  * Upper regularized incomplete gamma function Q(a, x) = 1 - P(a, x)
  */
 public fun regularizedGammaQ(a: Double, x: Double): Double {
-    require(a > 0.0) { "regularizedGammaQ requires a > 0, got $a" }
+    if (a <= 0.0) throw InvalidParameterException("regularizedGammaQ requires a > 0, got $a")
     if (x < 0.0) return 1.0
     if (x == 0.0) return 1.0
 
@@ -140,10 +149,17 @@ private fun gammaSeriesP(a: Double, x: Double): Double {
     val lnPrefix = a * ln(x) - x - lnGamma(a)
     var sum = 1.0 / a
     var term = 1.0 / a
+    var converged = false
     for (n in 1..GAMMA_MAX_ITERATIONS) {
         term *= x / (a + n)
         sum += term
-        if (abs(term) < abs(sum) * GAMMA_EPSILON) break
+        if (abs(term) < abs(sum) * GAMMA_EPSILON) {
+            converged = true
+            break
+        }
+    }
+    checkConvergence(converged, GAMMA_MAX_ITERATIONS, sum * exp(lnPrefix)) {
+        "gammaSeriesP did not converge for a=$a, x=$x after $GAMMA_MAX_ITERATIONS iterations"
     }
     return sum * exp(lnPrefix)
 }
@@ -156,6 +172,7 @@ private fun gammaContinuedFractionQ(a: Double, x: Double): Double {
     var d = 1.0 / b0
     var h = d
 
+    var converged = false
     for (i in 1..GAMMA_MAX_ITERATIONS) {
         val an = -i.toDouble() * (i.toDouble() - a)
         val bn = x + 2.0 * i + 1.0 - a
@@ -168,7 +185,14 @@ private fun gammaContinuedFractionQ(a: Double, x: Double): Double {
         val delta = d * c
         h *= delta
 
-        if (abs(delta - 1.0) < GAMMA_EPSILON) break
+        if (abs(delta - 1.0) < GAMMA_EPSILON) {
+            converged = true
+            break
+        }
+    }
+
+    checkConvergence(converged, GAMMA_MAX_ITERATIONS, exp(lnPrefix) * h) {
+        "gammaContinuedFractionQ did not converge for a=$a, x=$x after $GAMMA_MAX_ITERATIONS iterations"
     }
 
     return exp(lnPrefix) * h
@@ -210,7 +234,7 @@ public fun erfc(x: Double): Double {
  * Based on Winitzki's approximation with Newton corrections.
  */
 public fun erfInv(x: Double): Double {
-    require(x > -1.0 && x < 1.0) { "erfInv requires -1 < x < 1, got $x" }
+    if (x <= -1.0 || x >= 1.0) throw InvalidParameterException("erfInv requires -1 < x < 1, got $x")
     if (x == 0.0) return 0.0
 
     val a = abs(x)
@@ -235,13 +259,13 @@ public fun erfInv(x: Double): Double {
 // ── Combinatorics ───────────────────────────────────────────────────────────
 
 public fun lnFactorial(n: Int): Double {
-    require(n >= 0) { "lnFactorial requires n >= 0, got $n" }
+    if (n < 0) throw InvalidParameterException("lnFactorial requires n >= 0, got $n")
     if (n <= 1) return 0.0
     return lnGamma(n.toDouble() + 1.0)
 }
 
 public fun lnCombination(n: Int, k: Int): Double {
-    require(n >= 0 && k >= 0 && k <= n) { "lnCombination requires 0 <= k <= n, got n=$n, k=$k" }
+    if (n < 0 || k < 0 || k > n) throw InvalidParameterException("lnCombination requires 0 <= k <= n, got n=$n, k=$k")
     if (k == 0 || k == n) return 0.0
     return lnFactorial(n) - lnFactorial(k) - lnFactorial(n - k)
 }

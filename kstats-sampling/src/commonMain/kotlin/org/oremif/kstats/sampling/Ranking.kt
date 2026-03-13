@@ -1,12 +1,14 @@
 package org.oremif.kstats.sampling
 
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+
 public enum class TieMethod { AVERAGE, MIN, MAX, DENSE, ORDINAL }
 
 /**
  * Compute ranks for the elements of this array.
  */
 public fun DoubleArray.rank(tieMethod: TieMethod = TieMethod.AVERAGE): DoubleArray {
-    require(isNotEmpty()) { "Array must not be empty" }
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
 
     val n = size
     val indexed = Array(n) { IndexedValue(it, this[it]) }
@@ -44,7 +46,7 @@ public fun DoubleArray.rank(tieMethod: TieMethod = TieMethod.AVERAGE): DoubleArr
  * Returns values in [0, 100].
  */
 public fun DoubleArray.percentileRank(): DoubleArray {
-    require(isNotEmpty()) { "Array must not be empty" }
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     val n = size
     val ranks = rank(TieMethod.AVERAGE)
     return DoubleArray(n) { (ranks[it] - 1.0) / (n - 1).coerceAtLeast(1) * 100.0 }

@@ -1,5 +1,6 @@
 package org.oremif.kstats.sampling
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -25,7 +26,7 @@ public fun <T> Iterable<T>.binByDouble(
     binSize: Double,
     rangeStart: Double? = null
 ): List<Bin<T>> {
-    require(binSize > 0.0) { "binSize must be positive" }
+    if (binSize <= 0.0) throw InvalidParameterException("binSize must be positive")
     val items = toList()
     if (items.isEmpty()) return emptyList()
 
@@ -56,7 +57,7 @@ public fun <T> Iterable<T>.binByDouble(
     valueSelector: (T) -> Double,
     binCount: Int
 ): List<Bin<T>> {
-    require(binCount > 0) { "binCount must be positive" }
+    if (binCount <= 0) throw InvalidParameterException("binCount must be positive")
     val items = toList()
     if (items.isEmpty()) return emptyList()
 

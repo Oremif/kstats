@@ -1,5 +1,6 @@
 package org.oremif.kstats.descriptive
 
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 import kotlin.math.sqrt
 
@@ -8,7 +9,7 @@ import kotlin.math.sqrt
 public fun Iterable<Double>.skewness(kind: PopulationKind = SAMPLE): Double {
     val list = toList()
     val n = list.size
-    require(n >= 3) { "Skewness requires at least 3 elements" }
+    if (n < 3) throw InsufficientDataException("Skewness requires at least 3 elements")
 
     val m = list.mean()
     var m2 = 0.0
@@ -41,7 +42,7 @@ public fun DoubleArray.skewness(kind: PopulationKind = SAMPLE): Double = asItera
 public fun Iterable<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean = true): Double {
     val list = toList()
     val n = list.size
-    require(n >= 4) { "Kurtosis requires at least 4 elements" }
+    if (n < 4) throw InsufficientDataException("Kurtosis requires at least 4 elements")
 
     val m = list.mean()
     var m2 = 0.0

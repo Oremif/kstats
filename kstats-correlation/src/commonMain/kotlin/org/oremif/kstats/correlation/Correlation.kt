@@ -1,5 +1,7 @@
 package org.oremif.kstats.correlation
 
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.PopulationKind
 import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.distributions.NormalDistribution
@@ -19,9 +21,9 @@ public data class CorrelationResult(
  * Pearson product-moment correlation coefficient with p-value.
  */
 public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult {
-    require(x.size == y.size) { "Arrays must have the same size" }
+    if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
     val n = x.size
-    require(n >= 3) { "Need at least 3 observations" }
+    if (n < 3) throw InsufficientDataException("Need at least 3 observations")
 
     val mx = x.mean()
     val my = y.mean()
@@ -55,9 +57,9 @@ public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult
  * Spearman rank correlation coefficient.
  */
 public fun spearmanCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult {
-    require(x.size == y.size) { "Arrays must have the same size" }
+    if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
     val n = x.size
-    require(n >= 3) { "Need at least 3 observations" }
+    if (n < 3) throw InsufficientDataException("Need at least 3 observations")
 
     val xRanks = x.rank(TieMethod.AVERAGE)
     val yRanks = y.rank(TieMethod.AVERAGE)
@@ -69,9 +71,9 @@ public fun spearmanCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResul
  * Kendall's tau-b correlation coefficient.
  */
 public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
-    require(x.size == y.size) { "Arrays must have the same size" }
+    if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
     val n = x.size
-    require(n >= 3) { "Need at least 3 observations" }
+    if (n < 3) throw InsufficientDataException("Need at least 3 observations")
 
     var concordant = 0
     var discordant = 0
@@ -123,9 +125,9 @@ public fun covariance(
     y: DoubleArray,
     kind: PopulationKind = PopulationKind.SAMPLE
 ): Double {
-    require(x.size == y.size) { "Arrays must have the same size" }
+    if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
     val n = x.size
-    require(n >= 2) { "Need at least 2 observations" }
+    if (n < 2) throw InsufficientDataException("Need at least 2 observations")
 
     val mx = x.mean()
     val my = y.mean()
@@ -143,9 +145,9 @@ public fun covariance(
  */
 public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> {
     val k = variables.size
-    require(k >= 2) { "Need at least 2 variables" }
+    if (k < 2) throw InsufficientDataException("Need at least 2 variables")
     val n = variables[0].size
-    require(variables.all { it.size == n }) { "All variables must have the same size" }
+    if (!variables.all { it.size == n }) throw InvalidParameterException("All variables must have the same size")
 
     return Array(k) { i ->
         DoubleArray(k) { j ->
@@ -162,9 +164,9 @@ public fun covarianceMatrix(
     kind: PopulationKind = PopulationKind.SAMPLE
 ): Array<DoubleArray> {
     val k = variables.size
-    require(k >= 2) { "Need at least 2 variables" }
+    if (k < 2) throw InsufficientDataException("Need at least 2 variables")
     val n = variables[0].size
-    require(variables.all { it.size == n }) { "All variables must have the same size" }
+    if (!variables.all { it.size == n }) throw InvalidParameterException("All variables must have the same size")
 
     return Array(k) { i ->
         DoubleArray(k) { j ->

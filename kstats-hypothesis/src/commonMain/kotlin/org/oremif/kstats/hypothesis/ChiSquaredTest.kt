@@ -1,5 +1,7 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.distributions.ChiSquaredDistribution
 
 /**
@@ -10,15 +12,15 @@ public fun chiSquaredTest(
     observed: IntArray,
     expected: DoubleArray? = null
 ): TestResult {
-    require(observed.size >= 2) { "Need at least 2 categories" }
+    if (observed.size < 2) throw InsufficientDataException("Need at least 2 categories")
 
     val n = observed.size
     val exp = expected ?: run {
         val total = observed.sum().toDouble()
         DoubleArray(n) { total / n }
     }
-    require(observed.size == exp.size) { "Observed and expected must have the same size" }
-    require(exp.all { it > 0.0 }) { "All expected values must be positive" }
+    if (observed.size != exp.size) throw InvalidParameterException("Observed and expected must have the same size")
+    if (!exp.all { it > 0.0 }) throw InvalidParameterException("All expected values must be positive")
 
     var chi2 = 0.0
     for (i in observed.indices) {
@@ -45,10 +47,10 @@ public fun chiSquaredIndependenceTest(
     contingencyTable: Array<IntArray>
 ): TestResult {
     val rows = contingencyTable.size
-    require(rows >= 2) { "Table must have at least 2 rows" }
+    if (rows < 2) throw InsufficientDataException("Table must have at least 2 rows")
     val cols = contingencyTable[0].size
-    require(cols >= 2) { "Table must have at least 2 columns" }
-    require(contingencyTable.all { it.size == cols }) { "All rows must have the same number of columns" }
+    if (cols < 2) throw InsufficientDataException("Table must have at least 2 columns")
+    if (!contingencyTable.all { it.size == cols }) throw InvalidParameterException("All rows must have the same number of columns")
 
     val rowTotals = IntArray(rows) { r -> contingencyTable[r].sum() }
     val colTotals = IntArray(cols) { c -> contingencyTable.sumOf { it[c] } }

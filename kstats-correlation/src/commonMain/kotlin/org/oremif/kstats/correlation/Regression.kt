@@ -1,5 +1,8 @@
 package org.oremif.kstats.correlation
 
+import org.oremif.kstats.core.exceptions.DegenerateDataException
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.mean
 import kotlin.math.sqrt
 
@@ -36,9 +39,9 @@ public data class SimpleLinearRegressionResult(
  * Simple linear regression: y = intercept + slope * x
  */
 public fun simpleLinearRegression(x: DoubleArray, y: DoubleArray): SimpleLinearRegressionResult {
-    require(x.size == y.size) { "Arrays must have the same size" }
+    if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
     val n = x.size
-    require(n >= 3) { "Need at least 3 observations" }
+    if (n < 3) throw InsufficientDataException("Need at least 3 observations")
 
     val mx = x.mean()
     val my = y.mean()
@@ -54,7 +57,7 @@ public fun simpleLinearRegression(x: DoubleArray, y: DoubleArray): SimpleLinearR
         syy += dy * dy
     }
 
-    require(sxx > 0.0) { "All x values are identical" }
+    if (sxx <= 0.0) throw DegenerateDataException("All x values are identical")
 
     val slope = sxy / sxx
     val intercept = my - slope * mx

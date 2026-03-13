@@ -1,5 +1,7 @@
 package org.oremif.kstats.descriptive
 
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -14,7 +16,7 @@ public fun Iterable<Double>.percentile(
     p: Double,
     interpolation: QuantileInterpolation = QuantileInterpolation.LINEAR
 ): Double {
-    require(p in 0.0..100.0) { "Percentile must be in [0, 100], got $p" }
+    if (p !in 0.0..100.0) throw InvalidParameterException("Percentile must be in [0, 100], got $p")
     return quantile(p / 100.0, interpolation)
 }
 
@@ -29,9 +31,9 @@ public fun Iterable<Double>.quantile(
     q: Double,
     interpolation: QuantileInterpolation = QuantileInterpolation.LINEAR
 ): Double {
-    require(q in 0.0..1.0) { "Quantile must be in [0, 1], got $q" }
+    if (q !in 0.0..1.0) throw InvalidParameterException("Quantile must be in [0, 1], got $q")
     val sorted = toList().sorted()
-    require(sorted.isNotEmpty()) { "Collection must not be empty" }
+    if (sorted.isEmpty()) throw InsufficientDataException("Collection must not be empty")
 
     if (sorted.size == 1) return sorted[0]
 

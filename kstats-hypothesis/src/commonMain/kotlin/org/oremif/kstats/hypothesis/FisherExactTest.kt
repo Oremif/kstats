@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.lnFactorial
 import kotlin.math.exp
 
@@ -10,8 +11,8 @@ public fun fisherExactTest(
     table: Array<IntArray>,
     alternative: Alternative = Alternative.TWO_SIDED
 ): TestResult {
-    require(table.size == 2 && table.all { it.size == 2 }) { "Table must be 2×2" }
-    require(table.all { row -> row.all { it >= 0 } }) { "All values must be non-negative" }
+    if (!(table.size == 2 && table.all { it.size == 2 })) throw InvalidParameterException("Table must be 2×2")
+    if (!table.all { row -> row.all { it >= 0 } }) throw InvalidParameterException("All values must be non-negative")
 
     val a = table[0][0]
     val b = table[0][1]

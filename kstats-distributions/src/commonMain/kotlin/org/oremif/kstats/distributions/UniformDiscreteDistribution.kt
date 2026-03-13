@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ln
 import kotlin.random.Random
 
@@ -9,7 +10,7 @@ public data class UniformDiscreteDistribution(
 ) : DiscreteDistribution {
 
     init {
-        require(min <= max) { "min must be <= max, got min=$min, max=$max" }
+        if (min > max) throw InvalidParameterException("min must be <= max, got min=$min, max=$max")
     }
 
     private val n = max - min + 1
@@ -25,7 +26,7 @@ public data class UniformDiscreteDistribution(
     }
 
     override fun quantile(p: Double): Int {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         return (min + (p * n).toInt()).coerceAtMost(max)
     }
 

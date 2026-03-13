@@ -1,5 +1,8 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.exceptions.DegenerateDataException
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.distributions.ContinuousDistribution
 import org.oremif.kstats.distributions.NormalDistribution
 import org.oremif.kstats.sampling.rank
@@ -14,7 +17,7 @@ public fun mannWhitneyUTest(
     sample2: DoubleArray,
     alternative: Alternative = Alternative.TWO_SIDED
 ): TestResult {
-    require(sample1.isNotEmpty() && sample2.isNotEmpty()) { "Samples must not be empty" }
+    if (sample1.isEmpty() || sample2.isEmpty()) throw InsufficientDataException("Samples must not be empty")
 
     val n1 = sample1.size
     val n2 = sample2.size
@@ -61,7 +64,7 @@ public fun wilcoxonSignedRankTest(
     alternative: Alternative = Alternative.TWO_SIDED
 ): TestResult {
     val diffs = if (sample2 != null) {
-        require(sample1.size == sample2.size) { "Samples must have the same size" }
+        if (sample1.size != sample2.size) throw InvalidParameterException("Samples must have the same size")
         DoubleArray(sample1.size) { sample1[it] - sample2[it] }
     } else {
         sample1
@@ -69,7 +72,7 @@ public fun wilcoxonSignedRankTest(
 
     // Remove zeros
     val nonZero = diffs.filter { it != 0.0 }
-    require(nonZero.isNotEmpty()) { "All differences are zero" }
+    if (nonZero.isEmpty()) throw DegenerateDataException("All differences are zero")
     val n = nonZero.size
 
     // Rank absolute values
@@ -113,7 +116,7 @@ public fun kolmogorovSmirnovTest(
     sample: DoubleArray,
     distribution: ContinuousDistribution
 ): TestResult {
-    require(sample.isNotEmpty()) { "Sample must not be empty" }
+    if (sample.isEmpty()) throw InsufficientDataException("Sample must not be empty")
 
     val n = sample.size
     val sorted = sample.sortedArray()
@@ -146,7 +149,7 @@ public fun kolmogorovSmirnovTest(
     sample1: DoubleArray,
     sample2: DoubleArray
 ): TestResult {
-    require(sample1.isNotEmpty() && sample2.isNotEmpty()) { "Samples must not be empty" }
+    if (sample1.isEmpty() || sample2.isEmpty()) throw InsufficientDataException("Samples must not be empty")
 
     val n1 = sample1.size
     val n2 = sample2.size
@@ -191,7 +194,7 @@ public fun kolmogorovSmirnovTest(
  */
 public fun shapiroWilkTest(sample: DoubleArray): TestResult {
     val n = sample.size
-    require(n >= 3) { "Shapiro-Wilk test requires at least 3 elements" }
+    if (n < 3) throw InsufficientDataException("Shapiro-Wilk test requires at least 3 elements")
 
     val sorted = sample.sortedArray()
     val mean = sorted.average()

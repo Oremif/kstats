@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.distributions.FDistribution
 
 public data class AnovaResult(
@@ -17,8 +18,8 @@ public data class AnovaResult(
  * One-way ANOVA test.
  */
 public fun oneWayAnova(vararg groups: DoubleArray): AnovaResult {
-    require(groups.size >= 2) { "ANOVA requires at least 2 groups" }
-    require(groups.all { it.size >= 2 }) { "Each group must have at least 2 elements" }
+    if (groups.size < 2) throw InsufficientDataException("ANOVA requires at least 2 groups")
+    if (!groups.all { it.size >= 2 }) throw InsufficientDataException("Each group must have at least 2 elements")
 
     val k = groups.size
     val groupMeans = groups.map { it.average() }

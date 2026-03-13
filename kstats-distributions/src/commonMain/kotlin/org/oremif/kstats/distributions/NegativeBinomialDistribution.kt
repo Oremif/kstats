@@ -1,6 +1,7 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.lnCombination
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -10,8 +11,8 @@ public data class NegativeBinomialDistribution(
 ) : DiscreteDistribution {
 
     init {
-        require(successes > 0) { "successes must be positive, got $successes" }
-        require(probability > 0.0 && probability <= 1.0) { "probability must be in (0, 1], got $probability" }
+        if (successes <= 0) throw InvalidParameterException("successes must be positive, got $successes")
+        if (probability <= 0.0 || probability > 1.0) throw InvalidParameterException("probability must be in (0, 1], got $probability")
     }
 
     private val r = successes
@@ -39,7 +40,7 @@ public data class NegativeBinomialDistribution(
     }
 
     override fun quantile(p: Double): Int {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         var cumulative = 0.0
         var k = 0
         while (cumulative < p) {

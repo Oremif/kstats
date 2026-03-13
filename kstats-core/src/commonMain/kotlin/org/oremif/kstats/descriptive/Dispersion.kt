@@ -1,5 +1,7 @@
 package org.oremif.kstats.descriptive
 
+import org.oremif.kstats.core.exceptions.DegenerateDataException
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -17,9 +19,9 @@ public fun Iterable<Double>.variance(kind: PopulationKind = SAMPLE): Double {
         val delta2 = x - mean
         m2 += delta * delta2
     }
-    require(count > 0) { "Collection must not be empty" }
+    if (count == 0) throw InsufficientDataException("Collection must not be empty")
     val divisor = if (kind == SAMPLE) {
-        require(count > 1) { "Sample variance requires at least 2 elements" }
+        if (count <= 1) throw InsufficientDataException("Sample variance requires at least 2 elements")
         count - 1
     } else {
         count
@@ -41,12 +43,12 @@ public fun DoubleArray.standardDeviation(kind: PopulationKind = SAMPLE): Double 
 
 public fun Iterable<Double>.range(): Double {
     val list = toList()
-    require(list.isNotEmpty()) { "Collection must not be empty" }
+    if (list.isEmpty()) throw InsufficientDataException("Collection must not be empty")
     return list.max() - list.min()
 }
 
 public fun DoubleArray.range(): Double {
-    require(isNotEmpty()) { "Array must not be empty" }
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     return max() - min()
 }
 
@@ -63,7 +65,7 @@ public fun DoubleArray.interquartileRange(): Double = asIterable().interquartile
 
 public fun Iterable<Double>.meanAbsoluteDeviation(): Double {
     val list = toList()
-    require(list.isNotEmpty()) { "Collection must not be empty" }
+    if (list.isEmpty()) throw InsufficientDataException("Collection must not be empty")
     val m = list.mean()
     return list.map { abs(it - m) }.mean()
 }
@@ -74,7 +76,7 @@ public fun DoubleArray.meanAbsoluteDeviation(): Double = asIterable().meanAbsolu
 
 public fun Iterable<Double>.medianAbsoluteDeviation(): Double {
     val list = toList()
-    require(list.isNotEmpty()) { "Collection must not be empty" }
+    if (list.isEmpty()) throw InsufficientDataException("Collection must not be empty")
     val med = list.median()
     return list.map { abs(it - med) }.median()
 }
@@ -85,12 +87,12 @@ public fun DoubleArray.medianAbsoluteDeviation(): Double = asIterable().medianAb
 
 public fun Iterable<Double>.standardError(): Double {
     val list = toList()
-    require(list.size > 1) { "Standard error requires at least 2 elements" }
+    if (list.size <= 1) throw InsufficientDataException("Standard error requires at least 2 elements")
     return list.standardDeviation() / sqrt(list.size.toDouble())
 }
 
 public fun DoubleArray.standardError(): Double {
-    require(size > 1) { "Standard error requires at least 2 elements" }
+    if (size <= 1) throw InsufficientDataException("Standard error requires at least 2 elements")
     return standardDeviation() / sqrt(size.toDouble())
 }
 
@@ -98,7 +100,7 @@ public fun DoubleArray.standardError(): Double {
 
 public fun Iterable<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double {
     val m = mean()
-    require(m != 0.0) { "Coefficient of variation is undefined when mean is zero" }
+    if (m == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
     return standardDeviation(kind) / m
 }
 

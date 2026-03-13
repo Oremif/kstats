@@ -1,6 +1,8 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.*
+import org.oremif.kstats.core.exceptions.ConvergenceException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -10,8 +12,8 @@ public data class GammaDistribution(
 ) : ContinuousDistribution {
 
     init {
-        require(shape > 0.0) { "shape must be positive, got $shape" }
-        require(rate > 0.0) { "rate must be positive, got $rate" }
+        if (shape <= 0.0) throw InvalidParameterException("shape must be positive, got $shape")
+        if (rate <= 0.0) throw InvalidParameterException("rate must be positive, got $rate")
     }
 
     private val scale = 1.0 / rate
@@ -42,7 +44,7 @@ public data class GammaDistribution(
     }
 
     override fun quantile(p: Double): Double {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
         if (p == 1.0) return Double.POSITIVE_INFINITY
 
@@ -57,14 +59,20 @@ public data class GammaDistribution(
         }
 
         // Newton's method
+        var converged = false
         for (i in 0..49) {
             val cdfVal = cdf(x)
             val pdfVal = pdf(x)
-            if (pdfVal == 0.0) break
+            if (pdfVal == 0.0) { converged = true; break }
             val delta = (cdfVal - p) / pdfVal
             x = (x - delta).coerceAtLeast(1e-15)
-            if (abs(delta) < 1e-12 * x) break
+            if (abs(delta) < 1e-12 * x) { converged = true; break }
         }
+        if (!converged) throw ConvergenceException(
+            "Gamma quantile did not converge for p=$p after 50 iterations",
+            iterations = 50,
+            lastEstimate = x
+        )
 
         return x
     }

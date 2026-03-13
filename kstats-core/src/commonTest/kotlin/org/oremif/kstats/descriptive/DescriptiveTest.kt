@@ -1,5 +1,6 @@
 package org.oremif.kstats.descriptive
 
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,8 +17,8 @@ class CentralTendencyTest {
 
     @Test
     fun testMeanEmpty() {
-        assertFailsWith<IllegalArgumentException> { emptyList<Double>().mean() }
-        assertFailsWith<IllegalArgumentException> { doubleArrayOf().mean() }
+        assertFailsWith<InsufficientDataException> { emptyList<Double>().mean() }
+        assertFailsWith<InsufficientDataException> { doubleArrayOf().mean() }
     }
 
     @Test

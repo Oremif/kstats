@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -8,7 +9,7 @@ public data class GeometricDistribution(
 ) : DiscreteDistribution {
 
     init {
-        require(probability > 0.0 && probability <= 1.0) { "probability must be in (0, 1], got $probability" }
+        if (probability <= 0.0 || probability > 1.0) throw InvalidParameterException("probability must be in (0, 1], got $probability")
     }
 
     private val p = probability
@@ -31,7 +32,7 @@ public data class GeometricDistribution(
     }
 
     override fun quantile(p: Double): Int {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0
         if (p == 1.0) return Int.MAX_VALUE
         return ceil(ln(1.0 - p) / ln(q) - 1.0).toInt().coerceAtLeast(0)

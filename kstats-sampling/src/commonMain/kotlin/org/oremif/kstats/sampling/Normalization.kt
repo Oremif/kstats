@@ -1,5 +1,8 @@
 package org.oremif.kstats.sampling
 
+import org.oremif.kstats.core.exceptions.DegenerateDataException
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.descriptive.standardDeviation
 
@@ -7,19 +10,19 @@ import org.oremif.kstats.descriptive.standardDeviation
  * Z-score normalization: (x - mean) / sd
  */
 public fun DoubleArray.zScore(): DoubleArray {
-    require(size >= 2) { "Need at least 2 elements for z-score" }
+    if (size < 2) throw InsufficientDataException("Need at least 2 elements for z-score")
     val m = mean()
     val sd = standardDeviation()
-    require(sd > 0.0) { "Standard deviation is zero, cannot compute z-scores" }
+    if (sd <= 0.0) throw DegenerateDataException("Standard deviation is zero, cannot compute z-scores")
     return DoubleArray(size) { (this[it] - m) / sd }
 }
 
 public fun Iterable<Double>.zScore(): List<Double> {
     val list = toList()
-    require(list.size >= 2) { "Need at least 2 elements for z-score" }
+    if (list.size < 2) throw InsufficientDataException("Need at least 2 elements for z-score")
     val m = list.mean()
     val sd = list.standardDeviation()
-    require(sd > 0.0) { "Standard deviation is zero, cannot compute z-scores" }
+    if (sd <= 0.0) throw DegenerateDataException("Standard deviation is zero, cannot compute z-scores")
     return list.map { (it - m) / sd }
 }
 
@@ -27,7 +30,7 @@ public fun Iterable<Double>.zScore(): List<Double> {
  * Min-max normalization to [0, 1].
  */
 public fun DoubleArray.minMaxNormalize(): DoubleArray {
-    require(isNotEmpty()) { "Array must not be empty" }
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     val minVal = min()
     val maxVal = max()
     val range = maxVal - minVal
@@ -39,8 +42,8 @@ public fun DoubleArray.minMaxNormalize(): DoubleArray {
  * Min-max normalization to [newMin, newMax].
  */
 public fun DoubleArray.minMaxNormalize(newMin: Double, newMax: Double): DoubleArray {
-    require(isNotEmpty()) { "Array must not be empty" }
-    require(newMin < newMax) { "newMin must be less than newMax" }
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    if (newMin >= newMax) throw InvalidParameterException("newMin must be less than newMax")
     val minVal = min()
     val maxVal = max()
     val range = maxVal - minVal

@@ -1,6 +1,7 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.gamma
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -10,8 +11,8 @@ public data class WeibullDistribution(
 ) : ContinuousDistribution {
 
     init {
-        require(shape > 0.0) { "shape must be positive, got $shape" }
-        require(scale > 0.0) { "scale must be positive, got $scale" }
+        if (shape <= 0.0) throw InvalidParameterException("shape must be positive, got $shape")
+        if (scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
     }
 
     private val k = shape
@@ -29,7 +30,7 @@ public data class WeibullDistribution(
     }
 
     override fun quantile(p: Double): Double {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
         if (p == 1.0) return Double.POSITIVE_INFINITY
         return lambda * (-ln(1.0 - p)).pow(1.0 / k)

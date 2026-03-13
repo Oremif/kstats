@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -9,7 +10,7 @@ public data class CauchyDistribution(
 ) : ContinuousDistribution {
 
     init {
-        require(scale > 0.0) { "scale must be positive, got $scale" }
+        if (scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
     }
 
     override fun pdf(x: Double): Double {
@@ -25,7 +26,7 @@ public data class CauchyDistribution(
     override fun cdf(x: Double): Double = 0.5 + atan((x - location) / scale) / PI
 
     override fun quantile(p: Double): Double {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return Double.NEGATIVE_INFINITY
         if (p == 1.0) return Double.POSITIVE_INFINITY
         return location + scale * tan(PI * (p - 0.5))

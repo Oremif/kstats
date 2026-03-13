@@ -1,6 +1,7 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.lnCombination
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -11,9 +12,9 @@ public data class HypergeometricDistribution(
 ) : DiscreteDistribution {
 
     init {
-        require(population >= 0) { "population must be non-negative, got $population" }
-        require(successes in 0..population) { "successes must be in [0, population], got $successes" }
-        require(draws in 0..population) { "draws must be in [0, population], got $draws" }
+        if (population < 0) throw InvalidParameterException("population must be non-negative, got $population")
+        if (successes !in 0..population) throw InvalidParameterException("successes must be in [0, population], got $successes")
+        if (draws !in 0..population) throw InvalidParameterException("draws must be in [0, population], got $draws")
     }
 
     private val bigN = population
@@ -44,7 +45,7 @@ public data class HypergeometricDistribution(
     }
 
     override fun quantile(p: Double): Int {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         var cumulative = 0.0
         for (k in kMin..kMax) {
             cumulative += pmf(k)

@@ -1,6 +1,7 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.*
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -9,7 +10,7 @@ public data class PoissonDistribution(
 ) : DiscreteDistribution {
 
     init {
-        require(rate > 0.0) { "rate must be positive, got $rate" }
+        if (rate <= 0.0) throw InvalidParameterException("rate must be positive, got $rate")
     }
 
     private val lambda = rate
@@ -31,7 +32,7 @@ public data class PoissonDistribution(
     }
 
     override fun quantile(p: Double): Int {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0
         // Search from the mean
         var k = lambda.toInt()

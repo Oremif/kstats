@@ -3,6 +3,7 @@ package org.oremif.kstats.distributions
 import org.oremif.kstats.core.erf
 import org.oremif.kstats.core.erfc
 import org.oremif.kstats.core.erfInv
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -12,7 +13,7 @@ public data class NormalDistribution(
 ) : ContinuousDistribution {
 
     init {
-        require(sigma > 0.0) { "sigma must be positive, got $sigma" }
+        if (sigma <= 0.0) throw InvalidParameterException("sigma must be positive, got $sigma")
     }
 
     override fun pdf(x: Double): Double {
@@ -34,7 +35,7 @@ public data class NormalDistribution(
     }
 
     override fun quantile(p: Double): Double {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return Double.NEGATIVE_INFINITY
         if (p == 1.0) return Double.POSITIVE_INFINITY
         return mu + sigma * sqrt(2.0) * erfInv(2.0 * p - 1.0)

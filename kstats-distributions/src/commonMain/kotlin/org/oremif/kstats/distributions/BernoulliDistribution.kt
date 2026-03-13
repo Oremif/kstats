@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.random.Random
@@ -9,7 +10,7 @@ public data class BernoulliDistribution(
 ) : DiscreteDistribution {
 
     init {
-        require(probability in 0.0..1.0) { "probability must be in [0, 1], got $probability" }
+        if (probability !in 0.0..1.0) throw InvalidParameterException("probability must be in [0, 1], got $probability")
     }
 
     private val p = probability
@@ -34,7 +35,7 @@ public data class BernoulliDistribution(
     }
 
     override fun quantile(p: Double): Int {
-        require(p in 0.0..1.0) { "p must be in [0, 1], got $p" }
+        if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         return if (p <= q) 0 else 1
     }
 
