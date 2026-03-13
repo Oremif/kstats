@@ -1,6 +1,7 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.lnCombination
+import org.oremif.kstats.core.regularizedBeta
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.exp
 import kotlin.math.ln
@@ -36,11 +37,14 @@ public data class NegativeBinomialDistribution(
 
     override fun cdf(k: Int): Double {
         if (k < 0) return 0.0
-        var sum = 0.0
-        for (i in 0..k) {
-            sum += pmf(i)
-        }
-        return sum.coerceAtMost(1.0)
+        if (p == 1.0) return 1.0
+        return regularizedBeta(p, r.toDouble(), (k + 1).toDouble())
+    }
+
+    override fun sf(k: Int): Double {
+        if (k < 0) return 1.0
+        if (p == 1.0) return 0.0
+        return regularizedBeta(q, (k + 1).toDouble(), r.toDouble())
     }
 
     override fun quantileInt(p: Double): Int {

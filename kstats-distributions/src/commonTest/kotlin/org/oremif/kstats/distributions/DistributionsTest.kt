@@ -1668,10 +1668,21 @@ class NegativeBinomialDistributionTest {
     fun testCdfKnownValues() {
         val d = NegativeBinomialDistribution(5, 0.4)
         assertEquals(0.01024, d.cdf(0), 1e-10)
-        assertEquals(0.1736704, d.cdf(3), 1e-8)
-        assertEquals(0.3668967424, d.cdf(5), 1e-8)
-        assertEquals(0.782722294349824, d.cdf(10), 1e-6)
+        assertEquals(0.1736704, d.cdf(3), 1e-10)
+        assertEquals(0.3668967424, d.cdf(5), 1e-10)
+        assertEquals(0.782722294349824, d.cdf(10), 1e-10)
         assertEquals(0.0, d.cdf(-1), 1e-15)
+    }
+
+    @Test
+    fun testCdfLargeK() {
+        // Large k values that would be slow/inaccurate with naive PMF summation
+        val d = NegativeBinomialDistribution(5, 0.4)
+        assertEquals(9.999999523331493e-01, d.cdf(50), 1e-10)
+
+        val d2 = NegativeBinomialDistribution(10, 0.3)
+        assertEquals(9.941288117574135e-01, d2.cdf(50), 1e-10)
+        assertEquals(9.999999741352392e-01, d2.cdf(100), 1e-10)
     }
 
     @Test
@@ -1685,8 +1696,20 @@ class NegativeBinomialDistributionTest {
     @Test
     fun testSfKnownValues() {
         val d = NegativeBinomialDistribution(5, 0.4)
-        assertEquals(0.6331032576, d.sf(5), 1e-8)
-        assertEquals(0.217277705650176, d.sf(10), 1e-6)
+        assertEquals(0.6331032576, d.sf(5), 1e-10)
+        assertEquals(0.217277705650176, d.sf(10), 1e-10)
+    }
+
+    @Test
+    fun testSfLargeK() {
+        // Large k values — sf uses complementary regularizedBeta for precision
+        val d = NegativeBinomialDistribution(5, 0.4)
+        assertEquals(4.766685066418214e-08, d.sf(50), 1e-15)
+        assertEquals(5.091810499366119e-18, d.sf(100), 1e-25)
+
+        val d2 = NegativeBinomialDistribution(10, 0.3)
+        assertEquals(5.871188242586509e-03, d2.sf(50), 1e-10)
+        assertEquals(2.586476076790538e-08, d2.sf(100), 1e-15)
     }
 
     // --- Quantile ---
@@ -1744,6 +1767,10 @@ class NegativeBinomialDistributionTest {
         assertEquals(1.0, d.pmf(0), 1e-15)
         assertEquals(0.0, d.pmf(1), 1e-15)
         assertEquals(0.0, d.mean, 1e-15)
+        assertEquals(1.0, d.cdf(0), 1e-15)
+        assertEquals(1.0, d.cdf(5), 1e-15)
+        assertEquals(0.0, d.sf(0), 1e-15)
+        assertEquals(0.0, d.sf(5), 1e-15)
     }
 
     // --- Invalid input ---
@@ -1778,7 +1805,7 @@ class NegativeBinomialDistributionTest {
     fun testSfPlusCdfEqualsOne() {
         val d = NegativeBinomialDistribution(5, 0.4)
         for (k in -1..20) {
-            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-10, "sf($k) + cdf($k) ≈ 1")
+            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-12, "sf($k) + cdf($k) ≈ 1")
         }
     }
 
