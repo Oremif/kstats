@@ -1,4 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/org.oremif/kstats)](https://central.sonatype.com/artifact/org.oremif/kstats)
+[![Maven Central](https://img.shields.io/maven-central/v/org.oremif/kstats-core)](https://central.sonatype.com/artifact/org.oremif/kstats-core)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 # kstats
@@ -7,31 +7,51 @@ Kotlin Multiplatform statistics library.
 
 ## Features
 
-| Module            | Description                                     | Highlights                                                                        |
-|-------------------|-------------------------------------------------|-----------------------------------------------------------------------------------|
-| **Descriptive**   | Central tendency, dispersion, shape, quantiles  | `mean()`, `standardDeviation()`, `describe()`, `skewness()`, `kurtosis()`         |
-| **Distributions** | Continuous & discrete probability distributions | `NormalDistribution`, `StudentTDistribution`, `BinomialDistribution`, and 14 more |
-| **Hypothesis**    | Parametric & non-parametric tests               | `tTest()`, `oneWayAnova()`, `mannWhitneyUTest()`, `shapiroWilkTest()`             |
-| **Correlation**   | Correlation coefficients & regression           | `pearsonCorrelation()`, `spearmanCorrelation()`, `simpleLinearRegression()`       |
-| **Sampling**      | Ranking, normalization, weighted sampling       | `zScore()`, `rank()`, `bootstrapSample()`, `WeightedDice`                         |
+| Module                  | Description                                     | Highlights                                                                        |
+|-------------------------|-------------------------------------------------|-----------------------------------------------------------------------------------|
+| **kstats-core**         | Math foundations, descriptive statistics         | `mean()`, `standardDeviation()`, `describe()`, `skewness()`, `kurtosis()`         |
+| **kstats-distributions**| Continuous & discrete probability distributions | `NormalDistribution`, `StudentTDistribution`, `BinomialDistribution`, and 14 more |
+| **kstats-hypothesis**   | Parametric & non-parametric tests               | `tTest()`, `oneWayAnova()`, `mannWhitneyUTest()`, `shapiroWilkTest()`             |
+| **kstats-correlation**  | Correlation coefficients & regression           | `pearsonCorrelation()`, `spearmanCorrelation()`, `simpleLinearRegression()`       |
+| **kstats-sampling**     | Ranking, normalization, weighted sampling       | `zScore()`, `rank()`, `bootstrapSample()`, `WeightedDice`                         |
 
 ## Installation
 
-Add the dependency to your `build.gradle.kts`:
+### Using BOM (recommended)
 
 ```kotlin
 dependencies {
-    implementation("org.oremif:kstats:0.1.0")
+    implementation(platform("org.oremif:kstats-bom:0.2.0"))
+
+    implementation("org.oremif:kstats-core")
+    implementation("org.oremif:kstats-distributions")
+    implementation("org.oremif:kstats-hypothesis")
+    implementation("org.oremif:kstats-correlation")
+    implementation("org.oremif:kstats-sampling")
 }
 ```
 
-For Kotlin Multiplatform projects:
+### Individual modules
+
+```kotlin
+dependencies {
+    implementation("org.oremif:kstats-core:0.2.0")
+    implementation("org.oremif:kstats-distributions:0.2.0")
+    // add other modules as needed
+}
+```
+
+### Kotlin Multiplatform
 
 ```kotlin
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("org.oremif:kstats:0.1.0")
+            implementation(project.dependencies.platform("org.oremif:kstats-bom:0.2.0"))
+
+            implementation("org.oremif:kstats-core")
+            implementation("org.oremif:kstats-distributions")
+            // add other modules as needed
         }
     }
 }
@@ -102,13 +122,16 @@ reg.predict(6.0)
 
 ```bash
 # Run all JVM tests
-./gradlew :library:jvmTest
+./gradlew jvmTest
 
-# Run all tests on the current platform
-./gradlew :library:allTests
+# Run tests for a specific module
+./gradlew :kstats-core:jvmTest
+
+# Run all platform tests
+./gradlew allTests
 
 # Full build
-./gradlew :library:build
+./gradlew build
 ```
 
 ## Contributing
