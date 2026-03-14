@@ -232,7 +232,7 @@ private fun swPoly(coeffs: DoubleArray, x: Double): Double {
 
 /**
  * Compute Shapiro-Wilk coefficients using Royston AS R94 algorithm.
- * Returns a full antisymmetric coefficient array of size n: a[i] = -a[n-1-i].
+ * Returns a full antisymmetric coefficient array of size n: `a[i] = -a[n-1-i]`.
  */
 private fun shapiroWilkCoefficients(n: Int): DoubleArray {
     val nn2 = n / 2
