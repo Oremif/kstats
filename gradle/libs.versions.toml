@@ -9,7 +9,6 @@ kotlinxBenchmark = "0.4.16"
 commonsMath3 = "3.6.1"
 
 [libraries]
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
 commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commonsMath3" }
 

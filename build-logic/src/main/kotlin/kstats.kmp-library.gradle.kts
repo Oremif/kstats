@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.kotlin.multiplatform.library")
-    id("com.vanniktech.maven.publish")
+    id("kstats.maven-publish")
 }
 
 val libs = the<VersionCatalogsExtension>().named("libs")
@@ -87,41 +87,7 @@ kotlin {
 
     sourceSets {
         commonTest.dependencies {
-            implementation(libs.findLibrary("kotlin-test").get())
-        }
-    }
-}
-
-mavenPublishing {
-    publishToMavenCentral(automaticRelease = true)
-
-    signAllPublications()
-
-    coordinates(group.toString(), project.name, version.toString())
-
-    pom {
-        name = project.name
-        description = "Kotlin Multiplatform statistics library"
-        inceptionYear = "2025"
-        url = "https://github.com/oremif/kstats"
-        licenses {
-            license {
-                name = "The Apache License, Version 2.0"
-                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                distribution = "repo"
-            }
-        }
-        developers {
-            developer {
-                id = "devcrocod"
-                name = "Pavel Gorgulov"
-                url = "https://github.com/devcrocod"
-            }
-        }
-        scm {
-            url = "https://github.com/oremif/kstats"
-            connection = "scm:git:git://github.com/oremif/kstats.git"
-            developerConnection = "scm:git:ssh://github.com/oremif/kstats.git"
+            implementation(kotlin("test"))
         }
     }
 }
