@@ -9,6 +9,7 @@ import org.oremif.kstats.distributions.StudentTDistribution
 import org.oremif.kstats.sampling.TieMethod
 import org.oremif.kstats.sampling.rank
 import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.sqrt
 
 /**
@@ -378,6 +379,162 @@ public fun pointBiserialCorrelation(x: BooleanArray, y: DoubleArray): Correlatio
 public fun pointBiserialCorrelation(x: IntArray, y: DoubleArray): CorrelationResult {
     val converted = DoubleArray(x.size) { x[it].toDouble() }
     return pointBiserialCorrelation(converted, y)
+}
+
+/**
+ * Computes the partial correlation between two variables while controlling for one or more
+ * confounding variables.
+ *
+ * Partial correlation measures the linear association between [x] and [y] after removing
+ * the effect of the [controls] variables. This is useful for determining whether an apparent
+ * relationship between two variables is genuine or is explained by shared dependence on a
+ * third variable.
+ *
+ * Uses the precision matrix (inverse correlation matrix) method: builds the Pearson
+ * correlation matrix of all variables, inverts it via Gaussian elimination with partial
+ * pivoting, and extracts the partial correlation from the precision matrix elements.
+ *
+ * When [controls] is empty, delegates directly to [pearsonCorrelation].
+ *
+ * Returns [Double.NaN] for both coefficient and p-value when the correlation matrix is
+ * singular (e.g., collinear controls, constant variable, or degenerate input).
+ *
+ * ### Example:
+ * ```kotlin
+ * val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+ * val y = doubleArrayOf(2.1, 4.3, 5.8, 8.2, 9.7, 12.1, 14.0, 16.2, 17.9, 20.1)
+ * val z = doubleArrayOf(1.5, 3.0, 4.5, 6.0, 7.5, 9.0, 10.5, 12.0, 13.5, 15.0)
+ * val result = partialCorrelation(x, y, z)
+ * result.coefficient // partial r between x and y, controlling for z
+ * result.pValue      // two-sided p-value
+ * result.n           // 10
+ * ```
+ *
+ * @param x the first array of observations.
+ * @param y the second array of observations, must have the same size as [x].
+ * @param controls one or more control variables to partial out. Each must have the same size as [x].
+ * If empty, returns the Pearson correlation between [x] and [y].
+ * @return a [CorrelationResult] containing the partial correlation coefficient, two-sided p-value,
+ * and sample size.
+ */
+public fun partialCorrelation(
+    x: DoubleArray,
+    y: DoubleArray,
+    vararg controls: DoubleArray
+): CorrelationResult {
+    if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
+    for (c in controls) {
+        if (c.size != x.size) throw InvalidParameterException("All arrays must have the same size")
+    }
+    val n = x.size
+    val k = controls.size
+
+    // Fast path: no controls → Pearson
+    if (k == 0) return pearsonCorrelation(x, y)
+
+    // Need df >= 1 → n >= k + 3
+    if (n < k + 3) throw InsufficientDataException(
+        "Need at least ${k + 3} observations for $k control variable${if (k > 1) "s" else ""}, got $n"
+    )
+
+    // Build correlation matrix of [x, y, z1, ..., zk]
+    val allVars = Array(k + 2) { i ->
+        when (i) {
+            0 -> x
+            1 -> y
+            else -> controls[i - 2]
+        }
+    }
+    val corrMatrix = correlationMatrix(*allVars)
+
+    // Check for NaN in correlation matrix
+    for (row in corrMatrix) {
+        for (v in row) {
+            if (v.isNaN()) return CorrelationResult(Double.NaN, Double.NaN, n)
+        }
+    }
+
+    // Invert correlation matrix → precision matrix
+    val precision = invertMatrix(corrMatrix)
+        ?: return CorrelationResult(Double.NaN, Double.NaN, n) // singular
+
+    // Extract partial correlation: r = -P[0][1] / sqrt(P[0][0] * P[1][1])
+    val denom = precision[0][0] * precision[1][1]
+    if (denom <= 0.0) return CorrelationResult(Double.NaN, Double.NaN, n)
+
+    val r = (-precision[0][1] / sqrt(denom)).coerceIn(-1.0, 1.0)
+
+    if (r.isNaN()) return CorrelationResult(Double.NaN, Double.NaN, n)
+
+    // p-value via t-test: t = r * sqrt(df / ((1-r)(1+r))), df = n - 2 - k
+    val df = n - 2 - k
+    val oneMinusR2 = (1.0 - r) * (1.0 + r)
+    if (oneMinusR2 == 0.0) {
+        return CorrelationResult(r, 0.0, n)
+    }
+    val t = r * sqrt(df.toDouble() / oneMinusR2)
+    val dist = StudentTDistribution(df.toDouble())
+    val pValue = 2.0 * dist.sf(t.absoluteValue)
+
+    return CorrelationResult(r, pValue.coerceIn(0.0, 1.0), n)
+}
+
+/**
+ * Inverts a square matrix using Gaussian elimination with partial pivoting.
+ *
+ * @return the inverse matrix, or `null` if the matrix is singular.
+ */
+private fun invertMatrix(matrix: Array<DoubleArray>): Array<DoubleArray>? {
+    val m = matrix.size
+    // Build augmented matrix [A | I]
+    val aug = Array(m) { i ->
+        DoubleArray(2 * m) { j ->
+            if (j < m) matrix[i][j] else if (j - m == i) 1.0 else 0.0
+        }
+    }
+
+    for (col in 0 until m) {
+        // Partial pivoting: find row with largest absolute value in column
+        var maxRow = col
+        var maxVal = aug[col][col].absoluteValue
+        for (row in col + 1 until m) {
+            val v = aug[row][col].absoluteValue
+            if (v > maxVal) {
+                maxVal = v
+                maxRow = row
+            }
+        }
+
+        if (maxVal < 1e-15) return null // singular
+
+        // Swap rows
+        if (maxRow != col) {
+            val temp = aug[col]
+            aug[col] = aug[maxRow]
+            aug[maxRow] = temp
+        }
+
+        // Scale pivot row
+        val pivot = aug[col][col]
+        for (j in 0 until 2 * m) {
+            aug[col][j] /= pivot
+        }
+
+        // Eliminate column in all other rows
+        for (row in 0 until m) {
+            if (row == col) continue
+            val factor = aug[row][col]
+            if (factor == 0.0) continue
+            for (j in 0 until 2 * m) {
+                aug[row][j] -= factor * aug[col][j]
+            }
+        }
+    }
+
+    // Extract inverse from right half
+    return Array(m) { i ->
+        DoubleArray(m) { j -> aug[i][j + m] }
+    }
 }
 
 /**
