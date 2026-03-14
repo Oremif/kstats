@@ -8,7 +8,7 @@ import org.apache.commons.math3.distribution.ZipfDistribution as CommonsZipf
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.NANOSECONDS)
-open class ZipfDistributionBenchmark {
+class ZipfDistributionBenchmark {
 
     // kstats distribution
     private val kZipf = ZipfDistribution(numberOfElements = 1000, exponent = 1.5)
