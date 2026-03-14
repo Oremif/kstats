@@ -3,6 +3,7 @@ package org.oremif.kstats.descriptive
 import org.oremif.kstats.core.compensatedSum
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.core.introSelect
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.ln
@@ -154,25 +155,25 @@ public fun DoubleArray.weightedMean(weights: DoubleArray): Double {
 
 // ── median ──────────────────────────────────────────────────────────────────
 
-public fun Iterable<Double>.median(): Double {
-    val sorted = this.toList().sorted()
-    if (sorted.isEmpty()) throw InsufficientDataException("Collection must not be empty")
-    val n = sorted.size
-    return if (n % 2 == 1) {
-        sorted[n / 2]
-    } else {
-        (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0
-    }
-}
+public fun Iterable<Double>.median(): Double =
+    toList().toDoubleArray().median()
 
 public fun DoubleArray.median(): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
-    val sorted = this.sortedArray()
-    val n = sorted.size
+    val work = copyOf()
+    val n = work.size
+    val mid = n / 2
+    work.introSelect(mid)
     return if (n % 2 == 1) {
-        sorted[n / 2]
+        work[mid]
     } else {
-        (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0
+        // introSelect guarantees: work[0..mid-1] <= work[mid]
+        // Find max of left half in O(n/2)
+        var left = work[0]
+        for (i in 1 until mid) {
+            if (work[i].compareTo(left) > 0) left = work[i]
+        }
+        (left + work[mid]) / 2.0
     }
 }
 
