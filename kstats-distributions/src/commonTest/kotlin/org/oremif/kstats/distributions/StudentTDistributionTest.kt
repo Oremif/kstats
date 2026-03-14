@@ -197,9 +197,13 @@ class StudentTDistributionTest {
     }
 
     @Test
-    fun testEntropyNaN() {
-        // entropy requires digamma (deferred to MATH-001)
-        assertTrue(StudentTDistribution(5.0).entropy.isNaN())
+    fun testEntropy() {
+        assertEquals(2.531024246969291, StudentTDistribution(1.0).entropy, 1e-10) // ln(4*pi), equals Cauchy
+        assertEquals(1.960279229160082, StudentTDistribution(2.0).entropy, 1e-10)
+        assertEquals(1.627502672414396, StudentTDistribution(5.0).entropy, 1e-10)
+        assertEquals(1.521262492975681, StudentTDistribution(10.0).entropy, 1e-10)
+        assertEquals(1.452543329787207, StudentTDistribution(30.0).entropy, 1e-10)
+        assertEquals(3.666727416103854, StudentTDistribution(0.5).entropy, 1e-10)
     }
 
     @Test

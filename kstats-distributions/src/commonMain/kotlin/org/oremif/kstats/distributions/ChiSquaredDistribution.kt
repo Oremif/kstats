@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.digamma
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.findQuantile
 import org.oremif.kstats.core.lnGamma
@@ -132,8 +133,9 @@ public data class ChiSquaredDistribution(
         return findQuantile(p, ::cdf, ::pdf, guess, lowerBound = 1e-15)
     }
 
-    // entropy = halfDf + ln(2) + lnGamma(halfDf) + (1 - halfDf) * digamma(halfDf)
-    // Deferred until digamma is available (MATH-001)
+    /** The differential entropy of this distribution. */
+    override val entropy: Double get() =
+        halfDf + ln(2.0) + lnGamma(halfDf) + (1.0 - halfDf) * digamma(halfDf)
 
     /** The mean of this distribution, equal to the degrees of freedom. */
     override val mean: Double get() = df

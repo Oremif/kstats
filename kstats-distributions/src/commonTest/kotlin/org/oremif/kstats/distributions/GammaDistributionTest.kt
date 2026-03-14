@@ -202,9 +202,13 @@ class GammaDistributionTest {
     }
 
     @Test
-    fun testEntropyNaN() {
-        // entropy requires digamma (deferred to MATH-001)
-        assertTrue(GammaDistribution(2.0, 1.0).entropy.isNaN())
+    fun testEntropy() {
+        assertEquals(1.577215664901533, GammaDistribution(2.0, 1.0).entropy, 1e-10)
+        assertEquals(1.0, GammaDistribution(1.0, 1.0).entropy, 1e-10) // Exponential(1)
+        assertEquals(0.090609929913988, GammaDistribution(0.5, 1.0).entropy, 1e-10)
+        assertEquals(0.306852819440055, GammaDistribution(1.0, 2.0).entropy, 1e-10) // 1 - ln(2)
+        assertEquals(2.846730337180690, GammaDistribution(5.0, 0.5).entropy, 1e-10)
+        assertEquals(1.437441889812870, GammaDistribution(10.0, 3.0).entropy, 1e-10)
     }
 
     @Test

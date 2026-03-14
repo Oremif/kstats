@@ -207,9 +207,13 @@ class BetaDistributionTest {
     }
 
     @Test
-    fun testEntropyNaN() {
-        // entropy requires digamma (deferred to MATH-001)
-        assertTrue(BetaDistribution(2.0, 5.0).entropy.isNaN())
+    fun testEntropy() {
+        assertEquals(-0.484530714995488, BetaDistribution(2.0, 5.0).entropy, 1e-10)
+        assertEquals(-0.241564475270491, BetaDistribution(0.5, 0.5).entropy, 1e-10)
+        assertEquals(0.0, BetaDistribution(1.0, 1.0).entropy, 1e-10) // Uniform(0,1)
+        assertEquals(-6.261125597836372, BetaDistribution(0.1, 0.1).entropy, 1e-10)
+        assertEquals(-0.817636660417293, BetaDistribution(10.0, 3.0).entropy, 1e-10)
+        assertEquals(-0.431945622001443, BetaDistribution(1.0, 3.0).entropy, 1e-10)
     }
 
     @Test

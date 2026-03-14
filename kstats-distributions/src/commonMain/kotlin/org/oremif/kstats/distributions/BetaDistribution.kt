@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.digamma
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.findQuantile
 import org.oremif.kstats.core.lnBeta
@@ -117,7 +118,10 @@ public data class BetaDistribution(
         return regularizedBeta(1.0 - x, beta, alpha)
     }
 
-    // entropy requires digamma function (deferred to MATH-001)
+    /** The differential entropy of this distribution. */
+    override val entropy: Double get() =
+        lnBeta(alpha, beta) - (alpha - 1.0) * digamma(alpha) - (beta - 1.0) * digamma(beta) +
+            (alpha + beta - 2.0) * digamma(alpha + beta)
 
     /**
      * Computes the quantile (inverse CDF) for the given probability [p].

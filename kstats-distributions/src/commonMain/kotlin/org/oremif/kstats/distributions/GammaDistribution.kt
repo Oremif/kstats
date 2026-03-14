@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.digamma
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.findQuantile
 import org.oremif.kstats.core.lnGamma
@@ -139,7 +140,9 @@ public data class GammaDistribution(
         return findQuantile(p, ::cdf, ::pdf, guess, lowerBound = 1e-15)
     }
 
-    // entropy requires digamma function (deferred to MATH-001)
+    /** The differential entropy of this distribution. */
+    override val entropy: Double get() =
+        shape - ln(rate) + lnGamma(shape) + (1.0 - shape) * digamma(shape)
 
     /** The mean of this distribution, equal to shape / rate. */
     override val mean: Double get() = shape / rate

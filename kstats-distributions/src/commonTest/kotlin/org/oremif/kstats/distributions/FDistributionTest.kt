@@ -204,9 +204,13 @@ class FDistributionTest {
     }
 
     @Test
-    fun testEntropyNaN() {
-        // entropy requires digamma (deferred to MATH-001)
-        assertTrue(FDistribution(5.0, 10.0).entropy.isNaN())
+    fun testEntropy() {
+        assertEquals(1.130759804909061, FDistribution(5.0, 10.0).entropy, 1e-10)
+        assertEquals(2.531024246969291, FDistribution(1.0, 1.0).entropy, 1e-10)
+        assertEquals(0.803258079701450, FDistribution(10.0, 20.0).entropy, 1e-10)
+        assertEquals(1.400000000000000, FDistribution(2.0, 5.0).entropy, 1e-10)
+        assertEquals(0.166072878675664, FDistribution(50.0, 50.0).entropy, 1e-10)
+        assertEquals(3.135651860148876, FDistribution(0.5, 0.5).entropy, 1e-10)
     }
 
     @Test

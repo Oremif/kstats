@@ -1,7 +1,9 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.digamma
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.findQuantile
+import org.oremif.kstats.core.lnBeta
 import org.oremif.kstats.core.lnGamma
 import org.oremif.kstats.core.regularizedBeta
 import kotlin.math.*
@@ -121,6 +123,11 @@ public data class StudentTDistribution(
         if (p == 0.5) return 0.0
         return findQuantile(p, ::cdf, ::pdf, NormalDistribution.STANDARD.quantile(p))
     }
+
+    /** The differential entropy of this distribution. */
+    override val entropy: Double get() =
+        (df + 1.0) / 2.0 * (digamma((df + 1.0) / 2.0) - digamma(df / 2.0)) +
+            0.5 * ln(df) + lnBeta(df / 2.0, 0.5)
 
     /** The mean of this distribution, which is 0 when degrees of freedom exceeds 1, or NaN otherwise. */
     override val mean: Double get() = if (df > 1) 0.0 else Double.NaN

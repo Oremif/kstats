@@ -204,9 +204,13 @@ class ChiSquaredDistributionTest {
     }
 
     @Test
-    fun testEntropyNaN() {
-        // entropy requires digamma (deferred to MATH-001)
-        assertTrue(ChiSquaredDistribution(5.0).entropy.isNaN())
+    fun testEntropy() {
+        assertEquals(0.783757110473934, ChiSquaredDistribution(1.0).entropy, 1e-10)
+        assertEquals(1.693147180559945, ChiSquaredDistribution(2.0).entropy, 1e-10)
+        assertEquals(2.423095090065000, ChiSquaredDistribution(5.0).entropy, 1e-10)
+        assertEquals(2.846730337180690, ChiSquaredDistribution(10.0).entropy, 1e-10)
+        assertEquals(3.708056270224887, ChiSquaredDistribution(50.0).entropy, 1e-10)
+        assertEquals(-0.939420444774176, ChiSquaredDistribution(0.5).entropy, 1e-10)
     }
 
     @Test

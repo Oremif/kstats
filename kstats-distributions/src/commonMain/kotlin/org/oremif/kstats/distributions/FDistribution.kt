@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.digamma
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.findQuantile
 import org.oremif.kstats.core.lnBeta
@@ -129,6 +130,12 @@ public data class FDistribution(
         if (p == 1.0) return Double.POSITIVE_INFINITY
         return findQuantile(p, ::cdf, ::pdf, d2 / (d2 - 2.0).coerceAtLeast(0.1), lowerBound = 1e-15)
     }
+
+    /** The differential entropy of this distribution. */
+    override val entropy: Double get() =
+        ln(d2 / d1) + lnBeta(d1 / 2.0, d2 / 2.0) +
+            (1.0 - d1 / 2.0) * digamma(d1 / 2.0) - (1.0 + d2 / 2.0) * digamma(d2 / 2.0) +
+            (d1 + d2) / 2.0 * digamma((d1 + d2) / 2.0)
 
     /** Returns the mean, defined only when the denominator degrees of freedom exceeds 2. Returns [Double.NaN] otherwise. */
     override val mean: Double get() = if (d2 > 2) d2 / (d2 - 2) else Double.NaN

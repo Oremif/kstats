@@ -454,9 +454,13 @@ class NakagamiDistributionTest {
     }
 
     @Test
-    fun testEntropyNaN() {
-        // Entropy requires digamma, deferred to MATH-001
-        assertTrue(d1.entropy.isNaN())
+    fun testEntropy() {
+        assertEquals(0.875408870846436, NakagamiDistribution(2.0, 3.0).entropy, 1e-10)
+        assertEquals(0.725791352644727, NakagamiDistribution(0.5, 1.0).entropy, 1e-10)
+        assertEquals(0.595460651890821, NakagamiDistribution(1.0, 1.0).entropy, 1e-10)
+        assertEquals(0.249231775907822, NakagamiDistribution(5.0, 2.0).entropy, 1e-10)
+        assertEquals(1.746753198387844, NakagamiDistribution(1.0, 10.0).entropy, 1e-10)
+        assertEquals(0.370457113107702, NakagamiDistribution(10.0, 5.0).entropy, 1e-10)
     }
 
     @Test

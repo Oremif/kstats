@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.digamma
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.findQuantile
 import org.oremif.kstats.core.lnGamma
@@ -158,7 +159,9 @@ public data class NakagamiDistribution(
         return (m4 - 4.0 * m1 * m3 + 6.0 * m1 * m1 * m2 - 3.0 * m1 * m1 * m1 * m1) / (v * v) - 3.0
     }
 
-    // entropy requires digamma function (deferred to MATH-001)
+    /** The differential entropy of this distribution. */
+    override val entropy: Double get() =
+        lnGamma(mu) + mu - (mu - 0.5) * digamma(mu) - 0.5 * ln(mu) - ln(2.0) + 0.5 * ln(omega)
 
     /**
      * Draws a single random value from this Nakagami distribution.
