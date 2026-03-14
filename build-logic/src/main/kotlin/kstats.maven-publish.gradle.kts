@@ -12,7 +12,11 @@ version = libs.findVersion("kstats").get().toString()
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
 
-    signAllPublications()
+    if (project.providers.gradleProperty("signing.keyId").isPresent ||
+        project.providers.environmentVariable("ORG_GRADLE_PROJECT_signingInMemoryKey").isPresent
+    ) {
+        signAllPublications()
+    }
 
     coordinates(group.toString(), project.name, version.toString())
 
