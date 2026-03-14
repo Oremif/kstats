@@ -3,6 +3,11 @@ package org.oremif.kstats.core
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 
+// ── Mathematical constants ──────────────────────────────────────────────────
+
+/** The Euler-Mascheroni constant γ ≈ 0.5772. */
+public const val EULER_MASCHERONI: Double = 0.5772156649015328606
+
 // ── Lanczos coefficients for ln(Gamma) ──────────────────────────────────────
 
 private val LANCZOS_COEFFICIENTS = doubleArrayOf(
