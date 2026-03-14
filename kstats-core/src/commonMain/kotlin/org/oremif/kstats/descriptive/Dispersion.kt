@@ -275,3 +275,126 @@ public fun Iterable<Double>.trimmedStd(proportion: Double, kind: PopulationKind 
  */
 public fun Sequence<Double>.trimmedStd(proportion: Double, kind: PopulationKind = SAMPLE): Double =
     sqrt(trimmedVariance(proportion, kind))
+
+// ── semiVariance ────────────────────────────────────────────────────────────
+
+/**
+ * Computes the semi-variance of the values on one side of a threshold.
+ *
+ * Semi-variance measures variability on only one side of a threshold, ignoring values on the
+ * other side. It is commonly used in finance to quantify downside risk separately from upside
+ * potential. The divisor uses the total number of elements (n-1 for sample, n for population),
+ * not just the count on the measured side, matching the Apache Commons Math convention.
+ * When the threshold equals the mean, the sum of downside and upside semi-variance equals
+ * the full variance. Uses Neumaier compensated summation for numerical stability.
+ *
+ * ### Example:
+ * ```kotlin
+ * val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
+ * data.semiVariance() // 1.7143 (downside, sample, threshold = mean)
+ * data.semiVariance(direction = SemiVarianceDirection.UPSIDE) // 2.8571
+ * ```
+ *
+ * @param threshold the reference point that separates downside from upside. Defaults to
+ * the [mean] of the values.
+ * @param direction which side of the threshold to measure. Defaults to
+ * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
+ * @param kind whether to compute sample or population semi-variance. Defaults to
+ * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
+ * @return the semi-variance on the selected side of the threshold.
+ * @see variance
+ */
+public fun DoubleArray.semiVariance(
+    threshold: Double = mean(),
+    direction: SemiVarianceDirection = SemiVarianceDirection.DOWNSIDE,
+    kind: PopulationKind = SAMPLE,
+): Double {
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    val divisor = if (kind == SAMPLE) {
+        if (size <= 1) throw InsufficientDataException("Sample semi-variance requires at least 2 elements")
+        size - 1
+    } else {
+        size
+    }
+    var sum = 0.0
+    var compensation = 0.0
+    for (x in this) {
+        val diff = x - threshold
+        val include = diff.isNaN() || when (direction) {
+            SemiVarianceDirection.DOWNSIDE -> diff < 0.0
+            SemiVarianceDirection.UPSIDE -> diff > 0.0
+        }
+        if (include) {
+            val sq = diff * diff
+            val t = sum + sq
+            compensation += if (abs(sum) >= abs(sq)) (sum - t) + sq else (sq - t) + sum
+            sum = t
+        }
+    }
+    return (sum + compensation) / divisor
+}
+
+/**
+ * Computes the semi-variance of the values on one side of a threshold.
+ *
+ * Semi-variance measures variability on only one side of a threshold, ignoring values on the
+ * other side. It is commonly used in finance to quantify downside risk separately from upside
+ * potential. The divisor uses the total number of elements (n-1 for sample, n for population),
+ * not just the count on the measured side. When the threshold equals the mean, the sum of
+ * downside and upside semi-variance equals the full variance.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).semiVariance() // 1.7143 (downside, sample)
+ * ```
+ *
+ * @param threshold the reference point that separates downside from upside. Defaults to
+ * the [mean] of the values.
+ * @param direction which side of the threshold to measure. Defaults to
+ * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
+ * @param kind whether to compute sample or population semi-variance. Defaults to
+ * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
+ * @return the semi-variance on the selected side of the threshold.
+ * @see variance
+ */
+public fun Iterable<Double>.semiVariance(
+    threshold: Double = mean(),
+    direction: SemiVarianceDirection = SemiVarianceDirection.DOWNSIDE,
+    kind: PopulationKind = SAMPLE,
+): Double = toList().toDoubleArray().semiVariance(threshold, direction, kind)
+
+/**
+ * Computes the semi-variance of the values on one side of a threshold.
+ *
+ * Semi-variance measures variability on only one side of a threshold, ignoring values on the
+ * other side. It is commonly used in finance to quantify downside risk separately from upside
+ * potential. The divisor uses the total number of elements (n-1 for sample, n for population),
+ * not just the count on the measured side. When the threshold equals the mean, the sum of
+ * downside and upside semi-variance equals the full variance.
+ *
+ * Since sequences can only be consumed once, the threshold cannot default to the mean directly.
+ * Instead, pass `Double.NaN` (the default) to use the mean of the materialized data.
+ *
+ * ### Example:
+ * ```kotlin
+ * sequenceOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).semiVariance() // 1.7143 (downside, sample)
+ * ```
+ *
+ * @param threshold the reference point that separates downside from upside. Defaults to
+ * `Double.NaN`, which uses the mean of the values.
+ * @param direction which side of the threshold to measure. Defaults to
+ * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
+ * @param kind whether to compute sample or population semi-variance. Defaults to
+ * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
+ * @return the semi-variance on the selected side of the threshold.
+ * @see variance
+ */
+public fun Sequence<Double>.semiVariance(
+    threshold: Double = Double.NaN,
+    direction: SemiVarianceDirection = SemiVarianceDirection.DOWNSIDE,
+    kind: PopulationKind = SAMPLE,
+): Double {
+    val array = toList().toDoubleArray()
+    val t = if (threshold.isNaN()) array.mean() else threshold
+    return array.semiVariance(t, direction, kind)
+}
