@@ -1,13 +1,54 @@
-*.iml
-.gradle
-.idea
+# OS-generated files
 .DS_Store
-build
-captures
-.externalNativeBuild
-.cxx
+Thumbs.db
+Desktop.ini
+
+# Editors and IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Gradle, Kotlin, and JVM build outputs
+.gradle/
+.kotlin/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
 local.properties
-xcuserdata
-.kotlin
-#So we don't accidentally commit our private keys
+hs_err_pid*
+replay_pid*
+
+# Kotlin/JS, Wasm, and docs tooling
+/kotlin-js-store/
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+.pnp.*
+.mintlify/
+
+# Apple toolchains
+DerivedData/
+xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.sample
 *.gpg
+*.jks
+*.keystore
+
+# Logs and temporary files
+*.log
+*.swp
+*.swo
+*.tmp
+*~
