@@ -323,7 +323,7 @@ private fun swPoly(coeffs: DoubleArray, x: Double): Double {
 /**
  * Computes Shapiro-Wilk coefficients using the Royston AS R94 algorithm.
  *
- * Returns a full antisymmetric coefficient array of size n where a[i] = -a[n-1-i].
+ * Returns a full antisymmetric coefficient array of size n where `a[i] = -a[n-1-i]`.
  * The extreme coefficients are corrected via polynomial approximations; middle
  * coefficients are normalized expected normal order statistics.
  */

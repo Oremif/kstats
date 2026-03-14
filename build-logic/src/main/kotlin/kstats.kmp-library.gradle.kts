@@ -83,6 +83,7 @@ kotlin {
     }
 
     wasmWasi {
+        nodejs()
         binaries.library()
     }
 
