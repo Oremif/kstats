@@ -2,7 +2,6 @@ package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs
-import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.random.Random
 import kotlin.test.Test

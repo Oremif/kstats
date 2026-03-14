@@ -1,6 +1,5 @@
 package org.oremif.kstats.descriptive
 
-import kotlin.math.abs
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
