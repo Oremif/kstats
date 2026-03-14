@@ -3,6 +3,38 @@ package org.oremif.kstats.descriptive
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.math.sqrt
 
+/**
+ * A snapshot of common descriptive statistics for a dataset.
+ *
+ * Returned by the [describe] function. Contains measures of central tendency, dispersion,
+ * shape, and position. Fields that require a minimum number of data points are set to
+ * [Double.NaN] when there is insufficient data (e.g. variance needs at least 2, skewness
+ * needs at least 3, kurtosis needs at least 4).
+ *
+ * ### Example:
+ * ```kotlin
+ * val stats = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0).describe()
+ * stats.mean     // 3.0
+ * stats.median   // 3.0
+ * stats.variance // 2.5
+ * ```
+ *
+ * @property count the number of observations.
+ * @property mean the arithmetic mean.
+ * @property standardDeviation the sample standard deviation (divides by n-1), or NaN if n < 2.
+ * @property min the smallest value in the dataset.
+ * @property q1 the first quartile (25th percentile).
+ * @property median the second quartile (50th percentile).
+ * @property q3 the third quartile (75th percentile).
+ * @property max the largest value in the dataset.
+ * @property variance the sample variance (divides by n-1), or NaN if n < 2.
+ * @property skewness the sample-adjusted Fisher-Pearson skewness, or NaN if n < 3.
+ * @property kurtosis the sample-adjusted excess kurtosis, or NaN if n < 4.
+ * @property sum the sum of all values.
+ * @property range the difference between the maximum and minimum values.
+ * @property interquartileRange the difference between Q3 and Q1.
+ * @property standardError the standard error of the mean (stddev / sqrt(n)), or NaN if n < 2.
+ */
 public data class DescriptiveStatistics(
     val count: Int,
     val mean: Double,
@@ -21,6 +53,23 @@ public data class DescriptiveStatistics(
     val standardError: Double
 )
 
+/**
+ * Computes a comprehensive descriptive statistics summary of the values in this iterable.
+ *
+ * Performs a single sort for order statistics (min, max, quartiles, median) and a single
+ * Welford pass for mean, variance, skewness, and kurtosis. This is more efficient than
+ * computing each statistic individually.
+ *
+ * ### Example:
+ * ```kotlin
+ * val stats = listOf(1.0, 2.0, 3.0, 4.0, 5.0).describe()
+ * stats.count  // 5
+ * stats.mean   // 3.0
+ * stats.median // 3.0
+ * ```
+ *
+ * @return a [DescriptiveStatistics] containing all computed statistics.
+ */
 public fun Iterable<Double>.describe(): DescriptiveStatistics {
     val list = toList()
     if (list.isEmpty()) throw InsufficientDataException("describe() requires at least 1 element")
@@ -106,4 +155,20 @@ private fun sortedQuantile(sorted: List<Double>, q: Double): Double {
     return sorted[lo] + frac * (sorted[hi] - sorted[lo])
 }
 
+/**
+ * Computes a comprehensive descriptive statistics summary of the values in this array.
+ *
+ * Performs a single sort for order statistics and a single Welford pass for mean, variance,
+ * skewness, and kurtosis.
+ *
+ * ### Example:
+ * ```kotlin
+ * val stats = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0).describe()
+ * stats.count  // 5
+ * stats.mean   // 3.0
+ * stats.median // 3.0
+ * ```
+ *
+ * @return a [DescriptiveStatistics] containing all computed statistics.
+ */
 public fun DoubleArray.describe(): DescriptiveStatistics = asIterable().describe()

@@ -1,16 +1,13 @@
 package org.oremif.kstats.core
 
 /**
- * Rearranges elements so that `this[k]` holds the k-th order statistic,
- * `this[0..k-1] <= this[k]`, and `this[k+1..n-1] >= this[k]`.
+ * Rearranges elements in-place so that the k-th smallest value is at index [k].
  *
- * Uses introselect: quickselect with median-of-three pivot selection
- * and heapsort fallback when recursion depth exceeds `2 * floor(log2(n))`.
- *
- * Expected O(n), worst-case O(n log n). O(1) extra memory (in-place).
- *
- * All comparisons use [Double.compareTo] (total order) so that NaN is treated
- * as greater than every other value, consistent with [DoubleArray.sortedArray].
+ * After this call, `this[k]` holds the k-th order statistic, all elements before index k are
+ * less than or equal to `this[k]`, and all elements after are greater than or equal. Uses
+ * introselect (quickselect with median-of-three pivot and heapsort fallback when recursion
+ * depth exceeds 2 * floor(log2(n))). Expected O(n) time, worst-case O(n log n), O(1) extra
+ * memory. NaN values sort last, consistent with [Double.compareTo] total order.
  */
 internal fun DoubleArray.introSelect(k: Int) {
     val n = size

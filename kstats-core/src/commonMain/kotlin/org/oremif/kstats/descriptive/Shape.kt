@@ -6,6 +6,24 @@ import kotlin.math.sqrt
 
 // ── skewness ────────────────────────────────────────────────────────────────
 
+/**
+ * Computes the skewness of the values in this iterable.
+ *
+ * Skewness measures the asymmetry of a distribution. A positive value indicates a longer
+ * right tail, a negative value indicates a longer left tail, and zero indicates symmetry.
+ * Uses a two-pass algorithm with z-normalization for numerical stability: first computes
+ * the mean and variance via Welford's method, then accumulates normalized cubed deviations.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).skewness() // 0.656...
+ * ```
+ *
+ * @param kind whether to compute sample-adjusted (Fisher-Pearson) or population skewness.
+ * Defaults to [PopulationKind.SAMPLE], which applies the bias correction factor
+ * sqrt(n*(n-1)) / (n-2).
+ * @return the skewness, or 0.0 if variance is zero (constant data).
+ */
 public fun Iterable<Double>.skewness(kind: PopulationKind = SAMPLE): Double {
     val list = toList()
     val n = list.size
@@ -44,10 +62,46 @@ public fun Iterable<Double>.skewness(kind: PopulationKind = SAMPLE): Double {
     }
 }
 
+/**
+ * Computes the skewness of the values in this array.
+ *
+ * Skewness measures the asymmetry of a distribution. A positive value indicates a longer
+ * right tail, a negative value indicates a longer left tail, and zero indicates symmetry.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).skewness() // 0.656...
+ * ```
+ *
+ * @param kind whether to compute sample-adjusted (Fisher-Pearson) or population skewness.
+ * Defaults to [PopulationKind.SAMPLE], which applies the bias correction factor
+ * sqrt(n*(n-1)) / (n-2).
+ * @return the skewness, or 0.0 if variance is zero (constant data).
+ */
 public fun DoubleArray.skewness(kind: PopulationKind = SAMPLE): Double = asIterable().skewness(kind)
 
 // ── kurtosis ────────────────────────────────────────────────────────────────
 
+/**
+ * Computes the kurtosis of the values in this iterable.
+ *
+ * Kurtosis measures the "tailedness" of a distribution relative to a normal distribution.
+ * Higher kurtosis indicates heavier tails and a sharper peak. By default, computes excess
+ * kurtosis (subtracting 3 so that a normal distribution has kurtosis 0). Uses a two-pass
+ * algorithm with z-normalization for numerical stability.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).kurtosis() // -0.151...
+ * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).kurtosis(excess = false) // 2.848...
+ * ```
+ *
+ * @param kind whether to compute sample-adjusted or population kurtosis. Defaults to
+ * [PopulationKind.SAMPLE], which applies bias correction.
+ * @param excess whether to subtract 3 (the kurtosis of a normal distribution). Defaults to
+ * `true`. Set to `false` for raw kurtosis.
+ * @return the kurtosis. Returns -3.0 (excess) or 0.0 (non-excess) if variance is zero.
+ */
 public fun Iterable<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean = true): Double {
     val list = toList()
     val n = list.size
@@ -91,5 +145,22 @@ public fun Iterable<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Bool
     return result
 }
 
+/**
+ * Computes the kurtosis of the values in this array.
+ *
+ * Kurtosis measures the "tailedness" of a distribution relative to a normal distribution.
+ * Higher kurtosis indicates heavier tails and a sharper peak.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).kurtosis() // -0.151...
+ * ```
+ *
+ * @param kind whether to compute sample-adjusted or population kurtosis. Defaults to
+ * [PopulationKind.SAMPLE], which applies bias correction.
+ * @param excess whether to subtract 3 (the kurtosis of a normal distribution). Defaults to
+ * `true`. Set to `false` for raw kurtosis.
+ * @return the kurtosis. Returns -3.0 (excess) or 0.0 (non-excess) if variance is zero.
+ */
 public fun DoubleArray.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean = true): Double =
     asIterable().kurtosis(kind, excess)

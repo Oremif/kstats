@@ -5,7 +5,32 @@ import org.oremif.kstats.core.lnFactorial
 import kotlin.math.exp
 
 /**
- * Fisher's exact test for 2×2 contingency tables.
+ * Performs Fisher's exact test for a 2x2 contingency table.
+ *
+ * The null hypothesis is that the row and column variables are independent.
+ * Unlike the chi-squared test, Fisher's exact test computes the exact p-value using
+ * the hypergeometric distribution, making it appropriate for small sample sizes where
+ * the chi-squared approximation may be unreliable. The test statistic reported is the
+ * odds ratio.
+ *
+ * ### Example:
+ * ```kotlin
+ * val table = arrayOf(
+ *     intArrayOf(10, 5),
+ *     intArrayOf(3, 12)
+ * )
+ * val result = fisherExactTest(table)
+ * result.statistic                   // odds ratio (8.0)
+ * result.pValue                      // two-sided exact p-value
+ * result.additionalInfo["oddsRatio"] // same as statistic
+ * ```
+ *
+ * @param table a 2x2 contingency table with non-negative integer counts.
+ * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED].
+ * [Alternative.LESS] tests if the odds ratio is less than 1, [Alternative.GREATER] tests
+ * if it is greater than 1.
+ * @return a [TestResult] containing the odds ratio as the statistic, the exact p-value,
+ * and additional info with the "oddsRatio" entry.
  */
 public fun fisherExactTest(
     table: Array<IntArray>,
@@ -65,6 +90,11 @@ public fun fisherExactTest(
     )
 }
 
+/**
+ * Log-probability mass function for the hypergeometric distribution.
+ *
+ * Computes in log-space to avoid overflow with large factorials.
+ */
 private fun hypergeometricLogPmf(k: Int, n1: Int, n2: Int, n: Int): Double {
     return lnFactorial(n1) + lnFactorial(n - n1) + lnFactorial(n2) + lnFactorial(n - n2) -
         lnFactorial(n) - lnFactorial(k) - lnFactorial(n1 - k) -

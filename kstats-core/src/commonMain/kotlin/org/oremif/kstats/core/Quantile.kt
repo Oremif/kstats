@@ -8,11 +8,34 @@ private const val BISECTION_MAX_ITERATIONS = 100
 private const val RELATIVE_TOLERANCE = 1e-12
 
 /**
- * Shared quantile-finding utility using Newton-Raphson with bisection fallback.
+ * Finds the quantile value x such that cdf(x) = [p], using Newton-Raphson with bisection fallback.
  *
- * Phase 1: Newton-Raphson (up to 50 iterations).
- * Phase 2: Bisection fallback if Newton fails or pdf is zero (up to 100 iterations).
- * Phase 3: Throws ConvergenceException if neither phase converges.
+ * This is the shared numerical root-finder used by distribution quantile methods. It first
+ * attempts Newton-Raphson iteration (up to 50 steps) for fast quadratic convergence, then
+ * falls back to bisection (up to 100 steps) if Newton stalls or the PDF is zero at the
+ * current estimate. For unbounded distributions, the bisection phase automatically expands
+ * the search bracket until it contains the target probability.
+ *
+ * ### Example:
+ * ```kotlin
+ * // Find the median of the standard normal distribution
+ * val median = findQuantile(
+ *     p = 0.5,
+ *     cdf = { x -> 0.5 * (1.0 + erf(x / sqrt(2.0))) },
+ *     pdf = { x -> exp(-x * x / 2.0) / sqrt(2.0 * PI) },
+ *     initialGuess = 0.0,
+ * ) // 0.0
+ * ```
+ *
+ * @param p the target cumulative probability, typically in (0, 1).
+ * @param cdf the cumulative distribution function.
+ * @param pdf the probability density function, used by the Newton-Raphson step.
+ * @param initialGuess a starting estimate for x. A good guess improves convergence speed.
+ * @param lowerBound the lower bound of the distribution's support. Defaults to negative infinity.
+ * @param upperBound the upper bound of the distribution's support. Defaults to positive infinity.
+ * @return the value x such that cdf(x) is approximately equal to [p].
+ * @throws org.oremif.kstats.core.exceptions.ConvergenceException if neither Newton-Raphson nor bisection converges within the
+ * iteration limits.
  */
 public fun findQuantile(
     p: Double,

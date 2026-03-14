@@ -11,6 +11,17 @@ import org.oremif.kstats.sampling.rank
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+/**
+ * The result of a correlation computation.
+ *
+ * @property coefficient the correlation coefficient, ranging from -1.0 (perfect negative
+ * correlation) through 0.0 (no correlation) to 1.0 (perfect positive correlation). Returns
+ * [Double.NaN] when the correlation is undefined (e.g. constant input).
+ * @property pValue the two-sided p-value for testing the null hypothesis that the true
+ * correlation is zero. Smaller values indicate stronger evidence of a real association.
+ * Returns [Double.NaN] when the p-value cannot be computed.
+ * @property n the number of observations used in the computation.
+ */
 public data class CorrelationResult(
     val coefficient: Double,
     val pValue: Double,
@@ -18,7 +29,33 @@ public data class CorrelationResult(
 )
 
 /**
- * Pearson product-moment correlation coefficient with p-value.
+ * Computes the Pearson product-moment correlation coefficient between two arrays.
+ *
+ * The Pearson correlation measures the strength and direction of the linear relationship
+ * between two variables. A value of 1.0 indicates a perfect positive linear relationship,
+ * -1.0 indicates a perfect negative linear relationship, and 0.0 indicates no linear
+ * relationship.
+ *
+ * The p-value is computed using a two-sided t-test for the null hypothesis that the true
+ * correlation is zero. Uses the numerically stable form (1-r)(1+r) instead of (1-r²) to
+ * avoid catastrophic cancellation when r is close to ±1.
+ *
+ * Returns [Double.NaN] for both coefficient and p-value when either array has zero variance
+ * (all values identical).
+ *
+ * ### Example:
+ * ```kotlin
+ * val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+ * val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
+ * val result = pearsonCorrelation(x, y)
+ * result.coefficient // 1.0
+ * result.pValue      // 0.0
+ * result.n           // 5
+ * ```
+ *
+ * @param x the first array of observations.
+ * @param y the second array of observations, must have the same size as [x].
+ * @return a [CorrelationResult] containing the Pearson r, two-sided p-value, and sample size.
  */
 public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
@@ -63,7 +100,26 @@ public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult
 }
 
 /**
- * Spearman rank correlation coefficient.
+ * Computes the Spearman rank correlation coefficient between two arrays.
+ *
+ * The Spearman correlation is a non-parametric measure of the monotonic relationship between
+ * two variables. Unlike Pearson, it does not assume linearity — it detects whether the
+ * variables tend to increase or decrease together, regardless of the rate.
+ *
+ * Computed by applying the Pearson correlation to the average-method ranks of the input
+ * arrays. Tied values receive the average of the ranks they would occupy.
+ *
+ * ### Example:
+ * ```kotlin
+ * val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+ * val y = doubleArrayOf(1.0, 4.0, 9.0, 16.0, 25.0)
+ * val result = spearmanCorrelation(x, y)
+ * result.coefficient // 1.0 (perfect monotonic relationship)
+ * ```
+ *
+ * @param x the first array of observations.
+ * @param y the second array of observations, must have the same size as [x].
+ * @return a [CorrelationResult] containing the Spearman rho, two-sided p-value, and sample size.
  */
 public fun spearmanCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
@@ -77,11 +133,32 @@ public fun spearmanCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResul
 }
 
 /**
- * Kendall's tau-b correlation coefficient.
+ * Computes Kendall's tau-b rank correlation coefficient between two arrays.
  *
- * Uses O(n log n) merge-sort based algorithm (Knight, 1966) for counting
- * discordant pairs, with ties-adjusted variance formula (Kendall, 1970)
- * for the p-value.
+ * Kendall's tau-b measures the ordinal association between two variables. It counts the
+ * number of concordant pairs (both values increase together) versus discordant pairs
+ * (one increases while the other decreases), with an adjustment for ties. Values range
+ * from -1.0 (all pairs discordant) to 1.0 (all pairs concordant).
+ *
+ * Uses an O(n log n) merge-sort algorithm (Knight, 1966) for counting discordant pairs,
+ * rather than the naive O(n²) approach. The p-value is computed using a normal approximation
+ * with the ties-adjusted variance formula (Kendall, 1970).
+ *
+ * Returns [Double.NaN] for both coefficient and p-value when all values in either array
+ * are identical (denominator becomes zero).
+ *
+ * ### Example:
+ * ```kotlin
+ * val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+ * val y = doubleArrayOf(1.0, 3.0, 2.0, 5.0, 4.0)
+ * val result = kendallTau(x, y)
+ * result.coefficient // 0.6
+ * result.pValue      // p-value from normal approximation
+ * ```
+ *
+ * @param x the first array of observations.
+ * @param y the second array of observations, must have the same size as [x].
+ * @return a [CorrelationResult] containing tau-b, two-sided p-value, and sample size.
  */
 public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
@@ -187,9 +264,10 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
 }
 
 /**
- * Counts the number of discordant pairs (inversions) in [arr] using merge sort.
- * Modifies [arr] in-place (sorts it). Uses [temp] as scratch space.
- * Returns the inversion count as Long to avoid overflow for large n.
+ * Counts discordant pairs (inversions) in [arr] via merge sort.
+ *
+ * Sorts [arr] in-place as a side effect. Uses [temp] as scratch space for merging.
+ * Returns the count as Long to avoid overflow for large n (up to ~2 billion pairs).
  */
 private fun countDiscordant(arr: DoubleArray, temp: DoubleArray, left: Int, right: Int): Long {
     if (left >= right) return 0L
@@ -222,7 +300,25 @@ private fun countDiscordant(arr: DoubleArray, temp: DoubleArray, left: Int, righ
 }
 
 /**
- * Covariance between two arrays.
+ * Computes the covariance between two arrays.
+ *
+ * Covariance measures how two variables change together. A positive value means they tend
+ * to increase together, a negative value means one tends to increase when the other decreases,
+ * and a value near zero means no linear association. Unlike correlation, the magnitude of
+ * covariance depends on the scale of the variables.
+ *
+ * ### Example:
+ * ```kotlin
+ * val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+ * val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
+ * covariance(x, y) // 5.0 (sample covariance)
+ * ```
+ *
+ * @param x the first array of observations.
+ * @param y the second array of observations, must have the same size as [x].
+ * @param kind whether to compute sample or population covariance. Defaults to [PopulationKind.SAMPLE],
+ * which divides by n-1 (Bessel's correction) to produce an unbiased estimate.
+ * @return the covariance between [x] and [y].
  */
 public fun covariance(
     x: DoubleArray,
@@ -245,7 +341,24 @@ public fun covariance(
 }
 
 /**
- * Correlation matrix for multiple variables.
+ * Computes the Pearson correlation matrix for multiple variables.
+ *
+ * Returns a symmetric k×k matrix where element (i, j) is the Pearson correlation between
+ * variables i and j. Diagonal elements are always 1.0 (a variable is perfectly correlated
+ * with itself).
+ *
+ * ### Example:
+ * ```kotlin
+ * val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0)
+ * val y = doubleArrayOf(2.0, 3.0, 5.0, 7.0)
+ * val matrix = correlationMatrix(x, y)
+ * matrix[0][0] // 1.0 (x with x)
+ * matrix[0][1] // Pearson r between x and y
+ * matrix[1][0] // same as matrix[0][1] (symmetric)
+ * ```
+ *
+ * @param variables two or more arrays of observations, all with the same size.
+ * @return a k×k array of Pearson correlation coefficients.
  */
 public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> {
     val k = variables.size
@@ -261,7 +374,24 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
 }
 
 /**
- * Covariance matrix for multiple variables.
+ * Computes the covariance matrix for multiple variables.
+ *
+ * Returns a symmetric k×k matrix where element (i, j) is the covariance between variables
+ * i and j. Diagonal elements are the variances of each variable.
+ *
+ * ### Example:
+ * ```kotlin
+ * val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0)
+ * val y = doubleArrayOf(2.0, 3.0, 5.0, 7.0)
+ * val matrix = covarianceMatrix(x, y)
+ * matrix[0][0] // variance of x
+ * matrix[0][1] // covariance of x and y
+ * ```
+ *
+ * @param variables two or more arrays of observations, all with the same size.
+ * @param kind whether to compute sample or population covariance. Defaults to [PopulationKind.SAMPLE],
+ * which divides by n-1 (Bessel's correction) to produce an unbiased estimate.
+ * @return a k×k array of covariance values.
  */
 public fun covarianceMatrix(
     vararg variables: DoubleArray,

@@ -5,12 +5,25 @@ import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.introSelect
 import kotlin.math.abs
+import kotlin.math.exp
 import kotlin.math.floor
 import kotlin.math.ln
-import kotlin.math.exp
 
 // ── mean ────────────────────────────────────────────────────────────────────
 
+/**
+ * Computes the arithmetic mean of the values in this iterable.
+ *
+ * The arithmetic mean is the sum of all values divided by the count. Uses compensated
+ * (Neumaier) summation for improved numerical precision.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 2.0, 3.0).mean() // 2.0
+ * ```
+ *
+ * @return the arithmetic mean of the elements.
+ */
 public fun Iterable<Double>.mean(): Double {
     var sum = 0.0
     var compensation = 0.0
@@ -25,11 +38,37 @@ public fun Iterable<Double>.mean(): Double {
     return (sum + compensation) / count
 }
 
+/**
+ * Computes the arithmetic mean of the values in this array.
+ *
+ * The arithmetic mean is the sum of all values divided by the count. Uses compensated
+ * (Neumaier) summation for improved numerical precision with large arrays.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(1.0, 2.0, 3.0).mean() // 2.0
+ * ```
+ *
+ * @return the arithmetic mean of the array elements.
+ */
 public fun DoubleArray.mean(): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     return compensatedSum() / size
 }
 
+/**
+ * Computes the arithmetic mean of the values in this sequence.
+ *
+ * The arithmetic mean is the sum of all values divided by the count. Uses compensated
+ * (Neumaier) summation for improved numerical precision. The sequence is consumed once.
+ *
+ * ### Example:
+ * ```kotlin
+ * sequenceOf(1.0, 2.0, 3.0).mean() // 2.0
+ * ```
+ *
+ * @return the arithmetic mean of the elements.
+ */
 public fun Sequence<Double>.mean(): Double {
     var sum = 0.0
     var compensation = 0.0
@@ -46,6 +85,20 @@ public fun Sequence<Double>.mean(): Double {
 
 // ── geometricMean ───────────────────────────────────────────────────────────
 
+/**
+ * Computes the geometric mean of the values in this iterable.
+ *
+ * The geometric mean is the nth root of the product of n values. It is useful for data that
+ * spans several orders of magnitude or for computing average growth rates. All values must
+ * be positive. Computed via logarithms to avoid overflow.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 2.0, 4.0, 8.0).geometricMean() // 2.8284...
+ * ```
+ *
+ * @return the geometric mean of the elements.
+ */
 public fun Iterable<Double>.geometricMean(): Double {
     var sumLn = 0.0
     var count = 0
@@ -58,6 +111,20 @@ public fun Iterable<Double>.geometricMean(): Double {
     return exp(sumLn / count)
 }
 
+/**
+ * Computes the geometric mean of the values in this array.
+ *
+ * The geometric mean is the nth root of the product of n values. It is useful for data that
+ * spans several orders of magnitude or for computing average growth rates. All values must
+ * be positive. Computed via logarithms to avoid overflow.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(1.0, 2.0, 4.0, 8.0).geometricMean() // 2.8284...
+ * ```
+ *
+ * @return the geometric mean of the array elements.
+ */
 public fun DoubleArray.geometricMean(): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     var sumLn = 0.0
@@ -70,6 +137,20 @@ public fun DoubleArray.geometricMean(): Double {
 
 // ── harmonicMean ────────────────────────────────────────────────────────────
 
+/**
+ * Computes the harmonic mean of the values in this iterable.
+ *
+ * The harmonic mean is the reciprocal of the arithmetic mean of the reciprocals. It is
+ * appropriate for averaging rates or ratios (e.g. speeds, P/E ratios). All values must
+ * be positive. Uses compensated summation for the reciprocals.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 2.0, 4.0).harmonicMean() // 1.7142...
+ * ```
+ *
+ * @return the harmonic mean of the elements.
+ */
 public fun Iterable<Double>.harmonicMean(): Double {
     var sumReciprocal = 0.0
     var compensation = 0.0
@@ -86,6 +167,20 @@ public fun Iterable<Double>.harmonicMean(): Double {
     return count.toDouble() / (sumReciprocal + compensation)
 }
 
+/**
+ * Computes the harmonic mean of the values in this array.
+ *
+ * The harmonic mean is the reciprocal of the arithmetic mean of the reciprocals. It is
+ * appropriate for averaging rates or ratios. All values must be positive. Uses compensated
+ * summation for the reciprocals.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(1.0, 2.0, 4.0).harmonicMean() // 1.7142...
+ * ```
+ *
+ * @return the harmonic mean of the array elements.
+ */
 public fun DoubleArray.harmonicMean(): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     var sumReciprocal = 0.0
@@ -102,6 +197,22 @@ public fun DoubleArray.harmonicMean(): Double {
 
 // ── weightedMean ────────────────────────────────────────────────────────────
 
+/**
+ * Computes the weighted arithmetic mean of the values using the given [weights].
+ *
+ * Each value is multiplied by its corresponding weight, the products are summed, and the
+ * result is divided by the total weight. Weights must be non-negative and their sum must
+ * be positive. The values and weights iterables must have the same number of elements.
+ * Uses compensated summation for both the weighted sum and the total weight.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 2.0, 3.0).weightedMean(listOf(3.0, 1.0, 1.0)) // 1.6
+ * ```
+ *
+ * @param weights the weights corresponding to each value. Must be non-negative.
+ * @return the weighted arithmetic mean.
+ */
 public fun Iterable<Double>.weightedMean(weights: Iterable<Double>): Double {
     val valueIter = this.iterator()
     val weightIter = weights.iterator()
@@ -130,6 +241,21 @@ public fun Iterable<Double>.weightedMean(weights: Iterable<Double>): Double {
     return (weightedSum + wsCompensation) / finalWeight
 }
 
+/**
+ * Computes the weighted arithmetic mean of the values using the given [weights].
+ *
+ * Each value is multiplied by its corresponding weight, the products are summed, and the
+ * result is divided by the total weight. Weights must be non-negative and their sum must
+ * be positive. The arrays must have the same size. Uses compensated summation.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(1.0, 2.0, 3.0).weightedMean(doubleArrayOf(3.0, 1.0, 1.0)) // 1.6
+ * ```
+ *
+ * @param weights the weights corresponding to each value. Must be non-negative.
+ * @return the weighted arithmetic mean.
+ */
 public fun DoubleArray.weightedMean(weights: DoubleArray): Double {
     if (size != weights.size) throw InvalidParameterException("Values and weights must have the same size")
     if (isEmpty()) throw InsufficientDataException("Arrays must not be empty")
@@ -155,9 +281,39 @@ public fun DoubleArray.weightedMean(weights: DoubleArray): Double {
 
 // ── median ──────────────────────────────────────────────────────────────────
 
+/**
+ * Computes the median of the values in this iterable.
+ *
+ * The median is the middle value when the data is sorted. For an even number of elements,
+ * it is the average of the two middle values. Unlike the mean, the median is robust to
+ * outliers.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(3.0, 1.0, 2.0).median()      // 2.0
+ * listOf(1.0, 2.0, 3.0, 4.0).median() // 2.5
+ * ```
+ *
+ * @return the median of the elements.
+ */
 public fun Iterable<Double>.median(): Double =
     toList().toDoubleArray().median()
 
+/**
+ * Computes the median of the values in this array.
+ *
+ * The median is the middle value when the data is sorted. For an even number of elements,
+ * it is the average of the two middle values. Uses introselect (O(n) expected time) instead
+ * of a full sort for efficiency.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(3.0, 1.0, 2.0).median()      // 2.0
+ * doubleArrayOf(1.0, 2.0, 3.0, 4.0).median() // 2.5
+ * ```
+ *
+ * @return the median of the array elements.
+ */
 public fun DoubleArray.median(): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     val work = copyOf()
@@ -179,6 +335,22 @@ public fun DoubleArray.median(): Double {
 
 // ── mode ────────────────────────────────────────────────────────────────────
 
+/**
+ * Returns the mode (most frequently occurring values) of this iterable.
+ *
+ * The mode is the set of values that appear most often. If multiple values share the highest
+ * frequency, all of them are returned (multimodal). Works with any comparable type, not just
+ * Double.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 2.0, 2.0, 3.0).mode()       // setOf(2.0)
+ * listOf(1.0, 1.0, 2.0, 2.0).mode()       // setOf(1.0, 2.0)
+ * listOf("a", "b", "b", "c").mode()        // setOf("b")
+ * ```
+ *
+ * @return a [Set] containing all values with the highest frequency.
+ */
 public fun <T : Comparable<T>> Iterable<T>.mode(): Set<T> {
     val counts = mutableMapOf<T, Int>()
     for (element in this) {

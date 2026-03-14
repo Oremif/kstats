@@ -10,6 +10,22 @@ import kotlin.math.sqrt
 
 // ── variance (Welford's online algorithm) ───────────────────────────────────
 
+/**
+ * Computes the variance of the values in this iterable.
+ *
+ * Variance measures how far values spread from their mean. Uses Welford's numerically
+ * stable single-pass algorithm. Sample variance (default) divides by n-1 (Bessel's
+ * correction) for an unbiased estimate; population variance divides by n.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).variance()                         // 4.5714...
+ * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).variance(PopulationKind.POPULATION) // 4.0
+ * ```
+ *
+ * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
+ * @return the variance of the elements.
+ */
 public fun Iterable<Double>.variance(kind: PopulationKind = SAMPLE): Double {
     var count = 0
     var mean = 0.0
@@ -31,24 +47,90 @@ public fun Iterable<Double>.variance(kind: PopulationKind = SAMPLE): Double {
     return m2 / divisor
 }
 
+/**
+ * Computes the variance of the values in this array.
+ *
+ * Variance measures how far values spread from their mean. Uses Welford's numerically
+ * stable single-pass algorithm.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).variance() // 4.5714...
+ * ```
+ *
+ * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
+ * @return the variance of the array elements.
+ */
 public fun DoubleArray.variance(kind: PopulationKind = SAMPLE): Double = asIterable().variance(kind)
 
 // ── standardDeviation ───────────────────────────────────────────────────────
 
+/**
+ * Computes the standard deviation of the values in this iterable.
+ *
+ * The standard deviation is the square root of the [variance]. It has the same unit as the
+ * data, making it easier to interpret than variance.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).standardDeviation() // 2.1380...
+ * ```
+ *
+ * @param kind whether to compute sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @return the standard deviation of the elements.
+ */
 public fun Iterable<Double>.standardDeviation(kind: PopulationKind = SAMPLE): Double =
     sqrt(variance(kind))
 
+/**
+ * Computes the standard deviation of the values in this array.
+ *
+ * The standard deviation is the square root of the [variance].
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).standardDeviation() // 2.1380...
+ * ```
+ *
+ * @param kind whether to compute sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @return the standard deviation of the array elements.
+ */
 public fun DoubleArray.standardDeviation(kind: PopulationKind = SAMPLE): Double =
     sqrt(variance(kind))
 
 // ── range ───────────────────────────────────────────────────────────────────
 
+/**
+ * Computes the range of the values in this iterable.
+ *
+ * The range is the difference between the maximum and minimum values. It is the simplest
+ * measure of spread but is sensitive to outliers.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 5.0, 3.0).range() // 4.0
+ * ```
+ *
+ * @return the range (max - min) of the elements.
+ */
 public fun Iterable<Double>.range(): Double {
     val list = toList()
     if (list.isEmpty()) throw InsufficientDataException("Collection must not be empty")
     return list.max() - list.min()
 }
 
+/**
+ * Computes the range of the values in this array.
+ *
+ * The range is the difference between the maximum and minimum values.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(1.0, 5.0, 3.0).range() // 4.0
+ * ```
+ *
+ * @return the range (max - min) of the array elements.
+ */
 public fun DoubleArray.range(): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     return max() - min()
@@ -56,15 +138,54 @@ public fun DoubleArray.range(): Double {
 
 // ── interquartileRange ──────────────────────────────────────────────────────
 
+/**
+ * Computes the interquartile range (IQR) of the values in this iterable.
+ *
+ * The IQR is the difference between the third quartile (Q3, 75th percentile) and the first
+ * quartile (Q1, 25th percentile). It measures the spread of the middle 50% of the data and
+ * is robust to outliers.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 2.0, 3.0, 4.0, 5.0).interquartileRange() // 2.0
+ * ```
+ *
+ * @return the interquartile range (Q3 - Q1).
+ */
 public fun Iterable<Double>.interquartileRange(): Double {
     val q = quartiles()
     return q.third - q.first
 }
 
+/**
+ * Computes the interquartile range (IQR) of the values in this array.
+ *
+ * The IQR is the difference between Q3 (75th percentile) and Q1 (25th percentile).
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0).interquartileRange() // 2.0
+ * ```
+ *
+ * @return the interquartile range (Q3 - Q1).
+ */
 public fun DoubleArray.interquartileRange(): Double = asIterable().interquartileRange()
 
 // ── meanAbsoluteDeviation ───────────────────────────────────────────────────
 
+/**
+ * Computes the mean absolute deviation (MAD) of the values in this iterable.
+ *
+ * The MAD is the average of the absolute deviations from the mean. It is a robust measure
+ * of spread that is less sensitive to outliers than standard deviation.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 2.0, 3.0, 4.0, 5.0).meanAbsoluteDeviation() // 1.2
+ * ```
+ *
+ * @return the mean absolute deviation from the mean.
+ */
 public fun Iterable<Double>.meanAbsoluteDeviation(): Double {
     val list = toList()
     if (list.isEmpty()) throw InsufficientDataException("Collection must not be empty")
@@ -72,10 +193,36 @@ public fun Iterable<Double>.meanAbsoluteDeviation(): Double {
     return list.map { abs(it - m) }.mean()
 }
 
+/**
+ * Computes the mean absolute deviation (MAD) of the values in this array.
+ *
+ * The MAD is the average of the absolute deviations from the mean.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0).meanAbsoluteDeviation() // 1.2
+ * ```
+ *
+ * @return the mean absolute deviation from the mean.
+ */
 public fun DoubleArray.meanAbsoluteDeviation(): Double = asIterable().meanAbsoluteDeviation()
 
 // ── medianAbsoluteDeviation ─────────────────────────────────────────────────
 
+/**
+ * Computes the median absolute deviation (median AD) of the values in this iterable.
+ *
+ * This is the median of the absolute deviations from the median of the data. It is an
+ * extremely robust measure of spread — even more resistant to outliers than the mean
+ * absolute deviation — since both the center and spread use the median.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 2.0, 3.0, 4.0, 5.0).medianAbsoluteDeviation() // 1.0
+ * ```
+ *
+ * @return the median absolute deviation from the median.
+ */
 public fun Iterable<Double>.medianAbsoluteDeviation(): Double {
     val list = toList()
     if (list.isEmpty()) throw InsufficientDataException("Collection must not be empty")
@@ -83,16 +230,55 @@ public fun Iterable<Double>.medianAbsoluteDeviation(): Double {
     return list.map { abs(it - med) }.median()
 }
 
+/**
+ * Computes the median absolute deviation (median AD) of the values in this array.
+ *
+ * This is the median of the absolute deviations from the median of the data.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0).medianAbsoluteDeviation() // 1.0
+ * ```
+ *
+ * @return the median absolute deviation from the median.
+ */
 public fun DoubleArray.medianAbsoluteDeviation(): Double = asIterable().medianAbsoluteDeviation()
 
 // ── standardError ───────────────────────────────────────────────────────────
 
+/**
+ * Computes the standard error of the mean for the values in this iterable.
+ *
+ * The standard error estimates how much the sample mean is expected to vary from the true
+ * population mean. It equals the sample standard deviation divided by the square root of
+ * the sample size. Smaller values indicate a more precise estimate of the population mean.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 2.0, 3.0, 4.0, 5.0).standardError() // 0.7071...
+ * ```
+ *
+ * @return the standard error of the mean.
+ */
 public fun Iterable<Double>.standardError(): Double {
     val list = toList()
     if (list.size <= 1) throw InsufficientDataException("Standard error requires at least 2 elements")
     return list.standardDeviation() / sqrt(list.size.toDouble())
 }
 
+/**
+ * Computes the standard error of the mean for the values in this array.
+ *
+ * The standard error equals the sample standard deviation divided by the square root of
+ * the sample size.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0).standardError() // 0.7071...
+ * ```
+ *
+ * @return the standard error of the mean.
+ */
 public fun DoubleArray.standardError(): Double {
     if (size <= 1) throw InsufficientDataException("Standard error requires at least 2 elements")
     return standardDeviation() / sqrt(size.toDouble())
@@ -100,12 +286,42 @@ public fun DoubleArray.standardError(): Double {
 
 // ── coefficientOfVariation ──────────────────────────────────────────────────
 
+/**
+ * Computes the coefficient of variation (CV) of the values in this iterable.
+ *
+ * The CV is the ratio of the standard deviation to the mean. It expresses variability as
+ * a proportion of the mean, which is useful for comparing the spread of datasets with
+ * different units or scales. The mean must not be zero.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).coefficientOfVariation() // 0.4276...
+ * ```
+ *
+ * @param kind whether to use sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @return the coefficient of variation (standard deviation / mean).
+ * @throws DegenerateDataException if the mean is zero.
+ */
 public fun Iterable<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double {
     val m = mean()
     if (m == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
     return standardDeviation(kind) / m
 }
 
+/**
+ * Computes the coefficient of variation (CV) of the values in this array.
+ *
+ * The CV is the ratio of the standard deviation to the mean. The mean must not be zero.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).coefficientOfVariation() // 0.4276...
+ * ```
+ *
+ * @param kind whether to use sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @return the coefficient of variation (standard deviation / mean).
+ * @throws DegenerateDataException if the mean is zero.
+ */
 public fun DoubleArray.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double =
     asIterable().coefficientOfVariation(kind)
 

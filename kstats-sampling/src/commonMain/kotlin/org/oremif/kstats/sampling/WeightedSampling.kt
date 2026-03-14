@@ -4,14 +4,50 @@ import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.random.Random
 
+/**
+ * A biased coin that lands heads (true) with probability [p].
+ *
+ * Useful for simulating Bernoulli trials with a specific success probability.
+ *
+ * ### Example:
+ * ```kotlin
+ * val coin = WeightedCoin(0.7)
+ * coin.flip() // true with 70% probability
+ * ```
+ *
+ * @param p the probability of heads (true). Must be in [0, 1].
+ * @param random the random number generator. Defaults to [Random].
+ */
 public class WeightedCoin(public val p: Double, private val random: Random = Random) {
     init {
         if (p !in 0.0..1.0) throw InvalidParameterException("probability must be in [0, 1], got $p")
     }
 
+    /**
+     * Flips the coin and returns the result.
+     *
+     * @return `true` (heads) with probability [p], `false` (tails) otherwise.
+     */
     public fun flip(): Boolean = random.nextDouble() < p
 }
 
+/**
+ * A weighted die that produces outcomes with probabilities proportional to their weights.
+ *
+ * Weights are normalized internally so they do not need to sum to 1. Uses a cumulative
+ * weight lookup for O(n) roll time, where n is the number of outcomes.
+ *
+ * ### Example:
+ * ```kotlin
+ * val die = WeightedDice(mapOf("A" to 3.0, "B" to 1.0))
+ * die.roll() // "A" with 75% probability, "B" with 25%
+ * ```
+ *
+ * @param T the type of outcomes.
+ * @param weights a map from each outcome to its non-negative weight. At least one weight
+ * must be positive.
+ * @param random the random number generator. Defaults to [Random].
+ */
 public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random = Random) {
     private val outcomes: List<T>
     private val cumulativeWeights: DoubleArray
@@ -32,6 +68,12 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
         }
     }
 
+    /**
+     * Rolls the die and returns one outcome, selected with probability proportional
+     * to its weight.
+     *
+     * @return a randomly selected outcome of type [T].
+     */
     public fun roll(): T {
         val u = random.nextDouble()
         for (i in cumulativeWeights.indices) {
@@ -42,7 +84,20 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
 }
 
 /**
- * Random sample without replacement.
+ * Draws a random sample of [n] elements without replacement.
+ *
+ * Uses a partial Fisher-Yates shuffle to select [n] elements in O(n) time.
+ * Each element can appear at most once in the result.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1, 2, 3, 4, 5).randomSample(3) // e.g. [4, 1, 5]
+ * ```
+ *
+ * @param T the type of elements.
+ * @param n the number of elements to draw. Must be between 0 and the collection size.
+ * @param random the random number generator. Defaults to [Random].
+ * @return a list of [n] randomly selected elements.
  */
 public fun <T> Iterable<T>.randomSample(n: Int, random: Random = Random): List<T> {
     val list = toMutableList()
@@ -60,7 +115,21 @@ public fun <T> Iterable<T>.randomSample(n: Int, random: Random = Random): List<T
 }
 
 /**
- * Bootstrap sample with replacement.
+ * Draws a bootstrap sample of [n] elements with replacement.
+ *
+ * Bootstrap sampling randomly picks elements from the list, allowing the same element
+ * to be chosen multiple times. This is commonly used for estimating the sampling
+ * distribution of a statistic (bootstrap method).
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1, 2, 3).bootstrapSample(5) // e.g. [2, 1, 3, 1, 2]
+ * ```
+ *
+ * @param T the type of elements.
+ * @param n the number of elements to draw. Must be non-negative.
+ * @param random the random number generator. Defaults to [Random].
+ * @return a list of [n] randomly drawn elements, potentially with duplicates.
  */
 public fun <T> List<T>.bootstrapSample(n: Int, random: Random = Random): List<T> {
     if (isEmpty()) throw InsufficientDataException("List must not be empty")

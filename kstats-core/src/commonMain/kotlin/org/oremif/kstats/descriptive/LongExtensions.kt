@@ -12,48 +12,87 @@ import kotlin.jvm.JvmName
 // For data within that range the conversion is exact.
 
 /**
- * Arithmetic mean of Long values.
+ * Computes the arithmetic mean of the Long values.
  *
- * **Precision:** Long values whose absolute value exceeds 2^53 (9,007,199,254,740,992)
- * may lose precision when converted to Double.
+ * Values are converted to Double internally. Long values whose absolute value exceeds
+ * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1L, 2L, 3L).mean() // 2.0
+ * ```
+ *
+ * @return the arithmetic mean of the Long values as a Double.
  */
 @JvmName("meanOfLong")
 public fun Iterable<Long>.mean(): Double = map { it.toDouble() }.mean()
 
 /**
- * Median of Long values.
+ * Computes the median of the Long values.
  *
- * **Precision:** Long values whose absolute value exceeds 2^53 (9,007,199,254,740,992)
- * may lose precision when converted to Double.
+ * Values are converted to Double internally. Long values whose absolute value exceeds
+ * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1L, 2L, 3L, 4L).median() // 2.5
+ * ```
+ *
+ * @return the median of the Long values as a Double.
  */
 @JvmName("medianOfLong")
 public fun Iterable<Long>.median(): Double = map { it.toDouble() }.median()
 
 /**
- * Variance of Long values.
+ * Computes the variance of the Long values.
  *
- * **Precision:** Long values whose absolute value exceeds 2^53 (9,007,199,254,740,992)
- * may lose precision when converted to Double.
+ * Values are converted to Double internally. Long values whose absolute value exceeds
+ * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(2L, 4L, 4L, 4L, 5L, 5L, 7L, 9L).variance() // 4.5714...
+ * ```
+ *
+ * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
+ * @return the variance of the Long values as a Double.
  */
 @JvmName("varianceOfLong")
 public fun Iterable<Long>.variance(kind: PopulationKind = PopulationKind.SAMPLE): Double =
     map { it.toDouble() }.variance(kind)
 
 /**
- * Standard deviation of Long values.
+ * Computes the standard deviation of the Long values.
  *
- * **Precision:** Long values whose absolute value exceeds 2^53 (9,007,199,254,740,992)
- * may lose precision when converted to Double.
+ * Values are converted to Double internally. Long values whose absolute value exceeds
+ * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(2L, 4L, 4L, 4L, 5L, 5L, 7L, 9L).standardDeviation() // 2.1380...
+ * ```
+ *
+ * @param kind whether to compute sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @return the standard deviation of the Long values as a Double.
  */
 @JvmName("standardDeviationOfLong")
 public fun Iterable<Long>.standardDeviation(kind: PopulationKind = PopulationKind.SAMPLE): Double =
     map { it.toDouble() }.standardDeviation(kind)
 
 /**
- * Percentile of Long values.
+ * Computes the p-th percentile of the Long values.
  *
- * **Precision:** Long values whose absolute value exceeds 2^53 (9,007,199,254,740,992)
- * may lose precision when converted to Double.
+ * Values are converted to Double internally. Long values whose absolute value exceeds
+ * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1L, 2L, 3L, 4L, 5L).percentile(50.0) // 3.0
+ * ```
+ *
+ * @param p the percentile to compute, in [0, 100].
+ * @param interpolation how to interpolate between data points. Defaults to [QuantileInterpolation.LINEAR].
+ * @return the p-th percentile of the Long values as a Double.
  */
 @JvmName("percentileOfLong")
 public fun Iterable<Long>.percentile(
@@ -62,10 +101,19 @@ public fun Iterable<Long>.percentile(
 ): Double = map { it.toDouble() }.percentile(p, interpolation)
 
 /**
- * Descriptive statistics summary of Long values.
+ * Computes a descriptive statistics summary of the Long values.
  *
- * **Precision:** Long values whose absolute value exceeds 2^53 (9,007,199,254,740,992)
- * may lose precision when converted to Double.
+ * Values are converted to Double internally. Long values whose absolute value exceeds
+ * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ *
+ * ### Example:
+ * ```kotlin
+ * val stats = listOf(1L, 2L, 3L, 4L, 5L).describe()
+ * stats.mean   // 3.0
+ * stats.median // 3.0
+ * ```
+ *
+ * @return a [DescriptiveStatistics] summary of the values.
  */
 @JvmName("describeOfLong")
 public fun Iterable<Long>.describe(): DescriptiveStatistics = map { it.toDouble() }.describe()

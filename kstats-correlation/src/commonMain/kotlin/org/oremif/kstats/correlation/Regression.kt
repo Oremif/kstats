@@ -6,6 +6,22 @@ import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.mean
 import kotlin.math.sqrt
 
+/**
+ * The result of a simple linear regression fit (y = intercept + slope * x).
+ *
+ * @property slope the change in y for a one-unit increase in x.
+ * @property intercept the predicted value of y when x is zero.
+ * @property rSquared the coefficient of determination, indicating the proportion of variance
+ * in y explained by the linear relationship with x. Ranges from 0.0 (no explanatory power)
+ * to 1.0 (perfect fit).
+ * @property standardErrorSlope the standard error of the slope estimate, measuring the
+ * uncertainty in [slope]. Smaller values indicate a more precise estimate.
+ * @property standardErrorIntercept the standard error of the intercept estimate, measuring
+ * the uncertainty in [intercept].
+ * @property residuals the difference between each observed y value and the predicted value
+ * (y - predicted). Residuals sum to approximately zero for a correctly fitted model.
+ * @property n the number of observations used in the regression.
+ */
 public data class SimpleLinearRegressionResult(
     val slope: Double,
     val intercept: Double,
@@ -15,8 +31,38 @@ public data class SimpleLinearRegressionResult(
     val residuals: DoubleArray,
     val n: Int
 ) {
+    /**
+     * Predicts the y value for a single x value using the fitted model.
+     *
+     * ### Example:
+     * ```kotlin
+     * val result = simpleLinearRegression(
+     *     x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0),
+     *     y = doubleArrayOf(3.0, 5.0, 7.0, 9.0, 11.0)
+     * )
+     * result.predict(6.0) // 13.0
+     * ```
+     *
+     * @param x the input value.
+     * @return the predicted y value (intercept + slope * x).
+     */
     public fun predict(x: Double): Double = intercept + slope * x
 
+    /**
+     * Predicts y values for an array of x values using the fitted model.
+     *
+     * ### Example:
+     * ```kotlin
+     * val result = simpleLinearRegression(
+     *     x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0),
+     *     y = doubleArrayOf(3.0, 5.0, 7.0, 9.0, 11.0)
+     * )
+     * result.predict(doubleArrayOf(6.0, 7.0)) // [13.0, 15.0]
+     * ```
+     *
+     * @param x the array of input values.
+     * @return an array of predicted y values, one per input.
+     */
     public fun predict(x: DoubleArray): DoubleArray = DoubleArray(x.size) { predict(x[it]) }
 
     override fun equals(other: Any?): Boolean {
@@ -36,7 +82,28 @@ public data class SimpleLinearRegressionResult(
 }
 
 /**
- * Simple linear regression: y = intercept + slope * x
+ * Fits a simple linear regression model (y = intercept + slope * x) using ordinary least squares.
+ *
+ * Simple linear regression finds the straight line that best fits the data by minimizing the
+ * sum of squared residuals (differences between observed and predicted y values). The result
+ * includes the fitted coefficients, goodness-of-fit measure (R²), standard errors, and
+ * residuals.
+ *
+ * ### Example:
+ * ```kotlin
+ * val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+ * val y = doubleArrayOf(3.0, 5.0, 7.0, 9.0, 11.0)
+ * val result = simpleLinearRegression(x, y)
+ * result.slope     // 2.0
+ * result.intercept // 1.0
+ * result.rSquared  // 1.0 (perfect fit)
+ * result.predict(6.0) // 13.0
+ * ```
+ *
+ * @param x the array of predictor (independent variable) observations.
+ * @param y the array of response (dependent variable) observations, must have the same size as [x].
+ * @return a [SimpleLinearRegressionResult] containing the fitted model and diagnostics.
+ * @throws DegenerateDataException if all x values are identical (no variance to fit a slope).
  */
 public fun simpleLinearRegression(x: DoubleArray, y: DoubleArray): SimpleLinearRegressionResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")

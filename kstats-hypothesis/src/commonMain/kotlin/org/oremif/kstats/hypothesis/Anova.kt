@@ -3,6 +3,26 @@ package org.oremif.kstats.hypothesis
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.distributions.FDistribution
 
+/**
+ * The result of a one-way ANOVA test.
+ *
+ * Contains the F-statistic, p-value, and the full ANOVA decomposition into between-group
+ * and within-group components.
+ *
+ * @property fStatistic the F-statistic, computed as the ratio of between-group variance to
+ * within-group variance. Larger values indicate greater differences between groups.
+ * @property pValue the probability of observing an F-statistic at least as extreme as the
+ * computed value, assuming all group means are equal. Smaller values indicate stronger
+ * evidence that at least one group mean differs.
+ * @property dfBetween the between-group degrees of freedom, equal to the number of groups minus one.
+ * @property dfWithin the within-group degrees of freedom, equal to the total number of
+ * observations minus the number of groups.
+ * @property ssBetween the sum of squares between groups, measuring the variation due to
+ * differences between group means.
+ * @property ssWithin the sum of squares within groups, measuring the variation within each group.
+ * @property msBetween the mean square between groups (ssBetween / dfBetween).
+ * @property msWithin the mean square within groups (ssWithin / dfWithin).
+ */
 public data class AnovaResult(
     val fStatistic: Double,
     val pValue: Double,
@@ -15,7 +35,28 @@ public data class AnovaResult(
 )
 
 /**
- * One-way ANOVA test.
+ * Performs a one-way analysis of variance (ANOVA) test.
+ *
+ * The null hypothesis is that all group means are equal. ANOVA partitions the total
+ * variation in the data into variation between groups and variation within groups,
+ * then compares these using an F-test. A significant result indicates that at least
+ * one group mean differs from the others, but does not identify which one.
+ *
+ * ### Example:
+ * ```kotlin
+ * val group1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+ * val group2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+ * val group3 = doubleArrayOf(11.0, 12.0, 13.0, 14.0, 15.0)
+ * val result = oneWayAnova(group1, group2, group3)
+ * result.fStatistic // F-statistic
+ * result.pValue     // p-value (< 0.001 for clearly different groups)
+ * result.dfBetween  // 2 (three groups minus one)
+ * result.dfWithin   // 12 (fifteen observations minus three groups)
+ * ```
+ *
+ * @param groups two or more groups of observations, each with at least 2 elements.
+ * @return an [AnovaResult] containing the F-statistic, p-value, and the full ANOVA table
+ * decomposition (degrees of freedom, sums of squares, mean squares).
  */
 public fun oneWayAnova(vararg groups: DoubleArray): AnovaResult {
     if (groups.size < 2) throw InsufficientDataException("ANOVA requires at least 2 groups")

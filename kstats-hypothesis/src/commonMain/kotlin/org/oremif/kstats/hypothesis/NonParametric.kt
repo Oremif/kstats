@@ -5,12 +5,35 @@ import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.distributions.ContinuousDistribution
 import org.oremif.kstats.distributions.NormalDistribution
-import org.oremif.kstats.sampling.rank
 import org.oremif.kstats.sampling.TieMethod
+import org.oremif.kstats.sampling.rank
 import kotlin.math.*
 
 /**
- * Mann-Whitney U test (Wilcoxon rank-sum test).
+ * Performs the Mann-Whitney U test (also known as the Wilcoxon rank-sum test).
+ *
+ * The null hypothesis is that the two samples are drawn from the same distribution.
+ * This is a non-parametric test that does not assume normality — it compares the ranks
+ * of the combined samples rather than the raw values. Uses a normal approximation for
+ * computing the p-value.
+ *
+ * ### Example:
+ * ```kotlin
+ * val control = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+ * val treatment = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+ * val result = mannWhitneyUTest(control, treatment)
+ * result.statistic              // U statistic (minimum of U1 and U2)
+ * result.pValue                 // p-value
+ * result.additionalInfo["U1"]   // U statistic for sample 1
+ * result.additionalInfo["U2"]   // U statistic for sample 2
+ * result.additionalInfo["z"]    // z-score from normal approximation
+ * ```
+ *
+ * @param sample1 the first sample. Must not be empty.
+ * @param sample2 the second sample. Must not be empty.
+ * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED].
+ * @return a [TestResult] containing the U statistic (minimum of U1 and U2), p-value,
+ * and additional info with "U1", "U2", and "z".
  */
 public fun mannWhitneyUTest(
     sample1: DoubleArray,
@@ -54,9 +77,35 @@ public fun mannWhitneyUTest(
 }
 
 /**
- * Wilcoxon signed-rank test.
- * One-sample: tests whether the median differs from zero.
- * Two-sample (paired): tests whether the median difference is zero.
+ * Performs the Wilcoxon signed-rank test.
+ *
+ * In one-sample mode (when [sample2] is `null`), tests whether the median of [sample1]
+ * differs from zero. In paired mode (when [sample2] is provided), tests whether the median
+ * of the paired differences is zero. This is a non-parametric alternative to the paired
+ * t-test that does not assume normality. Uses a normal approximation for computing the p-value.
+ *
+ * Zero differences are removed before ranking. The test statistic W is the sum of positive
+ * signed ranks.
+ *
+ * ### Example:
+ * ```kotlin
+ * val before = doubleArrayOf(10.0, 12.0, 14.0, 16.0, 18.0)
+ * val after = doubleArrayOf(8.0, 9.0, 11.0, 12.0, 13.0)
+ * val result = wilcoxonSignedRankTest(before, after)
+ * result.statistic                 // W+ (sum of positive ranks)
+ * result.pValue                    // p-value
+ * result.additionalInfo["wPlus"]   // sum of positive signed ranks
+ * result.additionalInfo["wMinus"]  // sum of negative signed ranks
+ * result.additionalInfo["z"]       // z-score from normal approximation
+ * ```
+ *
+ * @param sample1 the first sample, or the only sample in one-sample mode.
+ * @param sample2 the second sample for paired mode. Must have the same size as [sample1]
+ * if provided. Defaults to `null` (one-sample mode).
+ * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED].
+ * @return a [TestResult] containing the W+ statistic, p-value, and additional info
+ * with "wPlus", "wMinus", and "z".
+ * @throws DegenerateDataException if all differences are zero after pairing or in one-sample mode.
  */
 public fun wilcoxonSignedRankTest(
     sample1: DoubleArray,
@@ -110,7 +159,27 @@ public fun wilcoxonSignedRankTest(
 }
 
 /**
- * One-sample Kolmogorov-Smirnov test: tests if sample comes from the given distribution.
+ * Performs a one-sample Kolmogorov-Smirnov test against a reference distribution.
+ *
+ * The null hypothesis is that [sample] was drawn from [distribution]. The test computes the
+ * maximum absolute difference between the empirical cumulative distribution function (ECDF)
+ * of the sample and the theoretical CDF of the reference distribution. Uses Kolmogorov's
+ * asymptotic formula for the p-value approximation.
+ *
+ * ### Example:
+ * ```kotlin
+ * val sample = doubleArrayOf(-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, -1.5, -0.3, 0.3, 0.8)
+ * val result = kolmogorovSmirnovTest(sample, NormalDistribution.STANDARD)
+ * result.statistic                // D statistic (max ECDF-CDF deviation)
+ * result.pValue                   // p-value
+ * result.additionalInfo["dPlus"]  // max(ECDF - CDF)
+ * result.additionalInfo["dMinus"] // max(CDF - ECDF)
+ * ```
+ *
+ * @param sample the observed values. Must not be empty.
+ * @param distribution the reference continuous distribution to test against.
+ * @return a [TestResult] containing the D statistic, p-value, and additional info
+ * with "dPlus" and "dMinus".
  */
 public fun kolmogorovSmirnovTest(
     sample: DoubleArray,
@@ -143,7 +212,25 @@ public fun kolmogorovSmirnovTest(
 }
 
 /**
- * Two-sample Kolmogorov-Smirnov test.
+ * Performs a two-sample Kolmogorov-Smirnov test.
+ *
+ * The null hypothesis is that [sample1] and [sample2] are drawn from the same distribution.
+ * The test computes the maximum absolute difference between the two empirical cumulative
+ * distribution functions. Uses Kolmogorov's asymptotic formula for the p-value approximation
+ * with an effective sample size derived from both sample sizes.
+ *
+ * ### Example:
+ * ```kotlin
+ * val s1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+ * val s2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+ * val result = kolmogorovSmirnovTest(s1, s2)
+ * result.statistic // D statistic (max ECDF difference)
+ * result.pValue    // p-value
+ * ```
+ *
+ * @param sample1 the first sample. Must not be empty.
+ * @param sample2 the second sample. Must not be empty.
+ * @return a [TestResult] containing the D statistic and p-value.
  */
 public fun kolmogorovSmirnovTest(
     sample1: DoubleArray,
@@ -193,30 +280,32 @@ public fun kolmogorovSmirnovTest(
 // Source: Royston P. (1995) "Remark AS R94", Applied Statistics 44(4), pp.547-551.
 // Matching R's swilk.c implementation (GPL-2+, based on AS181/R94).
 
-// Polynomial for a[n-1] correction, n >= 4, evaluated at 1/sqrt(n)
+/** Polynomial for a[n-1] correction, n >= 4, evaluated at 1/sqrt(n). */
 private val SW_C1 = doubleArrayOf(0.0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056)
 
-// Polynomial for a[n-2] correction, n >= 6, evaluated at 1/sqrt(n)
+/** Polynomial for a[n-2] correction, n >= 6, evaluated at 1/sqrt(n). */
 private val SW_C2 = doubleArrayOf(0.0, 0.042981, -0.293762, -1.752461, 5.682633, -3.582633)
 
-// P-value mean polynomial for 4 <= n <= 11, evaluated at n
+/** P-value mean polynomial for 4 <= n <= 11, evaluated at n. */
 private val SW_C3 = doubleArrayOf(0.544, -0.39978, 0.025054, -6.714e-4)
 
-// P-value log-sigma polynomial for 4 <= n <= 11, evaluated at n
+/** P-value log-sigma polynomial for 4 <= n <= 11, evaluated at n. */
 private val SW_C4 = doubleArrayOf(1.3822, -0.77857, 0.062767, -0.0020322)
 
-// P-value mean polynomial for n >= 12, evaluated at ln(n)
+/** P-value mean polynomial for n >= 12, evaluated at ln(n). */
 private val SW_C5 = doubleArrayOf(-1.5861, -0.31082, -0.083751, 0.0038915)
 
-// P-value log-sigma polynomial for n >= 12, evaluated at ln(n)
+/** P-value log-sigma polynomial for n >= 12, evaluated at ln(n). */
 private val SW_C6 = doubleArrayOf(-0.4803, -0.082676, 0.0030302)
 
-// Gamma polynomial for p-value transform, 4 <= n <= 11, evaluated at n
+/** Gamma polynomial for p-value transform, 4 <= n <= 11, evaluated at n. */
 private val SW_G = doubleArrayOf(-2.273, 0.459)
 
 /**
- * Evaluate polynomial with coefficients in ascending power order using Horner's method.
- * Computes: coeffs[0] + coeffs[1]*x + coeffs[2]*x^2 + ... + coeffs[n-1]*x^(n-1)
+ * Evaluates a polynomial with coefficients in ascending power order using Horner's method.
+ *
+ * Used internally by the Shapiro-Wilk implementation for Royston AS R94 polynomial
+ * approximations.
  */
 private fun swPoly(coeffs: DoubleArray, x: Double): Double {
     var result = coeffs[0]
@@ -231,8 +320,11 @@ private fun swPoly(coeffs: DoubleArray, x: Double): Double {
 }
 
 /**
- * Compute Shapiro-Wilk coefficients using Royston AS R94 algorithm.
- * Returns a full antisymmetric coefficient array of size n: `a[i] = -a[n-1-i]`.
+ * Computes Shapiro-Wilk coefficients using the Royston AS R94 algorithm.
+ *
+ * Returns a full antisymmetric coefficient array of size n where a[i] = -a[n-1-i].
+ * The extreme coefficients are corrected via polynomial approximations; middle
+ * coefficients are normalized expected normal order statistics.
  */
 private fun shapiroWilkCoefficients(n: Int): DoubleArray {
     val nn2 = n / 2
@@ -289,8 +381,10 @@ private fun shapiroWilkCoefficients(n: Int): DoubleArray {
 }
 
 /**
- * Compute Shapiro-Wilk p-value using Royston AS R94 approximation.
- * Three different transforms depending on n: n=3 (exact), 4<=n<=11, n>=12.
+ * Computes the Shapiro-Wilk p-value using the Royston AS R94 approximation.
+ *
+ * Uses three different transforms depending on the sample size:
+ * n=3 (exact via arcsine), 4<=n<=11 (gamma-log transform), n>=12 (log-normal transform).
  */
 private fun shapiroWilkPValue(w: Double, n: Int): Double {
     val normal = NormalDistribution.STANDARD
@@ -326,10 +420,27 @@ private fun shapiroWilkPValue(w: Double, n: Int): Double {
 }
 
 /**
- * Shapiro-Wilk test for normality using Royston's AS R94 algorithm.
+ * Performs the Shapiro-Wilk test for normality.
  *
- * Tests the null hypothesis that the data was drawn from a normal distribution.
- * Valid for sample sizes 3 <= n <= 5000.
+ * The null hypothesis is that [sample] was drawn from a normal distribution. The W statistic
+ * measures how well the ordered sample values match the expected normal order statistics —
+ * values close to 1.0 indicate normality, while values significantly below 1.0 suggest
+ * non-normality. Uses Royston's AS R94 algorithm for both the W statistic and p-value
+ * approximation. Valid for sample sizes from 3 to 5000.
+ *
+ * If all values are identical (zero variance), returns W = 1.0 and p-value = 1.0.
+ *
+ * ### Example:
+ * ```kotlin
+ * val data = doubleArrayOf(-1.2, -0.5, 0.1, 0.3, 0.7, 1.0, 1.5)
+ * val result = shapiroWilkTest(data)
+ * result.statistic       // W statistic (~0.984 for this data)
+ * result.pValue          // p-value (~0.978, fails to reject normality)
+ * result.isSignificant() // false (data is consistent with normality)
+ * ```
+ *
+ * @param sample the observed values. Must have between 3 and 5000 elements.
+ * @return a [TestResult] containing the W statistic and p-value.
  */
 public fun shapiroWilkTest(sample: DoubleArray): TestResult {
     val n = sample.size
@@ -372,7 +483,10 @@ public fun shapiroWilkTest(sample: DoubleArray): TestResult {
 }
 
 /**
- * Approximation of Kolmogorov-Smirnov p-value.
+ * Approximates the Kolmogorov-Smirnov p-value using Kolmogorov's asymptotic series.
+ *
+ * Applies a continuity correction to the D statistic and evaluates the alternating
+ * series until convergence (term < 1e-12) or 100 terms.
  */
 private fun kolmogorovSmirnovPValue(d: Double, n: Int): Double {
     val sqrtN = sqrt(n.toDouble())

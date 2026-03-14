@@ -9,7 +9,29 @@ import kotlin.math.abs
 import kotlin.math.sqrt
 
 /**
- * One-sample t-test: tests whether the population mean equals [mu].
+ * Performs a one-sample t-test for whether the population mean equals [mu].
+ *
+ * The null hypothesis is that the true mean of the population from which [sample] was
+ * drawn equals [mu]. The test uses the Student's t-distribution with n-1 degrees of freedom,
+ * where n is the sample size.
+ *
+ * ### Example:
+ * ```kotlin
+ * val sample = doubleArrayOf(5.0, 6.0, 7.0, 5.5, 6.5)
+ * val result = tTest(sample, mu = 5.0)
+ * result.statistic          // t-statistic
+ * result.pValue             // p-value
+ * result.confidenceInterval // 95% CI for the sample mean
+ * result.isSignificant()    // true if p < 0.05
+ * ```
+ *
+ * @param sample the observed values. Must contain at least 2 elements.
+ * @param mu the hypothesized population mean. Defaults to `0.0`.
+ * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED],
+ * which tests whether the true mean differs from [mu] in either direction.
+ * @param confidenceLevel the confidence level for the confidence interval. Defaults to `0.95` (95%).
+ * @return a [TestResult] containing the t-statistic, p-value, degrees of freedom (n-1),
+ * a confidence interval for the mean, and additional info with "mean" and "standardError".
  */
 public fun tTest(
     sample: DoubleArray,
@@ -49,7 +71,32 @@ public fun tTest(
 }
 
 /**
- * Two-sample t-test. By default uses Welch's t-test (unequal variances).
+ * Performs a two-sample t-test for whether two populations have the same mean.
+ *
+ * The null hypothesis is that the two populations from which [sample1] and [sample2] were
+ * drawn have equal means. By default, uses Welch's t-test which does not assume equal
+ * variances. Set [equalVariances] to `true` for the pooled (Student's) variant when the
+ * populations are known to have similar variances.
+ *
+ * ### Example:
+ * ```kotlin
+ * val control = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+ * val treatment = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+ * val result = tTest(control, treatment)
+ * result.statistic          // t-statistic
+ * result.pValue             // p-value
+ * result.confidenceInterval // 95% CI for the difference in means
+ * ```
+ *
+ * @param sample1 the first sample. Must contain at least 2 elements.
+ * @param sample2 the second sample. Must contain at least 2 elements.
+ * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED],
+ * which tests whether the means differ in either direction.
+ * @param equalVariances whether to assume equal variances in both populations. Defaults to `false`
+ * (Welch's t-test). Set to `true` for the pooled (Student's) t-test.
+ * @param confidenceLevel the confidence level for the confidence interval. Defaults to `0.95` (95%).
+ * @return a [TestResult] containing the t-statistic, p-value, degrees of freedom, a confidence
+ * interval for the difference in means, and additional info with "mean1", "mean2", and "meanDifference".
  */
 public fun tTest(
     sample1: DoubleArray,
@@ -111,7 +158,30 @@ public fun tTest(
 }
 
 /**
- * Paired t-test.
+ * Performs a paired t-test for whether the mean difference between matched observations is zero.
+ *
+ * The null hypothesis is that the true mean difference between the paired observations is zero.
+ * Internally computes the element-wise differences and delegates to a one-sample t-test on
+ * those differences. This test is appropriate when the two samples are not independent — for
+ * example, before/after measurements on the same subjects.
+ *
+ * ### Example:
+ * ```kotlin
+ * val before = doubleArrayOf(200.0, 190.0, 210.0, 180.0, 195.0)
+ * val after = doubleArrayOf(190.0, 180.0, 195.0, 170.0, 185.0)
+ * val result = pairedTTest(before, after)
+ * result.statistic          // t-statistic
+ * result.pValue             // p-value
+ * result.confidenceInterval // 95% CI for the mean difference
+ * ```
+ *
+ * @param sample1 the first set of observations (e.g. "before"). Must have at least 2 elements.
+ * @param sample2 the second set of observations (e.g. "after"). Must have the same size as [sample1].
+ * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED],
+ * which tests whether the mean difference differs from zero in either direction.
+ * @param confidenceLevel the confidence level for the confidence interval. Defaults to `0.95` (95%).
+ * @return a [TestResult] containing the t-statistic, p-value, degrees of freedom (n-1),
+ * and a confidence interval for the mean difference.
  */
 public fun pairedTTest(
     sample1: DoubleArray,

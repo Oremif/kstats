@@ -5,7 +5,18 @@ import kotlin.math.*
 
 // ── Mathematical constants ──────────────────────────────────────────────────
 
-/** The Euler-Mascheroni constant γ ≈ 0.5772. */
+/**
+ * The Euler-Mascheroni constant, approximately 0.5772.
+ *
+ * This constant appears in many areas of mathematics and statistics, including the mean of
+ * the Gumbel distribution and the digamma function. It is the limiting difference between
+ * the harmonic series and the natural logarithm.
+ *
+ * ### Example:
+ * ```kotlin
+ * EULER_MASCHERONI // 0.5772156649015328606
+ * ```
+ */
 public const val EULER_MASCHERONI: Double = 0.5772156649015328606
 
 // ── Lanczos coefficients for ln(Gamma) ──────────────────────────────────────
@@ -24,6 +35,22 @@ private val LANCZOS_COEFFICIENTS = doubleArrayOf(
 
 private const val LANCZOS_G = 7.0
 
+/**
+ * Computes the natural logarithm of the gamma function at [x].
+ *
+ * The gamma function generalizes the factorial to real numbers: for positive integers,
+ * gamma(n) equals (n-1)!. The logarithmic form is used to avoid overflow for large arguments.
+ * Uses the Lanczos approximation with a reflection formula for values less than 0.5.
+ *
+ * ### Example:
+ * ```kotlin
+ * lnGamma(5.0) // 3.1780... (ln(24), since Gamma(5) = 4! = 24)
+ * lnGamma(0.5) // 0.5723... (ln(sqrt(pi)))
+ * ```
+ *
+ * @param x the point at which to evaluate. Must be positive.
+ * @return the natural logarithm of gamma([x]).
+ */
 public fun lnGamma(x: Double): Double {
     if (x <= 0.0) throw InvalidParameterException("lnGamma requires x > 0, got $x")
     if (x < 0.5) {
@@ -39,15 +66,63 @@ public fun lnGamma(x: Double): Double {
     return 0.5 * ln(2.0 * PI) + (xx + 0.5) * ln(t) - t + ln(sum)
 }
 
+/**
+ * Computes the gamma function at [x].
+ *
+ * The gamma function generalizes the factorial to real numbers: for positive integers,
+ * gamma(n) equals (n-1)!. Computed as the exponential of [lnGamma].
+ *
+ * ### Example:
+ * ```kotlin
+ * gamma(5.0) // 24.0 (since Gamma(5) = 4! = 24)
+ * gamma(0.5) // 1.7724... (sqrt(pi))
+ * ```
+ *
+ * @param x the point at which to evaluate. Must be positive.
+ * @return the value of the gamma function at [x].
+ */
 public fun gamma(x: Double): Double = exp(lnGamma(x))
 
 // ── Beta function ───────────────────────────────────────────────────────────
 
+/**
+ * Computes the natural logarithm of the beta function for parameters [a] and [b].
+ *
+ * The beta function is defined as gamma(a) * gamma(b) / gamma(a + b). The logarithmic form
+ * avoids overflow for large parameters. It is used internally by the regularized incomplete
+ * beta function and by beta distributions.
+ *
+ * ### Example:
+ * ```kotlin
+ * lnBeta(2.0, 3.0) // -2.4849... (ln(1/12))
+ * lnBeta(0.5, 0.5) // 1.1447... (ln(pi))
+ * ```
+ *
+ * @param a the first shape parameter. Must be positive.
+ * @param b the second shape parameter. Must be positive.
+ * @return the natural logarithm of beta([a], [b]).
+ */
 public fun lnBeta(a: Double, b: Double): Double {
     if (a <= 0.0 || b <= 0.0) throw InvalidParameterException("lnBeta requires a > 0 and b > 0, got a=$a, b=$b")
     return lnGamma(a) + lnGamma(b) - lnGamma(a + b)
 }
 
+/**
+ * Computes the beta function for parameters [a] and [b].
+ *
+ * The beta function is defined as gamma(a) * gamma(b) / gamma(a + b). Computed as the
+ * exponential of [lnBeta].
+ *
+ * ### Example:
+ * ```kotlin
+ * beta(1.0, 1.0) // 1.0
+ * beta(0.5, 0.5) // 3.1415... (pi)
+ * ```
+ *
+ * @param a the first shape parameter. Must be positive.
+ * @param b the second shape parameter. Must be positive.
+ * @return the value of beta([a], [b]).
+ */
 public fun beta(a: Double, b: Double): Double = exp(lnBeta(a, b))
 
 // ── Regularized incomplete beta function I_x(a, b) ─────────────────────────
@@ -55,6 +130,26 @@ public fun beta(a: Double, b: Double): Double = exp(lnBeta(a, b))
 private const val BETA_MAX_ITERATIONS = 200
 private const val BETA_EPSILON = 1e-14
 
+/**
+ * Computes the regularized incomplete beta function I(x; a, b) at point [x].
+ *
+ * The regularized incomplete beta function gives the cumulative probability for beta-distributed
+ * random variables. It is central to computing p-values for t-tests, F-tests, and other
+ * hypothesis tests. Uses Lentz's continued fraction algorithm with a symmetry relation
+ * for numerical stability.
+ *
+ * ### Example:
+ * ```kotlin
+ * regularizedBeta(0.5, 1.0, 1.0) // 0.5 (uniform on [0,1])
+ * regularizedBeta(0.5, 2.0, 3.0) // 0.6875
+ * ```
+ *
+ * @param x the point at which to evaluate, in the range [0, 1].
+ * @param a the first shape parameter. Must be positive.
+ * @param b the second shape parameter. Must be positive.
+ * @return the regularized incomplete beta function value at [x], in the range [0, 1].
+ * @throws org.oremif.kstats.core.exceptions.ConvergenceException if the continued fraction does not converge within 200 iterations.
+ */
 public fun regularizedBeta(x: Double, a: Double, b: Double): Double {
     if (a <= 0.0 || b <= 0.0) throw InvalidParameterException("regularizedBeta requires a > 0 and b > 0")
     if (x <= 0.0) return 0.0
@@ -118,8 +213,23 @@ private const val GAMMA_MAX_ITERATIONS = 200
 private const val GAMMA_EPSILON = 1e-14
 
 /**
- * Lower regularized incomplete gamma function P(a, x) = gamma(a, x) / Gamma(a)
- * Uses series expansion for x < a+1, continued fraction otherwise.
+ * Computes the lower regularized incomplete gamma function P(a, x).
+ *
+ * This gives the probability that a gamma-distributed random variable with shape parameter [a]
+ * is less than or equal to [x]. It is used internally to compute CDF values for chi-squared,
+ * gamma, and Poisson distributions, as well as the error function. Uses a series expansion
+ * when x is less than a + 1, and a continued fraction otherwise.
+ *
+ * ### Example:
+ * ```kotlin
+ * regularizedGammaP(1.0, 1.0) // 0.6321... (1 - e^(-1))
+ * regularizedGammaP(1.0, 0.0) // 0.0
+ * ```
+ *
+ * @param a the shape parameter. Must be positive.
+ * @param x the upper integration limit. Returns 0.0 for non-positive values.
+ * @return the value of P([a], [x]), in the range [0, 1].
+ * @throws ConvergenceException if the iterative computation does not converge within 200 iterations.
  */
 public fun regularizedGammaP(a: Double, x: Double): Double {
     if (a <= 0.0) throw InvalidParameterException("regularizedGammaP requires a > 0, got $a")
@@ -136,7 +246,22 @@ public fun regularizedGammaP(a: Double, x: Double): Double {
 }
 
 /**
- * Upper regularized incomplete gamma function Q(a, x) = 1 - P(a, x)
+ * Computes the upper regularized incomplete gamma function Q(a, x), the complement of [regularizedGammaP].
+ *
+ * This gives the probability that a gamma-distributed random variable with shape parameter [a]
+ * exceeds [x]. Equivalent to 1 - P(a, x), but computed directly for better numerical precision
+ * in the upper tail.
+ *
+ * ### Example:
+ * ```kotlin
+ * regularizedGammaQ(1.0, 1.0) // 0.3678... (e^(-1))
+ * regularizedGammaQ(1.0, 0.0) // 1.0
+ * ```
+ *
+ * @param a the shape parameter. Must be positive.
+ * @param x the lower integration limit. Returns 1.0 for non-positive values.
+ * @return the value of Q([a], [x]), in the range [0, 1].
+ * @throws ConvergenceException if the iterative computation does not converge within 200 iterations.
  */
 public fun regularizedGammaQ(a: Double, x: Double): Double {
     if (a <= 0.0) throw InvalidParameterException("regularizedGammaQ requires a > 0, got $a")
@@ -206,8 +331,21 @@ private fun gammaContinuedFractionQ(a: Double, x: Double): Double {
 // ── Error function ──────────────────────────────────────────────────────────
 
 /**
- * Error function using regularized incomplete gamma function for high precision.
- * erf(x) = sign(x) * P(0.5, x^2)
+ * Computes the error function at [x].
+ *
+ * The error function measures the probability that a standard normally distributed random
+ * variable falls within the range [-x*sqrt(2), x*sqrt(2)]. It ranges from -1 to 1, with
+ * erf(0) = 0. Computed via [regularizedGammaP] for high precision.
+ *
+ * ### Example:
+ * ```kotlin
+ * erf(0.0)  // 0.0
+ * erf(1.0)  // 0.8427... (about 84% of the area under the standard normal curve)
+ * erf(-1.5) // -erf(1.5), the function is odd
+ * ```
+ *
+ * @param x the point at which to evaluate.
+ * @return the error function value at [x], in the range [-1, 1].
  */
 public fun erf(x: Double): Double {
     if (x.isNaN()) return Double.NaN
@@ -221,6 +359,22 @@ public fun erf(x: Double): Double {
     return sign * regularizedGammaP(0.5, ax * ax)
 }
 
+/**
+ * Computes the complementary error function at [x], equal to 1 - erf(x).
+ *
+ * The complementary form is useful when erf(x) is close to 1, since computing 1 - erf(x)
+ * directly would lose precision. Computed via [regularizedGammaQ] for the positive branch.
+ *
+ * ### Example:
+ * ```kotlin
+ * erfc(0.0) // 1.0
+ * erfc(2.0) // 0.0046... (the tail probability)
+ * erf(2.0) + erfc(2.0) // 1.0
+ * ```
+ *
+ * @param x the point at which to evaluate.
+ * @return the complementary error function value at [x], in the range [0, 2].
+ */
 public fun erfc(x: Double): Double {
     if (x.isNaN()) return Double.NaN
     if (x == Double.POSITIVE_INFINITY) return 0.0
@@ -235,8 +389,21 @@ public fun erfc(x: Double): Double {
 }
 
 /**
- * Inverse error function using rational approximation with Newton refinement.
- * Based on Winitzki's approximation with Newton corrections.
+ * Computes the inverse error function at [x].
+ *
+ * Returns the value y such that erf(y) = [x]. This is used internally to compute quantiles
+ * of the normal distribution. Uses Winitzki's rational approximation as an initial guess,
+ * refined with four iterations of Newton's method for high precision.
+ *
+ * ### Example:
+ * ```kotlin
+ * erfInv(0.0)                // 0.0
+ * erfInv(erf(1.0))           // 1.0 (round-trip)
+ * erfInv(0.8427007929497149) // 1.0 (since erf(1) ≈ 0.8427)
+ * ```
+ *
+ * @param x the value at which to evaluate. Must be strictly between -1 and 1 (exclusive).
+ * @return the inverse error function value at [x].
  */
 public fun erfInv(x: Double): Double {
     if (x <= -1.0 || x >= 1.0) throw InvalidParameterException("erfInv requires -1 < x < 1, got $x")
@@ -263,12 +430,45 @@ public fun erfInv(x: Double): Double {
 
 // ── Combinatorics ───────────────────────────────────────────────────────────
 
+/**
+ * Computes the natural logarithm of n factorial.
+ *
+ * The logarithmic form avoids overflow for large [n] by delegating to [lnGamma](n + 1).
+ * Returns 0.0 for n = 0 and n = 1 (since 0! = 1! = 1).
+ *
+ * ### Example:
+ * ```kotlin
+ * lnFactorial(0)  // 0.0 (ln(1))
+ * lnFactorial(5)  // 4.7874... (ln(120))
+ * lnFactorial(20) // 42.3356... (ln(20!), no overflow)
+ * ```
+ *
+ * @param n the non-negative integer whose factorial logarithm to compute.
+ * @return the natural logarithm of [n]!.
+ */
 public fun lnFactorial(n: Int): Double {
     if (n < 0) throw InvalidParameterException("lnFactorial requires n >= 0, got $n")
     if (n <= 1) return 0.0
     return lnGamma(n.toDouble() + 1.0)
 }
 
+/**
+ * Computes the natural logarithm of the binomial coefficient "n choose k".
+ *
+ * The logarithmic form avoids overflow for large [n] and [k]. Computed as
+ * lnFactorial(n) - lnFactorial(k) - lnFactorial(n - k). Returns 0.0 when [k] is 0 or
+ * equal to [n] (since C(n, 0) = C(n, n) = 1).
+ *
+ * ### Example:
+ * ```kotlin
+ * lnCombination(10, 3) // 4.7874... (ln(120), since C(10,3) = 120)
+ * lnCombination(5, 0)  // 0.0 (ln(1))
+ * ```
+ *
+ * @param n the total number of items. Must be non-negative.
+ * @param k the number of items to choose. Must satisfy 0 <= k <= n.
+ * @return the natural logarithm of C([n], [k]).
+ */
 public fun lnCombination(n: Int, k: Int): Double {
     if (n < 0 || k < 0 || k > n) throw InvalidParameterException("lnCombination requires 0 <= k <= n, got n=$n, k=$k")
     if (k == 0 || k == n) return 0.0
@@ -277,6 +477,13 @@ public fun lnCombination(n: Int, k: Int): Double {
 
 // ── Compensated summation (Neumaier) ────────────────────────────────────
 
+/**
+ * Neumaier compensated summation of the array elements.
+ *
+ * Reduces floating-point rounding error from O(n*epsilon) to O(epsilon) by tracking a running
+ * compensation term. Improves on Kahan summation by handling the case where the next addend
+ * is larger than the running sum.
+ */
 internal fun DoubleArray.compensatedSum(): Double {
     var sum = 0.0
     var compensation = 0.0

@@ -2,6 +2,15 @@ package org.oremif.kstats.core
 
 import kotlin.random.Random
 
+/**
+ * Returns a cryptographically secure random number generator backed by the Web Crypto API.
+ *
+ * Uses `crypto.getRandomValues` to fill an internal buffer of 64 integers, refilling
+ * when exhausted. This avoids calling into the native crypto API on every random number
+ * request.
+ *
+ * @return a [Random] instance backed by `crypto.getRandomValues`.
+ */
 public actual fun secureRandom(): Random = JsSecureRandom
 
 private object JsSecureRandom : Random() {
