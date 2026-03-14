@@ -1,0 +1,193 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "sequoia",
+  "name": "kstats",
+  "description": "Zero-dependency Kotlin Multiplatform statistics library",
+  "colors": {
+    "primary": "#7F52FF",
+    "light": "#A67BFF",
+    "dark": "#5C3DBF"
+  },
+  "favicon": "/images/favicon.svg",
+  "styling": {
+    "eyebrows": "breadcrumbs",
+    "latex": true,
+    "codeblocks": "dark"
+  },
+  "search": {
+    "prompt": "Search kstats docs..."
+  },
+  "appearance": {
+    "default": "system"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/Oremif/kstats"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/Oremif/kstats"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "getting-started/introduction",
+              "getting-started/installation",
+              "getting-started/quick-start"
+            ]
+          },
+          {
+            "group": "Descriptive Statistics",
+            "pages": [
+              "core/overview",
+              "core/central-tendency",
+              "core/dispersion",
+              "core/shape",
+              "core/quantiles",
+              "core/summary-statistics",
+              "core/online-statistics",
+              "core/frequency-tables",
+              "core/moments"
+            ]
+          },
+          {
+            "group": "Distributions",
+            "pages": [
+              "distributions/overview",
+              {
+                "group": "Continuous",
+                "pages": [
+                  "distributions/continuous/beta",
+                  "distributions/continuous/cauchy",
+                  "distributions/continuous/chi-squared",
+                  "distributions/continuous/exponential",
+                  "distributions/continuous/f",
+                  "distributions/continuous/gamma",
+                  "distributions/continuous/gumbel",
+                  "distributions/continuous/laplace",
+                  "distributions/continuous/levy",
+                  "distributions/continuous/log-normal",
+                  "distributions/continuous/logistic",
+                  "distributions/continuous/nakagami",
+                  "distributions/continuous/normal",
+                  "distributions/continuous/pareto",
+                  "distributions/continuous/student-t",
+                  "distributions/continuous/triangular",
+                  "distributions/continuous/uniform",
+                  "distributions/continuous/weibull"
+                ]
+              },
+              {
+                "group": "Discrete",
+                "pages": [
+                  "distributions/discrete/bernoulli",
+                  "distributions/discrete/beta-binomial",
+                  "distributions/discrete/binomial",
+                  "distributions/discrete/geometric",
+                  "distributions/discrete/hypergeometric",
+                  "distributions/discrete/logarithmic",
+                  "distributions/discrete/negative-binomial",
+                  "distributions/discrete/poisson",
+                  "distributions/discrete/uniform-discrete",
+                  "distributions/discrete/zipf"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Hypothesis Tests",
+            "pages": [
+              "hypothesis/overview",
+              {
+                "group": "Parametric",
+                "pages": [
+                  "hypothesis/parametric/one-sample-t-test",
+                  "hypothesis/parametric/two-sample-t-test",
+                  "hypothesis/parametric/paired-t-test",
+                  "hypothesis/parametric/one-way-anova",
+                  "hypothesis/parametric/chi-squared-goodness",
+                  "hypothesis/parametric/chi-squared-independence",
+                  "hypothesis/parametric/fisher-exact-test"
+                ]
+              },
+              {
+                "group": "Non-Parametric",
+                "pages": [
+                  "hypothesis/nonparametric/mann-whitney-u",
+                  "hypothesis/nonparametric/wilcoxon-signed-rank",
+                  "hypothesis/nonparametric/kolmogorov-smirnov"
+                ]
+              },
+              {
+                "group": "Normality",
+                "pages": [
+                  "hypothesis/normality/shapiro-wilk",
+                  "hypothesis/normality/anderson-darling",
+                  "hypothesis/normality/dagostino-pearson"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Correlation & Regression",
+            "pages": [
+              "correlation/overview",
+              "correlation/pearson",
+              "correlation/spearman",
+              "correlation/kendall",
+              "correlation/point-biserial",
+              "correlation/partial",
+              "correlation/covariance",
+              "correlation/matrices",
+              "correlation/linear-regression"
+            ]
+          },
+          {
+            "group": "Sampling",
+            "pages": [
+              "sampling/overview",
+              "sampling/ranking",
+              "sampling/normalization",
+              "sampling/binning",
+              "sampling/weighted-sampling",
+              "sampling/bootstrap"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Tutorials",
+            "pages": [
+              "guides/tutorials/getting-started",
+              "guides/tutorials/first-analysis"
+            ]
+          },
+          {
+            "group": "How-to Guides",
+            "pages": [
+              "guides/how-to/choosing-a-distribution",
+              "guides/how-to/testing-normality",
+              "guides/how-to/comparing-groups",
+              "guides/how-to/building-a-pipeline"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "href": "https://oremif.github.io/kstats"
+      }
+    ]
+  }
+}
