@@ -3,6 +3,7 @@
 package org.oremif.kstats.core
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import platform.posix.O_RDONLY
@@ -29,6 +30,7 @@ private class DevUrandom : Random() {
         return value.ushr(32 - bitCount)
     }
 
+    @OptIn(UnsafeNumber::class)
     private fun fillBuffer() {
         val fd = open("/dev/urandom", O_RDONLY)
         check(fd >= 0) { "Failed to open /dev/urandom" }
@@ -36,7 +38,7 @@ private class DevUrandom : Random() {
             var totalRead = 0
             buffer.usePinned { pinned ->
                 while (totalRead < buffer.size) {
-                    val bytesRead = read(fd, pinned.addressOf(totalRead), (buffer.size - totalRead).toULong())
+                    val bytesRead = read(fd, pinned.addressOf(totalRead), (buffer.size - totalRead).toUInt())
                     check(bytesRead > 0) { "Failed to read from /dev/urandom" }
                     totalRead += bytesRead.toInt()
                 }
