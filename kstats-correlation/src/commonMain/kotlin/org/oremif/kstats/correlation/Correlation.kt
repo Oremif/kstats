@@ -264,6 +264,123 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
 }
 
 /**
+ * Computes the point-biserial correlation between a binary variable and a continuous variable.
+ *
+ * The point-biserial correlation measures the strength and direction of the association
+ * between a dichotomous (two-category) variable and a continuous variable. It is
+ * mathematically equivalent to the Pearson correlation when the binary variable is coded
+ * as 0 and 1. The binary variable [x] may use any two distinct finite values — they are
+ * automatically remapped so that the smaller value becomes 0 and the larger becomes 1,
+ * ensuring a consistent sign convention.
+ *
+ * Delegates to [pearsonCorrelation] after remapping, so the p-value is computed using the
+ * same numerically stable t-test with (1-r)(1+r) cancellation avoidance.
+ *
+ * Returns [Double.NaN] for both coefficient and p-value when the continuous variable has
+ * zero variance (all values identical).
+ *
+ * ### Example:
+ * ```kotlin
+ * val group = doubleArrayOf(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
+ * val score = doubleArrayOf(2.1, 3.4, 2.8, 7.5, 8.1, 6.9)
+ * val result = pointBiserialCorrelation(group, score)
+ * result.coefficient // 0.9808 (strong positive association)
+ * result.pValue      // 0.00002
+ * result.n           // 6
+ * ```
+ *
+ * @param x the binary variable. Must contain exactly 2 distinct finite values.
+ * Non-finite values (NaN, Inf) are skipped during the distinct-value scan but
+ * passed through to Pearson, where they propagate as NaN.
+ * @param y the continuous variable, must have the same size as [x].
+ * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample size.
+ */
+public fun pointBiserialCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult {
+    if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
+    val n = x.size
+    if (n < 3) throw InsufficientDataException("Need at least 3 observations")
+
+    // Collect distinct finite values in x
+    val distinct = mutableSetOf<Double>()
+    for (v in x) {
+        if (v.isFinite()) distinct.add(v)
+        if (distinct.size > 2) break
+    }
+    if (distinct.size != 2) {
+        throw InvalidParameterException(
+            "Binary variable must contain exactly 2 distinct values, got ${distinct.size}"
+        )
+    }
+
+    // Remap: smaller value → 0.0, larger → 1.0
+    val sorted = distinct.sorted()
+    val lo = sorted[0]
+    val hi = sorted[1]
+    val remapped = DoubleArray(n) { if (x[it] == hi) 1.0 else if (x[it] == lo) 0.0 else x[it] }
+
+    return pearsonCorrelation(remapped, y)
+}
+
+/**
+ * Computes the point-biserial correlation between a boolean variable and a continuous variable.
+ *
+ * The point-biserial correlation measures the strength and direction of the association
+ * between a dichotomous (two-category) variable and a continuous variable. This overload
+ * accepts a [BooleanArray] where `false` is mapped to 0.0 and `true` to 1.0, then delegates
+ * to [pearsonCorrelation].
+ *
+ * When all boolean values are the same (all `true` or all `false`), the binary variable has
+ * zero variance, and both coefficient and p-value are [Double.NaN].
+ *
+ * ### Example:
+ * ```kotlin
+ * val passed = booleanArrayOf(false, false, false, true, true, true)
+ * val score = doubleArrayOf(2.1, 3.4, 2.8, 7.5, 8.1, 6.9)
+ * val result = pointBiserialCorrelation(passed, score)
+ * result.coefficient // 0.9808 (strong positive association)
+ * result.pValue      // 0.00002
+ * ```
+ *
+ * @param x the binary variable as booleans (`false` = 0, `true` = 1).
+ * @param y the continuous variable, must have the same size as [x].
+ * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample size.
+ */
+public fun pointBiserialCorrelation(x: BooleanArray, y: DoubleArray): CorrelationResult {
+    if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
+    if (x.size < 3) throw InsufficientDataException("Need at least 3 observations")
+
+    val converted = DoubleArray(x.size) { if (x[it]) 1.0 else 0.0 }
+    return pearsonCorrelation(converted, y)
+}
+
+/**
+ * Computes the point-biserial correlation between an integer-coded binary variable and a continuous variable.
+ *
+ * The point-biserial correlation measures the strength and direction of the association
+ * between a dichotomous (two-category) variable and a continuous variable. This overload
+ * accepts an [IntArray] whose values are converted to Double and then validated as binary
+ * (must contain exactly 2 distinct finite values). The smaller value is mapped to 0 and
+ * the larger to 1.
+ *
+ * ### Example:
+ * ```kotlin
+ * val group = intArrayOf(0, 0, 0, 1, 1, 1)
+ * val score = doubleArrayOf(2.1, 3.4, 2.8, 7.5, 8.1, 6.9)
+ * val result = pointBiserialCorrelation(group, score)
+ * result.coefficient // 0.9808 (strong positive association)
+ * result.pValue      // 0.00002
+ * ```
+ *
+ * @param x the binary variable as integers. Must contain exactly 2 distinct values.
+ * @param y the continuous variable, must have the same size as [x].
+ * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample size.
+ */
+public fun pointBiserialCorrelation(x: IntArray, y: DoubleArray): CorrelationResult {
+    val converted = DoubleArray(x.size) { x[it].toDouble() }
+    return pointBiserialCorrelation(converted, y)
+}
+
+/**
  * Counts discordant pairs (inversions) in [arr] via merge sort.
  *
  * Sorts [arr] in-place as a side effect. Uses [temp] as scratch space for merging.
