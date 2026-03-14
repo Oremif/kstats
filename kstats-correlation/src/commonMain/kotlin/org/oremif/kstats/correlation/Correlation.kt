@@ -603,15 +603,18 @@ public fun covariance(
     val n = x.size
     if (n < 2) throw InsufficientDataException("Need at least 2 observations")
 
-    val mx = x.mean()
-    val my = y.mean()
-
-    var sum = 0.0
+    // Welford-style single-pass online covariance (SPEC §5.2)
+    var meanX = 0.0
+    var meanY = 0.0
+    var cXY = 0.0
     for (i in 0 until n) {
-        sum += (x[i] - mx) * (y[i] - my)
+        val dx = x[i] - meanX
+        meanX += dx / (i + 1)
+        meanY += (y[i] - meanY) / (i + 1)
+        cXY += dx * (y[i] - meanY) // old dx, new meanY
     }
 
-    return sum / (if (kind == PopulationKind.SAMPLE) n - 1 else n)
+    return cXY / (if (kind == PopulationKind.SAMPLE) n - 1 else n)
 }
 
 /**
