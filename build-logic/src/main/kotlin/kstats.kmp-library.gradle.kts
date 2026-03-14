@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
 import com.android.build.api.dsl.androidLibrary
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -17,6 +20,7 @@ kotlin {
     explicitApi()
 
     jvm()
+
     androidLibrary {
         namespace = "org.oremif.${project.name.replace("-", ".")}"
         compileSdk = libs.findVersion("android-compileSdk").get().toString().toInt()
@@ -34,10 +38,53 @@ kotlin {
             }
         }
     }
+    androidNativeArm32()
+    androidNativeArm64()
+    androidNativeX86()
+    androidNativeX64()
+
+
+    // iOS
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+
+    // Desktop
+    macosArm64()
+    macosX64()
+    linuxArm64()
     linuxX64()
+    mingwX64()
+
+    // WatchOS
+    watchosArm32()
+    watchosArm64()
+    watchosX64()
+    watchosDeviceArm64()
+    watchosSimulatorArm64()
+
+    // tvOS
+    tvosArm64()
+    tvosSimulatorArm64()
+
+
+    // JS
+    js {
+        browser()
+        nodejs()
+        binaries.library()
+    }
+
+    // Wasm
+    wasmJs {
+        browser()
+        nodejs()
+        binaries.library()
+    }
+
+    wasmWasi {
+        binaries.library()
+    }
 
     sourceSets {
         commonTest.dependencies {
