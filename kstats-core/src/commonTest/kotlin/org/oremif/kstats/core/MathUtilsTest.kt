@@ -149,6 +149,35 @@ class MathUtilsTest {
         assertFailsWith<InvalidParameterException> { lnCombination(-1, 0) }
     }
 
+    // ── Generalized harmonic numbers ────────────────────────────────────
+
+    @Test
+    fun testGeneralizedHarmonicKnownValues() {
+        // H(1, s) = 1 for any s
+        assertEquals(1.0, generalizedHarmonic(1, 1.0), PRECISE_TOLERANCE)
+        assertEquals(1.0, generalizedHarmonic(1, 2.5), PRECISE_TOLERANCE)
+        // H(0, s) = 0 (empty sum)
+        assertEquals(0.0, generalizedHarmonic(0, 1.0), PRECISE_TOLERANCE)
+        // H(n, 0) = n
+        assertEquals(5.0, generalizedHarmonic(5, 0.0), PRECISE_TOLERANCE)
+        assertEquals(10.0, generalizedHarmonic(10, 0.0), PRECISE_TOLERANCE)
+        // H(10, 1) = 10th harmonic number
+        assertEquals(2.928968253968254e+00, generalizedHarmonic(10, 1.0), PRECISE_TOLERANCE)
+        // H(100, 1)
+        assertEquals(5.187377517639621e+00, generalizedHarmonic(100, 1.0), PRECISE_TOLERANCE)
+        // H(10, 2)
+        assertEquals(1.549767731166541e+00, generalizedHarmonic(10, 2.0), PRECISE_TOLERANCE)
+        // H(100, 2) ≈ π²/6
+        assertEquals(1.634983900184893e+00, generalizedHarmonic(100, 2.0), PRECISE_TOLERANCE)
+        // H(5, 3)
+        assertEquals(1.185662037037037e+00, generalizedHarmonic(5, 3.0), PRECISE_TOLERANCE)
+    }
+
+    @Test
+    fun testGeneralizedHarmonicInvalid() {
+        assertFailsWith<InvalidParameterException> { generalizedHarmonic(-1, 1.0) }
+    }
+
     // ── Compensated sum (Neumaier) ───────────────────────────────────────
 
     @Test

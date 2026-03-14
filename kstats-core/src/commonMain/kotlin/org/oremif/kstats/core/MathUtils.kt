@@ -428,6 +428,39 @@ public fun erfInv(x: Double): Double {
     return sign * p
 }
 
+// ── Generalized harmonic numbers ─────────────────────────────────────────────
+
+/**
+ * Computes the generalized harmonic number H([n], [s]) = Σ_{i=1}^{n} 1/i^s.
+ *
+ * Uses Neumaier compensated summation (inline, no array allocation) for numerical accuracy.
+ * The ordinary harmonic number is the special case s = 1. When s = 0, the result equals [n].
+ *
+ * ### Example:
+ * ```kotlin
+ * generalizedHarmonic(10, 1.0) // 2.92896... (10th harmonic number)
+ * generalizedHarmonic(5, 0.0)  // 5.0
+ * generalizedHarmonic(0, 2.0)  // 0.0 (empty sum)
+ * ```
+ *
+ * @param n the upper summation limit. Must be non-negative.
+ * @param s the exponent applied to each term.
+ * @return the generalized harmonic number H([n], [s]).
+ */
+public fun generalizedHarmonic(n: Int, s: Double): Double {
+    if (n < 0) throw InvalidParameterException("generalizedHarmonic requires n >= 0, got $n")
+    if (n == 0) return 0.0
+    var sum = 0.0
+    var compensation = 0.0
+    for (i in 1..n) {
+        val x = 1.0 / i.toDouble().pow(s)
+        val t = sum + x
+        compensation += if (abs(sum) >= abs(x)) (sum - t) + x else (x - t) + sum
+        sum = t
+    }
+    return sum + compensation
+}
+
 // ── Combinatorics ───────────────────────────────────────────────────────────
 
 /**
