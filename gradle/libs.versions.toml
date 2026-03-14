@@ -1,11 +1,11 @@
 [versions]
-kstats = "0.2.0"
-agp = "8.13.0"
-kotlin = "2.2.20"
+kstats = "0.3.0"
+agp = "9.1.0"
+kotlin = "2.3.10"
 android-minSdk = "24"
 android-compileSdk = "36"
-vanniktechMavenPublish = "0.34.0"
-kotlinxBenchmark = "0.4.13"
+vanniktechMavenPublish = "0.36.0"
+kotlinxBenchmark = "0.4.16"
 commonsMath3 = "3.6.1"
 
 [libraries]
@@ -14,8 +14,8 @@ kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-
 commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commonsMath3" }
 
 [plugins]
-android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish" }
 kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kotlinxBenchmark" }
 kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }

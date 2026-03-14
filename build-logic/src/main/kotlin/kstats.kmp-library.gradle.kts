@@ -1,6 +1,5 @@
 @file:OptIn(ExperimentalWasmDsl::class)
 
-import com.android.build.api.dsl.androidLibrary
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -21,7 +20,7 @@ kotlin {
 
     jvm()
 
-    androidLibrary {
+    android {
         namespace = "org.oremif.${project.name.replace("-", ".")}"
         compileSdk = libs.findVersion("android-compileSdk").get().toString().toInt()
         minSdk = libs.findVersion("android-minSdk").get().toString().toInt()
