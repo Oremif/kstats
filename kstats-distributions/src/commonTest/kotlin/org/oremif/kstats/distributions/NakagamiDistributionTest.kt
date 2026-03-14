@@ -1,7 +1,6 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.random.Random
