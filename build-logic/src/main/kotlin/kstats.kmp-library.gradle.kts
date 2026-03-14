@@ -8,6 +8,7 @@ plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.kotlin.multiplatform.library")
     id("kstats.maven-publish")
+    id("kstats.dokka")
 }
 
 val libs = the<VersionCatalogsExtension>().named("libs")
