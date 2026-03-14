@@ -2,14 +2,15 @@ package org.oremif.kstats.benchmark.hypothesis
 
 import kotlinx.benchmark.*
 import org.openjdk.jmh.annotations.Param
-import org.openjdk.jmh.annotations.State as JmhState
-import org.oremif.kstats.hypothesis.*
+import org.oremif.kstats.hypothesis.TestResult
+import org.oremif.kstats.hypothesis.chiSquaredIndependenceTest
 import org.apache.commons.math3.stat.inference.ChiSquareTest as CommonsChiSq
+import org.openjdk.jmh.annotations.State as JmhState
 
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.MICROSECONDS)
-open class ChiSquaredIndependenceBenchmark {
+class ChiSquaredIndependenceBenchmark {
 
     @Param("3", "10", "50")
     var tableSize: Int = 0

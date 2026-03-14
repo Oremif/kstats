@@ -2,15 +2,15 @@ package org.oremif.kstats.benchmark.correlation
 
 import kotlinx.benchmark.*
 import org.openjdk.jmh.annotations.Param
-import org.openjdk.jmh.annotations.State as JmhState
 import org.oremif.kstats.benchmark.util.DataGenerators
-import org.oremif.kstats.correlation.*
+import org.oremif.kstats.correlation.covariance
 import org.apache.commons.math3.stat.correlation.Covariance as CommonsCovariance
+import org.openjdk.jmh.annotations.State as JmhState
 
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.MICROSECONDS)
-open class CovarianceBenchmark {
+class CovarianceBenchmark {
 
     @Param("100", "1000", "10000")
     var size: Int = 0

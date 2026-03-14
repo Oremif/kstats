@@ -8,7 +8,7 @@ import org.apache.commons.math3.distribution.FDistribution as CommonsF
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.NANOSECONDS)
-open class FDistributionBenchmark {
+class FDistributionBenchmark {
 
     private val kDist = FDistribution(dfNumerator = 5.0, dfDenominator = 10.0)
     private val cDist = CommonsF(5.0, 10.0)
