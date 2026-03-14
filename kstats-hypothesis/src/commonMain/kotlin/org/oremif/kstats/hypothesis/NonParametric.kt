@@ -482,6 +482,74 @@ public fun shapiroWilkTest(sample: DoubleArray): TestResult {
     )
 }
 
+public fun andersonDarlingTest(sample: DoubleArray): TestResult {
+    val n = sample.size
+    if (n < 3) throw InsufficientDataException("Anderson-Darling test requires at least 3 elements")
+
+    val sorted = sample.sortedArray()
+    val mean = sorted.average()
+
+    // Compute sum of squared deviations
+    var ss = 0.0
+    for (x in sorted) {
+        ss += (x - mean) * (x - mean)
+    }
+
+    // Constant data: zero variance means normality cannot be assessed,
+    // but constant data is trivially consistent with any location-scale family
+    if (ss == 0.0) {
+        return TestResult(
+            testName = "Anderson-Darling Test",
+            statistic = 0.0,
+            pValue = 1.0,
+            additionalInfo = mapOf("modifiedStatistic" to 0.0)
+        )
+    }
+
+    val sd = sqrt(ss / (n - 1))
+    val normal = NormalDistribution.STANDARD
+
+    // Compute A² statistic:
+    // A² = -n - (1/n) * Σ_{i=1}^{n} (2i-1) * [ln(Φ(z_i)) + ln(1 - Φ(z_{n+1-i}))]
+    // Source: D'Agostino & Stephens (1986), "Goodness-of-Fit Techniques"
+    var s = 0.0
+    for (i in 0 until n) {
+        val zi = (sorted[i] - mean) / sd
+        val zni = (sorted[n - 1 - i] - mean) / sd
+        // Use cdf for lower tail and sf (via erfc) for upper tail to preserve precision
+        val logCdf = ln(normal.cdf(zi).coerceAtLeast(1e-308))
+        val logSf = ln(normal.sf(zni).coerceAtLeast(1e-308))
+        s += (2.0 * (i + 1) - 1.0) * (logCdf + logSf)
+    }
+
+    val a2 = -n.toDouble() - s / n
+
+    // Modified statistic for finite sample correction
+    val a2Star = a2 * (1.0 + 0.75 / n + 2.25 / (n.toDouble() * n))
+
+    // P-value approximation: D'Agostino & Stephens (1986)
+    val pValue = andersonDarlingPValue(a2Star)
+
+    return TestResult(
+        testName = "Anderson-Darling Test",
+        statistic = a2,
+        pValue = pValue.coerceIn(0.0, 1.0),
+        additionalInfo = mapOf("modifiedStatistic" to a2Star)
+    )
+}
+
+// P-value approximation for the modified Anderson-Darling statistic A²*.
+// Source: D'Agostino & Stephens (1986), Table 4.9, case 3 (parameters estimated from data).
+private fun andersonDarlingPValue(a2Star: Double): Double {
+    if (a2Star.isNaN()) return Double.NaN
+    return when {
+        a2Star >= 0.6 -> exp(1.2937 - 5.709 * a2Star + 0.0186 * a2Star * a2Star)
+        a2Star >= 0.34 -> exp(0.9177 - 4.279 * a2Star - 1.38 * a2Star * a2Star)
+        a2Star >= 0.2 -> 1.0 - exp(-8.318 + 42.796 * a2Star - 59.938 * a2Star * a2Star)
+        else -> 1.0 - exp(-13.436 + 101.14 * a2Star - 223.73 * a2Star * a2Star)
+    }
+}
+
 /**
  * Approximates the Kolmogorov-Smirnov p-value using Kolmogorov's asymptotic series.
  *
