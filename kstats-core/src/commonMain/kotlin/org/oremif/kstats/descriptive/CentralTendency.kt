@@ -4,6 +4,7 @@ import org.oremif.kstats.core.compensatedSum
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs
+import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.exp
 
@@ -186,3 +187,84 @@ public fun <T : Comparable<T>> Iterable<T>.mode(): Set<T> {
     val maxCount = counts.values.max()
     return counts.filter { it.value == maxCount }.keys
 }
+
+// ── trimmedMean ─────────────────────────────────────────────────────────────
+
+/**
+ * Computes the trimmed (truncated) mean by removing a fraction of values from each tail.
+ *
+ * The trimmed mean sorts the data, discards the lowest and highest [proportion] of values,
+ * and computes the arithmetic mean of the remaining middle portion. This makes it more
+ * robust to outliers than the regular mean. A proportion of 0.0 gives the ordinary mean;
+ * a proportion approaching 0.5 converges toward the median.
+ *
+ * Uses compensated (Neumaier) summation for improved numerical precision with large values.
+ *
+ * ### Example:
+ * ```kotlin
+ * doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedMean(0.1) // 5.5
+ * ```
+ *
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
+ * For example, 0.1 removes the lowest 10% and highest 10%.
+ * @return the mean of the remaining values after trimming.
+ * @see trimmedVariance
+ */
+public fun DoubleArray.trimmedMean(proportion: Double): Double {
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    if (proportion.isNaN() || proportion < 0.0 || proportion >= 0.5)
+        throw InvalidParameterException("proportion must be in [0.0, 0.5), got $proportion")
+    val sorted = sortedArray()
+    val k = floor(size * proportion).toInt()
+    val m = size - 2 * k
+    var sum = 0.0
+    var compensation = 0.0
+    for (i in k until size - k) {
+        val t = sum + sorted[i]
+        compensation += if (abs(sum) >= abs(sorted[i])) (sum - t) + sorted[i] else (sorted[i] - t) + sum
+        sum = t
+    }
+    return (sum + compensation) / m
+}
+
+/**
+ * Computes the trimmed (truncated) mean by removing a fraction of values from each tail.
+ *
+ * The trimmed mean sorts the data, discards the lowest and highest [proportion] of values,
+ * and computes the arithmetic mean of the remaining middle portion. This makes it more
+ * robust to outliers than the regular mean. A proportion of 0.0 gives the ordinary mean;
+ * a proportion approaching 0.5 converges toward the median.
+ *
+ * ### Example:
+ * ```kotlin
+ * listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedMean(0.1) // 5.5
+ * ```
+ *
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
+ * For example, 0.1 removes the lowest 10% and highest 10%.
+ * @return the mean of the remaining values after trimming.
+ * @see trimmedVariance
+ */
+public fun Iterable<Double>.trimmedMean(proportion: Double): Double =
+    toList().toDoubleArray().trimmedMean(proportion)
+
+/**
+ * Computes the trimmed (truncated) mean by removing a fraction of values from each tail.
+ *
+ * The trimmed mean sorts the data, discards the lowest and highest [proportion] of values,
+ * and computes the arithmetic mean of the remaining middle portion. This makes it more
+ * robust to outliers than the regular mean. A proportion of 0.0 gives the ordinary mean;
+ * a proportion approaching 0.5 converges toward the median.
+ *
+ * ### Example:
+ * ```kotlin
+ * sequenceOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedMean(0.1) // 5.5
+ * ```
+ *
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
+ * For example, 0.1 removes the lowest 10% and highest 10%.
+ * @return the mean of the remaining values after trimming.
+ * @see trimmedVariance
+ */
+public fun Sequence<Double>.trimmedMean(proportion: Double): Double =
+    toList().toDoubleArray().trimmedMean(proportion)
