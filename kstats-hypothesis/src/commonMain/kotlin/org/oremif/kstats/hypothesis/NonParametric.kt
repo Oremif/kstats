@@ -3,6 +3,7 @@ package org.oremif.kstats.hypothesis
 import org.oremif.kstats.core.exceptions.DegenerateDataException
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.distributions.ChiSquaredDistribution
 import org.oremif.kstats.distributions.ContinuousDistribution
 import org.oremif.kstats.distributions.NormalDistribution
 import org.oremif.kstats.sampling.TieMethod
@@ -572,4 +573,132 @@ private fun kolmogorovSmirnovPValue(d: Double, n: Int): Double {
         if (abs(term) < 1e-12) break
     }
     return (2.0 * sum).coerceIn(0.0, 1.0)
+}
+
+/**
+ * Performs the D'Agostino-Pearson omnibus normality test.
+ *
+ * The null hypothesis is that [sample] was drawn from a normal distribution. The test
+ * combines D'Agostino's skewness test (1970) and Anscombe & Glynn's kurtosis test (1983)
+ * into a single chi-squared statistic K² = Z₁² + Z₂² with 2 degrees of freedom. This is
+ * equivalent to scipy's `normaltest()`. Complements [shapiroWilkTest] and
+ * [andersonDarlingTest] for assessing normality.
+ *
+ * If all values are identical (zero variance), returns K² = 0.0 and p-value = 1.0.
+ *
+ * ### Example:
+ * ```kotlin
+ * val data = doubleArrayOf(-1.2, -0.5, 0.1, 0.3, 0.7, 1.0, 1.5,
+ *     0.2, -0.3, 0.8, -0.7, 0.4, 1.1, -0.1, 0.6, -0.9, 0.3, -0.2, 0.5, 1.3)
+ * val result = dagostinoPearsonTest(data)
+ * result.statistic                // K² statistic
+ * result.pValue                   // p-value from chi-squared distribution with df=2
+ * result.degreesOfFreedom         // 2.0
+ * result.additionalInfo["z1"]     // skewness z-score
+ * result.additionalInfo["z2"]     // kurtosis z-score
+ * result.additionalInfo["skewness"]  // sample skewness (population)
+ * result.additionalInfo["kurtosis"]  // sample kurtosis (population, non-excess)
+ * result.isSignificant()          // true if data deviates significantly from normality
+ * ```
+ *
+ * @param sample the observed values. Must have at least 20 elements.
+ * @return a [TestResult] containing the K² statistic, p-value, degrees of freedom (2.0),
+ * and additional info with "z1", "z2", "skewness", and "kurtosis".
+ */
+public fun dagostinoPearsonTest(sample: DoubleArray): TestResult {
+    val n = sample.size
+    if (n < 20) throw InsufficientDataException(
+        "D'Agostino-Pearson test requires at least 20 elements, got $n"
+    )
+
+    // Compute population moments (two-pass)
+    val mean = sample.average()
+    var m2 = 0.0
+    var m3 = 0.0
+    var m4 = 0.0
+    for (x in sample) {
+        val d = x - mean
+        val d2 = d * d
+        m2 += d2
+        m3 += d2 * d
+        m4 += d2 * d2
+    }
+    m2 /= n
+    m3 /= n
+    m4 /= n
+
+    // Constant data: zero variance
+    if (m2 == 0.0) {
+        return TestResult(
+            testName = "D'Agostino-Pearson Test",
+            statistic = 0.0,
+            pValue = 1.0,
+            degreesOfFreedom = 2.0,
+            additionalInfo = mapOf("z1" to 0.0, "z2" to 0.0, "skewness" to 0.0, "kurtosis" to 0.0)
+        )
+    }
+
+    val b1 = m3 / (m2 * sqrt(m2))   // population skewness
+    val b2 = m4 / (m2 * m2)         // population kurtosis (non-excess)
+
+    val z1 = skewTestZScore(b1, n)
+    val z2 = kurtosisTestZScore(b2, n)
+
+    val k2 = z1 * z1 + z2 * z2
+    if (k2.isNaN() || k2.isInfinite()) {
+        return TestResult(
+            testName = "D'Agostino-Pearson Test",
+            statistic = k2,
+            pValue = Double.NaN,
+            degreesOfFreedom = 2.0,
+            additionalInfo = mapOf("z1" to z1, "z2" to z2, "skewness" to b1, "kurtosis" to b2)
+        )
+    }
+    val pValue = ChiSquaredDistribution(2.0).sf(k2)
+
+    return TestResult(
+        testName = "D'Agostino-Pearson Test",
+        statistic = k2,
+        pValue = pValue.coerceIn(0.0, 1.0),
+        degreesOfFreedom = 2.0,
+        additionalInfo = mapOf("z1" to z1, "z2" to z2, "skewness" to b1, "kurtosis" to b2)
+    )
+}
+
+/**
+ * Computes the skewness z-score using D'Agostino's (1970) transformation.
+ *
+ * Transforms the sample skewness [b1] into a standard normal deviate Z₁ via
+ * a log-sinh transformation that stabilizes the distribution for moderate n.
+ */
+private fun skewTestZScore(b1: Double, n: Int): Double {
+    val an = n.toDouble()
+    val y = b1 * sqrt((an + 1.0) * (an + 3.0) / (6.0 * (an - 2.0)))
+    val beta2 = 3.0 * (an * an + 27.0 * an - 70.0) * (an + 1.0) * (an + 3.0) /
+        ((an - 2.0) * (an + 5.0) * (an + 7.0) * (an + 9.0))
+    val w2 = -1.0 + sqrt(2.0 * (beta2 - 1.0))
+    val delta = 1.0 / sqrt(0.5 * ln(w2))
+    val alpha = sqrt(2.0 / (w2 - 1.0))
+    return delta * asinh(y / alpha)
+}
+
+/**
+ * Computes the kurtosis z-score using Anscombe & Glynn's (1983) transformation.
+ *
+ * Transforms the sample kurtosis [b2] (non-excess, population) into a standard normal
+ * deviate Z₂ via a cube-root transformation.
+ */
+private fun kurtosisTestZScore(b2: Double, n: Int): Double {
+    val an = n.toDouble()
+    val e = 3.0 * (an - 1.0) / (an + 1.0)
+    val varB2 = 24.0 * an * (an - 2.0) * (an - 3.0) /
+        ((an + 1.0) * (an + 1.0) * (an + 3.0) * (an + 5.0))
+    val x = (b2 - e) / sqrt(varB2)
+    val sqrtBeta1 = 6.0 * (an * an - 5.0 * an + 2.0) /
+        ((an + 7.0) * (an + 9.0)) *
+        sqrt(6.0 * (an + 3.0) * (an + 5.0) / (an * (an - 2.0) * (an - 3.0)))
+    val a = 6.0 + 8.0 / sqrtBeta1 * (2.0 / sqrtBeta1 + sqrt(1.0 + 4.0 / (sqrtBeta1 * sqrtBeta1)))
+    val denom = 1.0 + x * sqrt(2.0 / (a - 4.0))
+    val term2 = denom.sign * ((1.0 - 2.0 / a) / abs(denom)).pow(1.0 / 3.0)
+    return (1.0 - 2.0 / (9.0 * a) - term2) / sqrt(2.0 / (9.0 * a))
 }
