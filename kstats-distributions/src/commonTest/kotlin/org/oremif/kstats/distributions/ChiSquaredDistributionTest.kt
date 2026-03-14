@@ -1,0 +1,235 @@
+package org.oremif.kstats.distributions
+
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import kotlin.math.exp
+import kotlin.math.ln
+import kotlin.math.sqrt
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
+
+class ChiSquaredDistributionTest {
+
+    // --- Basic correctness (scipy 15-digit refs) ---
+
+    @Test
+    fun testPdfKnownValues() {
+        val d = ChiSquaredDistribution(5.0)
+        // scipy: stats.chi2(5).pdf(x)
+        assertEquals(0.00400012982810046, d.pdf(0.1), 1e-12)
+        assertEquals(0.0806569081730478, d.pdf(1.0), 1e-12)
+        assertEquals(0.138369165806865, d.pdf(2.0), 1e-12)
+        assertEquals(0.122041521349387, d.pdf(5.0), 1e-12)
+        assertEquals(0.0283345553417345, d.pdf(10.0), 1e-12)
+    }
+
+    @Test
+    fun testCdfKnownValues() {
+        val d = ChiSquaredDistribution(5.0)
+        // scipy: stats.chi2(5).cdf(x)
+        assertEquals(0.000162316611922615, d.cdf(0.1), 1e-10)
+        assertEquals(0.0374342267527036, d.cdf(1.0), 1e-10)
+        assertEquals(0.15085496391539, d.cdf(2.0), 1e-10)
+        assertEquals(0.584119813004492, d.cdf(5.0), 1e-10)
+        assertEquals(0.924764753853488, d.cdf(10.0), 1e-10)
+    }
+
+    @Test
+    fun testSfKnownValues() {
+        val d = ChiSquaredDistribution(5.0)
+        // scipy: stats.chi2(5).sf(x)
+        assertEquals(0.999837683388077, d.sf(0.1), 1e-10)
+        assertEquals(0.962565773247296, d.sf(1.0), 1e-10)
+        assertEquals(0.84914503608461, d.sf(2.0), 1e-10)
+        assertEquals(0.415880186995508, d.sf(5.0), 1e-10)
+        assertEquals(0.0752352461465122, d.sf(10.0), 1e-10)
+    }
+
+    @Test
+    fun testSfUpperTail() {
+        val d = ChiSquaredDistribution(5.0)
+        // scipy: stats.chi2(5).sf(x) — far tail
+        assertEquals(0.00124973056303138, d.sf(20.0), 1e-10)
+        assertEquals(1.38579733670096e-09, d.sf(50.0), 1e-14)
+    }
+
+    @Test
+    fun testLogPdfKnownValues() {
+        val d = ChiSquaredDistribution(10.0)
+        // scipy: stats.chi2(10).pdf(x) → logpdf
+        assertEquals(ln(0.000789753463167491), d.logPdf(1.0), 1e-8)
+        assertEquals(ln(0.0668009428905426), d.logPdf(5.0), 1e-10)
+        assertEquals(ln(0.0877336848839254), d.logPdf(10.0), 1e-10)
+    }
+
+    @Test
+    fun testQuantileKnownValues() {
+        val d = ChiSquaredDistribution(10.0)
+        // scipy: stats.chi2(10).ppf(p)
+        assertEquals(2.55821216018721, d.quantile(0.01), 1e-6)
+        assertEquals(3.94029913611906, d.quantile(0.05), 1e-6)
+        assertEquals(4.86518205192533, d.quantile(0.1), 1e-6)
+        assertEquals(9.34181776559197, d.quantile(0.5), 1e-6)
+        assertEquals(15.9871791721053, d.quantile(0.9), 1e-6)
+        assertEquals(18.3070380532751, d.quantile(0.95), 1e-5)
+        assertEquals(23.2092511589544, d.quantile(0.99), 1e-4)
+    }
+
+    @Test
+    fun testMoments() {
+        val d5 = ChiSquaredDistribution(5.0)
+        assertEquals(5.0, d5.mean, 1e-12)
+        assertEquals(10.0, d5.variance, 1e-12)
+        assertEquals(sqrt(8.0 / 5.0), d5.skewness, 1e-12)
+        assertEquals(12.0 / 5.0, d5.kurtosis, 1e-12)
+
+        val d10 = ChiSquaredDistribution(10.0)
+        assertEquals(10.0, d10.mean, 1e-12)
+        assertEquals(20.0, d10.variance, 1e-12)
+    }
+
+    // --- Edge cases ---
+
+    @Test
+    fun testPdfAtZero() {
+        // df=2: pdf(0)=0.5
+        assertEquals(0.5, ChiSquaredDistribution(2.0).pdf(0.0), 1e-12)
+        // df<2: pdf(0)=+Inf
+        assertEquals(Double.POSITIVE_INFINITY, ChiSquaredDistribution(1.0).pdf(0.0))
+        // df>2: pdf(0)=0
+        assertEquals(0.0, ChiSquaredDistribution(5.0).pdf(0.0), 1e-12)
+    }
+
+    @Test
+    fun testNegativeX() {
+        val d = ChiSquaredDistribution(5.0)
+        assertEquals(0.0, d.pdf(-1.0), 1e-12)
+        assertEquals(0.0, d.cdf(-1.0), 1e-12)
+        assertEquals(1.0, d.sf(-1.0), 1e-12)
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPdf(-1.0))
+    }
+
+    @Test
+    fun testQuantileBoundaries() {
+        val d = ChiSquaredDistribution(5.0)
+        assertEquals(0.0, d.quantile(0.0), 1e-12)
+        assertEquals(Double.POSITIVE_INFINITY, d.quantile(1.0))
+    }
+
+    // --- Different df ---
+
+    @Test
+    fun testDf1() {
+        val d = ChiSquaredDistribution(1.0)
+        // scipy: stats.chi2(1).cdf(x)
+        assertEquals(0.682689492137086, d.cdf(1.0), 1e-10)
+        assertEquals(0.974652681322532, d.cdf(5.0), 1e-10)
+        // sf
+        assertEquals(0.317310507862911, d.sf(1.0), 1e-10)
+        assertEquals(0.0253473186774683, d.sf(5.0), 1e-10)
+    }
+
+    @Test
+    fun testDf30() {
+        val d = ChiSquaredDistribution(30.0)
+        // scipy: stats.chi2(30)
+        assertEquals(30.0, d.mean, 1e-12)
+        assertEquals(60.0, d.variance, 1e-12)
+        assertEquals(0.0834584729346629, d.cdf(20.0), 1e-8)
+        assertEquals(0.916541527065337, d.sf(20.0), 1e-8)
+    }
+
+    // --- Invalid input ---
+
+    @Test
+    fun testInvalidParameters() {
+        assertFailsWith<InvalidParameterException> { ChiSquaredDistribution(0.0) }
+        assertFailsWith<InvalidParameterException> { ChiSquaredDistribution(-1.0) }
+    }
+
+    @Test
+    fun testQuantileInvalidP() {
+        val d = ChiSquaredDistribution(5.0)
+        assertFailsWith<InvalidParameterException> { d.quantile(-0.1) }
+        assertFailsWith<InvalidParameterException> { d.quantile(1.1) }
+    }
+
+    // --- Property-based ---
+
+    @Test
+    fun testCdfQuantileRoundTrip() {
+        val d = ChiSquaredDistribution(10.0)
+        for (p in listOf(0.1, 0.25, 0.5, 0.75, 0.9)) {
+            assertEquals(p, d.cdf(d.quantile(p)), 1e-8, "cdf(quantile($p)) ≈ $p")
+        }
+    }
+
+    @Test
+    fun testSfPlusCdfEqualsOne() {
+        val d = ChiSquaredDistribution(5.0)
+        for (x in listOf(0.0, 1.0, 2.0, 5.0, 10.0, 20.0)) {
+            assertEquals(1.0, d.sf(x) + d.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
+        }
+    }
+
+    @Test
+    fun testLogPdfConsistency() {
+        val d = ChiSquaredDistribution(5.0)
+        for (x in listOf(0.5, 1.0, 2.0, 5.0, 10.0)) {
+            assertEquals(d.pdf(x), exp(d.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
+        }
+    }
+
+    @Test
+    fun testSampleStats() {
+        val d = ChiSquaredDistribution(10.0) // mean=10
+        val rng = kotlin.random.Random(42)
+        val samples = d.sample(100_000, rng)
+        val sampleMean = samples.average()
+        assertEquals(10.0, sampleMean, 0.5, "sample mean ≈ 10")
+        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
+    }
+
+    @Test
+    fun testCdfMonotonicity() {
+        val d = ChiSquaredDistribution(5.0)
+        var prev = 0.0
+        for (x in listOf(0.0, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0)) {
+            val cdfVal = d.cdf(x)
+            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
+            prev = cdfVal
+        }
+    }
+
+    @Test
+    fun testEntropyNaN() {
+        // entropy requires digamma (deferred to MATH-001)
+        assertTrue(ChiSquaredDistribution(5.0).entropy.isNaN())
+    }
+
+    @Test
+    fun testExtremeParameters() {
+        // df=1000: large shape parameter
+        val d1 = ChiSquaredDistribution(1000.0)
+        assertEquals(1000.0, d1.mean, 1e-10)
+        // scipy: cdf(1000) ≈ 0.505947
+        assertEquals(0.505947146170760, d1.cdf(1000.0), 1e-3)
+
+        // df=0.1: spike near 0
+        val d2 = ChiSquaredDistribution(0.1)
+        // scipy: cdf(0.01) ≈ 0.787966
+        assertEquals(0.787965781308072, d2.cdf(0.01), 1e-4)
+    }
+
+    @Test
+    fun testPdfIntegration() {
+        val d = ChiSquaredDistribution(5.0)
+        val eps = 1e-6
+        val lower = d.quantile(eps)
+        val upper = d.quantile(1.0 - eps)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
+    }
+}
