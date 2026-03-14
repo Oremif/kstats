@@ -666,6 +666,95 @@ public fun dagostinoPearsonTest(sample: DoubleArray): TestResult {
 }
 
 /**
+ * Performs the **Jarque-Bera** goodness-of-fit test for normality.
+ *
+ * The Jarque-Bera test checks whether a sample has the skewness (0) and kurtosis (3)
+ * expected of a normal distribution. The test statistic is:
+ *
+ * ```
+ * JB = (n / 6) · (S² + K² / 4)
+ * ```
+ *
+ * where **S** is the population (biased) skewness and **K** is the population (biased)
+ * excess kurtosis. Under the null hypothesis of normality, JB asymptotically follows
+ * a chi-squared distribution with 2 degrees of freedom.
+ *
+ * **Null hypothesis:** the data comes from a normal distribution.
+ *
+ * ### Usage
+ * ```kotlin
+ * val result = jarqueBeraTest(data)
+ * result.statistic                  // JB statistic
+ * result.pValue                     // chi-squared p-value (df = 2)
+ * result.additionalInfo["skewness"] // population skewness (biased)
+ * result.additionalInfo["kurtosis"] // population excess kurtosis (biased)
+ * result.isSignificant()            // true if data deviates significantly from normality
+ * ```
+ *
+ * @param sample the observed values. Must have at least 3 elements.
+ * @return a [TestResult] containing the JB statistic, p-value, degrees of freedom (2.0),
+ * and additional info with "skewness" and "kurtosis".
+ */
+public fun jarqueBeraTest(sample: DoubleArray): TestResult {
+    val n = sample.size
+    if (n < 3) throw InsufficientDataException(
+        "Jarque-Bera test requires at least 3 elements, got $n"
+    )
+
+    // Compute population moments (two-pass)
+    val mean = sample.average()
+    var m2 = 0.0
+    var m3 = 0.0
+    var m4 = 0.0
+    for (x in sample) {
+        val d = x - mean
+        val d2 = d * d
+        m2 += d2
+        m3 += d2 * d
+        m4 += d2 * d2
+    }
+    m2 /= n
+    m3 /= n
+    m4 /= n
+
+    // Constant data: zero variance
+    if (m2 == 0.0) {
+        return TestResult(
+            testName = "Jarque-Bera Test",
+            statistic = 0.0,
+            pValue = 1.0,
+            degreesOfFreedom = 2.0,
+            additionalInfo = mapOf("skewness" to 0.0, "kurtosis" to 0.0)
+        )
+    }
+
+    val skewness = m3 / (m2 * sqrt(m2))    // population skewness
+    val kurtosis = m4 / (m2 * m2) - 3.0    // population excess kurtosis
+
+    val jb = (n.toDouble() / 6.0) * (skewness * skewness + kurtosis * kurtosis / 4.0)
+
+    if (jb.isNaN() || jb.isInfinite()) {
+        return TestResult(
+            testName = "Jarque-Bera Test",
+            statistic = jb,
+            pValue = Double.NaN,
+            degreesOfFreedom = 2.0,
+            additionalInfo = mapOf("skewness" to skewness, "kurtosis" to kurtosis)
+        )
+    }
+
+    val pValue = ChiSquaredDistribution(2.0).sf(jb)
+
+    return TestResult(
+        testName = "Jarque-Bera Test",
+        statistic = jb,
+        pValue = pValue.coerceIn(0.0, 1.0),
+        degreesOfFreedom = 2.0,
+        additionalInfo = mapOf("skewness" to skewness, "kurtosis" to kurtosis)
+    )
+}
+
+/**
  * Computes the skewness z-score using D'Agostino's (1970) transformation.
  *
  * Transforms the sample skewness [b1] into a standard normal deviate Z₁ via
