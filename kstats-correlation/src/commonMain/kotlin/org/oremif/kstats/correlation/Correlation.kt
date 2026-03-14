@@ -78,52 +78,147 @@ public fun spearmanCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResul
 
 /**
  * Kendall's tau-b correlation coefficient.
+ *
+ * Uses O(n log n) merge-sort based algorithm (Knight, 1966) for counting
+ * discordant pairs, with ties-adjusted variance formula (Kendall, 1970)
+ * for the p-value.
  */
 public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
     val n = x.size
     if (n < 3) throw InsufficientDataException("Need at least 3 observations")
 
-    var concordant = 0
-    var discordant = 0
-    var tiedX = 0
-    var tiedY = 0
+    // Step 1: Sort indices by (x, y) lexicographically
+    val indices = (0 until n).sortedWith(compareBy<Int> { x[it] }.thenBy { y[it] })
 
-    for (i in 0 until n) {
-        for (j in i + 1 until n) {
-            val xDiff = x[i].compareTo(x[j])
-            val yDiff = y[i].compareTo(y[j])
+    // Step 2: Scan sorted indices for x-tied groups and joint ties
+    var n1 = 0L // x-tied pairs
+    var n3 = 0L // jointly tied pairs (same x and y)
+    var vt = 0L // Σ t(t-1)(2t+5)
+    var v1x = 0L // Σ t(t-1)
+    var v2x = 0L // Σ t(t-1)(t-2)
 
-            if (xDiff == 0 && yDiff == 0) {
-                tiedX++
-                tiedY++
-            } else if (xDiff == 0) {
-                tiedX++
-            } else if (yDiff == 0) {
-                tiedY++
-            } else if (xDiff * yDiff > 0) {
-                concordant++
-            } else {
-                discordant++
+    var i = 0
+    while (i < n) {
+        // Find end of x-tied group
+        var j = i + 1
+        while (j < n && x[indices[j]] == x[indices[i]]) j++
+        val t = (j - i).toLong()
+        if (t > 1) {
+            n1 += t * (t - 1) / 2
+            vt += t * (t - 1) * (2 * t + 5)
+            v1x += t * (t - 1)
+            v2x += t * (t - 1) * (t - 2)
+            // Within this x-tied group, scan for joint ties (same y too)
+            var k = i
+            while (k < j) {
+                var l = k + 1
+                while (l < j && y[indices[l]] == y[indices[k]]) l++
+                val s = (l - k).toLong()
+                if (s > 1) {
+                    n3 += s * (s - 1) / 2
+                }
+                k = l
             }
         }
+        i = j
     }
 
-    val nPairs = n.toLong() * (n - 1) / 2
-    val denominator = sqrt((nPairs - tiedX).toDouble() * (nPairs - tiedY).toDouble())
+    // Step 3: Extract y-permutation and count y-tied groups
+    val yPerm = DoubleArray(n) { y[indices[it]] }
 
-    if (denominator == 0.0) {
+    // Sort a copy of y to find y-tied groups
+    val ySorted = y.copyOf()
+    ySorted.sort()
+    var n2 = 0L // y-tied pairs
+    var vu = 0L // Σ u(u-1)(2u+5)
+    var v1y = 0L // Σ u(u-1)
+    var v2y = 0L // Σ u(u-1)(u-2)
+
+    i = 0
+    while (i < n) {
+        var j = i + 1
+        while (j < n && ySorted[j] == ySorted[i]) j++
+        val u = (j - i).toLong()
+        if (u > 1) {
+            n2 += u * (u - 1) / 2
+            vu += u * (u - 1) * (2 * u + 5)
+            v1y += u * (u - 1)
+            v2y += u * (u - 1) * (u - 2)
+        }
+        i = j
+    }
+
+    // Step 4: Count discordant pairs via merge sort on yPerm
+    val temp = DoubleArray(n)
+    val dis = countDiscordant(yPerm, temp, 0, n - 1)
+
+    // Step 5: Compute tau-b
+    val n0 = n.toLong() * (n - 1) / 2
+    val nS = n0 - n1 - n2 + n3 - 2 * dis
+    val denom1 = n0 - n1
+    val denom2 = n0 - n2
+
+    if (denom1 == 0L || denom2 == 0L) {
         return CorrelationResult(Double.NaN, Double.NaN, n)
     }
 
-    val tau = (concordant - discordant).toDouble() / denominator
+    val tau = nS.toDouble() / sqrt(denom1.toDouble() * denom2.toDouble())
 
-    // Normal approximation for p-value
-    val sigma = sqrt(2.0 * (2.0 * n + 5.0) / (9.0 * n * (n - 1.0)))
-    val z = tau / sigma
+    // Step 6: Ties-adjusted p-value (Kendall, 1970)
+    val nL = n.toLong()
+    val v0 = nL * (nL - 1) * (2 * nL + 5)
+    var varS = (v0 - vt - vu).toDouble() / 18.0
+    if (nL >= 2) {
+        varS += v1x.toDouble() * v1y.toDouble() / (2.0 * nL * (nL - 1))
+    }
+    if (nL >= 3) {
+        varS += v2x.toDouble() * v2y.toDouble() / (9.0 * nL * (nL - 1) * (nL - 2))
+    }
+
+    if (varS <= 0.0) {
+        return CorrelationResult(tau, if (tau == 0.0) 1.0 else 0.0, n)
+    }
+
+    val z = nS.toDouble() / sqrt(varS)
     val pValue = 2.0 * NormalDistribution.STANDARD.sf(abs(z))
 
-    return CorrelationResult(tau, pValue.coerceIn(0.0, 1.0), n)
+    return CorrelationResult(tau.coerceIn(-1.0, 1.0), pValue.coerceIn(0.0, 1.0), n)
+}
+
+/**
+ * Counts the number of discordant pairs (inversions) in [arr] using merge sort.
+ * Modifies [arr] in-place (sorts it). Uses [temp] as scratch space.
+ * Returns the inversion count as Long to avoid overflow for large n.
+ */
+private fun countDiscordant(arr: DoubleArray, temp: DoubleArray, left: Int, right: Int): Long {
+    if (left >= right) return 0L
+
+    val mid = left + (right - left) / 2
+    var count = countDiscordant(arr, temp, left, mid)
+    count += countDiscordant(arr, temp, mid + 1, right)
+
+    // Merge and count inversions
+    var i = left
+    var j = mid + 1
+    var k = left
+    while (i <= mid && j <= right) {
+        if (arr[i].compareTo(arr[j]) <= 0) {
+            temp[k++] = arr[i++]
+        } else {
+            // arr[j] < arr[i]: all remaining elements in left half (i..mid) are inversions
+            count += (mid - i + 1).toLong()
+            temp[k++] = arr[j++]
+        }
+    }
+    while (i <= mid) temp[k++] = arr[i++]
+    while (j <= right) temp[k++] = arr[j++]
+
+    for (idx in left..right) {
+        arr[idx] = temp[idx]
+    }
+
+    return count
 }
 
 /**
