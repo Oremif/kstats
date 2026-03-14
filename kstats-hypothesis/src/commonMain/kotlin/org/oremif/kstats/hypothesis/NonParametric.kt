@@ -483,6 +483,32 @@ public fun shapiroWilkTest(sample: DoubleArray): TestResult {
     )
 }
 
+/**
+ * Performs the Anderson-Darling test for normality.
+ *
+ * The null hypothesis is that [sample] was drawn from a normal distribution. The test
+ * measures the discrepancy between the empirical distribution and a fitted normal
+ * distribution, giving more weight to the tails than the Kolmogorov-Smirnov test.
+ * Standardizes the data using the sample mean and standard deviation before computing
+ * the A² statistic. Uses D'Agostino & Stephens' (1986) piecewise approximation for
+ * the p-value with a finite-sample correction factor.
+ *
+ * If all values are identical (zero variance), returns A² = 0.0 and p-value = 1.0.
+ *
+ * ### Example:
+ * ```kotlin
+ * val data = doubleArrayOf(-1.2, -0.5, 0.1, 0.3, 0.7, 1.0, 1.5)
+ * val result = andersonDarlingTest(data)
+ * result.statistic                           // A² statistic
+ * result.pValue                              // p-value
+ * result.additionalInfo["modifiedStatistic"] // A²* (finite-sample corrected)
+ * result.isSignificant()                     // true if data deviates from normality
+ * ```
+ *
+ * @param sample the observed values. Must have at least 3 elements.
+ * @return a [TestResult] containing the A² statistic, p-value, and additional info
+ * with "modifiedStatistic" (the finite-sample corrected A²*).
+ */
 public fun andersonDarlingTest(sample: DoubleArray): TestResult {
     val n = sample.size
     if (n < 3) throw InsufficientDataException("Anderson-Darling test requires at least 3 elements")
@@ -666,22 +692,17 @@ public fun dagostinoPearsonTest(sample: DoubleArray): TestResult {
 }
 
 /**
- * Performs the **Jarque-Bera** goodness-of-fit test for normality.
+ * Performs the Jarque-Bera goodness-of-fit test for normality.
  *
- * The Jarque-Bera test checks whether a sample has the skewness (0) and kurtosis (3)
- * expected of a normal distribution. The test statistic is:
+ * The null hypothesis is that [sample] was drawn from a normal distribution. The test
+ * checks whether the sample has the skewness (zero) and kurtosis (three) expected of a
+ * normal distribution. It combines squared skewness and scaled squared excess kurtosis
+ * into a single statistic that asymptotically follows a chi-squared distribution with
+ * 2 degrees of freedom. Uses population (biased) moment estimates.
  *
- * ```
- * JB = (n / 6) · (S² + K² / 4)
- * ```
+ * If all values are identical (zero variance), returns JB = 0.0 and p-value = 1.0.
  *
- * where **S** is the population (biased) skewness and **K** is the population (biased)
- * excess kurtosis. Under the null hypothesis of normality, JB asymptotically follows
- * a chi-squared distribution with 2 degrees of freedom.
- *
- * **Null hypothesis:** the data comes from a normal distribution.
- *
- * ### Usage
+ * ### Example:
  * ```kotlin
  * val result = jarqueBeraTest(data)
  * result.statistic                  // JB statistic

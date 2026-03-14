@@ -9,6 +9,15 @@ import org.oremif.kstats.distributions.FDistribution
  * Contains the F-statistic, p-value, and the full ANOVA decomposition into between-group
  * and within-group components.
  *
+ * ### Example:
+ * ```kotlin
+ * val result = oneWayAnova(group1, group2, group3)
+ * result.fStatistic // ratio of between-group to within-group variance
+ * result.pValue     // p-value from F-distribution
+ * result.dfBetween  // number of groups minus one
+ * result.dfWithin   // total observations minus number of groups
+ * ```
+ *
  * @property fStatistic the F-statistic, computed as the ratio of between-group variance to
  * within-group variance. Larger values indicate greater differences between groups.
  * @property pValue the probability of observing an F-statistic at least as extreme as the

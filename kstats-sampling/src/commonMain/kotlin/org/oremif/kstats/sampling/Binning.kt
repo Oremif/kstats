@@ -7,6 +7,14 @@ import kotlin.math.floor
 /**
  * A histogram bin containing the items that fall within a value range.
  *
+ * ### Example:
+ * ```kotlin
+ * val bins = listOf(1.0, 2.0, 3.0, 4.0, 5.0).bin(2.5)
+ * bins[0].range // 1.0..3.5
+ * bins[0].count // number of items in this bin
+ * bins[0].items // the actual items
+ * ```
+ *
  * @param T the type of items in the bin.
  * @property range the closed interval of values that this bin covers.
  * @property items the elements whose values fall within [range].
@@ -23,6 +31,15 @@ public data class Bin<T>(
 
 /**
  * A histogram bin with frequency statistics but without the original items.
+ *
+ * ### Example:
+ * ```kotlin
+ * val freq = listOf(1.0, 2.0, 3.0, 4.0, 5.0).frequencyTable(2)
+ * freq[0].range               // bin boundaries
+ * freq[0].count               // how many values in this bin
+ * freq[0].relativeFrequency   // proportion of total
+ * freq[0].cumulativeFrequency // running proportion
+ * ```
  *
  * @property range the closed interval of values that this bin covers.
  * @property count the number of values that fall within [range].

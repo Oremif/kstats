@@ -15,6 +15,14 @@ import kotlin.math.sqrt
 /**
  * The result of a correlation computation.
  *
+ * ### Example:
+ * ```kotlin
+ * val result = pearsonCorrelation(x, y)
+ * result.coefficient // correlation coefficient (-1.0 to 1.0)
+ * result.pValue      // two-sided p-value for H0: r = 0
+ * result.n           // number of observations
+ * ```
+ *
  * @property coefficient the correlation coefficient, ranging from -1.0 (perfect negative
  * correlation) through 0.0 (no correlation) to 1.0 (perfect positive correlation). Returns
  * [Double.NaN] when the correlation is undefined (e.g. constant input).

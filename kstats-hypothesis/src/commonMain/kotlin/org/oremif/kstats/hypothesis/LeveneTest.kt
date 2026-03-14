@@ -48,8 +48,6 @@ public enum class LeveneCenter {
  * Defaults to [LeveneCenter.MEDIAN] (Brown-Forsythe variant).
  * @return a [TestResult] containing the W statistic, p-value, and additional info
  * with "dfBetween" and "dfWithin".
- * @throws InsufficientDataException if fewer than 2 groups are provided or any group
- * has fewer than 2 elements.
  */
 public fun leveneTest(
     vararg groups: DoubleArray,

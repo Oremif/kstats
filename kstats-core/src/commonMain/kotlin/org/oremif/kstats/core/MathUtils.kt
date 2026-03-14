@@ -7,8 +7,10 @@ import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
+import kotlin.math.floor
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.math.tan
 
 // ── Mathematical constants ──────────────────────────────────────────────────
 
@@ -435,6 +437,178 @@ public fun erfInv(x: Double): Double {
     return sign * p
 }
 
+/**
+ * Computes the inverse complementary error function at [y].
+ *
+ * Returns the value x such that erfc(x) = [y]. Equivalent to erfInv(1 - y) but accepts
+ * the complementary probability directly, which is convenient when working with tail
+ * probabilities. Used internally by quantile functions of distributions related to the
+ * normal distribution.
+ *
+ * ### Example:
+ * ```kotlin
+ * erfcInv(1.0)              // 0.0 (since erfc(0) = 1)
+ * erfcInv(0.5)              // 0.4769... (since erfc(0.4769) ≈ 0.5)
+ * erfcInv(erfc(1.0))        // 1.0 (round-trip)
+ * ```
+ *
+ * @param y the value at which to evaluate. Must be strictly between 0 and 2 (exclusive).
+ * @return the inverse complementary error function value at [y].
+ */
+public fun erfcInv(y: Double): Double {
+    if (y.isNaN()) return Double.NaN
+    if (y <= 0.0 || y >= 2.0) throw InvalidParameterException("erfcInv requires 0 < y < 2, got $y")
+    if (y == 1.0) return 0.0
+    return erfInv(1.0 - y)
+}
+
+// ── Digamma and trigamma functions ───────────────────────────────────────────
+
+// Bernoulli-number based coefficients for digamma asymptotic expansion:
+// B_{2k}/(2k) for k=1..6: 1/12, 1/120, 1/252, 1/240, 1/132, 691/32760
+private val DIGAMMA_ASYMPTOTIC_COEFFICIENTS = doubleArrayOf(
+    1.0 / 12.0,
+    -1.0 / 120.0,
+    1.0 / 252.0,
+    -1.0 / 240.0,
+    1.0 / 132.0,
+    -691.0 / 32760.0,
+)
+
+// Coefficients for trigamma asymptotic expansion (derived from Bernoulli numbers):
+// B_{2k}/(x^{2k+1}) terms
+private val TRIGAMMA_ASYMPTOTIC_COEFFICIENTS = doubleArrayOf(
+    1.0 / 6.0,
+    -1.0 / 30.0,
+    1.0 / 42.0,
+    -1.0 / 30.0,
+    5.0 / 66.0,
+    -691.0 / 2730.0,
+)
+
+/**
+ * Computes the digamma (psi) function at [x].
+ *
+ * The digamma function is the logarithmic derivative of the gamma function:
+ * psi(x) = d/dx [ln(Gamma(x))] = Gamma'(x) / Gamma(x).
+ * It appears in the entropy of gamma, beta, and related distributions, and in
+ * maximum-likelihood parameter estimation for exponential-family distributions.
+ *
+ * Uses the asymptotic expansion for x >= 6, with recurrence relation to shift
+ * smaller arguments upward, and a reflection formula for negative non-integer arguments.
+ *
+ * ### Example:
+ * ```kotlin
+ * digamma(1.0)  // -0.5772... (negative Euler-Mascheroni constant)
+ * digamma(2.0)  // 0.4227... (1 - gamma)
+ * digamma(0.5)  // -1.9635... (-gamma - 2*ln(2))
+ * ```
+ *
+ * @param x the point at which to evaluate. Must not be zero or a negative integer (poles of the gamma function).
+ * @return the value of the digamma function at [x].
+ * @throws InvalidParameterException if [x] is zero or a negative integer.
+ */
+public fun digamma(x: Double): Double {
+    // NaN/Inf fast paths
+    if (x.isNaN()) return Double.NaN
+    if (x == Double.POSITIVE_INFINITY) return Double.POSITIVE_INFINITY
+    if (x == Double.NEGATIVE_INFINITY) return Double.NaN
+
+    // Poles: x = 0 or negative integer
+    if (x == 0.0 || (x < 0.0 && x == floor(x))) {
+        throw InvalidParameterException("digamma is not defined at x=$x (pole of the gamma function)")
+    }
+
+    // Negative non-integer: reflection formula psi(x) = psi(1-x) - pi/tan(pi*x)
+    if (x < 0.0) {
+        return digamma(1.0 - x) - PI / tan(PI * x)
+    }
+
+    // Recurrence relation: shift x up until x >= 6
+    var result = 0.0
+    var xx = x
+    while (xx < 6.0) {
+        result -= 1.0 / xx
+        xx += 1.0
+    }
+
+    // Asymptotic expansion for x >= 6:
+    // psi(x) ~ ln(x) - 1/(2x) - sum_{k=1}^{6} B_{2k}/(2k * x^{2k})
+    val invX = 1.0 / xx
+    val invX2 = invX * invX
+    result += ln(xx) - 0.5 * invX
+
+    var xPow = invX2 // x^(-2)
+    for (coeff in DIGAMMA_ASYMPTOTIC_COEFFICIENTS) {
+        result -= coeff * xPow
+        xPow *= invX2
+    }
+
+    return result
+}
+
+/**
+ * Computes the trigamma function at [x].
+ *
+ * The trigamma function is the second derivative of ln(Gamma(x)), or equivalently
+ * the derivative of the digamma function: psi'(x) = d/dx [psi(x)].
+ * It appears in the variance of sufficient statistics for exponential-family distributions
+ * and in Newton-Raphson updates for maximum-likelihood estimation.
+ *
+ * Uses the asymptotic expansion for x >= 8, with recurrence relation to shift
+ * smaller arguments upward, and a reflection formula for negative non-integer arguments.
+ *
+ * ### Example:
+ * ```kotlin
+ * trigamma(1.0)  // 1.6449... (pi^2/6)
+ * trigamma(0.5)  // 4.9348... (pi^2/2)
+ * trigamma(2.0)  // 0.6449... (pi^2/6 - 1)
+ * ```
+ *
+ * @param x the point at which to evaluate. Must not be zero or a negative integer (poles of the gamma function).
+ * @return the value of the trigamma function at [x].
+ * @throws InvalidParameterException if [x] is zero or a negative integer.
+ */
+public fun trigamma(x: Double): Double {
+    // NaN/Inf fast paths
+    if (x.isNaN()) return Double.NaN
+    if (x == Double.POSITIVE_INFINITY) return 0.0
+    if (x == Double.NEGATIVE_INFINITY) return Double.NaN
+
+    // Poles: x = 0 or negative integer
+    if (x == 0.0 || (x < 0.0 && x == floor(x))) {
+        throw InvalidParameterException("trigamma is not defined at x=$x (pole of the gamma function)")
+    }
+
+    // Negative non-integer: reflection formula psi'(x) = pi^2/sin^2(pi*x) - psi'(1-x)
+    if (x < 0.0) {
+        val sinPiX = sin(PI * x)
+        return (PI * PI) / (sinPiX * sinPiX) - trigamma(1.0 - x)
+    }
+
+    // Recurrence relation: shift x up until x >= 8
+    var result = 0.0
+    var xx = x
+    while (xx < 8.0) {
+        result += 1.0 / (xx * xx)
+        xx += 1.0
+    }
+
+    // Asymptotic expansion for x >= 8:
+    // psi'(x) ~ 1/x + 1/(2x^2) + sum_{k=1}^{6} B_{2k}/x^{2k+1}
+    val invX = 1.0 / xx
+    val invX2 = invX * invX
+    result += invX + 0.5 * invX2
+
+    var xPow = invX2 * invX // x^(-3)
+    for (coeff in TRIGAMMA_ASYMPTOTIC_COEFFICIENTS) {
+        result += coeff * xPow
+        xPow *= invX2
+    }
+
+    return result
+}
+
 // ── Generalized harmonic numbers ─────────────────────────────────────────────
 
 /**
@@ -513,6 +687,85 @@ public fun lnCombination(n: Int, k: Int): Double {
     if (n < 0 || k < 0 || k > n) throw InvalidParameterException("lnCombination requires 0 <= k <= n, got n=$n, k=$k")
     if (k == 0 || k == n) return 0.0
     return lnFactorial(n) - lnFactorial(k) - lnFactorial(n - k)
+}
+
+/**
+ * Computes the natural logarithm of the number of k-permutations of n items.
+ *
+ * The number of k-permutations P(n, k) is the number of ways to choose and arrange [k] items
+ * from a set of [n] items, where order matters. The logarithmic form avoids overflow for large
+ * [n] and [k]. Computed as lnFactorial(n) - lnFactorial(n - k). Returns 0.0 when [k] is 0
+ * (since P(n, 0) = 1).
+ *
+ * ### Example:
+ * ```kotlin
+ * lnPermutation(5, 2)  // 2.9957... (ln(20), since P(5,2) = 20)
+ * lnPermutation(5, 0)  // 0.0 (ln(1))
+ * lnPermutation(5, 5)  // 4.7874... (ln(120), since P(5,5) = 5! = 120)
+ * ```
+ *
+ * @param n the total number of items. Must be non-negative.
+ * @param k the number of items to arrange. Must satisfy 0 <= k <= n.
+ * @return the natural logarithm of P([n], [k]).
+ * @see lnCombination
+ */
+public fun lnPermutation(n: Int, k: Int): Double {
+    if (n < 0 || k < 0 || k > n) throw InvalidParameterException("lnPermutation requires 0 <= k <= n, got n=$n, k=$k")
+    if (k == 0) return 0.0
+    return lnFactorial(n) - lnFactorial(n - k)
+}
+
+/**
+ * Computes the greatest common divisor of two integers using the Euclidean algorithm.
+ *
+ * The GCD is the largest positive integer that divides both [a] and [b] without a remainder.
+ * Negative inputs are treated as their absolute values. Returns 0 when both inputs are 0.
+ * Uses a tail-recursive implementation for stack safety with large inputs.
+ *
+ * ### Example:
+ * ```kotlin
+ * gcd(12, 8)   // 4
+ * gcd(7, 13)   // 1 (coprime)
+ * gcd(0, 5)    // 5
+ * gcd(-12, 8)  // 4 (negatives treated as absolute values)
+ * ```
+ *
+ * @param a the first integer.
+ * @param b the second integer.
+ * @return the greatest common divisor of |[a]| and |[b]|.
+ * @see lcm
+ */
+public tailrec fun gcd(a: Long, b: Long): Long {
+    val absA = if (a < 0) -a else a
+    val absB = if (b < 0) -b else b
+    return if (absB == 0L) absA else gcd(absB, absA % absB)
+}
+
+/**
+ * Computes the least common multiple of two integers.
+ *
+ * The LCM is the smallest positive integer that is divisible by both [a] and [b]. Returns 0
+ * when either input is 0. Negative inputs are treated as their absolute values. Computed as
+ * |a| / gcd(|a|, |b|) * |b| to avoid intermediate overflow.
+ *
+ * ### Example:
+ * ```kotlin
+ * lcm(12, 8)    // 24
+ * lcm(7, 13)    // 91 (coprime, so LCM = a * b)
+ * lcm(0, 5)     // 0
+ * lcm(-12, 8)   // 24 (negatives treated as absolute values)
+ * ```
+ *
+ * @param a the first integer.
+ * @param b the second integer.
+ * @return the least common multiple of |[a]| and |[b]|, or 0 if either input is 0.
+ * @see gcd
+ */
+public fun lcm(a: Long, b: Long): Long {
+    if (a == 0L || b == 0L) return 0L
+    val absA = if (a < 0) -a else a
+    val absB = if (b < 0) -b else b
+    return absA / gcd(absA, absB) * absB
 }
 
 // ── Compensated summation (Neumaier) ────────────────────────────────────

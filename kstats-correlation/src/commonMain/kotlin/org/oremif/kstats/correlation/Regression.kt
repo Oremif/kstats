@@ -9,6 +9,15 @@ import kotlin.math.sqrt
 /**
  * The result of a simple linear regression fit (y = intercept + slope * x).
  *
+ * ### Example:
+ * ```kotlin
+ * val result = simpleLinearRegression(x, y)
+ * result.slope     // change in y per unit change in x
+ * result.intercept // predicted y when x = 0
+ * result.rSquared  // proportion of variance explained (0.0 to 1.0)
+ * result.predict(6.0) // predict y for a new x value
+ * ```
+ *
  * @property slope the change in y for a one-unit increase in x.
  * @property intercept the predicted value of y when x is zero.
  * @property rSquared the coefficient of determination, indicating the proportion of variance
