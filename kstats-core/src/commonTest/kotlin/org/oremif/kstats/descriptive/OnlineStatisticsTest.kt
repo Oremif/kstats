@@ -246,6 +246,8 @@ class OnlineStatisticsTest {
         assertEquals(offset + 3.0, stats.mean, 1e-5)
         assertEquals(2.5, stats.variance(), 1e-5) // sample variance of {1,2,3,4,5}
         assertEquals(0.0, stats.skewness(), 1e-5)
+        // Compensated sum should be exact even with large offset
+        assertEquals(5.0 * offset + 15.0, stats.sum, 0.0)
     }
 
     @Test
@@ -295,6 +297,7 @@ class OnlineStatisticsTest {
         stats.add(3.0)
 
         assertTrue(stats.mean.isNaN(), "Mean should be NaN after NaN input")
+        assertTrue(stats.sum.isNaN(), "Sum should be NaN after NaN input")
         assertTrue(stats.variance().isNaN(), "Variance should be NaN after NaN input")
     }
 

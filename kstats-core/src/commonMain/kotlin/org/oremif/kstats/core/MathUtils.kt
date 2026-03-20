@@ -62,6 +62,7 @@ private const val LANCZOS_G = 7.0
  */
 public fun lnGamma(x: Double): Double {
     if (x.isNaN()) return Double.NaN
+    if (x == Double.POSITIVE_INFINITY) return Double.POSITIVE_INFINITY
     if (x <= 0.0) throw InvalidParameterException("lnGamma requires x > 0, got $x")
     if (x < 0.5) {
         // Reflection formula: Gamma(x)*Gamma(1-x) = pi/sin(pi*x)
@@ -246,6 +247,7 @@ private const val GAMMA_EPSILON = 1e-14
 public fun regularizedGammaP(a: Double, x: Double): Double {
     if (a.isNaN() || x.isNaN()) return Double.NaN
     if (a <= 0.0) throw InvalidParameterException("regularizedGammaP requires a > 0, got $a")
+    if (x == Double.POSITIVE_INFINITY) return 1.0
     if (x < 0.0) return 0.0
     if (x == 0.0) return 0.0
 
@@ -279,6 +281,7 @@ public fun regularizedGammaP(a: Double, x: Double): Double {
 public fun regularizedGammaQ(a: Double, x: Double): Double {
     if (a.isNaN() || x.isNaN()) return Double.NaN
     if (a <= 0.0) throw InvalidParameterException("regularizedGammaQ requires a > 0, got $a")
+    if (x == Double.POSITIVE_INFINITY) return 0.0
     if (x < 0.0) return 1.0
     if (x == 0.0) return 1.0
 
@@ -420,6 +423,7 @@ public fun erfc(x: Double): Double {
  * @return the inverse error function value at [x].
  */
 public fun erfInv(x: Double): Double {
+    if (x.isNaN()) return Double.NaN
     if (x <= -1.0 || x >= 1.0) throw InvalidParameterException("erfInv requires -1 < x < 1, got $x")
     if (x == 0.0) return 0.0
 

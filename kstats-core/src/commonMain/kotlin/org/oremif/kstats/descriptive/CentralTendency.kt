@@ -17,6 +17,9 @@ import kotlin.math.ln
  * The arithmetic mean is the sum of all values divided by the count. Uses compensated
  * (Neumaier) summation for improved numerical precision.
  *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ *
  * ### Example:
  * ```kotlin
  * listOf(1.0, 2.0, 3.0).mean() // 2.0
@@ -64,6 +67,9 @@ public fun DoubleArray.mean(): Double {
  *
  * The arithmetic mean is the sum of all values divided by the count. Uses compensated
  * (Neumaier) summation for improved numerical precision. The sequence is consumed once.
+ *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin

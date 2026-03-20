@@ -42,6 +42,23 @@ class MathUtilsTest {
         assertFailsWith<InvalidParameterException> { lnGamma(-1.0) }
     }
 
+    @Test
+    fun testLnGammaInfinity() {
+        assertEquals(Double.POSITIVE_INFINITY, lnGamma(Double.POSITIVE_INFINITY))
+        assertEquals(Double.POSITIVE_INFINITY, gamma(Double.POSITIVE_INFINITY))
+    }
+
+    @Test
+    fun testLnGammaNaN() {
+        assertTrue(lnGamma(Double.NaN).isNaN())
+        assertTrue(gamma(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testLnGammaNegativeInfinity() {
+        assertFailsWith<InvalidParameterException> { lnGamma(Double.NEGATIVE_INFINITY) }
+    }
+
     // ── Beta function ───────────────────────────────────────────────────
 
     @Test
@@ -92,6 +109,30 @@ class MathUtilsTest {
         assertEquals(1.0, p + q, PRECISE_TOLERANCE)
     }
 
+    @Test
+    fun testRegularizedGammaInfinity() {
+        // P(a, +∞) = 1.0 for any a > 0
+        assertEquals(1.0, regularizedGammaP(1.0, Double.POSITIVE_INFINITY), PRECISE_TOLERANCE)
+        assertEquals(1.0, regularizedGammaP(5.0, Double.POSITIVE_INFINITY), PRECISE_TOLERANCE)
+        // Q(a, +∞) = 0.0 for any a > 0
+        assertEquals(0.0, regularizedGammaQ(1.0, Double.POSITIVE_INFINITY), PRECISE_TOLERANCE)
+        assertEquals(0.0, regularizedGammaQ(5.0, Double.POSITIVE_INFINITY), PRECISE_TOLERANCE)
+    }
+
+    @Test
+    fun testRegularizedGammaNaNPropagation() {
+        assertTrue(regularizedGammaP(Double.NaN, 1.0).isNaN())
+        assertTrue(regularizedGammaP(1.0, Double.NaN).isNaN())
+        assertTrue(regularizedGammaQ(Double.NaN, 1.0).isNaN())
+        assertTrue(regularizedGammaQ(1.0, Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testRegularizedGammaInvalidA() {
+        assertFailsWith<InvalidParameterException> { regularizedGammaP(-1.0, 1.0) }
+        assertFailsWith<InvalidParameterException> { regularizedGammaQ(-1.0, 1.0) }
+    }
+
     // ── Error function ──────────────────────────────────────────────────
 
     @Test
@@ -121,6 +162,11 @@ class MathUtilsTest {
                 "erfInv(erf($x)) should ≈ $x, erf($x)=$erfX, erfInv=${erfInv(erfX)}"
             )
         }
+    }
+
+    @Test
+    fun testErfInvNaN() {
+        assertTrue(erfInv(Double.NaN).isNaN())
     }
 
     // ── erfcInv ──────────────────────────────────────────────────────────

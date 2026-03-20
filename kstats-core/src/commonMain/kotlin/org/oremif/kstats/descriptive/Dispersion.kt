@@ -17,6 +17,9 @@ import kotlin.math.sqrt
  * stable single-pass algorithm. Sample variance (default) divides by n-1 (Bessel's
  * correction) for an unbiased estimate; population variance divides by n.
  *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ *
  * ### Example:
  * ```kotlin
  * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).variance()                         // 4.5714...
@@ -75,6 +78,9 @@ public fun DoubleArray.variance(kind: PopulationKind = SAMPLE): Double {
  *
  * The standard deviation is the square root of the [variance]. It has the same unit as the
  * data, making it easier to interpret than variance.
+ *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -341,9 +347,11 @@ public fun DoubleArray.standardError(): Double {
 /**
  * Computes the coefficient of variation (CV) of the values in this iterable.
  *
- * The CV is the ratio of the standard deviation to the mean. It expresses variability as
- * a proportion of the mean, which is useful for comparing the spread of datasets with
- * different units or scales. The mean must not be zero.
+ * The CV is the ratio of the standard deviation to the mean (sd / mean, not sd / |mean|).
+ * It expresses variability as a proportion of the mean, which is useful for comparing
+ * the spread of datasets with different units or scales. The mean must not be zero.
+ * Note that the result is negative when the mean is negative, consistent with
+ * scipy's `variation()`.
  *
  * ### Example:
  * ```kotlin
@@ -370,7 +378,9 @@ public fun Iterable<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE
 /**
  * Computes the coefficient of variation (CV) of the values in this array.
  *
- * The CV is the ratio of the standard deviation to the mean. The mean must not be zero.
+ * The CV is the ratio of the standard deviation to the mean (sd / mean, not sd / |mean|).
+ * The mean must not be zero. Note that the result is negative when the mean is negative,
+ * consistent with scipy's `variation()`.
  *
  * ### Example:
  * ```kotlin

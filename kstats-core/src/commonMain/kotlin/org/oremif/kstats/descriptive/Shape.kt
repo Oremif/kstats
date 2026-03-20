@@ -14,6 +14,9 @@ import kotlin.math.sqrt
  * Uses a two-pass algorithm with z-normalization for numerical stability: first computes
  * the mean and variance via Welford's method, then accumulates normalized cubed deviations.
  *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ *
  * ### Example:
  * ```kotlin
  * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).skewness() // 0.656...
@@ -103,6 +106,9 @@ public fun DoubleArray.skewness(kind: PopulationKind = SAMPLE): Double {
  * Higher kurtosis indicates heavier tails and a sharper peak. By default, computes excess
  * kurtosis (subtracting 3 so that a normal distribution has kurtosis 0). Uses a two-pass
  * algorithm with z-normalization for numerical stability.
+ *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin

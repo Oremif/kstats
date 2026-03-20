@@ -1,6 +1,7 @@
 package org.oremif.kstats.descriptive
 
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
+import kotlin.math.abs
 import kotlin.math.min as kMin
 import kotlin.math.max as kMax
 import kotlin.math.sqrt
@@ -33,6 +34,8 @@ public class OnlineStatistics {
     private var m2: Double = 0.0
     private var m3: Double = 0.0
     private var m4: Double = 0.0
+    private var sumVal: Double = 0.0
+    private var sumCompensation: Double = 0.0
     private var minVal: Double = Double.NaN
     private var maxVal: Double = Double.NaN
 
@@ -48,15 +51,21 @@ public class OnlineStatistics {
     public fun add(x: Double) {
         val n1 = n
         n++
+        val nd = n.toDouble()
+        val n1d = n1.toDouble()
         val delta = x - m1
-        val deltaN = delta / n
+        val deltaN = delta / nd
         val deltaN2 = deltaN * deltaN
-        val term1 = delta * deltaN * n1
+        val term1 = delta * deltaN * n1d
 
-        m4 += term1 * deltaN2 * (n * n - 3 * n + 3) + 6.0 * deltaN2 * m2 - 4.0 * deltaN * m3
-        m3 += term1 * deltaN * (n - 2) - 3.0 * deltaN * m2
+        m4 += term1 * deltaN2 * (nd * nd - 3.0 * nd + 3.0) + 6.0 * deltaN2 * m2 - 4.0 * deltaN * m3
+        m3 += term1 * deltaN * (nd - 2.0) - 3.0 * deltaN * m2
         m2 += term1
         m1 += deltaN
+
+        val t = sumVal + x
+        sumCompensation += if (abs(sumVal) >= abs(x)) (sumVal - t) + x else (x - t) + sumVal
+        sumVal = t
 
         minVal = if (n1 == 0L) x else kMin(minVal, x)
         maxVal = if (n1 == 0L) x else kMax(maxVal, x)
@@ -93,9 +102,11 @@ public class OnlineStatistics {
     public val mean: Double get() = if (n == 0L) Double.NaN else m1
 
     /**
-     * The sum of all observations (`mean * count`), or [Double.NaN] if no observations have been added.
+     * The sum of all observations, or [Double.NaN] if no observations have been added.
+     *
+     * Uses Neumaier compensated summation for improved numerical precision.
      */
-    public val sum: Double get() = if (n == 0L) Double.NaN else m1 * n
+    public val sum: Double get() = if (n == 0L) Double.NaN else sumVal + sumCompensation
 
     /**
      * The minimum observed value, or [Double.NaN] if no observations have been added.
@@ -193,6 +204,8 @@ public class OnlineStatistics {
         m2 = 0.0
         m3 = 0.0
         m4 = 0.0
+        sumVal = 0.0
+        sumCompensation = 0.0
         minVal = Double.NaN
         maxVal = Double.NaN
     }
