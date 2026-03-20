@@ -158,6 +158,16 @@ public fun DoubleArray.quantile(
 
 // ── sortedQuantile (internal helper) ─────────────────────────────────────────
 
+/** Compute quantile from an already-sorted array using linear interpolation. */
+internal fun sortedQuantile(sorted: DoubleArray, q: Double): Double {
+    if (sorted.size == 1) return sorted[0]
+    val pos = q * (sorted.size - 1)
+    val lo = floor(pos).toInt()
+    val hi = ceil(pos).toInt()
+    val frac = pos - lo
+    return sorted[lo] + frac * (sorted[hi] - sorted[lo])
+}
+
 /** Compute quantile from an already-sorted list using linear interpolation. */
 internal fun sortedQuantile(sorted: List<Double>, q: Double): Double {
     if (sorted.size == 1) return sorted[0]
@@ -211,7 +221,7 @@ public fun Iterable<Double>.quartiles(): Triple<Double, Double, Double> {
  */
 public fun DoubleArray.quartiles(): Triple<Double, Double, Double> {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
-    val sorted = sortedArray().asList()
+    val sorted = sortedArray()
     return Triple(
         sortedQuantile(sorted, 0.25),
         sortedQuantile(sorted, 0.50),

@@ -56,6 +56,9 @@ public fun Iterable<Double>.skewness(kind: PopulationKind = SAMPLE): Double {
  * Skewness measures the asymmetry of a distribution. A positive value indicates a longer
  * right tail, a negative value indicates a longer left tail, and zero indicates symmetry.
  *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ *
  * ### Example:
  * ```kotlin
  * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).skewness() // 0.656...
@@ -146,6 +149,9 @@ public fun Iterable<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Bool
  *
  * Kurtosis measures the "tailedness" of a distribution relative to a normal distribution.
  * Higher kurtosis indicates heavier tails and a sharper peak.
+ *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin

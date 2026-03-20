@@ -92,6 +92,9 @@ public fun Iterable<Double>.standardDeviation(kind: PopulationKind = SAMPLE): Do
  *
  * The standard deviation is the square root of the [variance].
  *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ *
  * ### Example:
  * ```kotlin
  * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).standardDeviation() // 2.1380...
@@ -135,6 +138,9 @@ public fun Iterable<Double>.range(): Double {
  * Computes the range of the values in this array.
  *
  * The range is the difference between the maximum and minimum values.
+ *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
