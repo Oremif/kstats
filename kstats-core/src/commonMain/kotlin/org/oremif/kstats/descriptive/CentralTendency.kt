@@ -322,10 +322,7 @@ public fun Iterable<Double>.median(): Double =
  *
  * @return the median of the array elements.
  */
-public fun DoubleArray.median(): Double {
-    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
-    return medianInPlace(copyOf())
-}
+public fun DoubleArray.median(): Double = medianInPlace(copyOf())
 
 /** Computes the median, mutating [work] in place via introselect. */
 private fun medianInPlace(work: DoubleArray): Double {

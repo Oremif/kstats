@@ -77,7 +77,10 @@ public fun Iterable<Double>.percentile(
 public fun DoubleArray.percentile(
     p: Double,
     interpolation: QuantileInterpolation = QuantileInterpolation.LINEAR
-): Double = asIterable().percentile(p, interpolation)
+): Double {
+    if (p !in 0.0..100.0) throw InvalidParameterException("Percentile must be in [0, 100], got $p")
+    return quantile(p / 100.0, interpolation)
+}
 
 // ── quantile ────────────────────────────────────────────────────────────────
 
@@ -207,4 +210,12 @@ public fun Iterable<Double>.quartiles(): Triple<Double, Double, Double> {
  *
  * @return a [Triple] of (Q1, Q2, Q3).
  */
-public fun DoubleArray.quartiles(): Triple<Double, Double, Double> = asIterable().quartiles()
+public fun DoubleArray.quartiles(): Triple<Double, Double, Double> {
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    val sorted = toList().sorted()
+    return Triple(
+        sortedQuantile(sorted, 0.25),
+        sortedQuantile(sorted, 0.50),
+        sortedQuantile(sorted, 0.75),
+    )
+}
