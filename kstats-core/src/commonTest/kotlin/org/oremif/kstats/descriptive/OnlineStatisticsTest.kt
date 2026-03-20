@@ -309,6 +309,22 @@ class OnlineStatisticsTest {
 
         assertEquals(Double.POSITIVE_INFINITY, stats.max)
         assertEquals(1.0, stats.min, 1e-15)
+        assertEquals(Double.POSITIVE_INFINITY, stats.mean, "Mean should be Inf for [1, Inf]")
+        assertEquals(Double.POSITIVE_INFINITY, stats.sum, "Sum should be Inf for [1, Inf]")
+    }
+
+    @Test
+    fun testInfinityMeanConsistency() {
+        // Verifies mean uses compensated sum (not Welford m1) to correctly handle Inf
+        val stats = OnlineStatistics()
+        stats.add(Double.POSITIVE_INFINITY)
+        stats.add(1.0)
+        stats.add(2.0)
+
+        assertEquals(Double.POSITIVE_INFINITY, stats.mean, "Mean should be Inf for [Inf, 1, 2]")
+        assertEquals(Double.POSITIVE_INFINITY, stats.sum, "Sum should be Inf for [Inf, 1, 2]")
+        // Variance is undefined for non-finite data — Welford produces NaN
+        assertTrue(stats.variance().isNaN(), "Variance should be NaN when Inf is present")
     }
 
     @Test

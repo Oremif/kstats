@@ -10,9 +10,9 @@ import platform.windows.BCRYPT_USE_SYSTEM_PREFERRED_RNG
 import platform.windows.BCryptGenRandom
 import kotlin.random.Random
 
-public actual fun secureRandom(): Random = WinSecureRandom
+public actual fun secureRandom(): Random = WinSecureRandom()
 
-private object WinSecureRandom : Random() {
+private class WinSecureRandom : Random() {
     private val buffer = ByteArray(256)
     private var position = buffer.size
 

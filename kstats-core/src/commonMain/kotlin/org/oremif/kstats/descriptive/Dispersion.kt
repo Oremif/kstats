@@ -3,6 +3,7 @@ package org.oremif.kstats.descriptive
 import org.oremif.kstats.core.exceptions.DegenerateDataException
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.core.introSelect
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 import kotlin.math.abs
 import kotlin.math.floor
@@ -432,7 +433,6 @@ public fun DoubleArray.trimmedVariance(proportion: Double, kind: PopulationKind 
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     if (proportion.isNaN() || proportion < 0.0 || proportion >= 0.5)
         throw InvalidParameterException("proportion must be in [0.0, 0.5), got $proportion")
-    val sorted = sortedArray()
     val k = floor(size * proportion).toInt()
     val m = size - 2 * k
     val divisor = if (kind == SAMPLE) {
@@ -443,13 +443,18 @@ public fun DoubleArray.trimmedVariance(proportion: Double, kind: PopulationKind 
     } else {
         m
     }
+    val work = copyOf()
+    if (k > 0) {
+        work.introSelect(k)
+        if (m > 1) work.introSelect(size - k - 1, k, size - 1)
+    }
     var mean = 0.0
     var m2 = 0.0
     for (i in k until size - k) {
         val j = i - k + 1
-        val delta = sorted[i] - mean
+        val delta = work[i] - mean
         mean += delta / j
-        val delta2 = sorted[i] - mean
+        val delta2 = work[i] - mean
         m2 += delta * delta2
     }
     return m2 / divisor
@@ -719,3 +724,88 @@ public fun Sequence<Double>.semiVariance(
     direction: SemiVarianceDirection = SemiVarianceDirection.DOWNSIDE,
     kind: PopulationKind = SAMPLE,
 ): Double = toList().toDoubleArray().semiVariance(threshold, direction, kind)
+
+// ── Sequence overloads ──────────────────────────────────────────────────────
+
+/**
+ * Computes the variance of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.variance] for details.
+ *
+ * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
+ * @return the variance of the elements.
+ */
+public fun Sequence<Double>.variance(kind: PopulationKind = SAMPLE): Double =
+    toList().toDoubleArray().variance(kind)
+
+/**
+ * Computes the standard deviation of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.standardDeviation] for details.
+ *
+ * @param kind whether to compute sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @return the standard deviation of the elements.
+ */
+public fun Sequence<Double>.standardDeviation(kind: PopulationKind = SAMPLE): Double =
+    toList().toDoubleArray().standardDeviation(kind)
+
+/**
+ * Computes the range of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.range] for details.
+ *
+ * @return the range (max - min) of the elements.
+ */
+public fun Sequence<Double>.range(): Double =
+    toList().toDoubleArray().range()
+
+/**
+ * Computes the interquartile range (IQR) of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.interquartileRange] for details.
+ *
+ * @return the interquartile range (Q3 - Q1).
+ */
+public fun Sequence<Double>.interquartileRange(): Double =
+    toList().toDoubleArray().interquartileRange()
+
+/**
+ * Computes the mean absolute deviation (MAD) of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.meanAbsoluteDeviation] for details.
+ *
+ * @return the mean absolute deviation from the mean.
+ */
+public fun Sequence<Double>.meanAbsoluteDeviation(): Double =
+    toList().toDoubleArray().meanAbsoluteDeviation()
+
+/**
+ * Computes the median absolute deviation (median AD) of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.medianAbsoluteDeviation] for details.
+ *
+ * @return the median absolute deviation from the median.
+ */
+public fun Sequence<Double>.medianAbsoluteDeviation(): Double =
+    toList().toDoubleArray().medianAbsoluteDeviation()
+
+/**
+ * Computes the standard error of the mean for the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.standardError] for details.
+ *
+ * @return the standard error of the mean.
+ */
+public fun Sequence<Double>.standardError(): Double =
+    toList().toDoubleArray().standardError()
+
+/**
+ * Computes the coefficient of variation (CV) of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.coefficientOfVariation] for details.
+ *
+ * @param kind whether to use sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @return the coefficient of variation (standard deviation / mean).
+ */
+public fun Sequence<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double =
+    toList().toDoubleArray().coefficientOfVariation(kind)

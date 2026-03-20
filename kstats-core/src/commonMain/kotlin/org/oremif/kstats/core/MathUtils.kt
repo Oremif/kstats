@@ -438,7 +438,7 @@ public fun erfInv(x: Double): Double {
 
     // Newton's method refinements for high precision
     val twoOverSqrtPi = 2.0 / sqrt(PI)
-    (0..3).forEach { _ ->
+    repeat(4) {
         val err = erf(p) - a
         p -= err / (twoOverSqrtPi * exp(-p * p))
     }

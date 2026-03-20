@@ -228,3 +228,43 @@ public fun DoubleArray.quartiles(): Triple<Double, Double, Double> {
         sortedQuantile(sorted, 0.75),
     )
 }
+
+// ── Sequence overloads ──────────────────────────────────────────────────────
+
+/**
+ * Computes the p-th percentile of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.percentile] for details.
+ *
+ * @param p the percentile to compute, in [0, 100].
+ * @param interpolation how to interpolate between data points. Defaults to [QuantileInterpolation.LINEAR].
+ * @return the p-th percentile value.
+ */
+public fun Sequence<Double>.percentile(
+    p: Double,
+    interpolation: QuantileInterpolation = QuantileInterpolation.LINEAR
+): Double = toList().toDoubleArray().percentile(p, interpolation)
+
+/**
+ * Computes the q-th quantile of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.quantile] for details.
+ *
+ * @param q the quantile to compute, in [0, 1].
+ * @param interpolation how to interpolate between data points. Defaults to [QuantileInterpolation.LINEAR].
+ * @return the q-th quantile value.
+ */
+public fun Sequence<Double>.quantile(
+    q: Double,
+    interpolation: QuantileInterpolation = QuantileInterpolation.LINEAR
+): Double = toList().toDoubleArray().quantile(q, interpolation)
+
+/**
+ * Computes the three quartiles (Q1, Q2, Q3) of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.quartiles] for details.
+ *
+ * @return a [Triple] of (Q1, Q2, Q3).
+ */
+public fun Sequence<Double>.quartiles(): Triple<Double, Double, Double> =
+    toList().toDoubleArray().quartiles()

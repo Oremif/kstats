@@ -16,6 +16,12 @@ import kotlin.math.sqrt
  *
  * This is analogous to Apache Commons Math `SummaryStatistics`.
  *
+ * **Non-finite values:** NaN values propagate through all statistics (IEEE 754 semantics).
+ * Infinite values are handled correctly for [mean], [sum], [min], and [max] (which use
+ * compensated summation). However, [variance], [standardDeviation], [skewness], and [kurtosis]
+ * return NaN when infinite values are present, since the Welford algorithm used for higher
+ * moments computes differences of running means, producing NaN from Inf - Inf.
+ *
  * ### Example:
  * ```kotlin
  * val stats = OnlineStatistics()
@@ -98,15 +104,37 @@ public class OnlineStatistics {
 
     /**
      * The arithmetic mean of all observations, or [Double.NaN] if no observations have been added.
+     *
+     * Uses compensated summation for improved numerical precision with finite data.
+     * When infinite values are present, falls back to the uncompensated sum (which
+     * correctly handles Inf) since the Neumaier compensation term produces NaN from
+     * Inf - Inf arithmetic.
      */
-    public val mean: Double get() = if (n == 0L) Double.NaN else m1
+    public val mean: Double get() {
+        if (n == 0L) return Double.NaN
+        val total = compensatedTotal()
+        return total / n.toDouble()
+    }
 
     /**
      * The sum of all observations, or [Double.NaN] if no observations have been added.
      *
-     * Uses Neumaier compensated summation for improved numerical precision.
+     * Uses Neumaier compensated summation for improved numerical precision with finite data.
+     * When infinite values are present, falls back to the uncompensated sum.
      */
-    public val sum: Double get() = if (n == 0L) Double.NaN else sumVal + sumCompensation
+    public val sum: Double get() {
+        if (n == 0L) return Double.NaN
+        return compensatedTotal()
+    }
+
+    /**
+     * Returns the compensated sum, falling back to the raw sum when
+     * the compensation term is corrupted by non-finite arithmetic (Inf - Inf = NaN).
+     */
+    private fun compensatedTotal(): Double {
+        val total = sumVal + sumCompensation
+        return if (total.isNaN() && sumVal.isInfinite()) sumVal else total
+    }
 
     /**
      * The minimum observed value, or [Double.NaN] if no observations have been added.

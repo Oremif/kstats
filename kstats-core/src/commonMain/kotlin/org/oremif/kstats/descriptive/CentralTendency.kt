@@ -101,6 +101,9 @@ public fun Sequence<Double>.mean(): Double {
  * spans several orders of magnitude or for computing average growth rates. All values must
  * be positive. Computed via logarithms to avoid overflow.
  *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ *
  * ### Example:
  * ```kotlin
  * listOf(1.0, 2.0, 4.0, 8.0).geometricMean() // 2.8284...
@@ -130,6 +133,9 @@ public fun Iterable<Double>.geometricMean(): Double {
  * The geometric mean is the nth root of the product of n values. It is useful for data that
  * spans several orders of magnitude or for computing average growth rates. All values must
  * be positive. Computed via logarithms to avoid overflow.
+ *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -161,6 +167,9 @@ public fun DoubleArray.geometricMean(): Double {
  * appropriate for averaging rates or ratios (e.g. speeds, P/E ratios). All values must
  * be positive. Uses compensated summation for the reciprocals.
  *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ *
  * ### Example:
  * ```kotlin
  * listOf(1.0, 2.0, 4.0).harmonicMean() // 1.7142...
@@ -190,6 +199,9 @@ public fun Iterable<Double>.harmonicMean(): Double {
  * The harmonic mean is the reciprocal of the arithmetic mean of the reciprocals. It is
  * appropriate for averaging rates or ratios. All values must be positive. Uses compensated
  * summation for the reciprocals.
+ *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -358,8 +370,8 @@ private fun medianInPlace(work: DoubleArray): Double {
  * Returns the mode (most frequently occurring values) of this iterable.
  *
  * The mode is the set of values that appear most often. If multiple values share the highest
- * frequency, all of them are returned (multimodal). Works with any comparable type, not just
- * Double.
+ * frequency, all of them are returned (multimodal). Works with any type that supports
+ * equality checks, not just numeric types.
  *
  * ### Example:
  * ```kotlin
@@ -370,7 +382,7 @@ private fun medianInPlace(work: DoubleArray): Double {
  *
  * @return a [Set] containing all values with the highest frequency.
  */
-public fun <T : Comparable<T>> Iterable<T>.mode(): Set<T> {
+public fun <T> Iterable<T>.mode(): Set<T> {
     val counts = mutableMapOf<T, Int>()
     for (element in this) {
         counts[element] = (counts[element] ?: 0) + 1
@@ -406,14 +418,18 @@ public fun DoubleArray.trimmedMean(proportion: Double): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     if (proportion.isNaN() || proportion < 0.0 || proportion >= 0.5)
         throw InvalidParameterException("proportion must be in [0.0, 0.5), got $proportion")
-    val sorted = sortedArray()
     val k = floor(size * proportion).toInt()
     val m = size - 2 * k
+    val work = copyOf()
+    if (k > 0) {
+        work.introSelect(k)
+        if (m > 1) work.introSelect(size - k - 1, k, size - 1)
+    }
     var sum = 0.0
     var compensation = 0.0
     for (i in k until size - k) {
-        val t = sum + sorted[i]
-        compensation += if (abs(sum) >= abs(sorted[i])) (sum - t) + sorted[i] else (sorted[i] - t) + sum
+        val t = sum + work[i]
+        compensation += if (abs(sum) >= abs(work[i])) (sum - t) + work[i] else (work[i] - t) + sum
         sum = t
     }
     return (sum + compensation) / m
@@ -460,3 +476,35 @@ public fun Iterable<Double>.trimmedMean(proportion: Double): Double =
  */
 public fun Sequence<Double>.trimmedMean(proportion: Double): Double =
     toList().toDoubleArray().trimmedMean(proportion)
+
+// ── Sequence overloads ──────────────────────────────────────────────────────
+
+/**
+ * Computes the geometric mean of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.geometricMean] for details.
+ *
+ * @return the geometric mean of the elements.
+ */
+public fun Sequence<Double>.geometricMean(): Double =
+    toList().toDoubleArray().geometricMean()
+
+/**
+ * Computes the harmonic mean of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.harmonicMean] for details.
+ *
+ * @return the harmonic mean of the elements.
+ */
+public fun Sequence<Double>.harmonicMean(): Double =
+    toList().toDoubleArray().harmonicMean()
+
+/**
+ * Computes the median of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.median] for details.
+ *
+ * @return the median of the elements.
+ */
+public fun Sequence<Double>.median(): Double =
+    toList().toDoubleArray().median()

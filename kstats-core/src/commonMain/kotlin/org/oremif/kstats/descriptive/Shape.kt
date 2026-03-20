@@ -196,3 +196,28 @@ public fun DoubleArray.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean =
         }
     }
 }
+
+// ── Sequence overloads ──────────────────────────────────────────────────────
+
+/**
+ * Computes the skewness of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.skewness] for details.
+ *
+ * @param kind whether to compute sample-adjusted or population skewness. Defaults to [PopulationKind.SAMPLE].
+ * @return the skewness, or 0.0 if variance is zero (constant data).
+ */
+public fun Sequence<Double>.skewness(kind: PopulationKind = SAMPLE): Double =
+    toList().toDoubleArray().skewness(kind)
+
+/**
+ * Computes the kurtosis of the values in this sequence.
+ *
+ * The sequence is materialized internally. See [DoubleArray.kurtosis] for details.
+ *
+ * @param kind whether to compute sample-adjusted or population kurtosis. Defaults to [PopulationKind.SAMPLE].
+ * @param excess whether to subtract 3 (the kurtosis of a normal distribution). Defaults to `true`.
+ * @return the kurtosis. Returns -3.0 (excess) or 0.0 (non-excess) if variance is zero.
+ */
+public fun Sequence<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean = true): Double =
+    toList().toDoubleArray().kurtosis(kind, excess)

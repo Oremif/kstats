@@ -16,6 +16,18 @@ internal fun DoubleArray.introSelect(k: Int) {
     introSelectRange(k, 0, n - 1, depthLimit)
 }
 
+/**
+ * Rearranges elements in-place so that the k-th smallest value within [lo]..[hi] is at index [k].
+ *
+ * This subrange variant is used by trimmed statistics to partition within a previously
+ * narrowed range, avoiding a full sort.
+ */
+internal fun DoubleArray.introSelect(k: Int, lo: Int, hi: Int) {
+    if (lo >= hi) return
+    val depthLimit = 2 * floorLog2(hi - lo + 1)
+    introSelectRange(k, lo, hi, depthLimit)
+}
+
 private fun DoubleArray.introSelectRange(k: Int, lo: Int, hi: Int, depthLimit: Int) {
     if (lo >= hi) return
 
