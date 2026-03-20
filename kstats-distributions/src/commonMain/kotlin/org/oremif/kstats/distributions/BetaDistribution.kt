@@ -61,7 +61,7 @@ public data class BetaDistribution(
      * @return the probability density at [x]. Always non-negative.
      */
     override fun pdf(x: Double): Double {
-        if (x < 0.0 || x > 1.0) return 0.0
+        if (x !in 0.0..1.0) return 0.0
         if (x == 0.0) return when {
             alpha == 1.0 -> beta
             alpha < 1.0 -> Double.POSITIVE_INFINITY

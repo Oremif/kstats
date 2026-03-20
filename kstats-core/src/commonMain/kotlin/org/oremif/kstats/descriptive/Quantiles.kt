@@ -5,7 +5,6 @@ import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.introSelect
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.roundToInt
 
 /**
  * Controls how values between two data points are interpolated when computing quantiles

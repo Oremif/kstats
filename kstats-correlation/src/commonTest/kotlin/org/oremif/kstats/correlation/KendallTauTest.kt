@@ -187,7 +187,7 @@ class KendallTauTest {
         val y = doubleArrayOf(2.0, 1.0, 4.0, 3.0, 6.0, 5.0, 7.0)
         val result = kendallTau(x, y)
         assertTrue(result.coefficient >= -1.0 && result.coefficient <= 1.0)
-        assertTrue(result.pValue >= 0.0 && result.pValue <= 1.0)
+        assertTrue(result.pValue in 0.0..1.0)
     }
 
     @Test

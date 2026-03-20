@@ -62,7 +62,7 @@ public data class BinomialDistribution(
      * @return the probability of exactly [k] successes, in the range `[0, 1]`.
      */
     override fun pmf(k: Int): Double {
-        if (k < 0 || k > n) return 0.0
+        if (k !in 0..n) return 0.0
         if (p == 0.0) return if (k == 0) 1.0 else 0.0
         if (p == 1.0) return if (k == n) 1.0 else 0.0
         return exp(logPmf(k))
@@ -80,7 +80,7 @@ public data class BinomialDistribution(
      *   when the mass is zero.
      */
     override fun logPmf(k: Int): Double {
-        if (k < 0 || k > n) return Double.NEGATIVE_INFINITY
+        if (k !in 0..n) return Double.NEGATIVE_INFINITY
         return lnCombination(n, k) + k * ln(p) + (n - k) * ln(1.0 - p)
     }
 

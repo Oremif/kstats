@@ -16,7 +16,7 @@ class SecureRandomTest {
         val rng = secureRandom()
         repeat(1000) {
             val value = rng.nextDouble()
-            assertTrue(value >= 0.0 && value < 1.0, "nextDouble() out of range: $value")
+            assertTrue(value in 0.0..<1.0, "nextDouble() out of range: $value")
         }
     }
 

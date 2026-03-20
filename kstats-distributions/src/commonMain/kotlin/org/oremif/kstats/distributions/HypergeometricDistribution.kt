@@ -70,7 +70,7 @@ public data class HypergeometricDistribution(
      * @return the probability of exactly [k] successes, or zero if [k] is outside the support.
      */
     override fun pmf(k: Int): Double {
-        if (k < kMin || k > kMax) return 0.0
+        if (k !in kMin..kMax) return 0.0
         return exp(logPmf(k))
     }
 
@@ -84,7 +84,7 @@ public data class HypergeometricDistribution(
      * when [k] is outside the support.
      */
     override fun logPmf(k: Int): Double {
-        if (k < kMin || k > kMax) return Double.NEGATIVE_INFINITY
+        if (k !in kMin..kMax) return Double.NEGATIVE_INFINITY
         return lnCombination(bigK, k) + lnCombination(bigN - bigK, n - k) - lnCombination(bigN, n)
     }
 

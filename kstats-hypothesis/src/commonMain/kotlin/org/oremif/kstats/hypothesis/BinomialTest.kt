@@ -42,7 +42,7 @@ public fun binomialTest(
     confidenceLevel: Double = 0.95
 ): TestResult {
     if (trials < 0) throw InvalidParameterException("trials must be non-negative, got $trials")
-    if (successes < 0 || successes > trials) throw InvalidParameterException(
+    if (successes !in 0..trials) throw InvalidParameterException(
         "successes must be in [0, trials], got successes=$successes, trials=$trials"
     )
     if (probability !in 0.0..1.0) throw InvalidParameterException(

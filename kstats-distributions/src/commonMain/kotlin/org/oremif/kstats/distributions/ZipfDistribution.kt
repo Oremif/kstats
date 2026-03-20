@@ -64,7 +64,7 @@ public data class ZipfDistribution(
      * @return the probability of rank [k], or zero if [k] is outside the support `[1, n]`.
      */
     override fun pmf(k: Int): Double {
-        if (k < 1 || k > n) return 0.0
+        if (k !in 1..n) return 0.0
         return exp(logPmf(k))
     }
 
@@ -78,7 +78,7 @@ public data class ZipfDistribution(
      * when [k] is outside the support.
      */
     override fun logPmf(k: Int): Double {
-        if (k < 1 || k > n) return Double.NEGATIVE_INFINITY
+        if (k !in 1..n) return Double.NEGATIVE_INFINITY
         return -s * ln(k.toDouble()) - logHns
     }
 

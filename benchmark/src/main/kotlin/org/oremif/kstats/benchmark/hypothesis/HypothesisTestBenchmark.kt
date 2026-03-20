@@ -14,7 +14,7 @@ import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest as CommonsK
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.MICROSECONDS)
-open class HypothesisTestBenchmark {
+class HypothesisTestBenchmark {
 
     @Param("100", "1000", "10000")
     var size: Int = 0

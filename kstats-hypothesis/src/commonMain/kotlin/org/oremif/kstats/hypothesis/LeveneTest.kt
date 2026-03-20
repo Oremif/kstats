@@ -84,7 +84,7 @@ public fun leveneTest(
     // Grand mean of Z
     var grandSum = 0.0
     for (i in 0 until k) {
-        for (j in 0 until z[i].size) {
+        for (j in z[i].indices) {
             grandSum += z[i][j]
         }
     }
@@ -100,7 +100,7 @@ public fun leveneTest(
     // SS within
     var ssWithin = 0.0
     for (i in 0 until k) {
-        for (j in 0 until z[i].size) {
+        for (j in z[i].indices) {
             val diff = z[i][j] - zGroupMeans[i]
             ssWithin += diff * diff
         }

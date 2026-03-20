@@ -10,7 +10,7 @@ import org.apache.commons.math3.distribution.PoissonDistribution as CommonsPoiss
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.NANOSECONDS)
-open class DiscreteDistributionBenchmark {
+class DiscreteDistributionBenchmark {
 
     // kstats distributions
     private val kBinomial = BinomialDistribution(trials = 100, probability = 0.3)

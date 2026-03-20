@@ -13,7 +13,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression as CommonsRegre
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.MICROSECONDS)
-open class CorrelationBenchmark {
+class CorrelationBenchmark {
 
     @Param("100", "1000", "10000")
     var size: Int = 0

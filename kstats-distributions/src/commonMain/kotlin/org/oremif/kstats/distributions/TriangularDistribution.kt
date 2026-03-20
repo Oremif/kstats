@@ -46,7 +46,7 @@ public data class TriangularDistribution(
 
     init {
         if (a >= b) throw InvalidParameterException("a must be less than b, got a=$a, b=$b")
-        if (c < a || c > b) throw InvalidParameterException("c must be in [a, b], got a=$a, b=$b, c=$c")
+        if (c !in a..b) throw InvalidParameterException("c must be in [a, b], got a=$a, b=$b, c=$c")
     }
 
     private val ba = b - a
@@ -64,7 +64,7 @@ public data class TriangularDistribution(
      * @return the probability density at [x], always non-negative.
      */
     override fun pdf(x: Double): Double = when {
-        x < a || x > b -> 0.0
+        x !in a..b -> 0.0
         x < c -> 2.0 * (x - a) / (ba * ca)
         x > c -> 2.0 * (b - x) / (ba * bc)
         else -> 2.0 / ba // x == c
@@ -81,7 +81,7 @@ public data class TriangularDistribution(
      * outside the support.
      */
     override fun logPdf(x: Double): Double = when {
-        x < a || x > b -> Double.NEGATIVE_INFINITY
+        x !in a..b -> Double.NEGATIVE_INFINITY
         x < c -> ln(2.0) + ln(x - a) - ln(ba) - ln(ca)
         x > c -> ln(2.0) + ln(b - x) - ln(ba) - ln(bc)
         else -> ln(2.0) - ln(ba) // x == c

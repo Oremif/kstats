@@ -81,7 +81,7 @@ public fun findQuantile(
         for (expansion in 0 until 50) {
             val cdfLo = cdf(lo)
             val cdfHi = cdf(hi)
-            if (cdfLo <= p && cdfHi >= p) break
+            if (p in cdfLo..cdfHi) break
             width *= 2.0
             if (cdfLo > p) lo -= width
             if (cdfHi < p) hi += width

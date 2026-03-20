@@ -245,12 +245,12 @@ public fun regularizedGammaP(a: Double, x: Double): Double {
     if (x < 0.0) return 0.0
     if (x == 0.0) return 0.0
 
-    if (x < a + 1.0) {
+    return if (x < a + 1.0) {
         // Series expansion
-        return gammaSeriesP(a, x)
+        gammaSeriesP(a, x)
     } else {
         // Continued fraction
-        return 1.0 - gammaContinuedFractionQ(a, x)
+        1.0 - gammaContinuedFractionQ(a, x)
     }
 }
 
@@ -277,10 +277,10 @@ public fun regularizedGammaQ(a: Double, x: Double): Double {
     if (x < 0.0) return 1.0
     if (x == 0.0) return 1.0
 
-    if (x < a + 1.0) {
-        return 1.0 - gammaSeriesP(a, x)
+    return if (x < a + 1.0) {
+        1.0 - gammaSeriesP(a, x)
     } else {
-        return gammaContinuedFractionQ(a, x)
+        gammaContinuedFractionQ(a, x)
     }
 }
 

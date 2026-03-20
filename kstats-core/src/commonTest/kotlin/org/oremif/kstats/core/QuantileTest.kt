@@ -8,7 +8,7 @@ import kotlin.test.assertFailsWith
 
 class QuantileTest {
 
-    private val TOLERANCE = 1e-10
+    private val PRECISE_TOLERANCE = 1e-10
 
     // ── Helper: Standard Normal cdf/pdf ──────────────────────────────────
 
@@ -32,7 +32,7 @@ class QuantileTest {
                 pdf = ::normalPdf,
                 initialGuess = 0.0,
             )
-            assertEquals(expected, result, TOLERANCE, "Normal quantile mismatch for p=$p")
+            assertEquals(expected, result, PRECISE_TOLERANCE, "Normal quantile mismatch for p=$p")
         }
     }
 
@@ -44,7 +44,7 @@ class QuantileTest {
             pdf = ::normalPdf,
             initialGuess = 0.0,
         )
-        assertEquals(0.0, result, TOLERANCE)
+        assertEquals(0.0, result, PRECISE_TOLERANCE)
     }
 
     // ── Bounded distribution (Beta-like on [0, 1]) ──────────────────────
@@ -72,7 +72,7 @@ class QuantileTest {
             lowerBound = 0.0,
             upperBound = 1.0,
         )
-        assertEquals(0.5, result, TOLERANCE)
+        assertEquals(0.5, result, PRECISE_TOLERANCE)
     }
 
     @Test
@@ -89,7 +89,7 @@ class QuantileTest {
                 upperBound = 1.0,
             )
             // Round-trip: cdf(quantile(p)) should equal p
-            assertEquals(p, betaCdf(x), TOLERANCE, "Round-trip failed for p=$p")
+            assertEquals(p, betaCdf(x), PRECISE_TOLERANCE, "Round-trip failed for p=$p")
         }
     }
 
@@ -121,7 +121,7 @@ class QuantileTest {
             lowerBound = 0.0,
             upperBound = 1.0,
         )
-        assertEquals(0.001, betaCdf(lowResult), TOLERANCE)
+        assertEquals(0.001, betaCdf(lowResult), PRECISE_TOLERANCE)
 
         // Very close to upper bound
         val highResult = findQuantile(
@@ -132,7 +132,7 @@ class QuantileTest {
             lowerBound = 0.0,
             upperBound = 1.0,
         )
-        assertEquals(0.999, betaCdf(highResult), TOLERANCE)
+        assertEquals(0.999, betaCdf(highResult), PRECISE_TOLERANCE)
     }
 
     // ── Bisection fallback (pdf returns 0) ──────────────────────────────
@@ -201,7 +201,7 @@ class QuantileTest {
                 initialGuess = 1.0,
                 lowerBound = 0.0,
             )
-            assertEquals(expected, result, TOLERANCE, "Exponential quantile mismatch for p=$p")
+            assertEquals(expected, result, PRECISE_TOLERANCE, "Exponential quantile mismatch for p=$p")
         }
     }
 }

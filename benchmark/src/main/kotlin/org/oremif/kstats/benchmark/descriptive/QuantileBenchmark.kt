@@ -11,7 +11,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics as Common
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.MICROSECONDS)
-open class QuantileBenchmark {
+class QuantileBenchmark {
 
     @Param("1000", "10000", "100000")
     var size: Int = 0

@@ -220,8 +220,7 @@ class LeveneTestTest {
     @Test
     fun zeroGroups() {
         assertFailsWith<InsufficientDataException> {
-            @Suppress("SpreadOperator")
-            leveneTest(*arrayOf())
+            leveneTest()
         }
     }
 

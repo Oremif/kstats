@@ -166,7 +166,7 @@ public fun Sequence<Double>.centralMoment(order: Int): Double =
  * @see variance
  */
 public fun Iterable<Double>.kStatistic(order: Int): Double {
-    if (order < 1 || order > 4) throw InvalidParameterException(
+    if (order !in 1..4) throw InvalidParameterException(
         "k-statistic order must be 1, 2, 3, or 4, got $order"
     )
 

@@ -13,7 +13,7 @@ import org.apache.commons.math3.distribution.ExponentialDistribution as CommonsE
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.NANOSECONDS)
-open class ContinuousDistributionBenchmark {
+class ContinuousDistributionBenchmark {
 
     // kstats distributions
     private val kNormal = NormalDistribution(0.0, 1.0)

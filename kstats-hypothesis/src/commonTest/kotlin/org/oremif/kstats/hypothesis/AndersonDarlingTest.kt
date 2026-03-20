@@ -186,8 +186,7 @@ class AndersonDarlingTest {
         val data = doubleArrayOf(1.0, 1.0, 1.0, 1.0, 1.0 + 1e-10)
         val result = andersonDarlingTest(data)
         assertTrue(result.statistic >= 0.0, "A² should be non-negative")
-        assertTrue(result.pValue >= 0.0 && result.pValue <= 1.0,
-            "p-value should be in [0, 1]")
+        assertTrue(result.pValue in 0.0..1.0, "p-value should be in [0, 1]")
     }
 
     // ===== Extreme parameters =====

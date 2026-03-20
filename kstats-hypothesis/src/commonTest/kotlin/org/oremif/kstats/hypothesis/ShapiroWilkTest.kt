@@ -243,7 +243,7 @@ class ShapiroWilkTest {
         val data = doubleArrayOf(1.0, 1.0, 1.0, 1.0, 1.0 + 1e-10)
         val result = shapiroWilkTest(data)
         assertTrue(result.statistic > 0.0 && result.statistic <= 1.0)
-        assertTrue(result.pValue >= 0.0 && result.pValue <= 1.0)
+        assertTrue(result.pValue in 0.0..1.0)
     }
 
     // ===== Large n: numerical stability =====

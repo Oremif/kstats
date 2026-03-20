@@ -112,8 +112,8 @@ public fun tTest(
     val n2 = sample2.size.toDouble()
     val mean1 = sample1.mean()
     val mean2 = sample2.mean()
-    val var1 = sample1.map { (it - mean1) * (it - mean1) }.sum() / (n1 - 1.0)
-    val var2 = sample2.map { (it - mean2) * (it - mean2) }.sum() / (n2 - 1.0)
+    val var1 = sample1.sumOf { (it - mean1) * (it - mean1) } / (n1 - 1.0)
+    val var2 = sample2.sumOf { (it - mean2) * (it - mean2) } / (n2 - 1.0)
 
     val t: Double
     val df: Double
