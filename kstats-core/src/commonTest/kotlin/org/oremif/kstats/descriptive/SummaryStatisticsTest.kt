@@ -12,7 +12,7 @@ class SummaryStatisticsTest {
     fun testDescribe() {
         val data = listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
         val stats = data.describe()
-        assertEquals(10, stats.count)
+        assertEquals(10L, stats.count)
         assertEquals(5.5, stats.mean, 1e-10)
         assertEquals(55.0, stats.sum, 1e-10)
         assertEquals(1.0, stats.min, 1e-10)
@@ -29,7 +29,7 @@ class SummaryStatisticsTest {
     @Test
     fun testDescribeN1() {
         val stats = listOf(42.0).describe()
-        assertEquals(1, stats.count)
+        assertEquals(1L, stats.count)
         assertEquals(42.0, stats.mean, 1e-10)
         assertEquals(42.0, stats.sum, 1e-10)
         assertEquals(42.0, stats.min, 1e-10)
@@ -49,7 +49,7 @@ class SummaryStatisticsTest {
     @Test
     fun testDescribeN2() {
         val stats = listOf(1.0, 3.0).describe()
-        assertEquals(2, stats.count)
+        assertEquals(2L, stats.count)
         assertEquals(2.0, stats.mean, 1e-10)
         assertTrue(stats.variance.isFinite())
         assertTrue(stats.standardDeviation.isFinite())
@@ -61,7 +61,7 @@ class SummaryStatisticsTest {
     @Test
     fun testDescribeN3() {
         val stats = listOf(1.0, 2.0, 3.0).describe()
-        assertEquals(3, stats.count)
+        assertEquals(3L, stats.count)
         assertTrue(stats.variance.isFinite())
         assertTrue(stats.standardDeviation.isFinite())
         assertTrue(stats.skewness.isFinite())
@@ -71,7 +71,7 @@ class SummaryStatisticsTest {
     @Test
     fun testDescribeN4() {
         val stats = listOf(1.0, 2.0, 3.0, 4.0).describe()
-        assertEquals(4, stats.count)
+        assertEquals(4L, stats.count)
         assertTrue(stats.variance.isFinite())
         assertTrue(stats.standardDeviation.isFinite())
         assertTrue(stats.skewness.isFinite())
@@ -81,7 +81,7 @@ class SummaryStatisticsTest {
     @Test
     fun testDescribeDoubleArraySmallN() {
         val stats = doubleArrayOf(7.0).describe()
-        assertEquals(1, stats.count)
+        assertEquals(1L, stats.count)
         assertEquals(7.0, stats.mean, 1e-10)
         assertTrue(stats.variance.isNaN())
         assertTrue(stats.skewness.isNaN())

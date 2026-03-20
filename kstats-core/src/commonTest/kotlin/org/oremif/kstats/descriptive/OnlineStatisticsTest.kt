@@ -67,7 +67,7 @@ class OnlineStatisticsTest {
         stats.addAll(data)
 
         val batchSkewness = data.skewness()
-        assertEquals(batchSkewness, stats.skewness, 1e-10)
+        assertEquals(batchSkewness, stats.skewness(), 1e-10)
     }
 
     @Test
@@ -77,7 +77,7 @@ class OnlineStatisticsTest {
         stats.addAll(data)
 
         val batchKurtosis = data.kurtosis()
-        assertEquals(batchKurtosis, stats.kurtosis, 1e-10)
+        assertEquals(batchKurtosis, stats.kurtosis(), 1e-10)
     }
 
     @Test
@@ -92,8 +92,8 @@ class OnlineStatisticsTest {
         assertEquals(10L, stats.count)
         assertEquals(5.5, stats.mean, 1e-10)
         assertEquals(9.166666666666666, stats.variance(), 1e-10)
-        assertEquals(0.0, stats.skewness, 1e-10)
-        assertEquals(-1.2, stats.kurtosis, 1e-10)
+        assertEquals(0.0, stats.skewness(), 1e-10)
+        assertEquals(-1.2, stats.kurtosis(), 1e-10)
     }
 
     @Test
@@ -120,7 +120,7 @@ class OnlineStatisticsTest {
 
         assertEquals(batch.mean, stats.mean, 1e-15)
         assertEquals(batch.variance(), stats.variance(), 1e-15)
-        assertEquals(batch.skewness, stats.skewness, 1e-15)
+        assertEquals(batch.skewness(), stats.skewness(), 1e-15)
     }
 
     // ── Edge cases ─────────────────────────────────────────────────────────
@@ -136,8 +136,8 @@ class OnlineStatisticsTest {
         assertTrue(stats.max.isNaN())
         assertTrue(stats.variance().isNaN())
         assertTrue(stats.standardDeviation().isNaN())
-        assertTrue(stats.skewness.isNaN())
-        assertTrue(stats.kurtosis.isNaN())
+        assertTrue(stats.skewness().isNaN())
+        assertTrue(stats.kurtosis().isNaN())
     }
 
     @Test
@@ -152,8 +152,8 @@ class OnlineStatisticsTest {
         assertEquals(42.0, stats.max, 1e-15)
         assertTrue(stats.variance().isNaN(), "Sample variance with n=1 should be NaN")
         assertEquals(0.0, stats.variance(PopulationKind.POPULATION), 1e-15)
-        assertTrue(stats.skewness.isNaN())
-        assertTrue(stats.kurtosis.isNaN())
+        assertTrue(stats.skewness().isNaN())
+        assertTrue(stats.kurtosis().isNaN())
     }
 
     @Test
@@ -165,8 +165,8 @@ class OnlineStatisticsTest {
         assertEquals(2L, stats.count)
         assertEquals(2.0, stats.mean, 1e-15)
         assertEquals(2.0, stats.variance(), 1e-10) // sample variance
-        assertTrue(stats.skewness.isNaN(), "Skewness with n=2 should be NaN")
-        assertTrue(stats.kurtosis.isNaN())
+        assertTrue(stats.skewness().isNaN(), "Skewness with n=2 should be NaN")
+        assertTrue(stats.kurtosis().isNaN())
     }
 
     @Test
@@ -175,8 +175,8 @@ class OnlineStatisticsTest {
         stats.addAll(doubleArrayOf(1.0, 2.0, 3.0))
 
         assertEquals(3L, stats.count)
-        assertTrue(stats.skewness.isFinite(), "Skewness with n=3 should be finite")
-        assertTrue(stats.kurtosis.isNaN(), "Kurtosis with n=3 should be NaN")
+        assertTrue(stats.skewness().isFinite(), "Skewness with n=3 should be finite")
+        assertTrue(stats.kurtosis().isNaN(), "Kurtosis with n=3 should be NaN")
     }
 
     @Test
@@ -185,8 +185,8 @@ class OnlineStatisticsTest {
         stats.addAll(doubleArrayOf(1.0, 2.0, 3.0, 4.0))
 
         assertEquals(4L, stats.count)
-        assertTrue(stats.skewness.isFinite())
-        assertTrue(stats.kurtosis.isFinite(), "Kurtosis with n=4 should be finite")
+        assertTrue(stats.skewness().isFinite())
+        assertTrue(stats.kurtosis().isFinite(), "Kurtosis with n=4 should be finite")
     }
 
     @Test
@@ -219,8 +219,8 @@ class OnlineStatisticsTest {
         assertEquals(0.0, stats.variance(), 1e-15)
         assertEquals(0.0, stats.variance(PopulationKind.POPULATION), 1e-15)
         assertEquals(0.0, stats.standardDeviation(), 1e-15)
-        assertEquals(0.0, stats.skewness, 1e-15)
-        assertEquals(-3.0, stats.kurtosis, 1e-15)
+        assertEquals(0.0, stats.skewness(), 1e-15)
+        assertEquals(-3.0, stats.kurtosis(), 1e-15)
     }
 
     @Test
@@ -245,7 +245,7 @@ class OnlineStatisticsTest {
 
         assertEquals(offset + 3.0, stats.mean, 1e-5)
         assertEquals(2.5, stats.variance(), 1e-5) // sample variance of {1,2,3,4,5}
-        assertEquals(0.0, stats.skewness, 1e-5)
+        assertEquals(0.0, stats.skewness(), 1e-5)
     }
 
     @Test
@@ -258,8 +258,8 @@ class OnlineStatisticsTest {
 
         assertTrue(stats.mean.isFinite(), "Mean should be finite for large-magnitude data")
         assertTrue(stats.variance().isFinite(), "Variance should be finite for large-magnitude data")
-        assertTrue(stats.skewness.isFinite(), "Skewness should be finite for large-magnitude data")
-        assertTrue(stats.kurtosis.isFinite(), "Kurtosis should be finite for large-magnitude data")
+        assertTrue(stats.skewness().isFinite(), "Skewness should be finite for large-magnitude data")
+        assertTrue(stats.kurtosis().isFinite(), "Kurtosis should be finite for large-magnitude data")
     }
 
     @Test
@@ -281,8 +281,8 @@ class OnlineStatisticsTest {
         // For standard normal: mean ≈ 0, variance ≈ 1, skewness ≈ 0, kurtosis ≈ 0
         assertEquals(0.0, stats.mean, 0.02)
         assertEquals(1.0, stats.variance(), 0.02)
-        assertEquals(0.0, stats.skewness, 0.1)
-        assertEquals(0.0, stats.kurtosis, 0.1)
+        assertEquals(0.0, stats.skewness(), 0.1)
+        assertEquals(0.0, stats.kurtosis(), 0.1)
     }
 
     // ── Non-finite values ──────────────────────────────────────────────────
@@ -328,7 +328,7 @@ class OnlineStatisticsTest {
         assertEquals(0.0, stats.mean, 1e-10)
         assertEquals(-5.0, stats.min, 1e-15)
         assertEquals(5.0, stats.max, 1e-15)
-        assertEquals(0.0, stats.skewness, 1e-10)
+        assertEquals(0.0, stats.skewness(), 1e-10)
     }
 
     // ── Skewed distribution reference ──────────────────────────────────────
@@ -339,7 +339,7 @@ class OnlineStatisticsTest {
         val stats = OnlineStatistics()
         stats.addAll(data)
 
-        assertTrue(stats.skewness > 0, "Right-skewed data should have positive skewness")
+        assertTrue(stats.skewness() > 0, "Right-skewed data should have positive skewness")
     }
 
     @Test
@@ -348,6 +348,6 @@ class OnlineStatisticsTest {
         val stats = OnlineStatistics()
         stats.addAll(data)
 
-        assertTrue(stats.skewness < 0, "Left-skewed data should have negative skewness")
+        assertTrue(stats.skewness() < 0, "Left-skewed data should have negative skewness")
     }
 }

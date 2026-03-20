@@ -108,7 +108,41 @@ public fun Iterable<Double>.centralMoment(order: Int): Double {
  * @see kStatistic
  * @see variance
  */
-public fun DoubleArray.centralMoment(order: Int): Double = asIterable().centralMoment(order)
+public fun DoubleArray.centralMoment(order: Int): Double {
+    if (order < 0) throw InvalidParameterException("order must be non-negative, got $order")
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+
+    val n = size
+    if (order == 0) return 1.0
+    if (order == 1) return 0.0
+
+    // Pass 1 — Welford mean + M2
+    var count = 0
+    var mean = 0.0
+    var m2 = 0.0
+    for (x in this) {
+        count++
+        val delta = x - mean
+        mean += delta / count
+        val delta2 = x - mean
+        m2 += delta * delta2
+    }
+
+    val variance = m2 / n
+    if (variance == 0.0) return 0.0
+    val sd = sqrt(variance)
+
+    // Pass 2 — z-normalized accumulation (overflow-safe)
+    var sumZr = 0.0
+    for (x in this) {
+        val z = (x - mean) / sd
+        sumZr += intPow(z, order)
+    }
+
+    val avgZr = sumZr / n
+    if (avgZr == 0.0) return 0.0
+    return avgZr * intPow(sd, order)
+}
 
 /**
  * Computes the n-th central moment of the values in this sequence.
@@ -261,7 +295,64 @@ public fun Iterable<Double>.kStatistic(order: Int): Double {
  * @see mean
  * @see variance
  */
-public fun DoubleArray.kStatistic(order: Int): Double = asIterable().kStatistic(order)
+public fun DoubleArray.kStatistic(order: Int): Double {
+    if (order < 1 || order > 4) throw InvalidParameterException(
+        "k-statistic order must be 1, 2, 3, or 4, got $order"
+    )
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+
+    val n = size
+    if (n < order) throw InsufficientDataException(
+        "k-statistic of order $order requires at least $order elements, got $n"
+    )
+
+    // Pass 1 — Welford mean + M2
+    var count = 0
+    var mean = 0.0
+    var m2 = 0.0
+    for (x in this) {
+        count++
+        val delta = x - mean
+        mean += delta / count
+        val delta2 = x - mean
+        m2 += delta * delta2
+    }
+
+    if (order == 1) return mean
+
+    val variance = m2 / n
+    if (variance == 0.0) return 0.0
+
+    val nd = n.toDouble()
+
+    if (order == 2) return m2 / (nd - 1.0)
+
+    // For orders 3 and 4 we need higher power sums via z-normalization
+    val sd = sqrt(variance)
+
+    var sumZ3 = 0.0
+    var sumZ4 = 0.0
+    for (x in this) {
+        val z = (x - mean) / sd
+        val z2 = z * z
+        val z3 = z2 * z
+        sumZ3 += z3
+        if (order == 4) sumZ4 += z2 * z2
+    }
+
+    if (order == 3) {
+        if (sumZ3 == 0.0) return 0.0
+        val s3 = sd * sd * sd * sumZ3
+        return nd * s3 / ((nd - 1.0) * (nd - 2.0))
+    }
+
+    // order == 4
+    val sumZ2 = m2 / (sd * sd)
+    val numerator = nd * (nd + 1.0) * sumZ4 - 3.0 * (nd - 1.0) * sumZ2 * sumZ2
+    if (numerator == 0.0) return 0.0
+    val sd4 = sd * sd * sd * sd
+    return sd4 * numerator / ((nd - 1.0) * (nd - 2.0) * (nd - 3.0))
+}
 
 /**
  * Computes the k-statistic of the given order, the unique symmetric unbiased estimator

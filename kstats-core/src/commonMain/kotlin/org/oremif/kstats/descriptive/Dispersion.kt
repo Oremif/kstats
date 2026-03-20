@@ -61,7 +61,26 @@ public fun Iterable<Double>.variance(kind: PopulationKind = SAMPLE): Double {
  * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
  * @return the variance of the array elements.
  */
-public fun DoubleArray.variance(kind: PopulationKind = SAMPLE): Double = asIterable().variance(kind)
+public fun DoubleArray.variance(kind: PopulationKind = SAMPLE): Double {
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    var count = 0
+    var mean = 0.0
+    var m2 = 0.0
+    for (x in this) {
+        count++
+        val delta = x - mean
+        mean += delta / count
+        val delta2 = x - mean
+        m2 += delta * delta2
+    }
+    val divisor = if (kind == SAMPLE) {
+        if (count <= 1) throw InsufficientDataException("Sample variance requires at least 2 elements")
+        count - 1
+    } else {
+        count
+    }
+    return m2 / divisor
+}
 
 // ── standardDeviation ───────────────────────────────────────────────────────
 
@@ -114,9 +133,16 @@ public fun DoubleArray.standardDeviation(kind: PopulationKind = SAMPLE): Double 
  * @return the range (max - min) of the elements.
  */
 public fun Iterable<Double>.range(): Double {
-    val list = toList()
-    if (list.isEmpty()) throw InsufficientDataException("Collection must not be empty")
-    return list.max() - list.min()
+    val iter = iterator()
+    if (!iter.hasNext()) throw InsufficientDataException("Collection must not be empty")
+    var min = iter.next()
+    var max = min
+    while (iter.hasNext()) {
+        val x = iter.next()
+        if (x.compareTo(min) < 0) min = x
+        if (x.compareTo(max) > 0) max = x
+    }
+    return max - min
 }
 
 /**
@@ -169,7 +195,10 @@ public fun Iterable<Double>.interquartileRange(): Double {
  *
  * @return the interquartile range (Q3 - Q1).
  */
-public fun DoubleArray.interquartileRange(): Double = asIterable().interquartileRange()
+public fun DoubleArray.interquartileRange(): Double {
+    val q = quartiles()
+    return q.third - q.first
+}
 
 // ── meanAbsoluteDeviation ───────────────────────────────────────────────────
 
@@ -205,7 +234,19 @@ public fun Iterable<Double>.meanAbsoluteDeviation(): Double {
  *
  * @return the mean absolute deviation from the mean.
  */
-public fun DoubleArray.meanAbsoluteDeviation(): Double = asIterable().meanAbsoluteDeviation()
+public fun DoubleArray.meanAbsoluteDeviation(): Double {
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    val m = mean()
+    var sum = 0.0
+    var compensation = 0.0
+    for (x in this) {
+        val dev = abs(x - m)
+        val t = sum + dev
+        compensation += if (abs(sum) >= abs(dev)) (sum - t) + dev else (dev - t) + sum
+        sum = t
+    }
+    return (sum + compensation) / size
+}
 
 // ── medianAbsoluteDeviation ─────────────────────────────────────────────────
 
@@ -242,7 +283,11 @@ public fun Iterable<Double>.medianAbsoluteDeviation(): Double {
  *
  * @return the median absolute deviation from the median.
  */
-public fun DoubleArray.medianAbsoluteDeviation(): Double = asIterable().medianAbsoluteDeviation()
+public fun DoubleArray.medianAbsoluteDeviation(): Double {
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    val med = median()
+    return DoubleArray(size) { abs(this[it] - med) }.median()
+}
 
 // ── standardError ───────────────────────────────────────────────────────────
 
@@ -303,9 +348,25 @@ public fun DoubleArray.standardError(): Double {
  * @throws DegenerateDataException if the mean is zero.
  */
 public fun Iterable<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double {
-    val m = mean()
-    if (m == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
-    return standardDeviation(kind) / m
+    var count = 0
+    var mean = 0.0
+    var m2 = 0.0
+    for (x in this) {
+        count++
+        val delta = x - mean
+        mean += delta / count
+        val delta2 = x - mean
+        m2 += delta * delta2
+    }
+    if (count == 0) throw InsufficientDataException("Collection must not be empty")
+    if (mean == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
+    val divisor = if (kind == SAMPLE) {
+        if (count <= 1) throw InsufficientDataException("Sample coefficient of variation requires at least 2 elements")
+        count - 1
+    } else {
+        count
+    }
+    return sqrt(m2 / divisor) / mean
 }
 
 /**
@@ -322,8 +383,27 @@ public fun Iterable<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE
  * @return the coefficient of variation (standard deviation / mean).
  * @throws DegenerateDataException if the mean is zero.
  */
-public fun DoubleArray.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double =
-    asIterable().coefficientOfVariation(kind)
+public fun DoubleArray.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double {
+    if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    var count = 0
+    var mean = 0.0
+    var m2 = 0.0
+    for (x in this) {
+        count++
+        val delta = x - mean
+        mean += delta / count
+        val delta2 = x - mean
+        m2 += delta * delta2
+    }
+    if (mean == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
+    val divisor = if (kind == SAMPLE) {
+        if (count <= 1) throw InsufficientDataException("Sample coefficient of variation requires at least 2 elements")
+        count - 1
+    } else {
+        count
+    }
+    return sqrt(m2 / divisor) / mean
+}
 
 // ── trimmedVariance ─────────────────────────────────────────────────────────
 
@@ -591,7 +671,7 @@ public fun Iterable<Double>.semiVariance(
  *
  * Since sequences can only be consumed once, the threshold cannot default to the mean directly
  * (unlike [DoubleArray.semiVariance] and [Iterable.semiVariance][Iterable.semiVariance] where
- * the default is `mean()`). Instead, pass `Double.NaN` (the default) to use the mean of the
+ * the default is `mean()`). Instead, pass `null` (the default) to use the mean of the
  * materialized data — the behavior is identical, only the default parameter encoding differs.
  *
  * ### Example:
@@ -600,7 +680,7 @@ public fun Iterable<Double>.semiVariance(
  * ```
  *
  * @param threshold the reference point that separates downside from upside. Defaults to
- * `Double.NaN`, which uses the mean of the values.
+ * `null`, which uses the mean of the values.
  * @param direction which side of the threshold to measure. Defaults to
  * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
  * @param kind whether to compute sample or population semi-variance. Defaults to
@@ -609,11 +689,11 @@ public fun Iterable<Double>.semiVariance(
  * @see variance
  */
 public fun Sequence<Double>.semiVariance(
-    threshold: Double = Double.NaN,
+    threshold: Double? = null,
     direction: SemiVarianceDirection = SemiVarianceDirection.DOWNSIDE,
     kind: PopulationKind = SAMPLE,
 ): Double {
     val array = toList().toDoubleArray()
-    val t = if (threshold.isNaN()) array.mean() else threshold
+    val t = threshold ?: array.mean()
     return array.semiVariance(t, direction, kind)
 }

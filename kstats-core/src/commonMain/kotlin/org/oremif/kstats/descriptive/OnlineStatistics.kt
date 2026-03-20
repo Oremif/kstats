@@ -138,34 +138,51 @@ public class OnlineStatistics {
     public fun standardDeviation(kind: PopulationKind = SAMPLE): Double = sqrt(variance(kind))
 
     /**
-     * The sample-adjusted skewness (Fisher-Pearson) of all observations.
+     * Computes the skewness of all observations.
      *
      * Returns [Double.NaN] if fewer than 3 observations have been added.
      * Returns 0.0 if the variance is zero (constant data).
+     *
+     * @param kind whether to compute sample-adjusted (Fisher-Pearson) or population skewness.
+     * Defaults to [PopulationKind.SAMPLE].
+     * @return the skewness, or [Double.NaN] if insufficient data.
      */
-    public val skewness: Double
-        get() {
-            if (n < 3L) return Double.NaN
-            if (m2 == 0.0) return 0.0
-            val nd = n.toDouble()
-            val g1 = sqrt(nd) * m3 / (m2 * sqrt(m2))
-            return sqrt(nd * (nd - 1.0)) / (nd - 2.0) * g1
+    public fun skewness(kind: PopulationKind = SAMPLE): Double {
+        if (n < 3L) return Double.NaN
+        if (m2 == 0.0) return 0.0
+        val nd = n.toDouble()
+        val g1 = sqrt(nd) * m3 / (m2 * sqrt(m2))
+        return if (kind == SAMPLE) {
+            sqrt(nd * (nd - 1.0)) / (nd - 2.0) * g1
+        } else {
+            g1
         }
+    }
 
     /**
-     * The sample-adjusted excess kurtosis of all observations.
+     * Computes the kurtosis of all observations.
      *
      * Returns [Double.NaN] if fewer than 4 observations have been added.
-     * Returns -3.0 if the variance is zero (constant data).
+     * Returns -3.0 (excess) or 0.0 (non-excess) if the variance is zero (constant data).
+     *
+     * @param kind whether to compute sample-adjusted or population kurtosis.
+     * Defaults to [PopulationKind.SAMPLE].
+     * @param excess whether to subtract 3 (the kurtosis of a normal distribution).
+     * Defaults to `true`.
+     * @return the kurtosis, or [Double.NaN] if insufficient data.
      */
-    public val kurtosis: Double
-        get() {
-            if (n < 4L) return Double.NaN
-            if (m2 == 0.0) return -3.0
-            val nd = n.toDouble()
-            val g2 = nd * m4 / (m2 * m2)
-            return (nd - 1.0) / ((nd - 2.0) * (nd - 3.0)) * ((nd + 1.0) * g2 - 3.0 * (nd - 1.0))
+    public fun kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean = true): Double {
+        if (n < 4L) return Double.NaN
+        if (m2 == 0.0) return if (excess) -3.0 else 0.0
+        val nd = n.toDouble()
+        val g2 = nd * m4 / (m2 * m2)
+        return if (kind == SAMPLE) {
+            val adj = (nd - 1.0) / ((nd - 2.0) * (nd - 3.0)) * ((nd + 1.0) * g2 - 3.0 * (nd - 1.0))
+            if (excess) adj else adj + 3.0
+        } else {
+            if (excess) g2 - 3.0 else g2
         }
+    }
 
     /**
      * Resets the accumulator to its initial empty state.

@@ -61,6 +61,7 @@ private const val LANCZOS_G = 7.0
  * @return the natural logarithm of gamma([x]).
  */
 public fun lnGamma(x: Double): Double {
+    if (x.isNaN()) return Double.NaN
     if (x <= 0.0) throw InvalidParameterException("lnGamma requires x > 0, got $x")
     if (x < 0.5) {
         // Reflection formula: Gamma(x)*Gamma(1-x) = pi/sin(pi*x)
@@ -112,6 +113,7 @@ public fun gamma(x: Double): Double = exp(lnGamma(x))
  * @return the natural logarithm of beta([a], [b]).
  */
 public fun lnBeta(a: Double, b: Double): Double {
+    if (a.isNaN() || b.isNaN()) return Double.NaN
     if (a <= 0.0 || b <= 0.0) throw InvalidParameterException("lnBeta requires a > 0 and b > 0, got a=$a, b=$b")
     return lnGamma(a) + lnGamma(b) - lnGamma(a + b)
 }
@@ -160,6 +162,7 @@ private const val BETA_EPSILON = 1e-14
  * @throws org.oremif.kstats.core.exceptions.ConvergenceException if the continued fraction does not converge within 200 iterations.
  */
 public fun regularizedBeta(x: Double, a: Double, b: Double): Double {
+    if (x.isNaN() || a.isNaN() || b.isNaN()) return Double.NaN
     if (a <= 0.0 || b <= 0.0) throw InvalidParameterException("regularizedBeta requires a > 0 and b > 0")
     if (x <= 0.0) return 0.0
     if (x >= 1.0) return 1.0
@@ -241,6 +244,7 @@ private const val GAMMA_EPSILON = 1e-14
  * @throws ConvergenceException if the iterative computation does not converge within 200 iterations.
  */
 public fun regularizedGammaP(a: Double, x: Double): Double {
+    if (a.isNaN() || x.isNaN()) return Double.NaN
     if (a <= 0.0) throw InvalidParameterException("regularizedGammaP requires a > 0, got $a")
     if (x < 0.0) return 0.0
     if (x == 0.0) return 0.0
@@ -273,6 +277,7 @@ public fun regularizedGammaP(a: Double, x: Double): Double {
  * @throws ConvergenceException if the iterative computation does not converge within 200 iterations.
  */
 public fun regularizedGammaQ(a: Double, x: Double): Double {
+    if (a.isNaN() || x.isNaN()) return Double.NaN
     if (a <= 0.0) throw InvalidParameterException("regularizedGammaQ requires a > 0, got $a")
     if (x < 0.0) return 1.0
     if (x == 0.0) return 1.0
@@ -736,14 +741,17 @@ public fun lnPermutation(n: Int, k: Int): Double {
  * @throws InvalidParameterException if [a] or [b] is [Long.MIN_VALUE].
  * @see lcm
  */
-public tailrec fun gcd(a: Long, b: Long): Long {
+public fun gcd(a: Long, b: Long): Long {
     if (a == Long.MIN_VALUE || b == Long.MIN_VALUE) throw InvalidParameterException(
         "gcd is not supported for Long.MIN_VALUE (absolute value overflows Long)"
     )
     val absA = if (a < 0) -a else a
     val absB = if (b < 0) -b else b
-    return if (absB == 0L) absA else gcd(absB, absA % absB)
+    return gcdInternal(absA, absB)
 }
+
+private tailrec fun gcdInternal(a: Long, b: Long): Long =
+    if (b == 0L) a else gcdInternal(b, a % b)
 
 /**
  * Computes the least common multiple of two integers.

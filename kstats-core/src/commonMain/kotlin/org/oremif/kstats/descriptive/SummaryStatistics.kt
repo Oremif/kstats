@@ -36,7 +36,7 @@ import kotlin.math.sqrt
  * @property standardError the standard error of the mean (stddev / sqrt(n)), or NaN if n < 2.
  */
 public data class DescriptiveStatistics(
-    val count: Int,
+    val count: Long,
     val mean: Double,
     val standardDeviation: Double,
     val min: Double,
@@ -110,28 +110,33 @@ public fun Iterable<Double>.describe(): DescriptiveStatistics {
     // Single z-pass — skewness (z³) + kurtosis (z⁴)
     var skew = Double.NaN
     var kurt = Double.NaN
-    if (n >= 3 && popVariance != 0.0) {
-        val popSd = sqrt(popVariance)
-        var sumZ3 = 0.0
-        var sumZ4 = 0.0
-        for (x in list) {
-            val z = (x - mean) / popSd
-            val z2 = z * z
-            sumZ3 += z2 * z
-            sumZ4 += z2 * z2
-        }
-        val g1 = sumZ3 / n
-        skew = sqrt(n.toDouble() * (n - 1)) / (n - 2) * g1
+    if (n >= 3) {
+        if (popVariance != 0.0) {
+            val popSd = sqrt(popVariance)
+            var sumZ3 = 0.0
+            var sumZ4 = 0.0
+            for (x in list) {
+                val z = (x - mean) / popSd
+                val z2 = z * z
+                sumZ3 += z2 * z
+                sumZ4 += z2 * z2
+            }
+            val g1 = sumZ3 / n
+            skew = sqrt(n.toDouble() * (n - 1)) / (n - 2) * g1
 
-        if (n >= 4) {
-            val g2 = sumZ4 / n
-            val nd = n.toDouble()
-            kurt = (nd - 1.0) / ((nd - 2.0) * (nd - 3.0)) * ((nd + 1.0) * g2 - 3.0 * (nd - 1.0))
+            if (n >= 4) {
+                val g2 = sumZ4 / n
+                val nd = n.toDouble()
+                kurt = (nd - 1.0) / ((nd - 2.0) * (nd - 3.0)) * ((nd + 1.0) * g2 - 3.0 * (nd - 1.0))
+            }
+        } else {
+            skew = 0.0
+            if (n >= 4) kurt = -3.0
         }
     }
 
     return DescriptiveStatistics(
-        count = n,
+        count = n.toLong(),
         mean = mean,
         standardDeviation = sd,
         min = minVal,
