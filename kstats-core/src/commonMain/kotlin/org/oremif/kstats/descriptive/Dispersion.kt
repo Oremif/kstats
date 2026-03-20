@@ -26,26 +26,17 @@ import kotlin.math.sqrt
  * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
  * @return the variance of the elements.
  */
-public fun Iterable<Double>.variance(kind: PopulationKind = SAMPLE): Double {
-    var count = 0
-    var mean = 0.0
-    var m2 = 0.0
-    for (x in this) {
-        count++
-        val delta = x - mean
-        mean += delta / count
-        val delta2 = x - mean
-        m2 += delta * delta2
+public fun Iterable<Double>.variance(kind: PopulationKind = SAMPLE): Double =
+    welford { count, _, m2 ->
+        if (count == 0) throw InsufficientDataException("Collection must not be empty")
+        val divisor = if (kind == SAMPLE) {
+            if (count <= 1) throw InsufficientDataException("Sample variance requires at least 2 elements")
+            count - 1
+        } else {
+            count
+        }
+        m2 / divisor
     }
-    if (count == 0) throw InsufficientDataException("Collection must not be empty")
-    val divisor = if (kind == SAMPLE) {
-        if (count <= 1) throw InsufficientDataException("Sample variance requires at least 2 elements")
-        count - 1
-    } else {
-        count
-    }
-    return m2 / divisor
-}
 
 /**
  * Computes the variance of the values in this array.
@@ -63,23 +54,15 @@ public fun Iterable<Double>.variance(kind: PopulationKind = SAMPLE): Double {
  */
 public fun DoubleArray.variance(kind: PopulationKind = SAMPLE): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
-    var count = 0
-    var mean = 0.0
-    var m2 = 0.0
-    for (x in this) {
-        count++
-        val delta = x - mean
-        mean += delta / count
-        val delta2 = x - mean
-        m2 += delta * delta2
+    return welford { _, m2 ->
+        val divisor = if (kind == SAMPLE) {
+            if (size <= 1) throw InsufficientDataException("Sample variance requires at least 2 elements")
+            size - 1
+        } else {
+            size
+        }
+        m2 / divisor
     }
-    val divisor = if (kind == SAMPLE) {
-        if (count <= 1) throw InsufficientDataException("Sample variance requires at least 2 elements")
-        count - 1
-    } else {
-        count
-    }
-    return m2 / divisor
 }
 
 // ── standardDeviation ───────────────────────────────────────────────────────
@@ -219,7 +202,15 @@ public fun Iterable<Double>.meanAbsoluteDeviation(): Double {
     val list = toList()
     if (list.isEmpty()) throw InsufficientDataException("Collection must not be empty")
     val m = list.mean()
-    return list.map { abs(it - m) }.mean()
+    var sum = 0.0
+    var compensation = 0.0
+    for (x in list) {
+        val dev = abs(x - m)
+        val t = sum + dev
+        compensation += if (abs(sum) >= abs(dev)) (sum - t) + dev else (dev - t) + sum
+        sum = t
+    }
+    return (sum + compensation) / list.size
 }
 
 /**
@@ -347,27 +338,18 @@ public fun DoubleArray.standardError(): Double {
  * @return the coefficient of variation (standard deviation / mean).
  * @throws DegenerateDataException if the mean is zero.
  */
-public fun Iterable<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double {
-    var count = 0
-    var mean = 0.0
-    var m2 = 0.0
-    for (x in this) {
-        count++
-        val delta = x - mean
-        mean += delta / count
-        val delta2 = x - mean
-        m2 += delta * delta2
+public fun Iterable<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double =
+    welford { count, mean, m2 ->
+        if (count == 0) throw InsufficientDataException("Collection must not be empty")
+        if (mean == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
+        val divisor = if (kind == SAMPLE) {
+            if (count <= 1) throw InsufficientDataException("Sample coefficient of variation requires at least 2 elements")
+            count - 1
+        } else {
+            count
+        }
+        sqrt(m2 / divisor) / mean
     }
-    if (count == 0) throw InsufficientDataException("Collection must not be empty")
-    if (mean == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
-    val divisor = if (kind == SAMPLE) {
-        if (count <= 1) throw InsufficientDataException("Sample coefficient of variation requires at least 2 elements")
-        count - 1
-    } else {
-        count
-    }
-    return sqrt(m2 / divisor) / mean
-}
 
 /**
  * Computes the coefficient of variation (CV) of the values in this array.
@@ -385,24 +367,16 @@ public fun Iterable<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE
  */
 public fun DoubleArray.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
-    var count = 0
-    var mean = 0.0
-    var m2 = 0.0
-    for (x in this) {
-        count++
-        val delta = x - mean
-        mean += delta / count
-        val delta2 = x - mean
-        m2 += delta * delta2
+    return welford { mean, m2 ->
+        if (mean == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
+        val divisor = if (kind == SAMPLE) {
+            if (size <= 1) throw InsufficientDataException("Sample coefficient of variation requires at least 2 elements")
+            size - 1
+        } else {
+            size
+        }
+        sqrt(m2 / divisor) / mean
     }
-    if (mean == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
-    val divisor = if (kind == SAMPLE) {
-        if (count <= 1) throw InsufficientDataException("Sample coefficient of variation requires at least 2 elements")
-        count - 1
-    } else {
-        count
-    }
-    return sqrt(m2 / divisor) / mean
 }
 
 // ── trimmedVariance ─────────────────────────────────────────────────────────

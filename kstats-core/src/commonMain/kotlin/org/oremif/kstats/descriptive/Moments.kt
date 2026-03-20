@@ -57,33 +57,21 @@ public fun Iterable<Double>.centralMoment(order: Int): Double {
     if (order == 0) return 1.0
     if (order == 1) return 0.0
 
-    // Pass 1 — Welford mean + M2
-    var count = 0
-    var mean = 0.0
-    var m2 = 0.0
-    for (x in list) {
-        count++
-        val delta = x - mean
-        mean += delta / count
-        val delta2 = x - mean
-        m2 += delta * delta2
+    return list.welford { _, mean, m2 ->
+        val variance = m2 / n
+        if (variance == 0.0) return 0.0
+        val sd = sqrt(variance)
+
+        var sumZr = 0.0
+        for (x in list) {
+            val z = (x - mean) / sd
+            sumZr += intPow(z, order)
+        }
+
+        val avgZr = sumZr / n
+        if (avgZr == 0.0) return 0.0
+        avgZr * intPow(sd, order)
     }
-
-    val variance = m2 / n
-    if (variance == 0.0) return 0.0
-
-    val sd = sqrt(variance)
-
-    // Pass 2 — z-normalized accumulation (overflow-safe)
-    var sumZr = 0.0
-    for (x in list) {
-        val z = (x - mean) / sd
-        sumZr += intPow(z, order)
-    }
-
-    val avgZr = sumZr / n
-    if (avgZr == 0.0) return 0.0
-    return avgZr * intPow(sd, order)
 }
 
 /**
@@ -116,32 +104,21 @@ public fun DoubleArray.centralMoment(order: Int): Double {
     if (order == 0) return 1.0
     if (order == 1) return 0.0
 
-    // Pass 1 — Welford mean + M2
-    var count = 0
-    var mean = 0.0
-    var m2 = 0.0
-    for (x in this) {
-        count++
-        val delta = x - mean
-        mean += delta / count
-        val delta2 = x - mean
-        m2 += delta * delta2
+    return welford { mean, m2 ->
+        val variance = m2 / n
+        if (variance == 0.0) return 0.0
+        val sd = sqrt(variance)
+
+        var sumZr = 0.0
+        for (x in this) {
+            val z = (x - mean) / sd
+            sumZr += intPow(z, order)
+        }
+
+        val avgZr = sumZr / n
+        if (avgZr == 0.0) return 0.0
+        avgZr * intPow(sd, order)
     }
-
-    val variance = m2 / n
-    if (variance == 0.0) return 0.0
-    val sd = sqrt(variance)
-
-    // Pass 2 — z-normalized accumulation (overflow-safe)
-    var sumZr = 0.0
-    for (x in this) {
-        val z = (x - mean) / sd
-        sumZr += intPow(z, order)
-    }
-
-    val avgZr = sumZr / n
-    if (avgZr == 0.0) return 0.0
-    return avgZr * intPow(sd, order)
 }
 
 /**
@@ -212,60 +189,39 @@ public fun Iterable<Double>.kStatistic(order: Int): Double {
         "k-statistic of order $order requires at least $order elements, got $n"
     )
 
-    // Pass 1 — Welford mean + M2
-    var count = 0
-    var mean = 0.0
-    var m2 = 0.0
-    for (x in list) {
-        count++
-        val delta = x - mean
-        mean += delta / count
-        val delta2 = x - mean
-        m2 += delta * delta2
+    return list.welford { _, mean, m2 ->
+        if (order == 1) return mean
+
+        val variance = m2 / n
+        if (variance == 0.0) return 0.0
+
+        val nd = n.toDouble()
+        if (order == 2) return m2 / (nd - 1.0)
+
+        val sd = sqrt(variance)
+
+        var sumZ3 = 0.0
+        var sumZ4 = 0.0
+        for (x in list) {
+            val z = (x - mean) / sd
+            val z2 = z * z
+            sumZ3 += z2 * z
+            if (order == 4) sumZ4 += z2 * z2
+        }
+
+        if (order == 3) {
+            if (sumZ3 == 0.0) return 0.0
+            val s3 = sd * sd * sd * sumZ3
+            return nd * s3 / ((nd - 1.0) * (nd - 2.0))
+        }
+
+        // order == 4
+        val sumZ2 = m2 / (sd * sd)
+        val numerator = nd * (nd + 1.0) * sumZ4 - 3.0 * (nd - 1.0) * sumZ2 * sumZ2
+        if (numerator == 0.0) return 0.0
+        val sd4 = sd * sd * sd * sd
+        sd4 * numerator / ((nd - 1.0) * (nd - 2.0) * (nd - 3.0))
     }
-
-    if (order == 1) return mean
-
-    val variance = m2 / n
-    if (variance == 0.0) return 0.0
-
-    val nd = n.toDouble()
-
-    if (order == 2) {
-        // k₂ = s₂ / (n-1) where s₂ = Σ(x_i - x̄)² = m2
-        return m2 / (nd - 1.0)
-    }
-
-    // For orders 3 and 4 we need higher power sums via z-normalization
-    val sd = sqrt(variance)
-
-    var sumZ3 = 0.0
-    var sumZ4 = 0.0
-    for (x in list) {
-        val z = (x - mean) / sd
-        val z2 = z * z
-        val z3 = z2 * z
-        sumZ3 += z3
-        if (order == 4) sumZ4 += z2 * z2
-    }
-
-    if (order == 3) {
-        // k₃ = n · s₃ / ((n-1)(n-2)) where s₃ = sd³·ΣZ³
-        if (sumZ3 == 0.0) return 0.0
-        val s3 = sd * sd * sd * sumZ3
-        return nd * s3 / ((nd - 1.0) * (nd - 2.0))
-    }
-
-    // order == 4
-    // k₄ = (n(n+1)·s₄ − 3(n−1)·s₂²) / ((n−1)(n−2)(n−3))
-    // Factor out sd⁴ to keep accumulation in z-space:
-    // s₄ = sd⁴·ΣZ⁴, s₂² = (sd²·ΣZ²)² = sd⁴·(ΣZ²)²
-    // k₄ = sd⁴ · (n(n+1)·ΣZ⁴ − 3(n−1)·(ΣZ²)²) / ((n−1)(n−2)(n−3))
-    val sumZ2 = m2 / (sd * sd) // = n (by definition), but recompute for generality
-    val numerator = nd * (nd + 1.0) * sumZ4 - 3.0 * (nd - 1.0) * sumZ2 * sumZ2
-    if (numerator == 0.0) return 0.0
-    val sd4 = sd * sd * sd * sd
-    return sd4 * numerator / ((nd - 1.0) * (nd - 2.0) * (nd - 3.0))
 }
 
 /**
@@ -296,7 +252,7 @@ public fun Iterable<Double>.kStatistic(order: Int): Double {
  * @see variance
  */
 public fun DoubleArray.kStatistic(order: Int): Double {
-    if (order < 1 || order > 4) throw InvalidParameterException(
+    if (order !in 1..4) throw InvalidParameterException(
         "k-statistic order must be 1, 2, 3, or 4, got $order"
     )
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
@@ -306,52 +262,39 @@ public fun DoubleArray.kStatistic(order: Int): Double {
         "k-statistic of order $order requires at least $order elements, got $n"
     )
 
-    // Pass 1 — Welford mean + M2
-    var count = 0
-    var mean = 0.0
-    var m2 = 0.0
-    for (x in this) {
-        count++
-        val delta = x - mean
-        mean += delta / count
-        val delta2 = x - mean
-        m2 += delta * delta2
+    return welford { mean, m2 ->
+        if (order == 1) return mean
+
+        val variance = m2 / n
+        if (variance == 0.0) return 0.0
+
+        val nd = n.toDouble()
+        if (order == 2) return m2 / (nd - 1.0)
+
+        val sd = sqrt(variance)
+
+        var sumZ3 = 0.0
+        var sumZ4 = 0.0
+        for (x in this) {
+            val z = (x - mean) / sd
+            val z2 = z * z
+            sumZ3 += z2 * z
+            if (order == 4) sumZ4 += z2 * z2
+        }
+
+        if (order == 3) {
+            if (sumZ3 == 0.0) return 0.0
+            val s3 = sd * sd * sd * sumZ3
+            return nd * s3 / ((nd - 1.0) * (nd - 2.0))
+        }
+
+        // order == 4
+        val sumZ2 = m2 / (sd * sd)
+        val numerator = nd * (nd + 1.0) * sumZ4 - 3.0 * (nd - 1.0) * sumZ2 * sumZ2
+        if (numerator == 0.0) return 0.0
+        val sd4 = sd * sd * sd * sd
+        sd4 * numerator / ((nd - 1.0) * (nd - 2.0) * (nd - 3.0))
     }
-
-    if (order == 1) return mean
-
-    val variance = m2 / n
-    if (variance == 0.0) return 0.0
-
-    val nd = n.toDouble()
-
-    if (order == 2) return m2 / (nd - 1.0)
-
-    // For orders 3 and 4 we need higher power sums via z-normalization
-    val sd = sqrt(variance)
-
-    var sumZ3 = 0.0
-    var sumZ4 = 0.0
-    for (x in this) {
-        val z = (x - mean) / sd
-        val z2 = z * z
-        val z3 = z2 * z
-        sumZ3 += z3
-        if (order == 4) sumZ4 += z2 * z2
-    }
-
-    if (order == 3) {
-        if (sumZ3 == 0.0) return 0.0
-        val s3 = sd * sd * sd * sumZ3
-        return nd * s3 / ((nd - 1.0) * (nd - 2.0))
-    }
-
-    // order == 4
-    val sumZ2 = m2 / (sd * sd)
-    val numerator = nd * (nd + 1.0) * sumZ4 - 3.0 * (nd - 1.0) * sumZ2 * sumZ2
-    if (numerator == 0.0) return 0.0
-    val sd4 = sd * sd * sd * sd
-    return sd4 * numerator / ((nd - 1.0) * (nd - 2.0) * (nd - 3.0))
 }
 
 /**

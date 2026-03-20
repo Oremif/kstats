@@ -114,12 +114,12 @@ public fun Iterable<Double>.describe(): DescriptiveStatistics {
         if (popVariance != 0.0) {
             val popSd = sqrt(popVariance)
             var sumZ3 = 0.0
-            var sumZ4 = 0.0
+            var sumZ4 = if (n >= 4) 0.0 else Double.NaN
             for (x in list) {
                 val z = (x - mean) / popSd
                 val z2 = z * z
                 sumZ3 += z2 * z
-                sumZ4 += z2 * z2
+                if (n >= 4) sumZ4 += z2 * z2
             }
             val g1 = sumZ3 / n
             skew = sqrt(n.toDouble() * (n - 1)) / (n - 2) * g1

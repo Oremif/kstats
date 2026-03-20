@@ -1,5 +1,7 @@
 package org.oremif.kstats.core
 
+import org.khronos.webgl.Int32Array
+import org.khronos.webgl.get
 import kotlin.random.Random
 
 /**
@@ -33,9 +35,4 @@ private object JsSecureRandom : Random() {
 
 private external object crypto {
     fun getRandomValues(array: Int32Array)
-}
-
-private external class Int32Array(size: Int) {
-    val length: Int
-    operator fun get(index: Int): Int
 }
