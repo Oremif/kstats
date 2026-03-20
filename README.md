@@ -3,13 +3,13 @@
 [![API Reference](https://img.shields.io/badge/API-Dokka-0f766e)](https://oremif.github.io/kstats)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-# kstats
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/logo-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="docs/images/logo-light.svg">
   <img alt="kstats logo" src="docs/images/logo-light.svg" width="88">
 </picture>
+
+# kstats
 
 A Kotlin Multiplatform statistics toolkit for descriptive analysis, probability distributions, hypothesis testing, correlation, regression, and sampling.
 
