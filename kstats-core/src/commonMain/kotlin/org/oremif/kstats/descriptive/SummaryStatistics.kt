@@ -83,19 +83,23 @@ public fun Iterable<Double>.describe(): DescriptiveStatistics {
     val med = sortedQuantile(sorted, 0.50)
     val q3 = sortedQuantile(sorted, 0.75)
 
-    // Single Welford pass — mean + M2
+    // Single Welford pass — mean + M2, with compensated sum
     var count = 0
     var mean = 0.0
     var m2 = 0.0
+    var sum = 0.0
+    var sumCompensation = 0.0
     for (x in list) {
         count++
         val delta = x - mean
         mean += delta / count
         val delta2 = x - mean
         m2 += delta * delta2
+        val t = sum + x
+        sumCompensation += if (kotlin.math.abs(sum) >= kotlin.math.abs(x)) (sum - t) + x else (x - t) + sum
+        sum = t
     }
-
-    val sum = mean * n
+    sum += sumCompensation
 
     // Variance-dependent fields: need n >= 2
     val popVariance = m2 / n
@@ -143,16 +147,6 @@ public fun Iterable<Double>.describe(): DescriptiveStatistics {
         interquartileRange = q3 - q1,
         standardError = se
     )
-}
-
-/** Compute quantile from an already-sorted list using linear interpolation. */
-private fun sortedQuantile(sorted: List<Double>, q: Double): Double {
-    if (sorted.size == 1) return sorted[0]
-    val pos = q * (sorted.size - 1)
-    val lo = kotlin.math.floor(pos).toInt()
-    val hi = kotlin.math.ceil(pos).toInt()
-    val frac = pos - lo
-    return sorted[lo] + frac * (sorted[hi] - sorted[lo])
 }
 
 /**

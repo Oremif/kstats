@@ -536,6 +536,7 @@ public fun DoubleArray.semiVariance(
     var compensation = 0.0
     for (x in this) {
         val diff = x - threshold
+        // NaN propagation (IEEE 754 / numpy default): include NaN diffs so the result becomes NaN
         val include = diff.isNaN() || when (direction) {
             SemiVarianceDirection.DOWNSIDE -> diff < 0.0
             SemiVarianceDirection.UPSIDE -> diff > 0.0
@@ -588,8 +589,10 @@ public fun Iterable<Double>.semiVariance(
  * not just the count on the measured side. When the threshold equals the mean, the sum of
  * downside and upside semi-variance equals the full variance.
  *
- * Since sequences can only be consumed once, the threshold cannot default to the mean directly.
- * Instead, pass `Double.NaN` (the default) to use the mean of the materialized data.
+ * Since sequences can only be consumed once, the threshold cannot default to the mean directly
+ * (unlike [DoubleArray.semiVariance] and [Iterable.semiVariance][Iterable.semiVariance] where
+ * the default is `mean()`). Instead, pass `Double.NaN` (the default) to use the mean of the
+ * materialized data — the behavior is identical, only the default parameter encoding differs.
  *
  * ### Example:
  * ```kotlin

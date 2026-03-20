@@ -730,12 +730,16 @@ public fun lnPermutation(n: Int, k: Int): Double {
  * gcd(-12, 8)  // 4 (negatives treated as absolute values)
  * ```
  *
- * @param a the first integer.
- * @param b the second integer.
+ * @param a the first integer. Must not be [Long.MIN_VALUE].
+ * @param b the second integer. Must not be [Long.MIN_VALUE].
  * @return the greatest common divisor of |[a]| and |[b]|.
+ * @throws InvalidParameterException if [a] or [b] is [Long.MIN_VALUE].
  * @see lcm
  */
 public tailrec fun gcd(a: Long, b: Long): Long {
+    if (a == Long.MIN_VALUE || b == Long.MIN_VALUE) throw InvalidParameterException(
+        "gcd is not supported for Long.MIN_VALUE (absolute value overflows Long)"
+    )
     val absA = if (a < 0) -a else a
     val absB = if (b < 0) -b else b
     return if (absB == 0L) absA else gcd(absB, absA % absB)
@@ -756,13 +760,17 @@ public tailrec fun gcd(a: Long, b: Long): Long {
  * lcm(-12, 8)   // 24 (negatives treated as absolute values)
  * ```
  *
- * @param a the first integer.
- * @param b the second integer.
+ * @param a the first integer. Must not be [Long.MIN_VALUE].
+ * @param b the second integer. Must not be [Long.MIN_VALUE].
  * @return the least common multiple of |[a]| and |[b]|, or 0 if either input is 0.
+ * @throws InvalidParameterException if [a] or [b] is [Long.MIN_VALUE].
  * @see gcd
  */
 public fun lcm(a: Long, b: Long): Long {
     if (a == 0L || b == 0L) return 0L
+    if (a == Long.MIN_VALUE || b == Long.MIN_VALUE) throw InvalidParameterException(
+        "lcm is not supported for Long.MIN_VALUE (absolute value overflows Long)"
+    )
     val absA = if (a < 0) -a else a
     val absB = if (b < 0) -b else b
     return absA / gcd(absA, absB) * absB

@@ -101,14 +101,18 @@ public fun Sequence<Double>.mean(): Double {
  */
 public fun Iterable<Double>.geometricMean(): Double {
     var sumLn = 0.0
+    var compensation = 0.0
     var count = 0
     for (element in this) {
         if (element <= 0.0) throw InvalidParameterException("All elements must be positive for geometric mean")
-        sumLn += ln(element)
+        val lnVal = ln(element)
+        val t = sumLn + lnVal
+        compensation += if (abs(sumLn) >= abs(lnVal)) (sumLn - t) + lnVal else (lnVal - t) + sumLn
+        sumLn = t
         count++
     }
     if (count == 0) throw InsufficientDataException("Collection must not be empty")
-    return exp(sumLn / count)
+    return exp((sumLn + compensation) / count)
 }
 
 /**
@@ -128,11 +132,15 @@ public fun Iterable<Double>.geometricMean(): Double {
 public fun DoubleArray.geometricMean(): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     var sumLn = 0.0
+    var compensation = 0.0
     for (element in this) {
         if (element <= 0.0) throw InvalidParameterException("All elements must be positive for geometric mean")
-        sumLn += ln(element)
+        val lnVal = ln(element)
+        val t = sumLn + lnVal
+        compensation += if (abs(sumLn) >= abs(lnVal)) (sumLn - t) + lnVal else (lnVal - t) + sumLn
+        sumLn = t
     }
-    return exp(sumLn / size)
+    return exp((sumLn + compensation) / size)
 }
 
 // ── harmonicMean ────────────────────────────────────────────────────────────
@@ -297,7 +305,7 @@ public fun DoubleArray.weightedMean(weights: DoubleArray): Double {
  * @return the median of the elements.
  */
 public fun Iterable<Double>.median(): Double =
-    toList().toDoubleArray().median()
+    medianInPlace(toList().toDoubleArray())
 
 /**
  * Computes the median of the values in this array.
@@ -316,7 +324,12 @@ public fun Iterable<Double>.median(): Double =
  */
 public fun DoubleArray.median(): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
-    val work = copyOf()
+    return medianInPlace(copyOf())
+}
+
+/** Computes the median, mutating [work] in place via introselect. */
+private fun medianInPlace(work: DoubleArray): Double {
+    if (work.isEmpty()) throw InsufficientDataException("Array must not be empty")
     val n = work.size
     val mid = n / 2
     work.introSelect(mid)
