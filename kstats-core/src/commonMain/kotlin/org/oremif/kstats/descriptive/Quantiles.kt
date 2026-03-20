@@ -23,7 +23,7 @@ public enum class QuantileInterpolation {
     /** Return the higher of the two nearest data points (ceiling). */
     HIGHER,
 
-    /** Return whichever of the two nearest data points is closer to the exact position. */
+    /** Return whichever of the two nearest data points is closer to the exact position. Ties (frac = 0.5) round up to the higher value. */
     NEAREST,
 
     /** Return the average of the two nearest data points. */
@@ -211,7 +211,7 @@ public fun Iterable<Double>.quartiles(): Triple<Double, Double, Double> {
  */
 public fun DoubleArray.quartiles(): Triple<Double, Double, Double> {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
-    val sorted = toList().sorted()
+    val sorted = sortedArray().asList()
     return Triple(
         sortedQuantile(sorted, 0.25),
         sortedQuantile(sorted, 0.50),

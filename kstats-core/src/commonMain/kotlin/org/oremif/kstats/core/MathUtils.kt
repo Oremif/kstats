@@ -636,6 +636,7 @@ public fun trigamma(x: Double): Double {
 public fun generalizedHarmonic(n: Int, s: Double): Double {
     if (n < 0) throw InvalidParameterException("generalizedHarmonic requires n >= 0, got $n")
     if (n == 0) return 0.0
+    if (s == 0.0) return n.toDouble()
     var sum = 0.0
     var compensation = 0.0
     for (i in 1..n) {

@@ -6,8 +6,14 @@ import kotlin.jvm.JvmName
 
 // ── Iterable<Int> extensions ────────────────────────────────────────────────
 //
-// Int values are converted to Double internally. Since Int fits within Double's
-// 53-bit mantissa, the conversion is always exact.
+// Int values are converted to Double internally via DoubleArray to avoid
+// intermediate boxing. Since Int fits within Double's 53-bit mantissa,
+// the conversion is always exact.
+
+private fun Iterable<Int>.toStatArray(): DoubleArray {
+    val list = toList()
+    return DoubleArray(list.size) { list[it].toDouble() }
+}
 
 /**
  * Computes the arithmetic mean of the Int values.
@@ -22,7 +28,7 @@ import kotlin.jvm.JvmName
  * @return the arithmetic mean of the Int values as a Double.
  */
 @JvmName("meanOfInt")
-public fun Iterable<Int>.mean(): Double = map { it.toDouble() }.mean()
+public fun Iterable<Int>.mean(): Double = toStatArray().mean()
 
 /**
  * Computes the median of the Int values.
@@ -37,7 +43,7 @@ public fun Iterable<Int>.mean(): Double = map { it.toDouble() }.mean()
  * @return the median of the Int values as a Double.
  */
 @JvmName("medianOfInt")
-public fun Iterable<Int>.median(): Double = map { it.toDouble() }.median()
+public fun Iterable<Int>.median(): Double = toStatArray().median()
 
 /**
  * Computes the variance of the Int values.
@@ -54,7 +60,7 @@ public fun Iterable<Int>.median(): Double = map { it.toDouble() }.median()
  */
 @JvmName("varianceOfInt")
 public fun Iterable<Int>.variance(kind: PopulationKind = PopulationKind.SAMPLE): Double =
-    map { it.toDouble() }.variance(kind)
+    toStatArray().variance(kind)
 
 /**
  * Computes the standard deviation of the Int values.
@@ -71,7 +77,7 @@ public fun Iterable<Int>.variance(kind: PopulationKind = PopulationKind.SAMPLE):
  */
 @JvmName("standardDeviationOfInt")
 public fun Iterable<Int>.standardDeviation(kind: PopulationKind = PopulationKind.SAMPLE): Double =
-    map { it.toDouble() }.standardDeviation(kind)
+    toStatArray().standardDeviation(kind)
 
 /**
  * Computes the p-th percentile of the Int values.
@@ -91,7 +97,7 @@ public fun Iterable<Int>.standardDeviation(kind: PopulationKind = PopulationKind
 public fun Iterable<Int>.percentile(
     p: Double,
     interpolation: QuantileInterpolation = QuantileInterpolation.LINEAR
-): Double = map { it.toDouble() }.percentile(p, interpolation)
+): Double = toStatArray().percentile(p, interpolation)
 
 /**
  * Computes a descriptive statistics summary of the Int values.
@@ -108,4 +114,4 @@ public fun Iterable<Int>.percentile(
  * @return a [DescriptiveStatistics] summary of the values.
  */
 @JvmName("describeOfInt")
-public fun Iterable<Int>.describe(): DescriptiveStatistics = map { it.toDouble() }.describe()
+public fun Iterable<Int>.describe(): DescriptiveStatistics = toStatArray().describe()

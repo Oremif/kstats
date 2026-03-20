@@ -157,8 +157,9 @@ public fun Iterable<Double>.describe(): DescriptiveStatistics {
 /**
  * Computes a comprehensive descriptive statistics summary of the values in this array.
  *
- * Performs a single sort for order statistics and a single Welford pass for mean, variance,
- * skewness, and kurtosis.
+ * Performs a single sort for order statistics (min, max, quartiles, median) and a single
+ * Welford pass for mean, variance, skewness, and kurtosis. This is more efficient than
+ * computing each statistic individually.
  *
  * ### Example:
  * ```kotlin
@@ -170,4 +171,84 @@ public fun Iterable<Double>.describe(): DescriptiveStatistics {
  *
  * @return a [DescriptiveStatistics] containing all computed statistics.
  */
-public fun DoubleArray.describe(): DescriptiveStatistics = asIterable().describe()
+public fun DoubleArray.describe(): DescriptiveStatistics {
+    if (isEmpty()) throw InsufficientDataException("describe() requires at least 1 element")
+
+    val sorted = sortedArray()
+    val n = sorted.size
+    val minVal = sorted.first()
+    val maxVal = sorted.last()
+    val q1 = sortedQuantile(sorted.asList(), 0.25)
+    val med = sortedQuantile(sorted.asList(), 0.50)
+    val q3 = sortedQuantile(sorted.asList(), 0.75)
+
+    // Single Welford pass — mean + M2, with compensated sum
+    var count = 0
+    var mean = 0.0
+    var m2 = 0.0
+    var sum = 0.0
+    var sumCompensation = 0.0
+    for (x in this) {
+        count++
+        val delta = x - mean
+        mean += delta / count
+        val delta2 = x - mean
+        m2 += delta * delta2
+        val t = sum + x
+        sumCompensation += if (kotlin.math.abs(sum) >= kotlin.math.abs(x)) (sum - t) + x else (x - t) + sum
+        sum = t
+    }
+    sum += sumCompensation
+
+    // Variance-dependent fields: need n >= 2
+    val popVariance = m2 / n
+    val variance = if (n >= 2) m2 / (n - 1) else Double.NaN
+    val sd = if (n >= 2) sqrt(variance) else Double.NaN
+    val se = if (n >= 2) sd / sqrt(n.toDouble()) else Double.NaN
+
+    // Single z-pass — skewness (z³) + kurtosis (z⁴)
+    var skew = Double.NaN
+    var kurt = Double.NaN
+    if (n >= 3) {
+        if (popVariance != 0.0) {
+            val popSd = sqrt(popVariance)
+            var sumZ3 = 0.0
+            var sumZ4 = if (n >= 4) 0.0 else Double.NaN
+            for (x in this) {
+                val z = (x - mean) / popSd
+                val z2 = z * z
+                sumZ3 += z2 * z
+                if (n >= 4) sumZ4 += z2 * z2
+            }
+            val g1 = sumZ3 / n
+            skew = sqrt(n.toDouble() * (n - 1)) / (n - 2) * g1
+
+            if (n >= 4) {
+                val g2 = sumZ4 / n
+                val nd = n.toDouble()
+                kurt = (nd - 1.0) / ((nd - 2.0) * (nd - 3.0)) * ((nd + 1.0) * g2 - 3.0 * (nd - 1.0))
+            }
+        } else {
+            skew = 0.0
+            if (n >= 4) kurt = -3.0
+        }
+    }
+
+    return DescriptiveStatistics(
+        count = n.toLong(),
+        mean = mean,
+        standardDeviation = sd,
+        min = minVal,
+        q1 = q1,
+        median = med,
+        q3 = q3,
+        max = maxVal,
+        variance = variance,
+        skewness = skew,
+        kurtosis = kurt,
+        sum = sum,
+        range = maxVal - minVal,
+        interquartileRange = q3 - q1,
+        standardError = se
+    )
+}

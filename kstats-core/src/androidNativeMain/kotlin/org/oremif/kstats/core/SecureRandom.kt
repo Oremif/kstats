@@ -13,9 +13,9 @@ import platform.posix.open
 import platform.posix.read
 import kotlin.random.Random
 
-public actual fun secureRandom(): Random = DevUrandom()
+public actual fun secureRandom(): Random = DevUrandom
 
-private class DevUrandom : Random() {
+private object DevUrandom : Random() {
     private val buffer = ByteArray(256)
     private var position = buffer.size
 

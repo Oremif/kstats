@@ -44,6 +44,9 @@ public fun Iterable<Double>.variance(kind: PopulationKind = SAMPLE): Double =
  * Variance measures how far values spread from their mean. Uses Welford's numerically
  * stable single-pass algorithm.
  *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ *
  * ### Example:
  * ```kotlin
  * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).variance() // 4.5714...
@@ -142,7 +145,14 @@ public fun Iterable<Double>.range(): Double {
  */
 public fun DoubleArray.range(): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
-    return max() - min()
+    var min = this[0]
+    var max = this[0]
+    for (i in 1 until size) {
+        val x = this[i]
+        if (x.compareTo(min) < 0) min = x
+        if (x.compareTo(max) > 0) max = x
+    }
+    return max - min
 }
 
 // ── interquartileRange ──────────────────────────────────────────────────────
@@ -643,18 +653,14 @@ public fun Iterable<Double>.semiVariance(
  * not just the count on the measured side. When the threshold equals the mean, the sum of
  * downside and upside semi-variance equals the full variance.
  *
- * Since sequences can only be consumed once, the threshold cannot default to the mean directly
- * (unlike [DoubleArray.semiVariance] and [Iterable.semiVariance][Iterable.semiVariance] where
- * the default is `mean()`). Instead, pass `null` (the default) to use the mean of the
- * materialized data — the behavior is identical, only the default parameter encoding differs.
+ * This overload uses the mean of the data as the threshold. Since sequences can only be
+ * consumed once, the data is materialized internally.
  *
  * ### Example:
  * ```kotlin
  * sequenceOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).semiVariance() // 1.7143 (downside, sample)
  * ```
  *
- * @param threshold the reference point that separates downside from upside. Defaults to
- * `null`, which uses the mean of the values.
  * @param direction which side of the threshold to measure. Defaults to
  * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
  * @param kind whether to compute sample or population semi-variance. Defaults to
@@ -663,11 +669,37 @@ public fun Iterable<Double>.semiVariance(
  * @see variance
  */
 public fun Sequence<Double>.semiVariance(
-    threshold: Double? = null,
     direction: SemiVarianceDirection = SemiVarianceDirection.DOWNSIDE,
     kind: PopulationKind = SAMPLE,
 ): Double {
     val array = toList().toDoubleArray()
-    val t = threshold ?: array.mean()
-    return array.semiVariance(t, direction, kind)
+    return array.semiVariance(array.mean(), direction, kind)
 }
+
+/**
+ * Computes the semi-variance of the values on one side of a threshold.
+ *
+ * Semi-variance measures variability on only one side of a threshold, ignoring values on the
+ * other side. It is commonly used in finance to quantify downside risk separately from upside
+ * potential. The divisor uses the total number of elements (n-1 for sample, n for population),
+ * not just the count on the measured side. When the threshold equals the mean, the sum of
+ * downside and upside semi-variance equals the full variance.
+ *
+ * ### Example:
+ * ```kotlin
+ * sequenceOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).semiVariance(5.0) // downside, sample
+ * ```
+ *
+ * @param threshold the reference point that separates downside from upside.
+ * @param direction which side of the threshold to measure. Defaults to
+ * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
+ * @param kind whether to compute sample or population semi-variance. Defaults to
+ * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
+ * @return the semi-variance on the selected side of the threshold.
+ * @see variance
+ */
+public fun Sequence<Double>.semiVariance(
+    threshold: Double,
+    direction: SemiVarianceDirection = SemiVarianceDirection.DOWNSIDE,
+    kind: PopulationKind = SAMPLE,
+): Double = toList().toDoubleArray().semiVariance(threshold, direction, kind)

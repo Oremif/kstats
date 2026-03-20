@@ -6,10 +6,15 @@ import kotlin.jvm.JvmName
 
 // ── Iterable<Long> extensions ───────────────────────────────────────────────
 //
-// All Long extensions convert values to Double via Long.toDouble().
-// Double has 53 bits of mantissa, so Long values with absolute value > 2^53
-// (9_007_199_254_740_992) may lose precision in the least-significant digits.
-// For data within that range the conversion is exact.
+// All Long extensions convert values to Double via DoubleArray to avoid
+// intermediate boxing. Double has 53 bits of mantissa, so Long values with
+// absolute value > 2^53 (9_007_199_254_740_992) may lose precision in the
+// least-significant digits. For data within that range the conversion is exact.
+
+private fun Iterable<Long>.toStatArray(): DoubleArray {
+    val list = toList()
+    return DoubleArray(list.size) { list[it].toDouble() }
+}
 
 /**
  * Computes the arithmetic mean of the Long values.
@@ -25,7 +30,7 @@ import kotlin.jvm.JvmName
  * @return the arithmetic mean of the Long values as a Double.
  */
 @JvmName("meanOfLong")
-public fun Iterable<Long>.mean(): Double = map { it.toDouble() }.mean()
+public fun Iterable<Long>.mean(): Double = toStatArray().mean()
 
 /**
  * Computes the median of the Long values.
@@ -41,7 +46,7 @@ public fun Iterable<Long>.mean(): Double = map { it.toDouble() }.mean()
  * @return the median of the Long values as a Double.
  */
 @JvmName("medianOfLong")
-public fun Iterable<Long>.median(): Double = map { it.toDouble() }.median()
+public fun Iterable<Long>.median(): Double = toStatArray().median()
 
 /**
  * Computes the variance of the Long values.
@@ -59,7 +64,7 @@ public fun Iterable<Long>.median(): Double = map { it.toDouble() }.median()
  */
 @JvmName("varianceOfLong")
 public fun Iterable<Long>.variance(kind: PopulationKind = PopulationKind.SAMPLE): Double =
-    map { it.toDouble() }.variance(kind)
+    toStatArray().variance(kind)
 
 /**
  * Computes the standard deviation of the Long values.
@@ -77,7 +82,7 @@ public fun Iterable<Long>.variance(kind: PopulationKind = PopulationKind.SAMPLE)
  */
 @JvmName("standardDeviationOfLong")
 public fun Iterable<Long>.standardDeviation(kind: PopulationKind = PopulationKind.SAMPLE): Double =
-    map { it.toDouble() }.standardDeviation(kind)
+    toStatArray().standardDeviation(kind)
 
 /**
  * Computes the p-th percentile of the Long values.
@@ -98,7 +103,7 @@ public fun Iterable<Long>.standardDeviation(kind: PopulationKind = PopulationKin
 public fun Iterable<Long>.percentile(
     p: Double,
     interpolation: QuantileInterpolation = QuantileInterpolation.LINEAR
-): Double = map { it.toDouble() }.percentile(p, interpolation)
+): Double = toStatArray().percentile(p, interpolation)
 
 /**
  * Computes a descriptive statistics summary of the Long values.
@@ -116,4 +121,4 @@ public fun Iterable<Long>.percentile(
  * @return a [DescriptiveStatistics] summary of the values.
  */
 @JvmName("describeOfLong")
-public fun Iterable<Long>.describe(): DescriptiveStatistics = map { it.toDouble() }.describe()
+public fun Iterable<Long>.describe(): DescriptiveStatistics = toStatArray().describe()

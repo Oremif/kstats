@@ -44,6 +44,9 @@ public fun Iterable<Double>.mean(): Double {
  * The arithmetic mean is the sum of all values divided by the count. Uses compensated
  * (Neumaier) summation for improved numerical precision with large arrays.
  *
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
+ * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ *
  * ### Example:
  * ```kotlin
  * doubleArrayOf(1.0, 2.0, 3.0).mean() // 2.0
