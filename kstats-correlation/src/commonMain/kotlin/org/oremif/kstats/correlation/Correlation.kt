@@ -84,6 +84,8 @@ public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult
         syy += dy * dy
     }
 
+    // Exact equality is safe: sxx/syy are sums of squares of deviations from mean,
+    // which are exactly 0.0 only when all values are identical (no floating-point rounding).
     if (sxx == 0.0 || syy == 0.0) {
         return CorrelationResult(Double.NaN, Double.NaN, n)
     }
@@ -97,6 +99,7 @@ public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult
     // t-test for correlation significance
     // Use (1-r)(1+r) instead of (1-r²) to avoid catastrophic cancellation when r → ±1
     val oneMinusR2 = (1.0 - r) * (1.0 + r)
+    // Exact equality is safe: after coerceIn, r = ±1.0 produces exactly 0.0
     if (oneMinusR2 == 0.0) {
         return CorrelationResult(r, 0.0, n)
     }
@@ -253,13 +256,10 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
     // Step 6: Ties-adjusted p-value (Kendall, 1970)
     val nL = n.toLong()
     val v0 = nL * (nL - 1) * (2 * nL + 5)
-    var varS = (v0 - vt - vu).toDouble() / 18.0
-    if (nL >= 2) {
-        varS += v1x.toDouble() * v1y.toDouble() / (2.0 * nL * (nL - 1))
-    }
-    if (nL >= 3) {
-        varS += v2x.toDouble() * v2y.toDouble() / (9.0 * nL * (nL - 1) * (nL - 2))
-    }
+    // n >= 3 is guaranteed by the guard at the top, so all terms are always computed
+    val varS = (v0 - vt - vu).toDouble() / 18.0 +
+        v1x.toDouble() * v1y.toDouble() / (2.0 * nL * (nL - 1)) +
+        v2x.toDouble() * v2y.toDouble() / (9.0 * nL * (nL - 1) * (nL - 2))
 
     if (varS <= 0.0) {
         return CorrelationResult(tau, if (tau == 0.0) 1.0 else 0.0, n)
@@ -643,6 +643,9 @@ public fun covariance(
  * matrix[0][1] // Pearson r between x and y
  * matrix[1][0] // same as matrix[0][1] (symmetric)
  * ```
+ *
+ * **Note:** requires at least 3 observations (unlike [covarianceMatrix] which requires 2),
+ * because the underlying Pearson computation needs n ≥ 3 for a defined t-statistic.
  *
  * @param variables two or more arrays of observations, all with the same size.
  * @return a k×k array of Pearson correlation coefficients.

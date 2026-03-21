@@ -271,6 +271,24 @@ class KendallTauTest {
     }
 
     @Test
+    fun testInfinityInX() {
+        val x = doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
+        val result = kendallTau(x, y)
+        assertTrue(result.coefficient in -1.0..1.0)
+        assertTrue(result.pValue in 0.0..1.0)
+    }
+
+    @Test
+    fun testNegativeInfinityInY() {
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(2.0, Double.NEGATIVE_INFINITY, 6.0, 8.0, 10.0)
+        val result = kendallTau(x, y)
+        assertTrue(result.coefficient in -1.0..1.0)
+        assertTrue(result.pValue in 0.0..1.0)
+    }
+
+    @Test
     fun testConsistencyWithBruteForce() {
         // Verify O(n log n) algorithm matches O(n²) brute force
         val x = doubleArrayOf(3.0, 1.0, 4.0, 1.0, 5.0, 9.0, 2.0, 6.0)

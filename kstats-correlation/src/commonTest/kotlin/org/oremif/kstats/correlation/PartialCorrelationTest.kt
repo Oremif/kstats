@@ -326,6 +326,24 @@ class PartialCorrelationTest {
         assertTrue(result.coefficient.isNaN())
     }
 
+    @Test
+    fun testInfinityInX() {
+        val x = doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
+        val z = doubleArrayOf(1.5, 2.5, 3.5, 4.5, 5.5)
+        val result = partialCorrelation(x, y, z)
+        assertTrue(result.coefficient.isNaN())
+    }
+
+    @Test
+    fun testInfinityInControl() {
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
+        val z = doubleArrayOf(1.5, Double.NEGATIVE_INFINITY, 3.5, 4.5, 5.5)
+        val result = partialCorrelation(x, y, z)
+        assertTrue(result.coefficient.isNaN())
+    }
+
     // --- Property-based ---
 
     @Test
