@@ -89,7 +89,7 @@ public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult
     }
 
     val rawR = sxy / sqrt(sxx * syy)
-    if (rawR.isNaN()) {
+    if (rawR.isNaN() || rawR.isInfinite()) {
         return CorrelationResult(Double.NaN, Double.NaN, n)
     }
     val r = rawR.coerceIn(-1.0, 1.0)
@@ -174,7 +174,7 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
     if (n < 3) throw InsufficientDataException("Need at least 3 observations")
 
     // Step 1: Sort indices by (x, y) lexicographically
-    val indices = (0 until n).sortedWith(compareBy<Int> { x[it] }.thenBy { y[it] })
+    val indices = (0 until n).sortedWith(compareBy<Int> { x[it] }.thenBy { y[it] }).toIntArray()
 
     // Step 2: Scan sorted indices for x-tied groups and joint ties
     var n1 = 0L // x-tied pairs
@@ -621,7 +621,8 @@ public fun covariance(
         cXY += dx * (y[i] - meanY) // old dx, new meanY
     }
 
-    return cXY / (if (kind == PopulationKind.SAMPLE) n - 1 else n)
+    val divisor = if (kind == PopulationKind.SAMPLE) (n - 1).toDouble() else n.toDouble()
+    return cXY / divisor
 }
 
 /**
@@ -649,12 +650,35 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
     if (k < 2) throw InsufficientDataException("Need at least 2 variables")
     val n = variables[0].size
     if (!variables.all { it.size == n }) throw InvalidParameterException("All variables must have the same size")
+    if (n < 3) throw InsufficientDataException("Need at least 3 observations")
+
+    // Pre-compute means and sum of squared deviations to avoid redundant passes
+    val means = DoubleArray(k) { variables[it].mean() }
+    val ss = DoubleArray(k)
+    for (v in 0 until k) {
+        var s = 0.0
+        for (i in 0 until n) {
+            val d = variables[v][i] - means[v]
+            s += d * d
+        }
+        ss[v] = s
+    }
 
     val result = Array(k) { DoubleArray(k) }
     for (i in 0 until k) {
         result[i][i] = 1.0
         for (j in i + 1 until k) {
-            val r = pearsonCorrelation(variables[i], variables[j]).coefficient
+            if (ss[i] == 0.0 || ss[j] == 0.0) {
+                result[i][j] = Double.NaN
+                result[j][i] = Double.NaN
+                continue
+            }
+            var sxy = 0.0
+            for (idx in 0 until n) {
+                sxy += (variables[i][idx] - means[i]) * (variables[j][idx] - means[j])
+            }
+            val rawR = sxy / sqrt(ss[i] * ss[j])
+            val r = if (rawR.isNaN() || rawR.isInfinite()) Double.NaN else rawR.coerceIn(-1.0, 1.0)
             result[i][j] = r
             result[j][i] = r
         }
@@ -690,12 +714,20 @@ public fun covarianceMatrix(
     if (k < 2) throw InsufficientDataException("Need at least 2 variables")
     val n = variables[0].size
     if (!variables.all { it.size == n }) throw InvalidParameterException("All variables must have the same size")
+    if (n < 2) throw InsufficientDataException("Need at least 2 observations")
+
+    // Pre-compute means to avoid redundant passes
+    val means = DoubleArray(k) { variables[it].mean() }
+    val divisor = if (kind == PopulationKind.SAMPLE) (n - 1).toDouble() else n.toDouble()
 
     val result = Array(k) { DoubleArray(k) }
     for (i in 0 until k) {
-        result[i][i] = covariance(variables[i], variables[i], kind)
-        for (j in i + 1 until k) {
-            val cov = covariance(variables[i], variables[j], kind)
+        for (j in i until k) {
+            var s = 0.0
+            for (idx in 0 until n) {
+                s += (variables[i][idx] - means[i]) * (variables[j][idx] - means[j])
+            }
+            val cov = s / divisor
             result[i][j] = cov
             result[j][i] = cov
         }

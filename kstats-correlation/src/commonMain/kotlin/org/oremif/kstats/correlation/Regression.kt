@@ -22,7 +22,8 @@ import kotlin.math.sqrt
  * @property intercept the predicted value of y when x is zero.
  * @property rSquared the coefficient of determination, indicating the proportion of variance
  * in y explained by the linear relationship with x. Ranges from 0.0 (no explanatory power)
- * to 1.0 (perfect fit).
+ * to 1.0 (perfect fit). Returns 1.0 when y has zero variance (all values identical), since
+ * there is no variance left to explain.
  * @property standardErrorSlope the standard error of the slope estimate, measuring the
  * uncertainty in [slope]. Smaller values indicate a more precise estimate.
  * @property standardErrorIntercept the standard error of the intercept estimate, measuring
@@ -78,13 +79,18 @@ public data class SimpleLinearRegressionResult(
         if (this === other) return true
         if (other !is SimpleLinearRegressionResult) return false
         return slope == other.slope && intercept == other.intercept &&
-            rSquared == other.rSquared && n == other.n
+            rSquared == other.rSquared && standardErrorSlope == other.standardErrorSlope &&
+            standardErrorIntercept == other.standardErrorIntercept &&
+            residuals.contentEquals(other.residuals) && n == other.n
     }
 
     override fun hashCode(): Int {
         var result = slope.hashCode()
         result = 31 * result + intercept.hashCode()
         result = 31 * result + rSquared.hashCode()
+        result = 31 * result + standardErrorSlope.hashCode()
+        result = 31 * result + standardErrorIntercept.hashCode()
+        result = 31 * result + residuals.contentHashCode()
         result = 31 * result + n
         return result
     }

@@ -165,6 +165,20 @@ class RegressionTest {
         assertEquals(1.0, result.rSquared, tol)
     }
 
+    // --- Numerical stability ---
+
+    @Test
+    fun testLargeOffset() {
+        // Verify numerical stability with large constant offset
+        val offset = 1e12
+        val x = DoubleArray(10) { offset + (it + 1).toDouble() }
+        val y = DoubleArray(10) { 2.0 * (offset + (it + 1).toDouble()) + 1.0 }
+        val result = simpleLinearRegression(x, y)
+        assertEquals(2.0, result.slope, 1e-6)
+        assertEquals(1.0, result.intercept, 1e-2)
+        assertTrue(result.rSquared > 0.999999, "R² should be near 1.0, got ${result.rSquared}")
+    }
+
     // --- Non-finite input ---
 
     @Test

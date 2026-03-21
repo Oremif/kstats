@@ -83,6 +83,17 @@ class PartialCorrelationTest {
     }
 
     @Test
+    fun testEmptyControlsSpread() {
+        // partialCorrelation(x, y, *emptyArray()) should delegate to Pearson
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
+        val partial = partialCorrelation(x, y, *emptyArray())
+        val pearson = pearsonCorrelation(x, y)
+        assertEquals(pearson.coefficient, partial.coefficient, tol)
+        assertEquals(pearson.pValue, partial.pValue, tol)
+    }
+
+    @Test
     fun testMinimumNForOneControl() {
         // k=1, need n >= 4 (df = n - 2 - k = 1)
         val x = doubleArrayOf(1.0, 2.5, 3.0, 5.0)
