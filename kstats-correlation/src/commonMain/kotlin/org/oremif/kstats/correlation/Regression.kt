@@ -28,19 +28,27 @@ import kotlin.math.sqrt
  * uncertainty in [slope]. Smaller values indicate a more precise estimate.
  * @property standardErrorIntercept the standard error of the intercept estimate, measuring
  * the uncertainty in [intercept].
- * @property residuals the difference between each observed y value and the predicted value
- * (y - predicted). Residuals sum to approximately zero for a correctly fitted model.
  * @property n the number of observations used in the regression.
  */
-public data class SimpleLinearRegressionResult(
+@ConsistentCopyVisibility
+public data class SimpleLinearRegressionResult
+@PublishedApi internal constructor(
     val slope: Double,
     val intercept: Double,
     val rSquared: Double,
     val standardErrorSlope: Double,
     val standardErrorIntercept: Double,
-    val residuals: DoubleArray,
+    private val _residuals: DoubleArray,
     val n: Int
 ) {
+    /**
+     * The difference between each observed y value and the predicted value
+     * (y - predicted). Residuals sum to approximately zero for a correctly fitted model.
+     *
+     * Returns a defensive copy — modifications to the returned array do not affect this result.
+     */
+    public val residuals: DoubleArray get() = _residuals.copyOf()
+
     /**
      * Predicts the y value for a single x value using the fitted model.
      *
@@ -81,7 +89,7 @@ public data class SimpleLinearRegressionResult(
         return slope == other.slope && intercept == other.intercept &&
             rSquared == other.rSquared && standardErrorSlope == other.standardErrorSlope &&
             standardErrorIntercept == other.standardErrorIntercept &&
-            residuals.contentEquals(other.residuals) && n == other.n
+            _residuals.contentEquals(other._residuals) && n == other.n
     }
 
     override fun hashCode(): Int {
@@ -90,10 +98,15 @@ public data class SimpleLinearRegressionResult(
         result = 31 * result + rSquared.hashCode()
         result = 31 * result + standardErrorSlope.hashCode()
         result = 31 * result + standardErrorIntercept.hashCode()
-        result = 31 * result + residuals.contentHashCode()
+        result = 31 * result + _residuals.contentHashCode()
         result = 31 * result + n
         return result
     }
+
+    override fun toString(): String =
+        "SimpleLinearRegressionResult(slope=$slope, intercept=$intercept, rSquared=$rSquared, " +
+            "standardErrorSlope=$standardErrorSlope, standardErrorIntercept=$standardErrorIntercept, " +
+            "residuals=${_residuals.contentToString()}, n=$n)"
 }
 
 /**
@@ -114,6 +127,10 @@ public data class SimpleLinearRegressionResult(
  * result.rSquared  // 1.0 (perfect fit)
  * result.predict(6.0) // 13.0
  * ```
+ *
+ * **Note on numerical precision:** the intercept is computed as `meanY - slope * meanX`. For data
+ * with a large constant offset (e.g. values around 1e12), this subtraction of nearly equal numbers
+ * may lose significant digits in the intercept estimate. The slope and R² are not affected.
  *
  * @param x the array of predictor (independent variable) observations.
  * @param y the array of response (dependent variable) observations, must have the same size as [x].
@@ -162,7 +179,7 @@ public fun simpleLinearRegression(x: DoubleArray, y: DoubleArray): SimpleLinearR
         rSquared = rSquared,
         standardErrorSlope = seSlope,
         standardErrorIntercept = seIntercept,
-        residuals = residuals,
+        _residuals = residuals,
         n = n
     )
 }

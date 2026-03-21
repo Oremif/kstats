@@ -384,6 +384,8 @@ public fun pointBiserialCorrelation(x: BooleanArray, y: DoubleArray): Correlatio
  * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample size.
  */
 public fun pointBiserialCorrelation(x: IntArray, y: DoubleArray): CorrelationResult {
+    if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
+    if (x.size < 3) throw InsufficientDataException("Need at least 3 observations")
     val converted = DoubleArray(x.size) { x[it].toDouble() }
     return pointBiserialCorrelation(converted, y)
 }
@@ -657,11 +659,12 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
 
     // Pass 2: compute all cross-products in a single pass (diagonal = sum of squares)
     val cp = Array(k) { DoubleArray(k) }
+    val devs = DoubleArray(k)
     for (idx in 0 until n) {
+        for (i in 0 until k) devs[i] = variables[i][idx] - means[i]
         for (i in 0 until k) {
-            val di = variables[i][idx] - means[i]
             for (j in i until k) {
-                cp[i][j] += di * (variables[j][idx] - means[j])
+                cp[i][j] += devs[i] * devs[j]
             }
         }
     }
@@ -720,11 +723,12 @@ public fun covarianceMatrix(
 
     // Pass 2: compute all cross-products in a single pass
     val cp = Array(k) { DoubleArray(k) }
+    val devs = DoubleArray(k)
     for (idx in 0 until n) {
+        for (i in 0 until k) devs[i] = variables[i][idx] - means[i]
         for (i in 0 until k) {
-            val di = variables[i][idx] - means[i]
             for (j in i until k) {
-                cp[i][j] += di * (variables[j][idx] - means[j])
+                cp[i][j] += devs[i] * devs[j]
             }
         }
     }
