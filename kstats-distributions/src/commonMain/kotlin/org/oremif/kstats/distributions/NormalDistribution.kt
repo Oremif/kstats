@@ -143,8 +143,8 @@ public class NormalDistribution(
      * @return a random value drawn from this distribution.
      */
     override fun sample(random: Random): Double {
-        // Box-Muller transform
-        val u1 = random.nextDouble()
+        // Box-Muller transform (guard against u1=0 which would produce ln(0)=-∞)
+        val u1 = random.nextDouble().coerceAtLeast(Double.MIN_VALUE)
         val u2 = random.nextDouble()
         return mu + sigma * sqrt(-2.0 * ln(u1)) * cos(2.0 * PI * u2)
     }

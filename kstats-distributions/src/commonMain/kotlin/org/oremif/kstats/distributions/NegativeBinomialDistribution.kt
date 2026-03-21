@@ -3,6 +3,7 @@ package org.oremif.kstats.distributions
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.lnCombination
 import org.oremif.kstats.core.regularizedBeta
+import kotlin.math.ceil
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.sqrt
@@ -126,15 +127,18 @@ public class NegativeBinomialDistribution(
      */
     override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
-        var cumulative = 0.0
-        var k = 0
-        while (cumulative < p) {
-            cumulative += pmf(k)
-            if (cumulative >= p) return k
-            k++
-            if (k > 10000) break // safety
+        if (p == 0.0) return 0
+        // Binary search using the CDF (which uses regularizedBeta, so it's O(1) per call)
+        val mu = mean
+        var lo = 0
+        var hi = maxOf(ceil(mu + 20.0 * sqrt(variance)).toInt(), 100)
+        // Expand upper bound if needed
+        while (cdf(hi) < p) hi *= 2
+        while (lo < hi) {
+            val mid = lo + (hi - lo) / 2
+            if (cdf(mid) < p) lo = mid + 1 else hi = mid
         }
-        return k
+        return lo
     }
 
     /** The mean (expected number of failures before achieving [successes] successes). */

@@ -124,7 +124,7 @@ public class ExponentialDistribution(
      * @param random the source of randomness.
      * @return a non-negative random value drawn from this distribution.
      */
-    override fun sample(random: Random): Double = -ln(random.nextDouble()) / rate
+    override fun sample(random: Random): Double = -ln(random.nextDouble().coerceAtLeast(Double.MIN_VALUE)) / rate
 
     /** Provides the pre-built standard exponential distribution constant. */
     public companion object {

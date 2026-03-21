@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.EULER_MASCHERONI
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.gamma
 import kotlin.math.*
@@ -163,10 +164,7 @@ public class WeibullDistribution(
 
     /** Returns the Shannon entropy of this distribution in nats, using the Euler-Mascheroni constant. */
     override val entropy: Double
-        get() {
-            val eulerMascheroni = 0.5772156649015329
-            return eulerMascheroni * (1.0 - 1.0 / k) + ln(lambda / k) + 1.0
-        }
+        get() = EULER_MASCHERONI * (1.0 - 1.0 / k) + ln(lambda / k) + 1.0
 
     /**
      * Draws a single random value from this Weibull distribution.

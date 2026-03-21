@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import kotlin.math.floor
 import kotlin.random.Random
 
 /**
@@ -82,14 +83,14 @@ public interface DiscreteDistribution : Distribution {
     /**
      * Returns the CDF value at [x], bridging to the integer [cdf] overload.
      *
-     * Truncates [x] to an integer via [Double.toInt] and delegates to [cdf].
+     * Floors [x] to an integer via [floor] and delegates to [cdf].
      * This override satisfies the [Distribution] interface contract, which declares
      * `cdf(x: Double)`.
      *
      * @param x the point at which to evaluate the cumulative probability.
-     * @return the probability that a value is less than or equal to the integer part of [x].
+     * @return the probability that a value is less than or equal to the floor of [x].
      */
-    override fun cdf(x: Double): Double = cdf(x.toInt())
+    override fun cdf(x: Double): Double = cdf(floor(x).toInt())
 
     /**
      * Returns the quantile (inverse CDF) for the given probability [p] as an [Int].
@@ -165,5 +166,8 @@ public interface DiscreteDistribution : Distribution {
      * @param random the source of randomness.
      * @return an [IntArray] of [n] independent random draws.
      */
-    public fun sample(n: Int, random: Random): IntArray = IntArray(n) { sample(random) }
+    public fun sample(n: Int, random: Random): IntArray {
+        require(n >= 0) { "n must be non-negative, got $n" }
+        return IntArray(n) { sample(random) }
+    }
 }

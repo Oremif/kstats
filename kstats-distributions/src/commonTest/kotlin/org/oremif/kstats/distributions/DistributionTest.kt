@@ -3,6 +3,8 @@ package org.oremif.kstats.distributions
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class DistributionTest {
 
@@ -124,5 +126,105 @@ class DistributionTest {
     fun discreteEntropyDefaultIsNaN() {
         val d = StubDiscreteDistribution()
         assertEquals(Double.NaN, d.entropy)
+    }
+
+    // --- cdf(Double) floors correctly for negative fractional values ---
+
+    @Test
+    fun discreteCdfDoubleFloorsNegativeFraction() {
+        // cdf(-0.5) should delegate to cdf(-1), not cdf(0)
+        val poisson = PoissonDistribution(rate = 5.0)
+        assertEquals(0.0, poisson.cdf(-0.5), tol, "cdf(-0.5) should be 0 for Poisson")
+        assertEquals(0.0, poisson.cdf(-0.1), tol, "cdf(-0.1) should be 0 for Poisson")
+    }
+
+    @Test
+    fun discreteCdfDoublePositiveFractionFloors() {
+        val binom = BinomialDistribution(10, 0.3)
+        // cdf(2.7) should equal cdf(2)
+        assertEquals(binom.cdf(2), binom.cdf(2.7), tol)
+        // cdf(3.0) should equal cdf(3)
+        assertEquals(binom.cdf(3), binom.cdf(3.0), tol)
+    }
+
+    // --- logPmf edge cases for degenerate parameters ---
+
+    @Test
+    fun binomialLogPmfDegenerateP0() {
+        val d = BinomialDistribution(10, 0.0)
+        assertEquals(0.0, d.logPmf(0), tol, "logPmf(0) should be 0 when p=0")
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(1), "logPmf(1) should be -Inf when p=0")
+    }
+
+    @Test
+    fun binomialLogPmfDegenerateP1() {
+        val d = BinomialDistribution(10, 1.0)
+        assertEquals(0.0, d.logPmf(10), tol, "logPmf(n) should be 0 when p=1")
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(0), "logPmf(0) should be -Inf when p=1")
+    }
+
+    @Test
+    fun geometricLogPmfDegenerateP1() {
+        val d = GeometricDistribution(1.0)
+        assertEquals(0.0, d.logPmf(0), tol, "logPmf(0) should be 0 when p=1")
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(1), "logPmf(1) should be -Inf when p=1")
+    }
+
+    // --- sample() degenerate cases ---
+
+    @Test
+    fun binomialSampleDegenerateP0LargeN() {
+        val d = BinomialDistribution(100, 0.0)
+        assertEquals(0, d.sample(Random(42)), "sample should return 0 when p=0")
+    }
+
+    @Test
+    fun binomialSampleDegenerateP1LargeN() {
+        val d = BinomialDistribution(100, 1.0)
+        assertEquals(100, d.sample(Random(42)), "sample should return n when p=1")
+    }
+
+    @Test
+    fun geometricSampleDegenerateP1() {
+        val d = GeometricDistribution(1.0)
+        assertEquals(0, d.sample(Random(42)), "sample should return 0 when p=1")
+    }
+
+    // --- sample(n) validation ---
+
+    @Test
+    fun continuousSampleNegativeNThrows() {
+        val d = NormalDistribution.STANDARD
+        assertFailsWith<IllegalArgumentException> { d.sample(-1, Random(42)) }
+    }
+
+    @Test
+    fun discreteSampleNegativeNThrows() {
+        val d = PoissonDistribution(5.0)
+        assertFailsWith<IllegalArgumentException> { d.sample(-1, Random(42)) }
+    }
+
+    @Test
+    fun sampleZeroNReturnsEmpty() {
+        val continuous = NormalDistribution.STANDARD
+        assertTrue(continuous.sample(0, Random(42)).isEmpty())
+        val discrete = PoissonDistribution(5.0)
+        assertTrue(discrete.sample(0, Random(42)).isEmpty())
+    }
+
+    // --- Box-Muller / sampling robustness ---
+
+    @Test
+    fun normalSampleProducesFiniteValues() {
+        val d = NormalDistribution.STANDARD
+        val samples = d.sample(100_000, Random(42))
+        assertTrue(samples.all { it.isFinite() }, "all samples should be finite")
+    }
+
+    @Test
+    fun exponentialSampleProducesFiniteValues() {
+        val d = ExponentialDistribution.STANDARD
+        val samples = d.sample(100_000, Random(42))
+        assertTrue(samples.all { it.isFinite() }, "all samples should be finite")
     }
 }

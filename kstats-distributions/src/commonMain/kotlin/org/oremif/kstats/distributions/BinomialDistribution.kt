@@ -81,6 +81,8 @@ public class BinomialDistribution(
      */
     override fun logPmf(k: Int): Double {
         if (k !in 0..n) return Double.NEGATIVE_INFINITY
+        if (p == 0.0) return if (k == 0) 0.0 else Double.NEGATIVE_INFINITY
+        if (p == 1.0) return if (k == n) 0.0 else Double.NEGATIVE_INFINITY
         return lnCombination(n, k) + k * ln(p) + (n - k) * ln(1.0 - p)
     }
 
@@ -205,15 +207,19 @@ public class BinomialDistribution(
      * @return a random number of successes drawn from this distribution, in `[0, trials]`.
      */
     override fun sample(random: Random): Int {
-        // For small n, direct simulation
-        if (n < 25) {
+        if (p == 0.0) return 0
+        if (p == 1.0) return n
+        // For small n or when normal approximation is unreliable, direct simulation
+        val np = n * p
+        val nq = n * (1.0 - p)
+        if (n < 25 || np < 5.0 || nq < 5.0) {
             var successes = 0
             for (i in 0 until n) {
                 if (random.nextDouble() < p) successes++
             }
             return successes
         }
-        // For large n, use normal approximation with correction
+        // For large n with reliable normal approximation
         val normal = NormalDistribution(mean, sqrt(variance))
         return normal.sample(random).roundToInt().coerceIn(0, n)
     }

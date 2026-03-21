@@ -107,5 +107,8 @@ public interface ContinuousDistribution : Distribution {
      * @param random the source of randomness.
      * @return a [DoubleArray] of [n] independent random draws.
      */
-    public fun sample(n: Int, random: Random): DoubleArray = DoubleArray(n) { sample(random) }
+    public fun sample(n: Int, random: Random): DoubleArray {
+        require(n >= 0) { "n must be non-negative, got $n" }
+        return DoubleArray(n) { sample(random) }
+    }
 }

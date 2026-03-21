@@ -65,6 +65,7 @@ public class GeometricDistribution(
      */
     override fun logPmf(k: Int): Double {
         if (k < 0) return Double.NEGATIVE_INFINITY
+        if (p == 1.0) return if (k == 0) 0.0 else Double.NEGATIVE_INFINITY
         return ln(p) + k * ln(q)
     }
 
@@ -133,6 +134,8 @@ public class GeometricDistribution(
      * @return a random non-negative integer representing the number of failures before success.
      */
     override fun sample(random: Random): Int {
-        return floor(ln(random.nextDouble()) / ln(q)).toInt()
+        if (p == 1.0) return 0
+        val u = random.nextDouble().coerceAtLeast(Double.MIN_VALUE)
+        return floor(ln(u) / ln(q)).toInt()
     }
 }
