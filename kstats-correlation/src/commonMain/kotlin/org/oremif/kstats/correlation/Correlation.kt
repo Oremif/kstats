@@ -9,7 +9,6 @@ import org.oremif.kstats.distributions.StudentTDistribution
 import org.oremif.kstats.sampling.TieMethod
 import org.oremif.kstats.sampling.rank
 import kotlin.math.abs
-import kotlin.math.absoluteValue
 import kotlin.math.sqrt
 
 /**
@@ -325,7 +324,7 @@ public fun pointBiserialCorrelation(x: DoubleArray, y: DoubleArray): Correlation
     val sorted = distinct.sorted()
     val lo = sorted[0]
     val hi = sorted[1]
-    val remapped = DoubleArray(n) { if (x[it] == hi) 1.0 else if (x[it] == lo) 0.0 else x[it] }
+    val remapped = DoubleArray(n) { if (x[it] == hi) 1.0 else if (x[it] == lo) 0.0 else Double.NaN }
 
     return pearsonCorrelation(remapped, y)
 }
@@ -482,7 +481,7 @@ public fun partialCorrelation(
     }
     val t = r * sqrt(df.toDouble() / oneMinusR2)
     val dist = StudentTDistribution(df.toDouble())
-    val pValue = 2.0 * dist.sf(t.absoluteValue)
+    val pValue = 2.0 * dist.sf(abs(t))
 
     return CorrelationResult(r, pValue.coerceIn(0.0, 1.0), n)
 }
@@ -504,9 +503,9 @@ private fun invertMatrix(matrix: Array<DoubleArray>): Array<DoubleArray>? {
     for (col in 0 until m) {
         // Partial pivoting: find row with largest absolute value in column
         var maxRow = col
-        var maxVal = aug[col][col].absoluteValue
+        var maxVal = abs(aug[col][col])
         for (row in col + 1 until m) {
-            val v = aug[row][col].absoluteValue
+            val v = abs(aug[row][col])
             if (v > maxVal) {
                 maxVal = v
                 maxRow = row
@@ -651,11 +650,16 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
     val n = variables[0].size
     if (!variables.all { it.size == n }) throw InvalidParameterException("All variables must have the same size")
 
-    return Array(k) { i ->
-        DoubleArray(k) { j ->
-            if (i == j) 1.0 else pearsonCorrelation(variables[i], variables[j]).coefficient
+    val result = Array(k) { DoubleArray(k) }
+    for (i in 0 until k) {
+        result[i][i] = 1.0
+        for (j in i + 1 until k) {
+            val r = pearsonCorrelation(variables[i], variables[j]).coefficient
+            result[i][j] = r
+            result[j][i] = r
         }
     }
+    return result
 }
 
 /**
@@ -687,9 +691,14 @@ public fun covarianceMatrix(
     val n = variables[0].size
     if (!variables.all { it.size == n }) throw InvalidParameterException("All variables must have the same size")
 
-    return Array(k) { i ->
-        DoubleArray(k) { j ->
-            covariance(variables[i], variables[j], kind)
+    val result = Array(k) { DoubleArray(k) }
+    for (i in 0 until k) {
+        result[i][i] = covariance(variables[i], variables[i], kind)
+        for (j in i + 1 until k) {
+            val cov = covariance(variables[i], variables[j], kind)
+            result[i][j] = cov
+            result[j][i] = cov
         }
     }
+    return result
 }
