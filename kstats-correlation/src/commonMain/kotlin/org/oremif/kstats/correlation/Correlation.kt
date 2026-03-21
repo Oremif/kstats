@@ -655,14 +655,12 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
     // Pass 1: compute means
     val means = DoubleArray(k) { variables[it].mean() }
 
-    // Pass 2: compute all sum-of-squares and cross-products in a single pass
-    val ss = DoubleArray(k)
-    val cp = Array(k) { DoubleArray(k) } // cross-products (upper triangle)
+    // Pass 2: compute all cross-products in a single pass (diagonal = sum of squares)
+    val cp = Array(k) { DoubleArray(k) }
     for (idx in 0 until n) {
         for (i in 0 until k) {
             val di = variables[i][idx] - means[i]
-            ss[i] += di * di
-            for (j in i + 1 until k) {
+            for (j in i until k) {
                 cp[i][j] += di * (variables[j][idx] - means[j])
             }
         }
@@ -672,12 +670,12 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
     for (i in 0 until k) {
         result[i][i] = 1.0
         for (j in i + 1 until k) {
-            if (ss[i] == 0.0 || ss[j] == 0.0) {
+            if (cp[i][i] == 0.0 || cp[j][j] == 0.0) {
                 result[i][j] = Double.NaN
                 result[j][i] = Double.NaN
                 continue
             }
-            val rawR = cp[i][j] / sqrt(ss[i] * ss[j])
+            val rawR = cp[i][j] / sqrt(cp[i][i] * cp[j][j])
             val r = if (rawR.isNaN() || rawR.isInfinite()) Double.NaN else rawR.coerceIn(-1.0, 1.0)
             result[i][j] = r
             result[j][i] = r
