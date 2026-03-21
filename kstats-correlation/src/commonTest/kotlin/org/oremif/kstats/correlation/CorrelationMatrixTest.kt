@@ -89,6 +89,16 @@ class CorrelationMatrixTest {
         }
     }
 
+    @Test
+    fun testTooFewObservationsThrows() {
+        assertFailsWith<InsufficientDataException> {
+            correlationMatrix(
+                doubleArrayOf(1.0, 2.0),
+                doubleArrayOf(3.0, 4.0)
+            )
+        }
+    }
+
     // --- covarianceMatrix ---
 
     @Test
@@ -139,6 +149,16 @@ class CorrelationMatrixTest {
     fun testCovarianceMatrixSingleVariableThrows() {
         assertFailsWith<InsufficientDataException> {
             covarianceMatrix(doubleArrayOf(1.0, 2.0, 3.0))
+        }
+    }
+
+    @Test
+    fun testCovarianceMatrixTooFewObservationsThrows() {
+        assertFailsWith<InsufficientDataException> {
+            covarianceMatrix(
+                doubleArrayOf(1.0),
+                doubleArrayOf(2.0)
+            )
         }
     }
 

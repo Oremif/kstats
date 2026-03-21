@@ -149,7 +149,7 @@ public fun simpleLinearRegression(x: DoubleArray, y: DoubleArray): SimpleLinearR
 
     // R-squared
     val ssRes = residuals.sumOf { it * it }
-    val rSquared = if (syy > 0.0) 1.0 - ssRes / syy else 1.0
+    val rSquared = if (syy > 0.0) (1.0 - ssRes / syy).coerceIn(0.0, 1.0) else 1.0
 
     // Standard errors
     val mse = ssRes / (n - 2)

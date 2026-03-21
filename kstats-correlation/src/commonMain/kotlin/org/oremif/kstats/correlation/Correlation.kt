@@ -652,16 +652,20 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
     if (!variables.all { it.size == n }) throw InvalidParameterException("All variables must have the same size")
     if (n < 3) throw InsufficientDataException("Need at least 3 observations")
 
-    // Pre-compute means and sum of squared deviations to avoid redundant passes
+    // Pass 1: compute means
     val means = DoubleArray(k) { variables[it].mean() }
+
+    // Pass 2: compute all sum-of-squares and cross-products in a single pass
     val ss = DoubleArray(k)
-    for (v in 0 until k) {
-        var s = 0.0
-        for (i in 0 until n) {
-            val d = variables[v][i] - means[v]
-            s += d * d
+    val cp = Array(k) { DoubleArray(k) } // cross-products (upper triangle)
+    for (idx in 0 until n) {
+        for (i in 0 until k) {
+            val di = variables[i][idx] - means[i]
+            ss[i] += di * di
+            for (j in i + 1 until k) {
+                cp[i][j] += di * (variables[j][idx] - means[j])
+            }
         }
-        ss[v] = s
     }
 
     val result = Array(k) { DoubleArray(k) }
@@ -673,11 +677,7 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
                 result[j][i] = Double.NaN
                 continue
             }
-            var sxy = 0.0
-            for (idx in 0 until n) {
-                sxy += (variables[i][idx] - means[i]) * (variables[j][idx] - means[j])
-            }
-            val rawR = sxy / sqrt(ss[i] * ss[j])
+            val rawR = cp[i][j] / sqrt(ss[i] * ss[j])
             val r = if (rawR.isNaN() || rawR.isInfinite()) Double.NaN else rawR.coerceIn(-1.0, 1.0)
             result[i][j] = r
             result[j][i] = r
@@ -716,18 +716,25 @@ public fun covarianceMatrix(
     if (!variables.all { it.size == n }) throw InvalidParameterException("All variables must have the same size")
     if (n < 2) throw InsufficientDataException("Need at least 2 observations")
 
-    // Pre-compute means to avoid redundant passes
+    // Pass 1: compute means
     val means = DoubleArray(k) { variables[it].mean() }
     val divisor = if (kind == PopulationKind.SAMPLE) (n - 1).toDouble() else n.toDouble()
+
+    // Pass 2: compute all cross-products in a single pass
+    val cp = Array(k) { DoubleArray(k) }
+    for (idx in 0 until n) {
+        for (i in 0 until k) {
+            val di = variables[i][idx] - means[i]
+            for (j in i until k) {
+                cp[i][j] += di * (variables[j][idx] - means[j])
+            }
+        }
+    }
 
     val result = Array(k) { DoubleArray(k) }
     for (i in 0 until k) {
         for (j in i until k) {
-            var s = 0.0
-            for (idx in 0 until n) {
-                s += (variables[i][idx] - means[i]) * (variables[j][idx] - means[j])
-            }
-            val cov = s / divisor
+            val cov = cp[i][j] / divisor
             result[i][j] = cov
             result[j][i] = cov
         }
