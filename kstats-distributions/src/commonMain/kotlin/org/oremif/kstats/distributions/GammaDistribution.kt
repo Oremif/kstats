@@ -85,7 +85,12 @@ public class GammaDistribution(
      * @return the natural log of the density at [x].
      */
     override fun logPdf(x: Double): Double {
-        if (x <= 0.0) return Double.NEGATIVE_INFINITY
+        if (x < 0.0) return Double.NEGATIVE_INFINITY
+        if (x == 0.0) return when {
+            shape == 1.0 -> ln(rate)
+            shape < 1.0 -> Double.POSITIVE_INFINITY
+            else -> Double.NEGATIVE_INFINITY
+        }
         return (shape - 1.0) * ln(x) - x * rate + shape * ln(rate) - lnGamma(shape)
     }
 
@@ -165,11 +170,14 @@ public class GammaDistribution(
      * @param random the source of randomness.
      * @return a random non-negative value drawn from this distribution.
      */
+    private val smallShapeHelper: GammaDistribution? =
+        if (shape < 1.0) GammaDistribution(shape + 1.0, 1.0) else null
+
     override fun sample(random: Random): Double {
         // Marsaglia and Tsang's method for shape >= 1
         // For shape < 1: use Gamma(shape+1)*U^(1/shape)
         if (shape < 1.0) {
-            val g1 = GammaDistribution(shape + 1.0, 1.0).sample(random)
+            val g1 = smallShapeHelper!!.sample(random)
             return g1 * random.nextDouble().pow(1.0 / shape) / rate
         }
 

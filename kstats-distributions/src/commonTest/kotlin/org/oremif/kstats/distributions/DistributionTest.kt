@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -195,13 +196,13 @@ class DistributionTest {
     @Test
     fun continuousSampleNegativeNThrows() {
         val d = NormalDistribution.STANDARD
-        assertFailsWith<IllegalArgumentException> { d.sample(-1, Random(42)) }
+        assertFailsWith<InvalidParameterException> { d.sample(-1, Random(42)) }
     }
 
     @Test
     fun discreteSampleNegativeNThrows() {
         val d = PoissonDistribution(5.0)
-        assertFailsWith<IllegalArgumentException> { d.sample(-1, Random(42)) }
+        assertFailsWith<InvalidParameterException> { d.sample(-1, Random(42)) }
     }
 
     @Test
@@ -226,5 +227,127 @@ class DistributionTest {
         val d = ExponentialDistribution.STANDARD
         val samples = d.sample(100_000, Random(42))
         assertTrue(samples.all { it.isFinite() }, "all samples should be finite")
+    }
+
+    // --- Discrete cdf/sf NaN handling ---
+
+    @Test
+    fun discreteCdfDoubleNaNReturnsNaN() {
+        val poisson = PoissonDistribution(rate = 5.0)
+        assertTrue(poisson.cdf(Double.NaN).isNaN(), "cdf(NaN) should return NaN")
+    }
+
+    @Test
+    fun discreteSfDoubleNaNReturnsNaN() {
+        val binom = BinomialDistribution(10, 0.3)
+        assertTrue(binom.sf(Double.NaN).isNaN(), "sf(NaN) should return NaN")
+    }
+
+    @Test
+    fun discreteCdfDoubleInfinityHandled() {
+        val binom = BinomialDistribution(10, 0.3)
+        assertEquals(1.0, binom.cdf(Double.POSITIVE_INFINITY), 1e-15)
+        assertEquals(0.0, binom.cdf(Double.NEGATIVE_INFINITY), 1e-15)
+    }
+
+    // --- logPdf boundary consistency ---
+
+    @Test
+    fun betaLogPdfBoundaryConsistency() {
+        // alpha=1: pdf(0)=beta, logPdf(0)=ln(beta)
+        val b1 = BetaDistribution(1.0, 5.0)
+        assertEquals(b1.pdf(0.0), kotlin.math.exp(b1.logPdf(0.0)), 1e-12, "Beta(1,5): exp(logPdf(0)) ≈ pdf(0)")
+        // beta=1: pdf(1)=alpha, logPdf(1)=ln(alpha)
+        val b2 = BetaDistribution(3.0, 1.0)
+        assertEquals(b2.pdf(1.0), kotlin.math.exp(b2.logPdf(1.0)), 1e-12, "Beta(3,1): exp(logPdf(1)) ≈ pdf(1)")
+        // alpha>1: pdf(0)=0, logPdf(0)=-Inf
+        val b3 = BetaDistribution(2.0, 5.0)
+        assertEquals(0.0, b3.pdf(0.0), 1e-12)
+        assertEquals(Double.NEGATIVE_INFINITY, b3.logPdf(0.0))
+    }
+
+    @Test
+    fun gammaLogPdfBoundaryConsistency() {
+        // shape=1: pdf(0)=rate, logPdf(0)=ln(rate)
+        val g1 = GammaDistribution(1.0, 2.0)
+        assertEquals(g1.pdf(0.0), kotlin.math.exp(g1.logPdf(0.0)), 1e-12, "Gamma(1,2): exp(logPdf(0)) ≈ pdf(0)")
+        // shape>1: pdf(0)=0, logPdf(0)=-Inf
+        val g2 = GammaDistribution(2.0, 1.0)
+        assertEquals(0.0, g2.pdf(0.0), 1e-12)
+        assertEquals(Double.NEGATIVE_INFINITY, g2.logPdf(0.0))
+        // shape<1: pdf(0)=+Inf, logPdf(0)=+Inf
+        val g3 = GammaDistribution(0.5, 1.0)
+        assertEquals(Double.POSITIVE_INFINITY, g3.pdf(0.0))
+        assertEquals(Double.POSITIVE_INFINITY, g3.logPdf(0.0))
+    }
+
+    @Test
+    fun chiSquaredLogPdfBoundaryConsistency() {
+        // df=2: pdf(0)=0.5, logPdf(0)=-ln(2)
+        val c1 = ChiSquaredDistribution(2.0)
+        assertEquals(c1.pdf(0.0), kotlin.math.exp(c1.logPdf(0.0)), 1e-12, "ChiSq(2): exp(logPdf(0)) ≈ pdf(0)")
+        // df<2: both +Inf
+        val c2 = ChiSquaredDistribution(1.0)
+        assertEquals(Double.POSITIVE_INFINITY, c2.pdf(0.0))
+        assertEquals(Double.POSITIVE_INFINITY, c2.logPdf(0.0))
+    }
+
+    @Test
+    fun fDistributionLogPdfBoundaryConsistency() {
+        // d1=2: pdf(0)=1.0, logPdf(0)=0.0
+        val f1 = FDistribution(2.0, 10.0)
+        assertEquals(f1.pdf(0.0), kotlin.math.exp(f1.logPdf(0.0)), 1e-12, "F(2,10): exp(logPdf(0)) ≈ pdf(0)")
+        // d1>2: both 0 / -Inf
+        val f2 = FDistribution(5.0, 10.0)
+        assertEquals(0.0, f2.pdf(0.0), 1e-12)
+        assertEquals(Double.NEGATIVE_INFINITY, f2.logPdf(0.0))
+    }
+
+    @Test
+    fun nakagamiLogPdfBoundaryConsistency() {
+        // mu=0.5: pdf(0) = sqrt(2/(pi*omega))
+        val n1 = NakagamiDistribution(0.5, 1.0)
+        assertEquals(n1.pdf(0.0), kotlin.math.exp(n1.logPdf(0.0)), 1e-12, "Nakagami(0.5,1): exp(logPdf(0)) ≈ pdf(0)")
+        // mu>0.5: both 0 / -Inf
+        val n2 = NakagamiDistribution(2.0, 1.0)
+        assertEquals(0.0, n2.pdf(0.0), 1e-12)
+        assertEquals(Double.NEGATIVE_INFINITY, n2.logPdf(0.0))
+    }
+
+    // --- Sampling finiteness for distributions with guards ---
+
+    @Test
+    fun laplaceSampleProducesFiniteValues() {
+        val d = LaplaceDistribution.STANDARD
+        val samples = d.sample(100_000, Random(42))
+        assertTrue(samples.all { it.isFinite() }, "all Laplace samples should be finite")
+    }
+
+    @Test
+    fun cauchySampleProducesFiniteValues() {
+        val d = CauchyDistribution.STANDARD
+        val samples = d.sample(100_000, Random(42))
+        assertTrue(samples.all { it.isFinite() }, "all Cauchy samples should be finite")
+    }
+
+    @Test
+    fun levySampleProducesFiniteValues() {
+        val d = LevyDistribution.STANDARD
+        val samples = d.sample(100_000, Random(42))
+        assertTrue(samples.all { it.isFinite() }, "all Levy samples should be finite")
+    }
+
+    @Test
+    fun gumbelSampleProducesFiniteValues() {
+        val d = GumbelDistribution.STANDARD
+        val samples = d.sample(100_000, Random(42))
+        assertTrue(samples.all { it.isFinite() }, "all Gumbel samples should be finite")
+    }
+
+    @Test
+    fun logisticSampleProducesFiniteValues() {
+        val d = LogisticDistribution.STANDARD
+        val samples = d.sample(100_000, Random(42))
+        assertTrue(samples.all { it.isFinite() }, "all Logistic samples should be finite")
     }
 }

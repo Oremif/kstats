@@ -4,6 +4,7 @@ import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.lnFactorial
 import org.oremif.kstats.core.regularizedGammaP
 import org.oremif.kstats.core.regularizedGammaQ
+import kotlin.math.ceil
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.roundToInt
@@ -106,11 +107,15 @@ public class PoissonDistribution(
     override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0
-        // Search from the mean
-        var k = lambda.toInt()
-        while (k > 0 && cdf(k - 1) >= p) k--
-        while (cdf(k) < p) k++
-        return k
+        // Binary search with expanding upper bound
+        var lo = 0
+        var hi = maxOf(ceil(lambda + 20.0 * sqrt(lambda)).toInt(), 100)
+        while (cdf(hi) < p) hi *= 2
+        while (lo < hi) {
+            val mid = lo + (hi - lo) / 2
+            if (cdf(mid) < p) lo = mid + 1 else hi = mid
+        }
+        return lo
     }
 
     /** The mean of this distribution, equal to [rate] (lambda). */

@@ -78,7 +78,12 @@ public class ChiSquaredDistribution(
      * @return the natural log of the density at [x].
      */
     override fun logPdf(x: Double): Double {
-        if (x <= 0.0) return Double.NEGATIVE_INFINITY
+        if (x < 0.0) return Double.NEGATIVE_INFINITY
+        if (x == 0.0) return when {
+            df == 2.0 -> -ln(2.0)
+            df < 2.0 -> Double.POSITIVE_INFINITY
+            else -> Double.NEGATIVE_INFINITY
+        }
         return (halfDf - 1.0) * ln(x) - x / 2.0 - halfDf * ln(2.0) - lnGamma(halfDf)
     }
 
@@ -158,8 +163,9 @@ public class ChiSquaredDistribution(
      * @param random the source of randomness.
      * @return a random non-negative value drawn from this distribution.
      */
+    private val gammaDelegate = GammaDistribution(halfDf, 0.5)
+
     override fun sample(random: Random): Double {
-        // Sum of df standard normal squared (for integer df) or Gamma(df/2, 2) general
-        return GammaDistribution(halfDf, 0.5).sample(random)
+        return gammaDelegate.sample(random)
     }
 }

@@ -84,7 +84,17 @@ public class BetaDistribution(
      * @return the natural log of the density at [x].
      */
     override fun logPdf(x: Double): Double {
-        if (x <= 0.0 || x >= 1.0) return Double.NEGATIVE_INFINITY
+        if (x < 0.0 || x > 1.0) return Double.NEGATIVE_INFINITY
+        if (x == 0.0) return when {
+            alpha == 1.0 -> -lnBeta(alpha, beta)   // (alpha-1)*ln(0)=0, (beta-1)*ln(1)=0
+            alpha < 1.0 -> Double.POSITIVE_INFINITY
+            else -> Double.NEGATIVE_INFINITY
+        }
+        if (x == 1.0) return when {
+            beta == 1.0 -> -lnBeta(alpha, beta)     // (alpha-1)*ln(1)=0, (beta-1)*ln(0)=0
+            beta < 1.0 -> Double.POSITIVE_INFINITY
+            else -> Double.NEGATIVE_INFINITY
+        }
         return (alpha - 1.0) * ln(x) + (beta - 1.0) * ln(1.0 - x) - lnBeta(alpha, beta)
     }
 
@@ -171,9 +181,12 @@ public class BetaDistribution(
      * @param random the source of randomness.
      * @return a random value in the interval (0, 1).
      */
+    private val gammaAlpha = GammaDistribution(alpha, 1.0)
+    private val gammaBeta = GammaDistribution(beta, 1.0)
+
     override fun sample(random: Random): Double {
-        val x = GammaDistribution(alpha, 1.0).sample(random)
-        val y = GammaDistribution(beta, 1.0).sample(random)
+        val x = gammaAlpha.sample(random)
+        val y = gammaBeta.sample(random)
         return x / (x + y)
     }
 

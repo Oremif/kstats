@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.random.Random
 
 /**
@@ -108,7 +109,7 @@ public interface ContinuousDistribution : Distribution {
      * @return a [DoubleArray] of [n] independent random draws.
      */
     public fun sample(n: Int, random: Random): DoubleArray {
-        require(n >= 0) { "n must be non-negative, got $n" }
+        if (n < 0) throw InvalidParameterException("n must be non-negative, got $n")
         return DoubleArray(n) { sample(random) }
     }
 }

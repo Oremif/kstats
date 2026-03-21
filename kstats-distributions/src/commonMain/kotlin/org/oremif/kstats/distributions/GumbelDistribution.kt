@@ -138,7 +138,7 @@ public class GumbelDistribution(
      * @return a random value drawn from this distribution.
      */
     override fun sample(random: Random): Double {
-        val u = random.nextDouble().coerceIn(1e-15, 1.0 - 1e-15)
+        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 1.0 - Double.MIN_VALUE)
         return mu - beta * ln(-ln(u))
     }
 

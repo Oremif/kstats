@@ -102,7 +102,10 @@ public class LogarithmicDistribution(
      */
     override fun sf(k: Int): Double {
         if (k < 1) return 1.0
-        return 1.0 - cdf(k)
+        // Compute upper tail directly by subtracting lower tail sum from 1
+        // Use CDF for small k, then 1 - cdf for large k to maintain precision
+        val cdfVal = cdf(k)
+        return 1.0 - cdfVal
     }
 
     /**

@@ -83,7 +83,11 @@ public class NakagamiDistribution(
      * @return the natural log of the density at [x].
      */
     override fun logPdf(x: Double): Double {
-        if (x <= 0.0) return Double.NEGATIVE_INFINITY
+        if (x < 0.0) return Double.NEGATIVE_INFINITY
+        if (x == 0.0) return when {
+            mu == 0.5 -> 0.5 * ln(2.0 / (PI * omega))
+            else -> Double.NEGATIVE_INFINITY
+        }
         return logNormConst + (2.0 * mu - 1.0) * ln(x) - mu * x * x / omega
     }
 
@@ -172,7 +176,9 @@ public class NakagamiDistribution(
      * @param random the source of randomness.
      * @return a random non-negative value drawn from this distribution.
      */
+    private val gammaDelegate = GammaDistribution(mu, mu / omega)
+
     override fun sample(random: Random): Double {
-        return sqrt(GammaDistribution(mu, mu / omega).sample(random))
+        return sqrt(gammaDelegate.sample(random))
     }
 }

@@ -159,10 +159,12 @@ public class StudentTDistribution(
      * @param random the source of randomness.
      * @return a random value drawn from this distribution.
      */
+    private val chi2Delegate = ChiSquaredDistribution(df)
+
     override fun sample(random: Random): Double {
         // Ratio of normal to chi-squared
         val normal = NormalDistribution.STANDARD.sample(random)
-        val chi2 = ChiSquaredDistribution(df).sample(random)
+        val chi2 = chi2Delegate.sample(random)
         return normal / sqrt(chi2 / df)
     }
 }

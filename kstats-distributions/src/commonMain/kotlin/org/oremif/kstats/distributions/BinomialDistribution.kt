@@ -117,11 +117,14 @@ public class BinomialDistribution(
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0
         if (p == 1.0) return n
-        // Linear search from the mean
-        var k = (n * this.p).toInt()
-        while (k > 0 && cdf(k - 1) >= p) k--
-        while (cdf(k) < p) k++
-        return k
+        // Binary search over [0, n]
+        var lo = 0
+        var hi = n
+        while (lo < hi) {
+            val mid = lo + (hi - lo) / 2
+            if (cdf(mid) < p) lo = mid + 1 else hi = mid
+        }
+        return lo
     }
 
     /** The mean of this distribution, equal to trials * probability. */

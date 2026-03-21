@@ -1,5 +1,6 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.floor
 import kotlin.random.Random
 
@@ -81,6 +82,20 @@ public interface DiscreteDistribution : Distribution {
     public fun sf(k: Int): Double = 1.0 - cdf(k)
 
     /**
+     * Returns the SF value at [x], bridging to the integer [sf] overload.
+     *
+     * Floors [x] to an integer via [floor] and delegates to [sf].
+     * Returns [Double.NaN] if [x] is NaN.
+     *
+     * @param x the point at which to evaluate the survival probability.
+     * @return the probability that a value is greater than the floor of [x].
+     */
+    override fun sf(x: Double): Double {
+        if (x.isNaN()) return Double.NaN
+        return sf(floor(x).toInt())
+    }
+
+    /**
      * Returns the CDF value at [x], bridging to the integer [cdf] overload.
      *
      * Floors [x] to an integer via [floor] and delegates to [cdf].
@@ -90,7 +105,10 @@ public interface DiscreteDistribution : Distribution {
      * @param x the point at which to evaluate the cumulative probability.
      * @return the probability that a value is less than or equal to the floor of [x].
      */
-    override fun cdf(x: Double): Double = cdf(floor(x).toInt())
+    override fun cdf(x: Double): Double {
+        if (x.isNaN()) return Double.NaN
+        return cdf(floor(x).toInt())
+    }
 
     /**
      * Returns the quantile (inverse CDF) for the given probability [p] as an [Int].
@@ -167,7 +185,7 @@ public interface DiscreteDistribution : Distribution {
      * @return an [IntArray] of [n] independent random draws.
      */
     public fun sample(n: Int, random: Random): IntArray {
-        require(n >= 0) { "n must be non-negative, got $n" }
+        if (n < 0) throw InvalidParameterException("n must be non-negative, got $n")
         return IntArray(n) { sample(random) }
     }
 }

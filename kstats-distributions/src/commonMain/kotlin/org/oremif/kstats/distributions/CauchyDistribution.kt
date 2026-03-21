@@ -145,7 +145,10 @@ public class CauchyDistribution(
      * @param random the source of randomness.
      * @return a random value drawn from this distribution.
      */
-    override fun sample(random: Random): Double = quantile(random.nextDouble())
+    override fun sample(random: Random): Double {
+        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 1.0 - Double.MIN_VALUE)
+        return location + scale * tan(PI * (u - 0.5))
+    }
 
     /**
      * Provides the standard Cauchy distribution instance.

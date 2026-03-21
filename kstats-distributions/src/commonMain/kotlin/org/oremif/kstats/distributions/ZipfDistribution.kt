@@ -102,7 +102,11 @@ public class ZipfDistribution(
      * @param k the integer point at which to evaluate the survival probability.
      * @return the probability of observing a rank strictly greater than [k].
      */
-    override fun sf(k: Int): Double = 1.0 - cdf(k)
+    override fun sf(k: Int): Double {
+        if (k < 1) return 1.0
+        if (k >= n) return 0.0
+        return (hns - generalizedHarmonic(k, s)) / hns
+    }
 
     /**
      * Returns the quantile (inverse CDF) for the given probability [p] as an [Int].

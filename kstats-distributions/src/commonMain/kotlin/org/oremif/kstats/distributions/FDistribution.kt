@@ -80,7 +80,12 @@ public class FDistribution(
      * @return the natural log of the probability density, or [Double.NEGATIVE_INFINITY] when [x] is non-positive.
      */
     override fun logPdf(x: Double): Double {
-        if (x <= 0.0) return Double.NEGATIVE_INFINITY
+        if (x < 0.0) return Double.NEGATIVE_INFINITY
+        if (x == 0.0) return when {
+            d1 == 2.0 -> 0.0
+            d1 < 2.0 -> Double.POSITIVE_INFINITY
+            else -> Double.NEGATIVE_INFINITY
+        }
         return 0.5 * (d1 * ln(d1) + d2 * ln(d2) + (d1 - 2.0) * ln(x)) -
             lnBeta(d1 / 2, d2 / 2) -
             (d1 + d2) / 2.0 * ln(d1 * x + d2)
@@ -165,9 +170,12 @@ public class FDistribution(
      * @param random the source of randomness.
      * @return a random value drawn from this distribution.
      */
+    private val chi2Numerator = ChiSquaredDistribution(d1)
+    private val chi2Denominator = ChiSquaredDistribution(d2)
+
     override fun sample(random: Random): Double {
-        val chi1 = ChiSquaredDistribution(d1).sample(random) / d1
-        val chi2 = ChiSquaredDistribution(d2).sample(random) / d2
+        val chi1 = chi2Numerator.sample(random) / d1
+        val chi2 = chi2Denominator.sample(random) / d2
         return chi1 / chi2
     }
 }

@@ -181,12 +181,13 @@ public class NegativeBinomialDistribution(
      * @return a random non-negative integer representing the number of failures before the
      * required successes.
      */
+    private val geoDelegate = GeometricDistribution(p)
+
     override fun sample(random: Random): Int {
         // Sum of r geometric(p) random variables
-        val geo = GeometricDistribution(p)
         var sum = 0
         for (i in 0 until r) {
-            sum += geo.sample(random)
+            sum += geoDelegate.sample(random)
         }
         return sum
     }
