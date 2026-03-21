@@ -48,9 +48,9 @@ import kotlin.random.Random
  * @param c the scale parameter, controlling the spread of the distribution. Must be positive.
  * Default is `1.0`.
  */
-public data class LevyDistribution(
-    val mu: Double = 0.0,
-    val c: Double = 1.0,
+public class LevyDistribution(
+    public val mu: Double = 0.0,
+    public val c: Double = 1.0,
 ) : ContinuousDistribution {
 
     init {

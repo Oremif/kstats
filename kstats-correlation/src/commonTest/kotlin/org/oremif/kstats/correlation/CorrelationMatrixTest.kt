@@ -175,11 +175,56 @@ class CorrelationMatrixTest {
     // --- NaN ---
 
     @Test
+    fun testCorrelationMatrixNaNPropagation() {
+        val x = doubleArrayOf(1.0, Double.NaN, 3.0)
+        val y = doubleArrayOf(4.0, 5.0, 6.0)
+        val matrix = correlationMatrix(x, y)
+        assertTrue(matrix[0][1].isNaN())
+        assertTrue(matrix[1][0].isNaN())
+    }
+
+    @Test
     fun testCovarianceMatrixNaNPropagation() {
         val x = doubleArrayOf(1.0, Double.NaN, 3.0)
         val y = doubleArrayOf(4.0, 5.0, 6.0)
         val matrix = covarianceMatrix(x, y)
         assertTrue(matrix[0][1].isNaN())
         assertTrue(matrix[1][0].isNaN())
+    }
+
+    // --- Numerical stability (large offset) ---
+
+    @Test
+    fun testCorrelationMatrixLargeOffset() {
+        val offset = 1e12
+        val x = DoubleArray(10) { offset + (it + 1).toDouble() }
+        val y = DoubleArray(10) { offset + 2.0 * (it + 1).toDouble() }
+        val matrix = correlationMatrix(x, y)
+        assertEquals(1.0, matrix[0][0], tol)
+        assertEquals(1.0, matrix[1][1], tol)
+        assertEquals(1.0, matrix[0][1], 1e-6)
+        assertEquals(1.0, matrix[1][0], 1e-6)
+    }
+
+    @Test
+    fun testCovarianceMatrixLargeOffset() {
+        val offset = 1e12
+        val x = DoubleArray(10) { offset + (it + 1).toDouble() }
+        val y = DoubleArray(10) { offset + 2.0 * (it + 1).toDouble() }
+        val matrix = covarianceMatrix(x, y)
+        // scipy reference: cov(x, x) = 9.166..., cov(x, y) = 18.333...
+        assertEquals(9.166666666666666, matrix[0][0], 1e-6)
+        assertEquals(18.333333333333332, matrix[0][1], 1e-6)
+        assertEquals(18.333333333333332, matrix[1][0], 1e-6)
+    }
+
+    @Test
+    fun testCovarianceMatrixLargeOffsetMatchesScalar() {
+        val offset = 1e12
+        val x = DoubleArray(10) { offset + (it + 1).toDouble() }
+        val y = DoubleArray(10) { offset + 2.0 * (it + 1).toDouble() }
+        val matrix = covarianceMatrix(x, y)
+        val scalar = covariance(x, y)
+        assertEquals(scalar, matrix[0][1], 1e-6)
     }
 }

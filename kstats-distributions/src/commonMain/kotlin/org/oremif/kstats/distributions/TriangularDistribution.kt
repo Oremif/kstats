@@ -38,10 +38,10 @@ import kotlin.random.Random
  * @param b the upper limit (maximum) of the distribution's support. Must be strictly greater than [a].
  * @param c the mode (peak) of the distribution. Must satisfy `a <= c <= b`.
  */
-public data class TriangularDistribution(
-    val a: Double,
-    val b: Double,
-    val c: Double,
+public class TriangularDistribution(
+    public val a: Double,
+    public val b: Double,
+    public val c: Double,
 ) : ContinuousDistribution {
 
     init {

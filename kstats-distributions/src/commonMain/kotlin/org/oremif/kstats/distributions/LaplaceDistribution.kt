@@ -30,9 +30,9 @@ import kotlin.random.Random
  * @param scale the scale parameter controlling the spread. Must be positive. Defaults to `1.0`.
  *   Larger values produce wider, flatter distributions.
  */
-public data class LaplaceDistribution(
-    val mu: Double = 0.0,
-    val scale: Double = 1.0,
+public class LaplaceDistribution(
+    public val mu: Double = 0.0,
+    public val scale: Double = 1.0,
 ) : ContinuousDistribution {
 
     init {

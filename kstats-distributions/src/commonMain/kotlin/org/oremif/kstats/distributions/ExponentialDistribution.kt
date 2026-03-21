@@ -43,8 +43,8 @@ import kotlin.random.Random
  * @param rate the rate parameter (lambda), representing the average number of events per unit
  * time. Must be positive. Default is `1.0`, which gives the standard exponential distribution.
  */
-public data class ExponentialDistribution(
-    val rate: Double = 1.0
+public class ExponentialDistribution(
+    public val rate: Double = 1.0
 ) : ContinuousDistribution {
 
     init {

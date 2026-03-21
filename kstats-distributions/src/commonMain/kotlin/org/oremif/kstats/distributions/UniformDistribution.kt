@@ -37,9 +37,9 @@ import kotlin.random.Random
  * @param max the upper bound of the distribution's support. Must be strictly greater than [min].
  * Default is `1.0`, which gives the standard uniform distribution on `[0, 1]`.
  */
-public data class UniformDistribution(
-    val min: Double = 0.0,
-    val max: Double = 1.0
+public class UniformDistribution(
+    public val min: Double = 0.0,
+    public val max: Double = 1.0
 ) : ContinuousDistribution {
 
     init {

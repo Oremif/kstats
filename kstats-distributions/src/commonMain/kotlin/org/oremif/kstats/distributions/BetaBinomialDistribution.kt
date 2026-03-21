@@ -40,10 +40,10 @@ import kotlin.random.Random
  * @param alpha the first shape parameter of the underlying Beta distribution. Must be positive.
  * @param beta the second shape parameter of the underlying Beta distribution. Must be positive.
  */
-public data class BetaBinomialDistribution(
-    val trials: Int,
-    val alpha: Double,
-    val beta: Double,
+public class BetaBinomialDistribution(
+    public val trials: Int,
+    public val alpha: Double,
+    public val beta: Double,
 ) : DiscreteDistribution {
 
     init {

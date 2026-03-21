@@ -40,9 +40,9 @@ import kotlin.random.Random
  * @param dfNumerator the degrees of freedom for the numerator (first) chi-squared variable. Must be positive.
  * @param dfDenominator the degrees of freedom for the denominator (second) chi-squared variable. Must be positive.
  */
-public data class FDistribution(
-    val dfNumerator: Double,
-    val dfDenominator: Double
+public class FDistribution(
+    public val dfNumerator: Double,
+    public val dfDenominator: Double
 ) : ContinuousDistribution {
 
     init {

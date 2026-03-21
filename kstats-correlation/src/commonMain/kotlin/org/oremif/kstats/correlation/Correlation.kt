@@ -30,7 +30,9 @@ import kotlin.math.sqrt
  * Returns [Double.NaN] when the p-value cannot be computed.
  * @property n the number of observations used in the computation.
  */
-public data class CorrelationResult(
+@ConsistentCopyVisibility
+public data class CorrelationResult
+@PublishedApi internal constructor(
     val coefficient: Double,
     val pValue: Double,
     val n: Int
@@ -128,14 +130,24 @@ public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult
  * result.coefficient // 1.0 (perfect monotonic relationship)
  * ```
  *
+ * Returns [Double.NaN] for both coefficient and p-value when either array contains NaN,
+ * or when either array has zero variance (all values identical after ranking).
+ *
  * @param x the first array of observations.
  * @param y the second array of observations, must have the same size as [x].
  * @return a [CorrelationResult] containing the Spearman rho, two-sided p-value, and sample size.
+ * @throws InvalidParameterException if [x] and [y] have different sizes.
+ * @throws InsufficientDataException if there are fewer than 3 observations.
  */
 public fun spearmanCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
     val n = x.size
     if (n < 3) throw InsufficientDataException("Need at least 3 observations")
+
+    // NaN check: rank() would assign NaN a valid rank, producing a misleading finite result.
+    // Return NaN for consistency with pearsonCorrelation and kendallTau.
+    for (v in x) if (v.isNaN()) return CorrelationResult(Double.NaN, Double.NaN, n)
+    for (v in y) if (v.isNaN()) return CorrelationResult(Double.NaN, Double.NaN, n)
 
     val xRanks = x.rank(TieMethod.AVERAGE)
     val yRanks = y.rank(TieMethod.AVERAGE)
@@ -170,11 +182,18 @@ public fun spearmanCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResul
  * @param x the first array of observations.
  * @param y the second array of observations, must have the same size as [x].
  * @return a [CorrelationResult] containing tau-b, two-sided p-value, and sample size.
+ * @throws InvalidParameterException if [x] and [y] have different sizes.
+ * @throws InsufficientDataException if there are fewer than 3 observations.
  */
 public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
     val n = x.size
     if (n < 3) throw InsufficientDataException("Need at least 3 observations")
+
+    // NaN check: NaN comparisons produce well-defined ordering in Kotlin (NaN > everything),
+    // but the resulting tau is statistically meaningless. Return NaN for consistency.
+    for (v in x) if (v.isNaN()) return CorrelationResult(Double.NaN, Double.NaN, n)
+    for (v in y) if (v.isNaN()) return CorrelationResult(Double.NaN, Double.NaN, n)
 
     // Step 1: Sort indices by (x, y) lexicographically
     val indices = (0 until n).sortedWith(compareBy<Int> { x[it] }.thenBy { y[it] }).toIntArray()
@@ -302,6 +321,9 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
  * passed through to Pearson, where they propagate as NaN.
  * @param y the continuous variable, must have the same size as [x].
  * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample size.
+ * @throws InvalidParameterException if [x] and [y] have different sizes, or if [x] does not
+ * contain exactly 2 distinct finite values.
+ * @throws InsufficientDataException if there are fewer than 3 observations.
  */
 public fun pointBiserialCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
@@ -352,6 +374,8 @@ public fun pointBiserialCorrelation(x: DoubleArray, y: DoubleArray): Correlation
  * @param x the binary variable as booleans (`false` = 0, `true` = 1).
  * @param y the continuous variable, must have the same size as [x].
  * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample size.
+ * @throws InvalidParameterException if [x] and [y] have different sizes.
+ * @throws InsufficientDataException if there are fewer than 3 observations.
  */
 public fun pointBiserialCorrelation(x: BooleanArray, y: DoubleArray): CorrelationResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
@@ -382,6 +406,9 @@ public fun pointBiserialCorrelation(x: BooleanArray, y: DoubleArray): Correlatio
  * @param x the binary variable as integers. Must contain exactly 2 distinct values.
  * @param y the continuous variable, must have the same size as [x].
  * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample size.
+ * @throws InvalidParameterException if [x] and [y] have different sizes, or if [x] does not
+ * contain exactly 2 distinct values.
+ * @throws InsufficientDataException if there are fewer than 3 observations.
  */
 public fun pointBiserialCorrelation(x: IntArray, y: DoubleArray): CorrelationResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
@@ -514,7 +541,9 @@ private fun invertMatrix(matrix: Array<DoubleArray>): Array<DoubleArray>? {
             }
         }
 
-        if (maxVal < 1e-15) return null // singular
+        // Threshold chosen for correlation matrices (elements in [-1, 1]):
+        // a pivot below 1e-15 indicates the matrix is effectively singular.
+        if (maxVal < 1e-15) return null
 
         // Swap rows
         if (maxRow != col) {
@@ -602,6 +631,8 @@ private fun countDiscordant(arr: DoubleArray, temp: DoubleArray, left: Int, righ
  * @param kind whether to compute sample or population covariance. Defaults to [PopulationKind.SAMPLE],
  * which divides by n-1 (Bessel's correction) to produce an unbiased estimate.
  * @return the covariance between [x] and [y].
+ * @throws InvalidParameterException if [x] and [y] have different sizes.
+ * @throws InsufficientDataException if there are fewer than 2 observations.
  */
 public fun covariance(
     x: DoubleArray,
@@ -649,6 +680,8 @@ public fun covariance(
  *
  * @param variables two or more arrays of observations, all with the same size.
  * @return a k×k array of Pearson correlation coefficients.
+ * @throws InvalidParameterException if the arrays have different sizes.
+ * @throws InsufficientDataException if there are fewer than 2 variables or fewer than 3 observations.
  */
 public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> {
     val k = variables.size
@@ -709,6 +742,8 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
  * @param kind whether to compute sample or population covariance. Defaults to [PopulationKind.SAMPLE],
  * which divides by n-1 (Bessel's correction) to produce an unbiased estimate.
  * @return a k×k array of covariance values.
+ * @throws InvalidParameterException if the arrays have different sizes.
+ * @throws InsufficientDataException if there are fewer than 2 variables or fewer than 2 observations.
  */
 public fun covarianceMatrix(
     vararg variables: DoubleArray,

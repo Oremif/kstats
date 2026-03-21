@@ -41,9 +41,9 @@ import kotlin.random.Random
  * @see ContinuousDistribution
  * @see GammaDistribution
  */
-public data class BetaDistribution(
-    val alpha: Double,
-    val beta: Double
+public class BetaDistribution(
+    public val alpha: Double,
+    public val beta: Double
 ) : ContinuousDistribution {
 
     init {

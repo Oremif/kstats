@@ -42,8 +42,8 @@ import kotlin.random.Random
  * @see ChiSquaredDistribution
  * @see NormalDistribution
  */
-public data class StudentTDistribution(
-    val degreesOfFreedom: Double
+public class StudentTDistribution(
+    public val degreesOfFreedom: Double
 ) : ContinuousDistribution {
 
     init {

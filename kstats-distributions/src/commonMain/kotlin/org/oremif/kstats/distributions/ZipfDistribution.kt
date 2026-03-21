@@ -34,9 +34,9 @@ import kotlin.random.Random
  * @param numberOfElements the number of elements (upper bound of support). Must be at least 1.
  * @param exponent the exponent characterizing the distribution. Must be positive.
  */
-public data class ZipfDistribution(
-    val numberOfElements: Int,
-    val exponent: Double
+public class ZipfDistribution(
+    public val numberOfElements: Int,
+    public val exponent: Double
 ) : DiscreteDistribution {
 
     init {

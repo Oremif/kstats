@@ -36,9 +36,9 @@ import kotlin.random.Random
  * @param shape the shape parameter (often denoted k), controlling the failure rate behavior. Must be positive.
  * @param scale the scale parameter (often denoted lambda), stretching the distribution along the x-axis. Must be positive. Defaults to 1.0.
  */
-public data class WeibullDistribution(
-    val shape: Double,
-    val scale: Double = 1.0
+public class WeibullDistribution(
+    public val shape: Double,
+    public val scale: Double = 1.0
 ) : ContinuousDistribution {
 
     init {

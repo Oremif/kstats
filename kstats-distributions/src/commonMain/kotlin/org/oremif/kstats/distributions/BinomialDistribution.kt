@@ -38,9 +38,9 @@ import kotlin.random.Random
  * @param trials the number of independent trials. Must be non-negative.
  * @param probability the probability of success on each trial. Must be in `[0, 1]`.
  */
-public data class BinomialDistribution(
-    val trials: Int,
-    val probability: Double
+public class BinomialDistribution(
+    public val trials: Int,
+    public val probability: Double
 ) : DiscreteDistribution {
 
     init {

@@ -30,16 +30,15 @@ import kotlin.math.sqrt
  * the uncertainty in [intercept].
  * @property n the number of observations used in the regression.
  */
-@ConsistentCopyVisibility
-public data class SimpleLinearRegressionResult
+public class SimpleLinearRegressionResult
 @PublishedApi internal constructor(
-    val slope: Double,
-    val intercept: Double,
-    val rSquared: Double,
-    val standardErrorSlope: Double,
-    val standardErrorIntercept: Double,
+    public val slope: Double,
+    public val intercept: Double,
+    public val rSquared: Double,
+    public val standardErrorSlope: Double,
+    public val standardErrorIntercept: Double,
     private val _residuals: DoubleArray,
-    val n: Int
+    public val n: Int
 ) {
     /**
      * The difference between each observed y value and the predicted value

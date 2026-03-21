@@ -33,8 +33,8 @@ import kotlin.random.Random
  *
  * @param probability the probability parameter p of the distribution. Must be in `(0, 1)`.
  */
-public data class LogarithmicDistribution(
-    val probability: Double
+public class LogarithmicDistribution(
+    public val probability: Double
 ) : DiscreteDistribution {
 
     init {

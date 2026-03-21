@@ -44,10 +44,10 @@ import kotlin.random.Random
  * @param successes the number of success items in the population. Must be in `[0, population]`.
  * @param draws the number of items drawn without replacement. Must be in `[0, population]`.
  */
-public data class HypergeometricDistribution(
-    val population: Int,
-    val successes: Int,
-    val draws: Int
+public class HypergeometricDistribution(
+    public val population: Int,
+    public val successes: Int,
+    public val draws: Int
 ) : DiscreteDistribution {
 
     init {

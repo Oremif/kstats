@@ -29,9 +29,9 @@ import kotlin.random.Random
  * @param mu the location parameter (mode) of the distribution. Defaults to `0.0`.
  * @param beta the scale parameter (spread) of the distribution. Must be positive. Defaults to `1.0`.
  */
-public data class GumbelDistribution(
-    val mu: Double = 0.0,
-    val beta: Double = 1.0,
+public class GumbelDistribution(
+    public val mu: Double = 0.0,
+    public val beta: Double = 1.0,
 ) : ContinuousDistribution {
 
     init {

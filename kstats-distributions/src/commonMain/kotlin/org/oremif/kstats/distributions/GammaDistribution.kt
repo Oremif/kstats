@@ -44,9 +44,9 @@ import kotlin.random.Random
  * @see ContinuousDistribution
  * @see ChiSquaredDistribution
  */
-public data class GammaDistribution(
-    val shape: Double,
-    val rate: Double = 1.0
+public class GammaDistribution(
+    public val shape: Double,
+    public val rate: Double = 1.0
 ) : ContinuousDistribution {
 
     init {

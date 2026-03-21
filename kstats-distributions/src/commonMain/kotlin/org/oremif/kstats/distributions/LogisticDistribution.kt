@@ -23,9 +23,9 @@ import kotlin.random.Random
  * @param mu the location (center) of the distribution. Defaults to `0.0`.
  * @param scale the scale (spread) of the distribution. Must be positive. Defaults to `1.0`.
  */
-public data class LogisticDistribution(
-    val mu: Double = 0.0,
-    val scale: Double = 1.0,
+public class LogisticDistribution(
+    public val mu: Double = 0.0,
+    public val scale: Double = 1.0,
 ) : ContinuousDistribution {
 
     init {

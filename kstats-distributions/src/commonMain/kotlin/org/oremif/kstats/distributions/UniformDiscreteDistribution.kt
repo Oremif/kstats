@@ -36,9 +36,9 @@ import kotlin.random.Random
  * @param min the smallest value in the support (inclusive).
  * @param max the largest value in the support (inclusive). Must be greater than or equal to [min].
  */
-public data class UniformDiscreteDistribution(
-    val min: Int,
-    val max: Int
+public class UniformDiscreteDistribution(
+    public val min: Int,
+    public val max: Int
 ) : DiscreteDistribution {
 
     init {

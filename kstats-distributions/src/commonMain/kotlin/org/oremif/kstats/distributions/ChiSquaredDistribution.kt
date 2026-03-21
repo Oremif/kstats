@@ -43,8 +43,8 @@ import kotlin.random.Random
  * @see ContinuousDistribution
  * @see GammaDistribution
  */
-public data class ChiSquaredDistribution(
-    val degreesOfFreedom: Double
+public class ChiSquaredDistribution(
+    public val degreesOfFreedom: Double
 ) : ContinuousDistribution {
 
     init {

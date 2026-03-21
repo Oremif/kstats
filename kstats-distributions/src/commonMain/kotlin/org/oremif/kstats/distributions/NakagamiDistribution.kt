@@ -43,9 +43,9 @@ import kotlin.random.Random
  * @see ContinuousDistribution
  * @see GammaDistribution
  */
-public data class NakagamiDistribution(
-    val mu: Double,
-    val omega: Double,
+public class NakagamiDistribution(
+    public val mu: Double,
+    public val omega: Double,
 ) : ContinuousDistribution {
 
     init {

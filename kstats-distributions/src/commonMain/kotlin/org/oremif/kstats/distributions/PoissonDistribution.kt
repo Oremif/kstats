@@ -37,8 +37,8 @@ import kotlin.random.Random
  *
  * @param rate the average number of events per interval (lambda). Must be positive.
  */
-public data class PoissonDistribution(
-    val rate: Double
+public class PoissonDistribution(
+    public val rate: Double
 ) : DiscreteDistribution {
 
     init {

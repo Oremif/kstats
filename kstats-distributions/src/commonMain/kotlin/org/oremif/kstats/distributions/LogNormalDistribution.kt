@@ -39,9 +39,9 @@ import kotlin.random.Random
  * @param mu the mean of the underlying normal distribution (log-scale location). Defaults to 0.0.
  * @param sigma the standard deviation of the underlying normal distribution (log-scale spread). Must be positive. Defaults to 1.0.
  */
-public data class LogNormalDistribution(
-    val mu: Double = 0.0,
-    val sigma: Double = 1.0
+public class LogNormalDistribution(
+    public val mu: Double = 0.0,
+    public val sigma: Double = 1.0
 ) : ContinuousDistribution {
 
     init {

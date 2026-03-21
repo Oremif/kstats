@@ -42,9 +42,9 @@ import kotlin.random.Random
  * @param location the center of the distribution, where the density peaks. Defaults to 0.0.
  * @param scale the half-width at half-maximum, controlling the spread of the distribution. Must be positive. Defaults to 1.0.
  */
-public data class CauchyDistribution(
-    val location: Double = 0.0,
-    val scale: Double = 1.0
+public class CauchyDistribution(
+    public val location: Double = 0.0,
+    public val scale: Double = 1.0
 ) : ContinuousDistribution {
 
     init {

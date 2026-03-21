@@ -45,9 +45,9 @@ import kotlin.random.Random
  * @param sigma the standard deviation (scale parameter) of the distribution. Must be positive.
  * Default is `1.0`, which gives the standard normal distribution.
  */
-public data class NormalDistribution(
-    val mu: Double = 0.0,
-    val sigma: Double = 1.0
+public class NormalDistribution(
+    public val mu: Double = 0.0,
+    public val sigma: Double = 1.0
 ) : ContinuousDistribution {
 
     init {

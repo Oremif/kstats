@@ -33,8 +33,8 @@ import kotlin.random.Random
  *
  * @param probability the probability of success on each trial. Must be in `(0, 1]`.
  */
-public data class GeometricDistribution(
-    val probability: Double
+public class GeometricDistribution(
+    public val probability: Double
 ) : DiscreteDistribution {
 
     init {

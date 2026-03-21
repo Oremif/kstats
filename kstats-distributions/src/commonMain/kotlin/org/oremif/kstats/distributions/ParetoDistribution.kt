@@ -23,9 +23,9 @@ import kotlin.random.Random
  * @param shape the tail index (α). Must be positive. Defaults to `1.0`.
  * @param scale the minimum value / location (xm). Must be positive. Defaults to `1.0`.
  */
-public data class ParetoDistribution(
-    val shape: Double = 1.0,
-    val scale: Double = 1.0,
+public class ParetoDistribution(
+    public val shape: Double = 1.0,
+    public val scale: Double = 1.0,
 ) : ContinuousDistribution {
 
     init {

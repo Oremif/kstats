@@ -31,8 +31,8 @@ import kotlin.random.Random
  *
  * @param probability the probability of success (outcome = 1). Must be in `[0, 1]`.
  */
-public data class BernoulliDistribution(
-    val probability: Double
+public class BernoulliDistribution(
+    public val probability: Double
 ) : DiscreteDistribution {
 
     init {

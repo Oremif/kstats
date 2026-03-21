@@ -41,9 +41,9 @@ import kotlin.random.Random
  * @param successes the required number of successes (the "stopping count"). Must be positive.
  * @param probability the probability of success on each trial. Must be in `(0, 1]`.
  */
-public data class NegativeBinomialDistribution(
-    val successes: Int,
-    val probability: Double
+public class NegativeBinomialDistribution(
+    public val successes: Int,
+    public val probability: Double
 ) : DiscreteDistribution {
 
     init {

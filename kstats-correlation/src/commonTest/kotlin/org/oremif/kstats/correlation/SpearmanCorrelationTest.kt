@@ -179,10 +179,27 @@ class SpearmanCorrelationTest {
     // --- Non-finite input ---
 
     @Test
-    fun testNaNInInputProducesFiniteResult() {
-        // rank() assigns NaN a valid rank (placed after all finite values),
-        // so Spearman on ranks produces a finite correlation coefficient
+    fun testNaNInXProducesNaN() {
         val x = doubleArrayOf(1.0, 2.0, Double.NaN, 4.0, 5.0)
+        val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
+        val result = spearmanCorrelation(x, y)
+        assertTrue(result.coefficient.isNaN())
+        assertTrue(result.pValue.isNaN())
+    }
+
+    @Test
+    fun testNaNInYProducesNaN() {
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(2.0, Double.NaN, 6.0, 8.0, 10.0)
+        val result = spearmanCorrelation(x, y)
+        assertTrue(result.coefficient.isNaN())
+        assertTrue(result.pValue.isNaN())
+    }
+
+    @Test
+    fun testInfinityProducesFiniteResult() {
+        // Infinity has a well-defined rank (largest), so Spearman handles it correctly
+        val x = doubleArrayOf(1.0, 2.0, Double.POSITIVE_INFINITY, 4.0, 5.0)
         val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
         val result = spearmanCorrelation(x, y)
         assertTrue(result.coefficient.isFinite())
