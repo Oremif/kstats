@@ -83,10 +83,12 @@ public fun tTest(
             val tCrit = dist.quantile(1.0 - alpha / 2.0)
             Pair(mean - tCrit * se, mean + tCrit * se)
         }
+
         Alternative.LESS -> {
             val tCrit = dist.quantile(1.0 - alpha)
             Pair(Double.NEGATIVE_INFINITY, mean + tCrit * se)
         }
+
         Alternative.GREATER -> {
             val tCrit = dist.quantile(1.0 - alpha)
             Pair(mean - tCrit * se, Double.POSITIVE_INFINITY)
@@ -203,10 +205,12 @@ public fun tTest(
             val tCrit = dist.quantile(1.0 - alpha / 2.0)
             Pair(diff - tCrit * se, diff + tCrit * se)
         }
+
         Alternative.LESS -> {
             val tCrit = dist.quantile(1.0 - alpha)
             Pair(Double.NEGATIVE_INFINITY, diff + tCrit * se)
         }
+
         Alternative.GREATER -> {
             val tCrit = dist.quantile(1.0 - alpha)
             Pair(diff - tCrit * se, Double.POSITIVE_INFINITY)

@@ -1,6 +1,5 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.DegenerateDataException
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs

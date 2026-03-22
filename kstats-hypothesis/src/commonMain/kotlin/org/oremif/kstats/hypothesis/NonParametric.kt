@@ -136,7 +136,9 @@ public fun wilcoxonSignedRankTest(
 
     // Remove zeros and extract absolute values + signs in one pass
     var nonZeroCount = 0
-    for (d in diffs) { if (d != 0.0) nonZeroCount++ }
+    for (d in diffs) {
+        if (d != 0.0) nonZeroCount++
+    }
     if (nonZeroCount == 0) throw DegenerateDataException("All differences are zero")
     val n = nonZeroCount
 
