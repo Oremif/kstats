@@ -65,6 +65,27 @@ class BinomialDistributionTest {
         assertEquals(10, d.quantileInt(1.0))
     }
 
+    @Test
+    fun testQuantileIntDegenerate() {
+        // p=0: all mass at k=0, so quantile(1.0) = 0
+        val d0 = BinomialDistribution(10, 0.0)
+        assertEquals(0, d0.quantileInt(0.0))
+        assertEquals(0, d0.quantileInt(0.5))
+        assertEquals(0, d0.quantileInt(1.0))
+
+        // p=1: all mass at k=n, so quantile(p) = n for any p > 0
+        val d1 = BinomialDistribution(10, 1.0)
+        assertEquals(0, d1.quantileInt(0.0))
+        assertEquals(10, d1.quantileInt(0.5))
+        assertEquals(10, d1.quantileInt(1.0))
+
+        // n=0: all mass at k=0
+        val d2 = BinomialDistribution(0, 0.5)
+        assertEquals(0, d2.quantileInt(0.0))
+        assertEquals(0, d2.quantileInt(0.5))
+        assertEquals(0, d2.quantileInt(1.0))
+    }
+
     // --- Moments ---
 
     @Test
@@ -185,6 +206,19 @@ class BinomialDistributionTest {
         assertEquals(3.0, sampleMean, 0.15, "sample mean ≈ 3.0")
         val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
         assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
+    }
+
+    @Test
+    fun testSampleStatsNormalApproximation() {
+        // n=100, p=0.5 hits the normal approximation branch (n>=25, np>=5, nq>=5)
+        val d = BinomialDistribution(100, 0.5)
+        val rng = kotlin.random.Random(123)
+        val samples = d.sample(100_000, rng)
+        val doubles = samples.map { it.toDouble() }
+        val sampleMean = doubles.average()
+        assertEquals(d.mean, sampleMean, 0.3, "sample mean ≈ ${d.mean}")
+        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
+        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.5), "sample variance ≈ ${d.variance}")
     }
 
     @Test

@@ -45,7 +45,7 @@ public class UniformDiscreteDistribution(
         if (min > max) throw InvalidParameterException("min must be <= max, got min=$min, max=$max")
     }
 
-    private val n = max - min + 1
+    private val n: Long = max.toLong() - min.toLong() + 1
 
     /**
      * Returns the probability mass at [k].
@@ -75,7 +75,7 @@ public class UniformDiscreteDistribution(
     override fun cdf(k: Int): Double = when {
         k < min -> 0.0
         k >= max -> 1.0
-        else -> (k - min + 1).toDouble() / n
+        else -> (k.toLong() - min.toLong() + 1).toDouble() / n.toDouble()
     }
 
     /**
@@ -87,11 +87,11 @@ public class UniformDiscreteDistribution(
     override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return min
-        return (min + ceil(p * n).toInt() - 1).coerceIn(min, max)
+        return (min.toLong() + ceil(p * n.toDouble()).toLong() - 1).coerceIn(min.toLong(), max.toLong()).toInt()
     }
 
     /** The mean of this distribution, equal to the midpoint of [min] and [max]. */
-    override val mean: Double get() = (min + max) / 2.0
+    override val mean: Double get() = min / 2.0 + max / 2.0
 
     /** The variance of this distribution. */
     override val variance: Double get() = (n.toDouble() * n - 1.0) / 12.0
@@ -100,11 +100,12 @@ public class UniformDiscreteDistribution(
     override val skewness: Double get() = 0.0
 
     /** The excess kurtosis of this distribution. Returns [Double.NaN] when there is only one outcome. */
-    override val kurtosis: Double get() {
-        if (n == 1) return Double.NaN
-        val nd = n.toDouble()
-        return -6.0 * (nd * nd + 1.0) / (5.0 * (nd * nd - 1.0))
-    }
+    override val kurtosis: Double
+        get() {
+            if (n == 1L) return Double.NaN
+            val nd = n.toDouble()
+            return -6.0 * (nd * nd + 1.0) / (5.0 * (nd * nd - 1.0))
+        }
 
     /** The Shannon entropy of this distribution in nats, equal to the natural log of the number of outcomes. */
     override val entropy: Double get() = ln(n.toDouble())
@@ -115,5 +116,5 @@ public class UniformDiscreteDistribution(
      * @param random the source of randomness.
      * @return a random integer uniformly chosen from `[min, max]`.
      */
-    override fun sample(random: Random): Int = random.nextInt(min, max + 1)
+    override fun sample(random: Random): Int = (min.toLong() + random.nextLong(n)).toInt()
 }

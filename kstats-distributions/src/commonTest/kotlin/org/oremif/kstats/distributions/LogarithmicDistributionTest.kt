@@ -248,6 +248,7 @@ class LogarithmicDistributionTest {
         assertFailsWith<InvalidParameterException> { LogarithmicDistribution(1.0) }
         assertFailsWith<InvalidParameterException> { LogarithmicDistribution(-0.1) }
         assertFailsWith<InvalidParameterException> { LogarithmicDistribution(1.5) }
+        assertFailsWith<InvalidParameterException> { LogarithmicDistribution(Double.NaN) }
     }
 
     // --- Property-based ---

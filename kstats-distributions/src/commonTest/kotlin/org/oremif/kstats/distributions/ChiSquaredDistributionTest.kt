@@ -155,6 +155,28 @@ class ChiSquaredDistributionTest {
         assertFailsWith<InvalidParameterException> { d.quantile(1.1) }
     }
 
+    @Test
+    fun testNaNInput() {
+        val d = ChiSquaredDistribution(5.0)
+        assertTrue(d.pdf(Double.NaN).isNaN())
+        assertTrue(d.logPdf(Double.NaN).isNaN())
+        assertTrue(d.cdf(Double.NaN).isNaN())
+        assertTrue(d.sf(Double.NaN).isNaN())
+        assertFailsWith<InvalidParameterException> { d.quantile(Double.NaN) }
+    }
+
+    @Test
+    fun testInfinityInput() {
+        val d = ChiSquaredDistribution(5.0)
+        assertEquals(0.0, d.pdf(Double.POSITIVE_INFINITY))
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPdf(Double.POSITIVE_INFINITY))
+        assertEquals(1.0, d.cdf(Double.POSITIVE_INFINITY), 1e-12)
+        assertEquals(0.0, d.sf(Double.POSITIVE_INFINITY), 1e-12)
+        assertEquals(0.0, d.pdf(Double.NEGATIVE_INFINITY))
+        assertEquals(0.0, d.cdf(Double.NEGATIVE_INFINITY), 1e-12)
+        assertEquals(1.0, d.sf(Double.NEGATIVE_INFINITY), 1e-12)
+    }
+
     // --- Property-based ---
 
     @Test

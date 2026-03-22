@@ -39,8 +39,7 @@ public class BernoulliDistribution(
         if (probability !in 0.0..1.0) throw InvalidParameterException("probability must be in [0, 1], got $probability")
     }
 
-    private val p = probability
-    private val q = 1.0 - p
+    private val q = 1.0 - probability
 
     /**
      * Returns the probability mass at [k].
@@ -52,7 +51,7 @@ public class BernoulliDistribution(
      */
     override fun pmf(k: Int): Double = when (k) {
         0 -> q
-        1 -> p
+        1 -> probability
         else -> 0.0
     }
 
@@ -65,7 +64,7 @@ public class BernoulliDistribution(
      */
     override fun logPmf(k: Int): Double = when (k) {
         0 -> ln(q)
-        1 -> ln(p)
+        1 -> ln(probability)
         else -> Double.NEGATIVE_INFINITY
     }
 
@@ -85,7 +84,8 @@ public class BernoulliDistribution(
      * Returns the quantile (inverse CDF) for the given probability [p] as an [Int].
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
-     * @return `0` when [p] is at most `1 - probability`, and `1` otherwise.
+     * @return the smallest outcome `k` in `{0, 1}` such that `cdf(k) >= p`.
+     *   Returns `0` when `p <= 1 - probability` (including the boundary), and `1` otherwise.
      */
     override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
@@ -93,22 +93,29 @@ public class BernoulliDistribution(
     }
 
     /** The mean of this distribution, equal to [probability]. */
-    override val mean: Double get() = p
+    override val mean: Double get() = probability
 
     /** The variance of this distribution, equal to `probability * (1 - probability)`. */
-    override val variance: Double get() = p * q
+    override val variance: Double get() = probability * q
 
     /** The skewness of this distribution. Returns [Double.NaN] when [probability] is 0 or 1. */
-    override val skewness: Double get() = if (p == 0.0 || p == 1.0) Double.NaN else (1.0 - 2.0 * p) / sqrt(p * q)
+    override val skewness: Double
+        get() =
+            if (probability == 0.0 || probability == 1.0) Double.NaN
+            else (1.0 - 2.0 * probability) / sqrt(probability * q)
 
     /** The excess kurtosis of this distribution. Returns [Double.NaN] when [probability] is 0 or 1. */
-    override val kurtosis: Double get() = if (p == 0.0 || p == 1.0) Double.NaN else (1.0 - 6.0 * p * q) / (p * q)
+    override val kurtosis: Double
+        get() =
+            if (probability == 0.0 || probability == 1.0) Double.NaN
+            else (1.0 - 6.0 * probability * q) / (probability * q)
 
     /** The Shannon entropy of this distribution in nats. Returns zero for degenerate cases where [probability] is 0 or 1. */
-    override val entropy: Double get() = when {
-        p == 0.0 || p == 1.0 -> 0.0
-        else -> -p * ln(p) - q * ln(q)
-    }
+    override val entropy: Double
+        get() = when {
+            probability == 0.0 || probability == 1.0 -> 0.0
+            else -> -probability * ln(probability) - q * ln(q)
+        }
 
     /**
      * Draws a single random value from this Bernoulli distribution.
@@ -118,5 +125,5 @@ public class BernoulliDistribution(
      * @param random the source of randomness.
      * @return `0` or `1`.
      */
-    override fun sample(random: Random): Int = if (random.nextDouble() < p) 1 else 0
+    override fun sample(random: Random): Int = if (random.nextDouble() < probability) 1 else 0
 }

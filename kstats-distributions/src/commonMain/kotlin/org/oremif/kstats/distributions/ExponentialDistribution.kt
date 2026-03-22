@@ -2,6 +2,7 @@ package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.exp
+import kotlin.math.expm1
 import kotlin.math.ln
 import kotlin.math.ln1p
 import kotlin.random.Random
@@ -48,7 +49,13 @@ public class ExponentialDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (rate <= 0.0) throw InvalidParameterException("rate must be positive, got $rate")
+        if (rate.isNaN() || rate <= 0.0) throw InvalidParameterException("rate must be positive, got $rate")
+    }
+
+    /** Provides the pre-built standard exponential distribution constant. */
+    public companion object {
+        /** The standard exponential distribution with rate 1. */
+        public val STANDARD: ExponentialDistribution = ExponentialDistribution(1.0)
     }
 
     /**
@@ -74,7 +81,7 @@ public class ExponentialDistribution(
      * @return the probability that a value drawn from this distribution is less than or equal to [x],
      * or `0.0` if [x] is negative.
      */
-    override fun cdf(x: Double): Double = if (x >= 0.0) 1.0 - exp(-rate * x) else 0.0
+    override fun cdf(x: Double): Double = if (x >= 0.0) -expm1(-rate * x) else 0.0
 
     /**
      * Computes the survival function at [x].
@@ -124,11 +131,5 @@ public class ExponentialDistribution(
      * @param random the source of randomness.
      * @return a non-negative random value drawn from this distribution.
      */
-    override fun sample(random: Random): Double = -ln(random.nextDouble().coerceAtLeast(Double.MIN_VALUE)) / rate
-
-    /** Provides the pre-built standard exponential distribution constant. */
-    public companion object {
-        /** The standard exponential distribution with rate 1. */
-        public val STANDARD: ExponentialDistribution = ExponentialDistribution(1.0)
-    }
+    override fun sample(random: Random): Double = -ln(1.0 - random.nextDouble()) / rate
 }

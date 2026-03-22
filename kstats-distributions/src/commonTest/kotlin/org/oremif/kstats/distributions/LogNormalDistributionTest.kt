@@ -138,6 +138,10 @@ class LogNormalDistributionTest {
     fun testInvalidParameters() {
         assertFailsWith<InvalidParameterException> { LogNormalDistribution(0.0, 0.0) }
         assertFailsWith<InvalidParameterException> { LogNormalDistribution(0.0, -1.0) }
+        assertFailsWith<InvalidParameterException> { LogNormalDistribution(0.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { LogNormalDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { LogNormalDistribution(Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { LogNormalDistribution(Double.NEGATIVE_INFINITY, 1.0) }
     }
 
     @Test
@@ -145,6 +149,19 @@ class LogNormalDistributionTest {
         val d = LogNormalDistribution(0.0, 1.0)
         assertFailsWith<InvalidParameterException> { d.quantile(-0.1) }
         assertFailsWith<InvalidParameterException> { d.quantile(1.1) }
+    }
+
+    @Test
+    fun testNaNAndInfinityInputs() {
+        val d = LogNormalDistribution(0.0, 1.0)
+        assertTrue(d.pdf(Double.NaN).isNaN(), "pdf(NaN) should be NaN")
+        assertTrue(d.cdf(Double.NaN).isNaN(), "cdf(NaN) should be NaN")
+        assertTrue(d.sf(Double.NaN).isNaN(), "sf(NaN) should be NaN")
+        assertTrue(d.logPdf(Double.NaN).isNaN(), "logPdf(NaN) should be NaN")
+
+        assertEquals(0.0, d.pdf(Double.POSITIVE_INFINITY), 1e-12)
+        assertEquals(1.0, d.cdf(Double.POSITIVE_INFINITY), 1e-12)
+        assertEquals(0.0, d.sf(Double.POSITIVE_INFINITY), 1e-12)
     }
 
     // --- Property-based ---

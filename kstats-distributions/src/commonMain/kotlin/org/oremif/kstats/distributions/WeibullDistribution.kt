@@ -63,7 +63,7 @@ public class WeibullDistribution(
     override fun pdf(x: Double): Double {
         if (x < 0.0) return 0.0
         if (x == 0.0) return if (k == 1.0) 1.0 / lambda else if (k < 1.0) Double.POSITIVE_INFINITY else 0.0
-        return (k / lambda) * (x / lambda).pow(k - 1.0) * exp(-(x / lambda).pow(k))
+        return exp(logPdf(x))
     }
 
     /**
@@ -76,7 +76,7 @@ public class WeibullDistribution(
      * @return the natural log of the probability density, or [Double.NEGATIVE_INFINITY] when [x] is negative.
      */
     override fun logPdf(x: Double): Double {
-        if (x < 0.0) return Double.NEGATIVE_INFINITY
+        if (x < 0.0 || x == Double.POSITIVE_INFINITY) return Double.NEGATIVE_INFINITY
         if (x == 0.0) return when {
             k < 1.0 -> Double.POSITIVE_INFINITY
             k == 1.0 -> -ln(lambda)

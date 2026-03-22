@@ -379,9 +379,30 @@ class NakagamiDistributionTest {
     }
 
     @Test
+    fun testLogPdfNaN() {
+        assertTrue(d1.logPdf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testCdfNaN() {
+        assertTrue(d1.cdf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testSfNaN() {
+        assertTrue(d1.sf(Double.NaN).isNaN())
+    }
+
+    @Test
     fun testCdfInfinity() {
         assertEquals(1.0, d1.cdf(Double.POSITIVE_INFINITY), 0.0)
         assertEquals(0.0, d1.cdf(Double.NEGATIVE_INFINITY), 0.0)
+    }
+
+    @Test
+    fun testSfInfinity() {
+        assertEquals(0.0, d1.sf(Double.POSITIVE_INFINITY), 0.0)
+        assertEquals(1.0, d1.sf(Double.NEGATIVE_INFINITY), 0.0)
     }
 
     // ========================================
@@ -511,6 +532,16 @@ class NakagamiDistributionTest {
     @Test
     fun testInvalidOmegaNegative() {
         assertFailsWith<InvalidParameterException> { NakagamiDistribution(1.0, -1.0) }
+    }
+
+    @Test
+    fun testInvalidMuNaN() {
+        assertFailsWith<InvalidParameterException> { NakagamiDistribution(Double.NaN, 1.0) }
+    }
+
+    @Test
+    fun testInvalidOmegaNaN() {
+        assertFailsWith<InvalidParameterException> { NakagamiDistribution(1.0, Double.NaN) }
     }
 
     @Test

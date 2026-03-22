@@ -43,10 +43,18 @@ public class UniformDistribution(
 ) : ContinuousDistribution {
 
     init {
+        if (min.isNaN() || min.isInfinite()) throw InvalidParameterException("min must be finite, got $min")
+        if (max.isNaN() || max.isInfinite()) throw InvalidParameterException("max must be finite, got $max")
         if (min >= max) throw InvalidParameterException("min must be less than max, got min=$min, max=$max")
     }
 
     private val range = max - min
+
+    /** Provides the pre-built standard uniform distribution constant. */
+    public companion object {
+        /** The standard uniform distribution on the interval `[0, 1]`. */
+        public val STANDARD: UniformDistribution = UniformDistribution(0.0, 1.0)
+    }
 
     /**
      * Computes the probability density at [x].
@@ -57,7 +65,11 @@ public class UniformDistribution(
      * @param x the point at which to evaluate the density.
      * @return the probability density at [x].
      */
-    override fun pdf(x: Double): Double = if (x in min..max) 1.0 / range else 0.0
+    override fun pdf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
+        x in min..max -> 1.0 / range
+        else -> 0.0
+    }
 
     /**
      * Computes the natural logarithm of the probability density at [x].
@@ -66,7 +78,11 @@ public class UniformDistribution(
      * @return the natural log of the density at [x], or [Double.NEGATIVE_INFINITY] if [x] is
      * outside the support.
      */
-    override fun logPdf(x: Double): Double = if (x in min..max) -ln(range) else Double.NEGATIVE_INFINITY
+    override fun logPdf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
+        x in min..max -> -ln(range)
+        else -> Double.NEGATIVE_INFINITY
+    }
 
     /**
      * Computes the cumulative distribution function at [x].
@@ -77,6 +93,7 @@ public class UniformDistribution(
      * @return the probability that a value drawn from this distribution is less than or equal to [x].
      */
     override fun cdf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
         x <= min -> 0.0
         x >= max -> 1.0
         else -> (x - min) / range
@@ -118,10 +135,4 @@ public class UniformDistribution(
      * @return a random value in `[min, max]`.
      */
     override fun sample(random: Random): Double = min + random.nextDouble() * range
-
-    /** Provides the pre-built standard uniform distribution constant. */
-    public companion object {
-        /** The standard uniform distribution on the interval `[0, 1]`. */
-        public val STANDARD: UniformDistribution = UniformDistribution(0.0, 1.0)
-    }
 }

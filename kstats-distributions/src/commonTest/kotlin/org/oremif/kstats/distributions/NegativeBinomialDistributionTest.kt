@@ -75,9 +75,11 @@ class NegativeBinomialDistributionTest {
     @Test
     fun testQuantileIntKnownValues() {
         val d = NegativeBinomialDistribution(5, 0.4)
+        assertEquals(0, d.quantileInt(0.0))
         assertEquals(4, d.quantileInt(0.25))
         assertEquals(7, d.quantileInt(0.5))
         assertEquals(10, d.quantileInt(0.75))
+        assertEquals(Int.MAX_VALUE, d.quantileInt(1.0))
     }
 
     // --- Moments ---
@@ -125,10 +127,21 @@ class NegativeBinomialDistributionTest {
         assertEquals(1.0, d.pmf(0), 1e-15)
         assertEquals(0.0, d.pmf(1), 1e-15)
         assertEquals(0.0, d.mean, 1e-15)
+        assertEquals(0.0, d.variance, 1e-15)
+        assertEquals(0.0, d.entropy, 1e-15)
         assertEquals(1.0, d.cdf(0), 1e-15)
         assertEquals(1.0, d.cdf(5), 1e-15)
         assertEquals(0.0, d.sf(0), 1e-15)
         assertEquals(0.0, d.sf(5), 1e-15)
+        assertEquals(0, d.quantileInt(0.5))
+        assertEquals(Int.MAX_VALUE, d.quantileInt(1.0))
+    }
+
+    @Test
+    fun testCdfSfAtIntMaxValue() {
+        val d = NegativeBinomialDistribution(5, 0.4)
+        assertEquals(1.0, d.cdf(Int.MAX_VALUE), 1e-15)
+        assertEquals(0.0, d.sf(Int.MAX_VALUE), 1e-15)
     }
 
     // --- Invalid input ---
@@ -147,6 +160,33 @@ class NegativeBinomialDistributionTest {
         val d = NegativeBinomialDistribution(5, 0.4)
         assertFailsWith<InvalidParameterException> { d.quantileInt(-0.1) }
         assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
+    }
+
+    @Test
+    fun testSmallProbability() {
+        val d = NegativeBinomialDistribution(3, 0.05)
+        // scipy: stats.nbinom(3, 0.05).mean() = 57, var = 1140
+        assertEquals(57.0, d.mean, 1e-10)
+        assertEquals(1140.0, d.variance, 1e-10)
+        assertEquals(0.0, d.cdf(-1), 1e-15)
+        // CDF should be very small at k=0 for small p: p^r = 0.05^3 = 0.000125
+        assertEquals(1.25e-4, d.pmf(0), 1e-10)
+        // Quantile round-trip
+        val k50 = d.quantileInt(0.5)
+        assertTrue(d.cdf(k50) >= 0.5)
+        if (k50 > 0) assertTrue(d.cdf(k50 - 1) < 0.5)
+    }
+
+    @Test
+    fun testLargeSuccesses() {
+        val d = NegativeBinomialDistribution(100, 0.5)
+        // mean = r*q/p = 100*0.5/0.5 = 100
+        assertEquals(100.0, d.mean, 1e-10)
+        assertEquals(200.0, d.variance, 1e-10)
+        // Quantile round-trip
+        val k50 = d.quantileInt(0.5)
+        assertTrue(d.cdf(k50) >= 0.5)
+        if (k50 > 0) assertTrue(d.cdf(k50 - 1) < 0.5)
     }
 
     // --- Property-based ---

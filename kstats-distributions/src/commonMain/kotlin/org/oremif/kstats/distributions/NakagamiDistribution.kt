@@ -1,16 +1,8 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.digamma
+import org.oremif.kstats.core.*
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.core.findQuantile
-import org.oremif.kstats.core.lnGamma
-import org.oremif.kstats.core.regularizedGammaP
-import org.oremif.kstats.core.regularizedGammaQ
-import kotlin.math.PI
-import kotlin.math.exp
-import kotlin.math.ln
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 import kotlin.random.Random
 
 /**
@@ -49,8 +41,8 @@ public class NakagamiDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (mu < 0.5) throw InvalidParameterException("mu must be >= 0.5, got $mu")
-        if (omega <= 0.0) throw InvalidParameterException("omega must be positive, got $omega")
+        if (mu.isNaN() || mu < 0.5) throw InvalidParameterException("mu must be >= 0.5, got $mu")
+        if (omega.isNaN() || omega <= 0.0) throw InvalidParameterException("omega must be positive, got $omega")
     }
 
     // Pre-computed log normalization constant: ln(2) + mu*ln(mu) - lnGamma(mu) - mu*ln(omega)
@@ -58,6 +50,8 @@ public class NakagamiDistribution(
 
     // Gamma(mu + 0.5) / Gamma(mu), computed in log space to avoid overflow
     private val gammaRatio = exp(lnGamma(mu + 0.5) - lnGamma(mu))
+
+    private val gammaDelegate = GammaDistribution(mu, mu / omega)
 
     /**
      * Computes the probability density at [x].
@@ -142,30 +136,32 @@ public class NakagamiDistribution(
     override val variance: Double get() = omega * (1.0 - gammaRatio * gammaRatio / mu)
 
     /** The skewness of this distribution, computed from raw moments via the Gamma relationship. */
-    override val skewness: Double get() {
-        val m1 = mean
-        val m2 = omega // E[X^2]
-        val gammaRatio3 = exp(lnGamma(mu + 1.5) - lnGamma(mu))
-        val m3 = gammaRatio3 * (omega / mu).pow(1.5) // E[X^3]
-        val v = variance
-        val sd = sqrt(v)
-        return (m3 - 3.0 * m1 * v - m1 * m1 * m1) / (sd * sd * sd)
-    }
+    override val skewness: Double
+        get() {
+            val m1 = mean
+            val gammaRatio3 = exp(lnGamma(mu + 1.5) - lnGamma(mu))
+            val m3 = gammaRatio3 * (omega / mu).pow(1.5) // E[X^3]
+            val v = variance
+            val sd = sqrt(v)
+            return (m3 - 3.0 * m1 * v - m1 * m1 * m1) / (sd * sd * sd)
+        }
 
     /** The excess kurtosis of this distribution, computed from raw moments via the Gamma relationship. */
-    override val kurtosis: Double get() {
-        val m1 = mean
-        val m2 = omega // E[X^2]
-        val gammaRatio3 = exp(lnGamma(mu + 1.5) - lnGamma(mu))
-        val m3 = gammaRatio3 * (omega / mu).pow(1.5) // E[X^3]
-        val m4 = (mu + 1.0) * omega * omega / mu // E[X^4] = Gamma(mu+2)/Gamma(mu) * (omega/mu)^2
-        val v = variance
-        return (m4 - 4.0 * m1 * m3 + 6.0 * m1 * m1 * m2 - 3.0 * m1 * m1 * m1 * m1) / (v * v) - 3.0
-    }
+    override val kurtosis: Double
+        get() {
+            val m1 = mean
+            val m2 = omega // E[X^2]
+            val gammaRatio3 = exp(lnGamma(mu + 1.5) - lnGamma(mu))
+            val m3 = gammaRatio3 * (omega / mu).pow(1.5) // E[X^3]
+            val m4 = (mu + 1.0) * omega * omega / mu // E[X^4] = Gamma(mu+2)/Gamma(mu) * (omega/mu)^2
+            val v = variance
+            return (m4 - 4.0 * m1 * m3 + 6.0 * m1 * m1 * m2 - 3.0 * m1 * m1 * m1 * m1) / (v * v) - 3.0
+        }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double get() =
-        lnGamma(mu) + mu - (mu - 0.5) * digamma(mu) - 0.5 * ln(mu) - ln(2.0) + 0.5 * ln(omega)
+    override val entropy: Double
+        get() =
+            lnGamma(mu) + mu - (mu - 0.5) * digamma(mu) - 0.5 * ln(mu) - ln(2.0) + 0.5 * ln(omega)
 
     /**
      * Draws a single random value from this Nakagami distribution.
@@ -176,8 +172,6 @@ public class NakagamiDistribution(
      * @param random the source of randomness.
      * @return a random non-negative value drawn from this distribution.
      */
-    private val gammaDelegate = GammaDistribution(mu, mu / omega)
-
     override fun sample(random: Random): Double {
         return sqrt(gammaDelegate.sample(random))
     }

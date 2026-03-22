@@ -51,7 +51,14 @@ public class NormalDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (sigma <= 0.0) throw InvalidParameterException("sigma must be positive, got $sigma")
+        if (mu.isNaN() || mu.isInfinite()) throw InvalidParameterException("mu must be finite, got $mu")
+        if (sigma.isNaN() || sigma <= 0.0) throw InvalidParameterException("sigma must be positive, got $sigma")
+    }
+
+    /** Provides the pre-built standard normal distribution constant. */
+    public companion object {
+        /** The standard normal distribution with mean 0 and standard deviation 1. */
+        public val STANDARD: NormalDistribution = NormalDistribution(0.0, 1.0)
     }
 
     /**
@@ -147,11 +154,5 @@ public class NormalDistribution(
         val u1 = random.nextDouble().coerceAtLeast(Double.MIN_VALUE)
         val u2 = random.nextDouble()
         return mu + sigma * sqrt(-2.0 * ln(u1)) * cos(2.0 * PI * u2)
-    }
-
-    /** Provides the pre-built standard normal distribution constant. */
-    public companion object {
-        /** The standard normal distribution with mean 0 and standard deviation 1. */
-        public val STANDARD: NormalDistribution = NormalDistribution(0.0, 1.0)
     }
 }

@@ -202,6 +202,18 @@ class GumbelDistributionTest {
     }
 
     @Test
+    fun testPdfInfinity() {
+        assertEquals(0.0, std.pdf(Double.POSITIVE_INFINITY), 0.0)
+        assertEquals(0.0, std.pdf(Double.NEGATIVE_INFINITY), 0.0)
+    }
+
+    @Test
+    fun testLogPdfInfinity() {
+        assertEquals(Double.NEGATIVE_INFINITY, std.logPdf(Double.POSITIVE_INFINITY))
+        assertEquals(Double.NEGATIVE_INFINITY, std.logPdf(Double.NEGATIVE_INFINITY))
+    }
+
+    @Test
     fun testCdfNaN() {
         assertEquals(Double.NaN, std.cdf(Double.NaN), 0.0)
     }

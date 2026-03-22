@@ -4,6 +4,7 @@ import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.lnCombination
 import kotlin.math.exp
 import kotlin.math.ln
+import kotlin.math.roundToInt
 import kotlin.math.sqrt
 import kotlin.random.Random
 
@@ -155,71 +156,95 @@ public class HypergeometricDistribution(
     }
 
     /** The mean (expected number of success items drawn). */
-    override val mean: Double get() = n.toDouble() * bigK / bigN
+    override val mean: Double
+        get() {
+            if (bigN == 0) return 0.0
+            return n.toDouble() * bigK / bigN
+        }
 
     /** The variance of the number of success items drawn. */
-    override val variance: Double get() {
-        val nd = n.toDouble()
-        val bigNd = bigN.toDouble()
-        val bigKd = bigK.toDouble()
-        return nd * bigKd * (bigNd - bigKd) * (bigNd - nd) / (bigNd * bigNd * (bigNd - 1.0))
-    }
-
-    /** The skewness of this distribution. Returns [Double.NaN] when [population] is less than 3. */
-    override val skewness: Double get() {
-        if (bigN < 3) return Double.NaN
-        val bigNd = bigN.toDouble()
-        val bigKd = bigK.toDouble()
-        val nd = n.toDouble()
-        return (bigNd - 2.0 * bigKd) * (bigNd - 2.0 * nd) * sqrt(bigNd - 1.0) /
-            ((bigNd - 2.0) * sqrt(nd * bigKd * (bigNd - bigKd) * (bigNd - nd)))
-    }
-
-    /** The excess kurtosis of this distribution. Returns [Double.NaN] when [population] is less than 4. */
-    override val kurtosis: Double get() {
-        if (bigN < 4) return Double.NaN
-        val bigNd = bigN.toDouble()
-        val bigKd = bigK.toDouble()
-        val nd = n.toDouble()
-        val num = (bigNd - 1.0) * bigNd * bigNd * (bigNd * (bigNd + 1.0) - 6.0 * bigKd * (bigNd - bigKd) - 6.0 * nd * (bigNd - nd)) +
-            6.0 * nd * bigKd * (bigNd - bigKd) * (bigNd - nd) * (5.0 * bigNd - 6.0)
-        val den = nd * bigKd * (bigNd - bigKd) * (bigNd - nd) * (bigNd - 2.0) * (bigNd - 3.0)
-        return num / den
-    }
-
-    /** The Shannon entropy of this distribution in nats, computed by summing over the entire support. */
-    override val entropy: Double get() {
-        var h = 0.0
-        for (k in kMin..kMax) {
-            val pk = pmf(k)
-            if (pk > 0.0) h -= pk * ln(pk)
+    override val variance: Double
+        get() {
+            if (bigN <= 1) return 0.0
+            val nd = n.toDouble()
+            val bigNd = bigN.toDouble()
+            val bigKd = bigK.toDouble()
+            return nd * bigKd * (bigNd - bigKd) * (bigNd - nd) / (bigNd * bigNd * (bigNd - 1.0))
         }
-        return h
-    }
 
     /**
-     * Draws a single random value from this hypergeometric distribution using direct simulation.
+     * The skewness of this distribution. Returns [Double.NaN] when [population] is less than 3
+     * or the distribution is degenerate (single point support).
+     */
+    override val skewness: Double
+        get() {
+            if (bigN < 3 || kMin == kMax) return Double.NaN
+            val bigNd = bigN.toDouble()
+            val bigKd = bigK.toDouble()
+            val nd = n.toDouble()
+            return (bigNd - 2.0 * bigKd) * (bigNd - 2.0 * nd) * sqrt(bigNd - 1.0) /
+                ((bigNd - 2.0) * sqrt(nd * bigKd * (bigNd - bigKd) * (bigNd - nd)))
+        }
+
+    /**
+     * The excess kurtosis of this distribution. Returns [Double.NaN] when [population] is less than 4
+     * or the distribution is degenerate (single point support).
+     */
+    override val kurtosis: Double
+        get() {
+            if (bigN < 4 || kMin == kMax) return Double.NaN
+            val bigNd = bigN.toDouble()
+            val bigKd = bigK.toDouble()
+            val nd = n.toDouble()
+            val num =
+                (bigNd - 1.0) * bigNd * bigNd * (bigNd * (bigNd + 1.0) - 6.0 * bigKd * (bigNd - bigKd) - 6.0 * nd * (bigNd - nd)) +
+                    6.0 * nd * bigKd * (bigNd - bigKd) * (bigNd - nd) * (5.0 * bigNd - 6.0)
+            val den = nd * bigKd * (bigNd - bigKd) * (bigNd - nd) * (bigNd - 2.0) * (bigNd - 3.0)
+            return num / den
+        }
+
+    /** The Shannon entropy of this distribution in nats, computed by summing over the entire support. */
+    override val entropy: Double
+        get() {
+            var h = 0.0
+            for (k in kMin..kMax) {
+                val pk = pmf(k)
+                if (pk > 0.0) h -= pk * ln(pk)
+            }
+            return h
+        }
+
+    /**
+     * Draws a single random value from this hypergeometric distribution.
      *
-     * Simulates the drawing process by maintaining a pool of success and failure items and
-     * drawing one at a time with probabilities proportional to the remaining pool sizes.
+     * For small draws (< 25) or when the normal approximation is unreliable, uses direct
+     * simulation of the drawing process. For large draws with sufficient variance, uses a
+     * normal approximation for O(1) sampling instead of O(draws).
      *
      * @param random the source of randomness.
      * @return a random integer representing the number of success items drawn.
      */
     override fun sample(random: Random): Int {
-        // Direct simulation
-        var succPool = bigK
-        var failPool = bigN - bigK
-        var result = 0
-        for (i in 0 until n) {
-            val total = succPool + failPool
-            if (random.nextDouble() < succPool.toDouble() / total) {
-                result++
-                succPool--
-            } else {
-                failPool--
+        if (kMin == kMax) return kMin
+        val v = variance
+        if (n < 25 || v < 5.0) {
+            // Direct simulation — draw one at a time
+            var succPool = bigK
+            var failPool = bigN - bigK
+            var result = 0
+            for (i in 0 until n) {
+                val total = succPool + failPool
+                if (random.nextDouble() < succPool.toDouble() / total) {
+                    result++
+                    succPool--
+                } else {
+                    failPool--
+                }
             }
+            return result
         }
-        return result
+        // Normal approximation for large parameters
+        val normal = NormalDistribution(mean, sqrt(v))
+        return normal.sample(random).roundToInt().coerceIn(kMin, kMax)
     }
 }

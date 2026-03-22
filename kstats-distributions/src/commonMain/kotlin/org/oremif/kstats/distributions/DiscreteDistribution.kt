@@ -119,6 +119,7 @@ public interface DiscreteDistribution : Distribution {
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
      * @return the smallest integer k at which `cdf(k) >= p`.
+     * @throws org.oremif.kstats.core.exceptions.InvalidParameterException if [p] is not in `[0, 1]`.
      */
     public fun quantileInt(p: Double): Int
 
@@ -131,26 +132,29 @@ public interface DiscreteDistribution : Distribution {
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
      * @return the smallest value at which `cdf(x) >= p`, as a [Double].
+     * @throws org.oremif.kstats.core.exceptions.InvalidParameterException if [p] is not in `[0, 1]`.
      */
     override fun quantile(p: Double): Double = quantileInt(p).toDouble()
 
     /**
      * Returns the skewness of this distribution.
      *
-     * Returns [Double.NaN] by default. Implementations override this with the exact formula
-     * for each distribution.
+     * Returns [Double.NaN] by default because not all discrete distributions have
+     * closed-form skewness expressions. Implementations override this with the exact
+     * formula when available.
      *
-     * @return the skewness, or [Double.NaN] if not yet implemented.
+     * @return the skewness, or [Double.NaN] if not available for this distribution.
      */
     override val skewness: Double get() = Double.NaN
 
     /**
      * Returns the excess kurtosis (Fisher definition) of this distribution.
      *
-     * Returns [Double.NaN] by default. Implementations override this with the exact formula
-     * for each distribution.
+     * Returns [Double.NaN] by default because not all discrete distributions have
+     * closed-form kurtosis expressions. Implementations override this with the exact
+     * formula when available.
      *
-     * @return the excess kurtosis, or [Double.NaN] if not yet implemented.
+     * @return the excess kurtosis, or [Double.NaN] if not available for this distribution.
      */
     override val kurtosis: Double get() = Double.NaN
 
@@ -179,10 +183,12 @@ public interface DiscreteDistribution : Distribution {
      * Draws [n] independent random integer values from this distribution.
      *
      * Each element in the returned array is drawn independently using [sample].
+     * Subclasses may override this method to provide batch-optimized sampling.
      *
      * @param n the number of values to draw. Must be non-negative.
      * @param random the source of randomness.
      * @return an [IntArray] of [n] independent random draws.
+     * @throws org.oremif.kstats.core.exceptions.InvalidParameterException if [n] is negative.
      */
     public fun sample(n: Int, random: Random): IntArray {
         if (n < 0) throw InvalidParameterException("n must be non-negative, got $n")

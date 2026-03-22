@@ -51,6 +51,15 @@ public class BetaDistribution(
         if (beta <= 0.0) throw InvalidParameterException("beta must be positive, got $beta")
     }
 
+    private val gammaAlpha = GammaDistribution(alpha, 1.0)
+    private val gammaBeta = GammaDistribution(beta, 1.0)
+
+    /** Predefined Beta distribution instances. */
+    public companion object {
+        /** The standard Beta distribution with alpha = 1 and beta = 1, equivalent to the continuous uniform distribution on [0, 1]. */
+        public val STANDARD: BetaDistribution = BetaDistribution(1.0, 1.0)
+    }
+
     /**
      * Computes the probability density at [x].
      *
@@ -61,7 +70,7 @@ public class BetaDistribution(
      * @return the probability density at [x]. Always non-negative.
      */
     override fun pdf(x: Double): Double {
-        if (x !in 0.0..1.0) return 0.0
+        if (x < 0.0 || x > 1.0) return 0.0
         if (x == 0.0) return when {
             alpha == 1.0 -> beta
             alpha < 1.0 -> Double.POSITIVE_INFINITY
@@ -129,9 +138,10 @@ public class BetaDistribution(
     }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double get() =
-        lnBeta(alpha, beta) - (alpha - 1.0) * digamma(alpha) - (beta - 1.0) * digamma(beta) +
-            (alpha + beta - 2.0) * digamma(alpha + beta)
+    override val entropy: Double
+        get() =
+            lnBeta(alpha, beta) - (alpha - 1.0) * digamma(alpha) - (beta - 1.0) * digamma(beta) +
+                (alpha + beta - 2.0) * digamma(alpha + beta)
 
     /**
      * Computes the quantile (inverse CDF) for the given probability [p].
@@ -153,24 +163,27 @@ public class BetaDistribution(
     override val mean: Double get() = alpha / (alpha + beta)
 
     /** The variance of this distribution, which decreases as alpha + beta increases. */
-    override val variance: Double get() {
-        val ab = alpha + beta
-        return (alpha * beta) / (ab * ab * (ab + 1.0))
-    }
+    override val variance: Double
+        get() {
+            val ab = alpha + beta
+            return (alpha * beta) / (ab * ab * (ab + 1.0))
+        }
 
     /** The skewness of this distribution. Positive when alpha < beta, negative when alpha > beta. */
-    override val skewness: Double get() {
-        val ab = alpha + beta
-        return 2.0 * (beta - alpha) * sqrt(ab + 1.0) / ((ab + 2.0) * sqrt(alpha * beta))
-    }
+    override val skewness: Double
+        get() {
+            val ab = alpha + beta
+            return 2.0 * (beta - alpha) * sqrt(ab + 1.0) / ((ab + 2.0) * sqrt(alpha * beta))
+        }
 
     /** The excess kurtosis of this distribution. */
-    override val kurtosis: Double get() { // excess
-        val ab = alpha + beta
-        return 6.0 * (alpha * alpha * alpha - alpha * alpha * (2.0 * beta - 1.0) +
-            beta * beta * (beta + 1.0) - 2.0 * alpha * beta * (beta + 2.0)) /
-            (alpha * beta * (ab + 2.0) * (ab + 3.0))
-    }
+    override val kurtosis: Double
+        get() { // excess
+            val ab = alpha + beta
+            return 6.0 * (alpha * alpha * alpha - alpha * alpha * (2.0 * beta - 1.0) +
+                beta * beta * (beta + 1.0) - 2.0 * alpha * beta * (beta + 2.0)) /
+                (alpha * beta * (ab + 2.0) * (ab + 3.0))
+        }
 
     /**
      * Draws a single random value from this Beta distribution.
@@ -181,18 +194,9 @@ public class BetaDistribution(
      * @param random the source of randomness.
      * @return a random value in the interval (0, 1).
      */
-    private val gammaAlpha = GammaDistribution(alpha, 1.0)
-    private val gammaBeta = GammaDistribution(beta, 1.0)
-
     override fun sample(random: Random): Double {
         val x = gammaAlpha.sample(random)
         val y = gammaBeta.sample(random)
         return x / (x + y)
-    }
-
-    /** Predefined Beta distribution instances. */
-    public companion object {
-        /** The standard Beta distribution with alpha = 1 and beta = 1, equivalent to the continuous uniform distribution on [0, 1]. */
-        public val STANDARD: BetaDistribution = BetaDistribution(1.0, 1.0)
     }
 }

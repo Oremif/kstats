@@ -38,6 +38,11 @@ public class GumbelDistribution(
         if (beta <= 0.0) throw InvalidParameterException("beta must be positive, got $beta")
     }
 
+    public companion object {
+        /** Standard Gumbel distribution with mu = 0 and beta = 1. */
+        public val STANDARD: GumbelDistribution = GumbelDistribution(0.0, 1.0)
+    }
+
     /**
      * Returns the probability density at [x] for this Gumbel distribution.
      *
@@ -49,6 +54,7 @@ public class GumbelDistribution(
      * @return the probability density at [x]. Always non-negative.
      */
     override fun pdf(x: Double): Double {
+        if (x.isInfinite()) return 0.0
         val z = (x - mu) / beta
         return exp(-(z + exp(-z))) / beta
     }
@@ -64,6 +70,7 @@ public class GumbelDistribution(
      * @return the natural log of the probability density at [x].
      */
     override fun logPdf(x: Double): Double {
+        if (x.isInfinite()) return Double.NEGATIVE_INFINITY
         val z = (x - mu) / beta
         return -ln(beta) - z - exp(-z)
     }
@@ -140,10 +147,5 @@ public class GumbelDistribution(
     override fun sample(random: Random): Double {
         val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 1.0 - Double.MIN_VALUE)
         return mu - beta * ln(-ln(u))
-    }
-
-    public companion object {
-        /** Standard Gumbel distribution with mu = 0 and beta = 1. */
-        public val STANDARD: GumbelDistribution = GumbelDistribution(0.0, 1.0)
     }
 }

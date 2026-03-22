@@ -132,6 +132,26 @@ class BetaDistributionTest {
     }
 
     @Test
+    fun testNaNInputs() {
+        val b = BetaDistribution(2.0, 5.0)
+        assertTrue(b.pdf(Double.NaN).isNaN(), "pdf(NaN) should be NaN")
+        assertTrue(b.logPdf(Double.NaN).isNaN(), "logPdf(NaN) should be NaN")
+        assertTrue(b.cdf(Double.NaN).isNaN(), "cdf(NaN) should be NaN")
+        assertTrue(b.sf(Double.NaN).isNaN(), "sf(NaN) should be NaN")
+    }
+
+    @Test
+    fun testInfinityInputs() {
+        val b = BetaDistribution(2.0, 5.0)
+        assertEquals(0.0, b.pdf(Double.POSITIVE_INFINITY), 1e-12)
+        assertEquals(0.0, b.pdf(Double.NEGATIVE_INFINITY), 1e-12)
+        assertEquals(1.0, b.cdf(Double.POSITIVE_INFINITY), 1e-12)
+        assertEquals(0.0, b.cdf(Double.NEGATIVE_INFINITY), 1e-12)
+        assertEquals(0.0, b.sf(Double.POSITIVE_INFINITY), 1e-12)
+        assertEquals(1.0, b.sf(Double.NEGATIVE_INFINITY), 1e-12)
+    }
+
+    @Test
     fun testQuantileInvalidP() {
         val b = BetaDistribution(2.0, 5.0)
         assertFailsWith<InvalidParameterException> { b.quantile(-0.1) }

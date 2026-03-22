@@ -12,10 +12,13 @@ import kotlin.test.assertTrue
 class TriangularDistributionTest {
     // Config 1: Symmetric — a=0, b=1, c=0.5
     private val sym = TriangularDistribution(0.0, 1.0, 0.5)
+
     // Config 2: Asymmetric — a=1, b=5, c=3
     private val asym = TriangularDistribution(1.0, 5.0, 3.0)
+
     // Config 3: Mode at left — a=-2, b=4, c=-2
     private val modeLeft = TriangularDistribution(-2.0, 4.0, -2.0)
+
     // Config 4: Mode at right — a=0, b=10, c=10
     private val modeRight = TriangularDistribution(0.0, 10.0, 10.0)
 
@@ -403,5 +406,52 @@ class TriangularDistributionTest {
     fun testInvalidQuantileProbability() {
         assertFailsWith<InvalidParameterException> { sym.quantile(-0.1) }
         assertFailsWith<InvalidParameterException> { sym.quantile(1.1) }
+    }
+
+    // ========================================
+    // NaN and Infinity inputs
+    // ========================================
+
+    @Test
+    fun testPdfNaN() {
+        assertTrue(sym.pdf(Double.NaN).isNaN())
+        assertTrue(asym.pdf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testLogPdfNaN() {
+        assertTrue(sym.logPdf(Double.NaN).isNaN())
+        assertTrue(asym.logPdf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testCdfNaN() {
+        assertTrue(sym.cdf(Double.NaN).isNaN())
+        assertTrue(asym.cdf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testSfNaN() {
+        assertTrue(sym.sf(Double.NaN).isNaN())
+        assertTrue(asym.sf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testCdfInfinity() {
+        assertEquals(1.0, sym.cdf(Double.POSITIVE_INFINITY), 0.0)
+        assertEquals(0.0, sym.cdf(Double.NEGATIVE_INFINITY), 0.0)
+        assertEquals(1.0, asym.cdf(Double.POSITIVE_INFINITY), 0.0)
+        assertEquals(0.0, asym.cdf(Double.NEGATIVE_INFINITY), 0.0)
+    }
+
+    @Test
+    fun testSfInfinity() {
+        assertEquals(0.0, sym.sf(Double.POSITIVE_INFINITY), 0.0)
+        assertEquals(1.0, sym.sf(Double.NEGATIVE_INFINITY), 0.0)
+    }
+
+    @Test
+    fun testQuantileNaN() {
+        assertFailsWith<InvalidParameterException> { sym.quantile(Double.NaN) }
     }
 }

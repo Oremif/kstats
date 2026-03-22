@@ -172,6 +172,34 @@ class WeibullDistributionTest {
     }
 
     @Test
+    fun testSpecialDoubleInputs() {
+        val w = WeibullDistribution(2.0, 1.0) // k > 1
+        // pdf
+        assertEquals(0.0, w.pdf(Double.POSITIVE_INFINITY))
+        assertEquals(0.0, w.pdf(Double.NEGATIVE_INFINITY))
+        assertTrue(w.pdf(Double.NaN).isNaN())
+        // logPdf
+        assertEquals(Double.NEGATIVE_INFINITY, w.logPdf(Double.POSITIVE_INFINITY))
+        assertEquals(Double.NEGATIVE_INFINITY, w.logPdf(Double.NEGATIVE_INFINITY))
+        assertTrue(w.logPdf(Double.NaN).isNaN())
+        // cdf
+        assertEquals(1.0, w.cdf(Double.POSITIVE_INFINITY))
+        assertEquals(0.0, w.cdf(Double.NEGATIVE_INFINITY))
+        assertTrue(w.cdf(Double.NaN).isNaN())
+        // sf
+        assertEquals(0.0, w.sf(Double.POSITIVE_INFINITY))
+        assertEquals(1.0, w.sf(Double.NEGATIVE_INFINITY))
+        assertTrue(w.sf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testSpecialDoubleInputsSmallShape() {
+        val w = WeibullDistribution(0.5, 1.0) // k < 1
+        assertEquals(0.0, w.pdf(Double.POSITIVE_INFINITY))
+        assertEquals(Double.NEGATIVE_INFINITY, w.logPdf(Double.POSITIVE_INFINITY))
+    }
+
+    @Test
     fun testQuantileInvalidP() {
         val w = WeibullDistribution(1.5, 2.0)
         assertFailsWith<InvalidParameterException> { w.quantile(-0.1) }

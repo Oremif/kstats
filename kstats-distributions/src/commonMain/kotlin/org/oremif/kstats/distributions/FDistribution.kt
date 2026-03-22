@@ -53,6 +53,9 @@ public class FDistribution(
     private val d1 = dfNumerator
     private val d2 = dfDenominator
 
+    private val chi2Numerator: ChiSquaredDistribution by lazy { ChiSquaredDistribution(d1) }
+    private val chi2Denominator: ChiSquaredDistribution by lazy { ChiSquaredDistribution(d2) }
+
     /**
      * Returns the probability density at [x].
      *
@@ -66,7 +69,11 @@ public class FDistribution(
      */
     override fun pdf(x: Double): Double {
         if (x < 0.0) return 0.0
-        if (x == 0.0) return if (d1 == 2.0) 1.0 else if (d1 < 2.0) Double.POSITIVE_INFINITY else 0.0
+        if (x == 0.0) return when {
+            d1 == 2.0 -> 1.0
+            d1 < 2.0 -> Double.POSITIVE_INFINITY
+            else -> 0.0
+        }
         return exp(logPdf(x))
     }
 
@@ -80,7 +87,7 @@ public class FDistribution(
      * @return the natural log of the probability density, or [Double.NEGATIVE_INFINITY] when [x] is non-positive.
      */
     override fun logPdf(x: Double): Double {
-        if (x < 0.0) return Double.NEGATIVE_INFINITY
+        if (x < 0.0 || x == Double.POSITIVE_INFINITY) return Double.NEGATIVE_INFINITY
         if (x == 0.0) return when {
             d1 == 2.0 -> 0.0
             d1 < 2.0 -> Double.POSITIVE_INFINITY
@@ -103,6 +110,7 @@ public class FDistribution(
      */
     override fun cdf(x: Double): Double {
         if (x <= 0.0) return 0.0
+        if (x == Double.POSITIVE_INFINITY) return 1.0
         return regularizedBeta(d1 * x / (d1 * x + d2), d1 / 2, d2 / 2)
     }
 
@@ -117,6 +125,7 @@ public class FDistribution(
      */
     override fun sf(x: Double): Double {
         if (x <= 0.0) return 1.0
+        if (x == Double.POSITIVE_INFINITY) return 0.0
         return regularizedBeta(d2 / (d1 * x + d2), d2 / 2, d1 / 2)
     }
 
@@ -137,29 +146,33 @@ public class FDistribution(
     }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double get() =
-        ln(d2 / d1) + lnBeta(d1 / 2.0, d2 / 2.0) +
-            (1.0 - d1 / 2.0) * digamma(d1 / 2.0) - (1.0 + d2 / 2.0) * digamma(d2 / 2.0) +
-            (d1 + d2) / 2.0 * digamma((d1 + d2) / 2.0)
+    override val entropy: Double
+        get() =
+            ln(d2 / d1) + lnBeta(d1 / 2.0, d2 / 2.0) +
+                (1.0 - d1 / 2.0) * digamma(d1 / 2.0) - (1.0 + d2 / 2.0) * digamma(d2 / 2.0) +
+                (d1 + d2) / 2.0 * digamma((d1 + d2) / 2.0)
 
     /** Returns the mean, defined only when the denominator degrees of freedom exceeds 2. Returns [Double.NaN] otherwise. */
     override val mean: Double get() = if (d2 > 2) d2 / (d2 - 2) else Double.NaN
 
     /** Returns the variance, defined only when the denominator degrees of freedom exceeds 4. Returns [Double.NaN] otherwise. */
-    override val variance: Double get() = if (d2 > 4) {
-        2.0 * d2 * d2 * (d1 + d2 - 2) / (d1 * (d2 - 2) * (d2 - 2) * (d2 - 4))
-    } else Double.NaN
+    override val variance: Double
+        get() = if (d2 > 4) {
+            2.0 * d2 * d2 * (d1 + d2 - 2) / (d1 * (d2 - 2) * (d2 - 2) * (d2 - 4))
+        } else Double.NaN
 
     /** Returns the skewness, defined only when the denominator degrees of freedom exceeds 6. Returns [Double.NaN] otherwise. */
-    override val skewness: Double get() = if (d2 > 6) {
-        (2 * d1 + d2 - 2) * sqrt(8.0 * (d2 - 4)) / ((d2 - 6) * sqrt(d1 * (d1 + d2 - 2)))
-    } else Double.NaN
+    override val skewness: Double
+        get() = if (d2 > 6) {
+            (2 * d1 + d2 - 2) * sqrt(8.0 * (d2 - 4)) / ((d2 - 6) * sqrt(d1 * (d1 + d2 - 2)))
+        } else Double.NaN
 
     /** Returns the excess kurtosis, defined only when the denominator degrees of freedom exceeds 8. Returns [Double.NaN] otherwise. */
-    override val kurtosis: Double get() = if (d2 > 8) {
-        12.0 * (d1 * (5 * d2 - 22) * (d1 + d2 - 2) + (d2 - 4) * (d2 - 2) * (d2 - 2)) /
-            (d1 * (d2 - 6) * (d2 - 8) * (d1 + d2 - 2))
-    } else Double.NaN
+    override val kurtosis: Double
+        get() = if (d2 > 8) {
+            12.0 * (d1 * (5 * d2 - 22) * (d1 + d2 - 2) + (d2 - 4) * (d2 - 2) * (d2 - 2)) /
+                (d1 * (d2 - 6) * (d2 - 8) * (d1 + d2 - 2))
+        } else Double.NaN
 
     /**
      * Draws a single random value from this F-distribution.
@@ -170,9 +183,6 @@ public class FDistribution(
      * @param random the source of randomness.
      * @return a random value drawn from this distribution.
      */
-    private val chi2Numerator = ChiSquaredDistribution(d1)
-    private val chi2Denominator = ChiSquaredDistribution(d2)
-
     override fun sample(random: Random): Double {
         val chi1 = chi2Numerator.sample(random) / d1
         val chi2 = chi2Denominator.sample(random) / d2

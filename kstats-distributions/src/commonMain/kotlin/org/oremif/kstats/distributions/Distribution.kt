@@ -81,6 +81,7 @@ public sealed interface Distribution {
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
      * @return the value x at which `cdf(x) = p`.
+     * @throws org.oremif.kstats.core.exceptions.InvalidParameterException if [p] is not in `[0, 1]`.
      */
     public fun quantile(p: Double): Double
 }

@@ -103,6 +103,75 @@ class HypergeometricDistributionTest {
         assertEquals(0.0, d.pmf(4), 1e-15)
     }
 
+    @Test
+    fun testEmptyPopulation() {
+        // population=0: degenerate distribution, always 0 successes
+        val d = HypergeometricDistribution(0, 0, 0)
+        assertEquals(1.0, d.pmf(0), 1e-15)
+        assertEquals(0.0, d.mean, 1e-15)
+        assertEquals(0.0, d.variance, 1e-15)
+        assertEquals(0.0, d.entropy, 1e-15)
+        assertTrue(d.skewness.isNaN())
+        assertTrue(d.kurtosis.isNaN())
+        assertEquals(0, d.sample(kotlin.random.Random(0)))
+    }
+
+    @Test
+    fun testPopulationOne() {
+        // population=1, successes=1, draws=1: degenerate at k=1
+        val d1 = HypergeometricDistribution(1, 1, 1)
+        assertEquals(1.0, d1.mean, 1e-15)
+        assertEquals(0.0, d1.variance, 1e-15)
+        assertTrue(d1.skewness.isNaN())
+        assertTrue(d1.kurtosis.isNaN())
+
+        // population=1, successes=0, draws=1: degenerate at k=0
+        val d2 = HypergeometricDistribution(1, 0, 1)
+        assertEquals(0.0, d2.mean, 1e-15)
+        assertEquals(0.0, d2.variance, 1e-15)
+    }
+
+    @Test
+    fun testDegenerateMomentsZeroDraws() {
+        // draws=0 with large N: degenerate at k=0
+        val d = HypergeometricDistribution(100, 50, 0)
+        assertEquals(0.0, d.mean, 1e-15)
+        assertEquals(0.0, d.variance, 1e-15)
+        assertTrue(d.skewness.isNaN())
+        assertTrue(d.kurtosis.isNaN())
+    }
+
+    @Test
+    fun testDegenerateMomentsAllSuccesses() {
+        // successes=population: always draw all successes, degenerate at k=draws
+        val d = HypergeometricDistribution(10, 10, 7)
+        assertEquals(7.0, d.mean, 1e-15)
+        assertEquals(0.0, d.variance, 1e-15)
+        assertTrue(d.skewness.isNaN())
+        assertTrue(d.kurtosis.isNaN())
+    }
+
+    @Test
+    fun testDegenerateMomentsZeroSuccesses() {
+        // successes=0: always 0, degenerate at k=0
+        val d = HypergeometricDistribution(10, 0, 5)
+        assertEquals(0.0, d.mean, 1e-15)
+        assertEquals(0.0, d.variance, 1e-15)
+        assertTrue(d.skewness.isNaN())
+        assertTrue(d.kurtosis.isNaN())
+    }
+
+    @Test
+    fun testDegenerateSample() {
+        // Degenerate distributions should always sample the single value
+        val d1 = HypergeometricDistribution(5, 5, 5)
+        val rng = kotlin.random.Random(42)
+        repeat(10) { assertEquals(5, d1.sample(rng)) }
+
+        val d2 = HypergeometricDistribution(10, 0, 5)
+        repeat(10) { assertEquals(0, d2.sample(rng)) }
+    }
+
     // --- Invalid input ---
 
     @Test

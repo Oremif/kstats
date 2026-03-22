@@ -48,7 +48,17 @@ public class CauchyDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
+        if (scale.isNaN() || scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
+    }
+
+    /**
+     * Provides the standard Cauchy distribution instance.
+     */
+    public companion object {
+        private val LOG_PI = ln(PI)
+
+        /** The standard Cauchy distribution with location 0 and scale 1. */
+        public val STANDARD: CauchyDistribution = CauchyDistribution(0.0, 1.0)
     }
 
     /**
@@ -75,7 +85,7 @@ public class CauchyDistribution(
      */
     override fun logPdf(x: Double): Double {
         val z = (x - location) / scale
-        return -ln(PI) - ln(scale) - ln(1.0 + z * z)
+        return -LOG_PI - ln(scale) - ln(1.0 + z * z)
     }
 
     /**
@@ -99,6 +109,7 @@ public class CauchyDistribution(
      */
     override fun sf(x: Double): Double {
         val z = (x - location) / scale
+        // Use atan(1/z) for z > 0 to avoid catastrophic cancellation in 0.5 - atan(z)/π when atan(z) → π/2
         return if (z > 0) atan(1.0 / z) / PI else 0.5 - atan(z) / PI
     }
 
@@ -146,15 +157,7 @@ public class CauchyDistribution(
      * @return a random value drawn from this distribution.
      */
     override fun sample(random: Random): Double {
-        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 1.0 - Double.MIN_VALUE)
+        val u = random.nextDouble().coerceAtLeast(Double.MIN_VALUE)
         return location + scale * tan(PI * (u - 0.5))
-    }
-
-    /**
-     * Provides the standard Cauchy distribution instance.
-     */
-    public companion object {
-        /** The standard Cauchy distribution with location 0 and scale 1. */
-        public val STANDARD: CauchyDistribution = CauchyDistribution(0.0, 1.0)
     }
 }

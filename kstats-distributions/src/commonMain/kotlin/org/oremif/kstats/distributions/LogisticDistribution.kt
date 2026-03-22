@@ -29,7 +29,13 @@ public class LogisticDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
+        if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
+        if (scale.isNaN() || scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
+    }
+
+    public companion object {
+        /** Standard logistic distribution with mu=0 and scale=1. */
+        public val STANDARD: LogisticDistribution = LogisticDistribution(0.0, 1.0)
     }
 
     /**
@@ -131,12 +137,7 @@ public class LogisticDistribution(
      * @return a random value drawn from this distribution.
      */
     override fun sample(random: Random): Double {
-        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 1.0 - Double.MIN_VALUE)
+        val u = random.nextDouble().coerceAtLeast(Double.MIN_VALUE)
         return mu + scale * ln(u / (1.0 - u))
-    }
-
-    public companion object {
-        /** Standard logistic distribution with mu=0 and scale=1. */
-        public val STANDARD: LogisticDistribution = LogisticDistribution(0.0, 1.0)
     }
 }

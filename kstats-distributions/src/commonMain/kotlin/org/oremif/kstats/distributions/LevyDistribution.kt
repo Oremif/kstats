@@ -54,7 +54,14 @@ public class LevyDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (c <= 0.0) throw InvalidParameterException("c must be positive, got $c")
+        if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
+        if (!(c > 0.0)) throw InvalidParameterException("c must be positive, got $c")
+    }
+
+    /** Provides the standard Levy distribution instance. */
+    public companion object {
+        /** The standard Levy distribution with location 0 and scale 1. */
+        public val STANDARD: LevyDistribution = LevyDistribution(0.0, 1.0)
     }
 
     /**
@@ -143,7 +150,7 @@ public class LevyDistribution(
     override val kurtosis: Double get() = Double.NaN
 
     /** The differential entropy of this distribution in nats, computed from the scale parameter [c] and the Euler-Mascheroni constant. */
-    override val entropy: Double = 0.5 * (1.0 + 3.0 * EULER_MASCHERONI + ln(16.0 * PI * c * c))
+    override val entropy: Double = 0.5 * (1.0 + 3.0 * EULER_MASCHERONI + 2.0 * ln(c) + ln(16.0 * PI))
 
     /**
      * Draws a single random value from this Levy distribution using inverse CDF sampling.
@@ -152,13 +159,7 @@ public class LevyDistribution(
      * @return a random value drawn from this distribution, always greater than [mu].
      */
     override fun sample(random: Random): Double {
-        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 1.0 - Double.MIN_VALUE)
+        val u = random.nextDouble().coerceAtLeast(Double.MIN_VALUE)
         return quantile(u)
-    }
-
-    /** Provides the standard Levy distribution instance. */
-    public companion object {
-        /** The standard Levy distribution with location 0 and scale 1. */
-        public val STANDARD: LevyDistribution = LevyDistribution(0.0, 1.0)
     }
 }

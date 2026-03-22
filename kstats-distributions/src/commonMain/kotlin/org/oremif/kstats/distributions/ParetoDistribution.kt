@@ -1,7 +1,10 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.*
+import kotlin.math.expm1
+import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 /**
@@ -31,6 +34,11 @@ public class ParetoDistribution(
     init {
         if (shape <= 0.0) throw InvalidParameterException("shape must be positive, got $shape")
         if (scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
+    }
+
+    public companion object {
+        /** Standard Pareto distribution with shape=1 and scale=1. */
+        public val STANDARD: ParetoDistribution = ParetoDistribution(1.0, 1.0)
     }
 
     /**
@@ -63,13 +71,14 @@ public class ParetoDistribution(
      * Returns the cumulative distribution function value at [x] for this Pareto distribution.
      *
      * For x ≥ scale: `1 - (xm/x)^α`. Returns 0 for x < scale.
+     * Computed via `−expm1(α·ln(xm/x))` to avoid catastrophic cancellation when x ≈ scale.
      *
      * @param x the point at which to evaluate the cumulative probability.
      * @return the probability that a value is less than or equal to [x], in the range `[0, 1]`.
      */
     override fun cdf(x: Double): Double {
         if (x < scale) return 0.0
-        return 1.0 - (scale / x).pow(shape)
+        return -expm1(shape * ln(scale / x))
     }
 
     /**
@@ -140,10 +149,5 @@ public class ParetoDistribution(
     override fun sample(random: Random): Double {
         val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 1.0 - Double.MIN_VALUE)
         return scale * u.pow(-1.0 / shape)
-    }
-
-    public companion object {
-        /** Standard Pareto distribution with shape=1 and scale=1. */
-        public val STANDARD: ParetoDistribution = ParetoDistribution(1.0, 1.0)
     }
 }

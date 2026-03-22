@@ -1,11 +1,7 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.digamma
+import org.oremif.kstats.core.*
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.core.findQuantile
-import org.oremif.kstats.core.lnBeta
-import org.oremif.kstats.core.lnGamma
-import org.oremif.kstats.core.regularizedBeta
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -52,6 +48,12 @@ public class StudentTDistribution(
 
     private val df = degreesOfFreedom
 
+    private val logPdfPrefix = lnGamma((df + 1) / 2) - lnGamma(df / 2) - 0.5 * ln(df * PI)
+    private val pdfCoeff = exp(logPdfPrefix)
+    private val halfDfPlus1 = (df + 1) / 2
+
+    private val chi2Delegate by lazy { ChiSquaredDistribution(df) }
+
     /**
      * Computes the probability density at [x].
      *
@@ -62,8 +64,8 @@ public class StudentTDistribution(
      * @return the probability density at [x]. Always non-negative.
      */
     override fun pdf(x: Double): Double {
-        val coeff = exp(lnGamma((df + 1) / 2) - lnGamma(df / 2)) / sqrt(df * PI)
-        return coeff * (1.0 + x * x / df).pow(-(df + 1) / 2)
+        if (x.isInfinite()) return 0.0
+        return pdfCoeff * (1.0 + x * x / df).pow(-halfDfPlus1)
     }
 
     /**
@@ -73,8 +75,8 @@ public class StudentTDistribution(
      * @return the natural log of the density at [x].
      */
     override fun logPdf(x: Double): Double {
-        return lnGamma((df + 1) / 2) - lnGamma(df / 2) - 0.5 * ln(df * PI) -
-            (df + 1) / 2 * ln(1.0 + x * x / df)
+        if (x.isInfinite()) return Double.NEGATIVE_INFINITY
+        return logPdfPrefix - halfDfPlus1 * ln(1.0 + x * x / df)
     }
 
     /**
@@ -87,6 +89,8 @@ public class StudentTDistribution(
      * @return the cumulative probability at [x], in the range [0, 1].
      */
     override fun cdf(x: Double): Double {
+        if (x == Double.NEGATIVE_INFINITY) return 0.0
+        if (x == Double.POSITIVE_INFINITY) return 1.0
         val t2 = x * x
         val ib = regularizedBeta(df / (df + t2), df / 2, 0.5)
         return if (x >= 0) 1.0 - 0.5 * ib else 0.5 * ib
@@ -102,6 +106,8 @@ public class StudentTDistribution(
      * @return the probability that a value exceeds [x], in the range [0, 1].
      */
     override fun sf(x: Double): Double {
+        if (x == Double.NEGATIVE_INFINITY) return 1.0
+        if (x == Double.POSITIVE_INFINITY) return 0.0
         val t2 = x * x
         val ib = regularizedBeta(df / (df + t2), df / 2, 0.5)
         return if (x >= 0) 0.5 * ib else 1.0 - 0.5 * ib
@@ -125,29 +131,32 @@ public class StudentTDistribution(
     }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double get() =
-        (df + 1.0) / 2.0 * (digamma((df + 1.0) / 2.0) - digamma(df / 2.0)) +
-            0.5 * ln(df) + lnBeta(df / 2.0, 0.5)
+    override val entropy: Double
+        get() =
+            (df + 1.0) / 2.0 * (digamma((df + 1.0) / 2.0) - digamma(df / 2.0)) +
+                0.5 * ln(df) + lnBeta(df / 2.0, 0.5)
 
     /** The mean of this distribution, which is 0 when degrees of freedom exceeds 1, or NaN otherwise. */
     override val mean: Double get() = if (df > 1) 0.0 else Double.NaN
 
     /** The variance of this distribution. Finite when df > 2, infinite when 1 < df <= 2, or NaN when df <= 1. */
-    override val variance: Double get() = when {
-        df > 2 -> df / (df - 2)
-        df > 1 -> Double.POSITIVE_INFINITY
-        else -> Double.NaN
-    }
+    override val variance: Double
+        get() = when {
+            df > 2 -> df / (df - 2)
+            df > 1 -> Double.POSITIVE_INFINITY
+            else -> Double.NaN
+        }
 
     /** The skewness of this distribution, which is 0 when degrees of freedom exceeds 3, or NaN otherwise. */
     override val skewness: Double get() = if (df > 3) 0.0 else Double.NaN
 
     /** The excess kurtosis of this distribution. Finite when df > 4, infinite when 2 < df <= 4, or NaN when df <= 2. */
-    override val kurtosis: Double get() = when {
-        df > 4 -> 6.0 / (df - 4)
-        df > 2 -> Double.POSITIVE_INFINITY
-        else -> Double.NaN
-    }
+    override val kurtosis: Double
+        get() = when {
+            df > 4 -> 6.0 / (df - 4)
+            df > 2 -> Double.POSITIVE_INFINITY
+            else -> Double.NaN
+        }
 
     /**
      * Draws a single random value from this Student's t-distribution.
@@ -159,8 +168,6 @@ public class StudentTDistribution(
      * @param random the source of randomness.
      * @return a random value drawn from this distribution.
      */
-    private val chi2Delegate = ChiSquaredDistribution(df)
-
     override fun sample(random: Random): Double {
         // Ratio of normal to chi-squared
         val normal = NormalDistribution.STANDARD.sample(random)

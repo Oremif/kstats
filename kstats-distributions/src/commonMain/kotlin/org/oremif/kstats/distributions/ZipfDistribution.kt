@@ -43,8 +43,8 @@ public class ZipfDistribution(
         if (numberOfElements < 1) throw InvalidParameterException(
             "numberOfElements must be >= 1, got $numberOfElements"
         )
-        if (exponent <= 0.0) throw InvalidParameterException(
-            "exponent must be > 0, got $exponent"
+        if (exponent.isNaN() || exponent <= 0.0 || exponent.isInfinite()) throw InvalidParameterException(
+            "exponent must be finite and positive, got $exponent"
         )
     }
 
@@ -56,6 +56,28 @@ public class ZipfDistribution(
 
     /** Log of normalization constant. */
     private val logHns = ln(hns)
+
+    /** Precomputed cumulative probabilities: cdfTable[k-1] = CDF(k) for k in 1..n. */
+    private val cdfTable = DoubleArray(n).also { arr ->
+        var sum = 0.0
+        for (i in 0 until n) {
+            sum += exp(-s * ln((i + 1).toDouble()) - logHns)
+            arr[i] = sum
+        }
+        arr[n - 1] = 1.0
+    }
+
+    /** Raw moment μ'_1 = H(n, s-1) / H(n, s). */
+    private val mu1 by lazy { generalizedHarmonic(n, s - 1.0) / hns }
+
+    /** Raw moment μ'_2 = H(n, s-2) / H(n, s). */
+    private val mu2 by lazy { generalizedHarmonic(n, s - 2.0) / hns }
+
+    /** Raw moment μ'_3 = H(n, s-3) / H(n, s). */
+    private val mu3 by lazy { generalizedHarmonic(n, s - 3.0) / hns }
+
+    /** Raw moment μ'_4 = H(n, s-4) / H(n, s). */
+    private val mu4 by lazy { generalizedHarmonic(n, s - 4.0) / hns }
 
     /**
      * Returns the probability mass at [k], the probability of observing rank [k].
@@ -85,7 +107,7 @@ public class ZipfDistribution(
     /**
      * Returns the cumulative distribution function value at [k].
      *
-     * Computed as the exact finite sum H([k], [exponent]) / H([numberOfElements], [exponent]).
+     * Uses a precomputed CDF table for O(1) lookup.
      *
      * @param k the integer point at which to evaluate the cumulative probability.
      * @return the probability of observing a rank less than or equal to [k].
@@ -93,7 +115,7 @@ public class ZipfDistribution(
     override fun cdf(k: Int): Double {
         if (k < 1) return 0.0
         if (k >= n) return 1.0
-        return generalizedHarmonic(k, s) / hns
+        return cdfTable[k - 1]
     }
 
     /**
@@ -105,37 +127,34 @@ public class ZipfDistribution(
     override fun sf(k: Int): Double {
         if (k < 1) return 1.0
         if (k >= n) return 0.0
-        return (hns - generalizedHarmonic(k, s)) / hns
+        return 1.0 - cdfTable[k - 1]
     }
 
     /**
      * Returns the quantile (inverse CDF) for the given probability [p] as an [Int].
      *
-     * Uses a linear search accumulating PMF values from k=1.
+     * Uses binary search on the precomputed CDF table for O(log n) lookup.
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
      * @return the smallest integer k in `[1, n]` at which `cdf(k) >= p`.
      */
     override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
-        var cumulative = 0.0
-        for (k in 1..n) {
-            cumulative += pmf(k)
-            if (cumulative >= p) return k
+        if (p == 0.0) return 1
+        var lo = 0
+        var hi = n - 1
+        while (lo < hi) {
+            val mid = (lo + hi) ushr 1
+            if (cdfTable[mid] < p) lo = mid + 1 else hi = mid
         }
-        return n
+        return lo + 1
     }
 
     /** The mean of this distribution: H(n, s-1) / H(n, s). */
-    override val mean: Double get() = generalizedHarmonic(n, s - 1.0) / hns
+    override val mean: Double get() = mu1
 
     /** The variance of this distribution. */
-    override val variance: Double
-        get() {
-            val hns1 = generalizedHarmonic(n, s - 1.0)
-            val hns2 = generalizedHarmonic(n, s - 2.0)
-            return (hns2 * hns - hns1 * hns1) / (hns * hns)
-        }
+    override val variance: Double get() = mu2 - mu1 * mu1
 
     /**
      * The skewness of this distribution.
@@ -146,9 +165,6 @@ public class ZipfDistribution(
     override val skewness: Double
         get() {
             if (n == 1) return Double.NaN
-            val mu1 = generalizedHarmonic(n, s - 1.0) / hns
-            val mu2 = generalizedHarmonic(n, s - 2.0) / hns
-            val mu3 = generalizedHarmonic(n, s - 3.0) / hns
             val v = mu2 - mu1 * mu1
             if (v == 0.0) return Double.NaN
             val m3 = mu3 - 3.0 * mu1 * mu2 + 2.0 * mu1 * mu1 * mu1
@@ -164,10 +180,6 @@ public class ZipfDistribution(
     override val kurtosis: Double
         get() {
             if (n == 1) return Double.NaN
-            val mu1 = generalizedHarmonic(n, s - 1.0) / hns
-            val mu2 = generalizedHarmonic(n, s - 2.0) / hns
-            val mu3 = generalizedHarmonic(n, s - 3.0) / hns
-            val mu4 = generalizedHarmonic(n, s - 4.0) / hns
             val v = mu2 - mu1 * mu1
             if (v == 0.0) return Double.NaN
             val m4 = mu4 - 4.0 * mu1 * mu3 + 6.0 * mu1 * mu1 * mu2 - 3.0 * mu1 * mu1 * mu1 * mu1
@@ -181,14 +193,16 @@ public class ZipfDistribution(
         get() {
             var h = 0.0
             for (k in 1..n) {
-                val pk = pmf(k)
-                if (pk > 0.0) h -= pk * ln(pk)
+                val logPk = logPmf(k)
+                if (logPk > Double.NEGATIVE_INFINITY) h -= exp(logPk) * logPk
             }
             return h
         }
 
     /**
      * Draws a single random value from this Zipf distribution using inverse transform sampling.
+     *
+     * Uses binary search on the precomputed CDF table for O(log n) per draw.
      *
      * @param random the source of randomness.
      * @return a random integer in `[1, n]`.

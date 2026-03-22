@@ -56,6 +56,8 @@ public class NegativeBinomialDistribution(
     private val p = probability
     private val q = 1.0 - p
 
+    private val geoDelegate = GeometricDistribution(p)
+
     /**
      * Returns the probability mass at [k], the probability of exactly [k] failures before
      * the [successes]-th success.
@@ -97,7 +99,7 @@ public class NegativeBinomialDistribution(
      */
     override fun cdf(k: Int): Double {
         if (k < 0) return 0.0
-        if (p == 1.0) return 1.0
+        if (p == 1.0 || k == Int.MAX_VALUE) return 1.0
         return regularizedBeta(p, r.toDouble(), (k + 1).toDouble())
     }
 
@@ -112,7 +114,7 @@ public class NegativeBinomialDistribution(
      */
     override fun sf(k: Int): Double {
         if (k < 0) return 1.0
-        if (p == 1.0) return 0.0
+        if (p == 1.0 || k == Int.MAX_VALUE) return 0.0
         return regularizedBeta(q, (k + 1).toDouble(), r.toDouble())
     }
 
@@ -128,6 +130,7 @@ public class NegativeBinomialDistribution(
     override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0
+        if (p == 1.0) return Int.MAX_VALUE
         // Binary search using the CDF (which uses regularizedBeta, so it's O(1) per call)
         val mu = mean
         var lo = 0
@@ -153,22 +156,23 @@ public class NegativeBinomialDistribution(
     /** The excess kurtosis of this distribution. */
     override val kurtosis: Double get() = 6.0 / r + p * p / (r * q)
 
-    /** The Shannon entropy of this distribution in nats, computed by summing over the support until convergence. */
-    override val entropy: Double get() {
-        var h = 0.0
-        var cumP = 0.0
-        var k = 0
-        while (cumP < 1.0 - 1e-15) {
-            val pk = pmf(k)
-            if (pk > 0.0) {
-                h -= pk * ln(pk)
-                cumP += pk
+    /** The Shannon entropy of this distribution in nats, computed by summing over the support until convergence. Returns zero when [probability] is 1.0 (degenerate case). */
+    override val entropy: Double
+        get() {
+            var h = 0.0
+            var cumP = 0.0
+            var k = 0
+            while (cumP < 1.0 - 1e-15) {
+                val pk = pmf(k)
+                if (pk > 0.0) {
+                    h -= pk * ln(pk)
+                    cumP += pk
+                }
+                k++
+                if (k > 100_000) break
             }
-            k++
-            if (k > 100_000) break
+            return h
         }
-        return h
-    }
 
     /**
      * Draws a single random value from this negative binomial distribution.
@@ -181,8 +185,6 @@ public class NegativeBinomialDistribution(
      * @return a random non-negative integer representing the number of failures before the
      * required successes.
      */
-    private val geoDelegate = GeometricDistribution(p)
-
     override fun sample(random: Random): Int {
         // Sum of r geometric(p) random variables
         var sum = 0

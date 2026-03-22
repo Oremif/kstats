@@ -1,11 +1,7 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.digamma
+import org.oremif.kstats.core.*
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.core.findQuantile
-import org.oremif.kstats.core.lnGamma
-import org.oremif.kstats.core.regularizedGammaP
-import org.oremif.kstats.core.regularizedGammaQ
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
@@ -50,11 +46,17 @@ public class GammaDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (shape <= 0.0) throw InvalidParameterException("shape must be positive, got $shape")
-        if (rate <= 0.0) throw InvalidParameterException("rate must be positive, got $rate")
+        if (shape.isNaN() || shape <= 0.0) throw InvalidParameterException("shape must be positive, got $shape")
+        if (rate.isNaN() || rate <= 0.0) throw InvalidParameterException("rate must be positive, got $rate")
     }
 
-    private val scale = 1.0 / rate
+    private val smallShapeHelper: GammaDistribution by lazy {
+        GammaDistribution(shape + 1.0, 1.0)
+    }
+
+    // Precomputed Marsaglia-Tsang constants for shape >= 1
+    private val marsagliaD: Double = if (shape >= 1.0) shape - 1.0 / 3.0 else 0.0
+    private val marsagliaC: Double = if (shape >= 1.0) 1.0 / sqrt(9.0 * marsagliaD) else 0.0
 
     /**
      * Computes the probability density at [x].
@@ -146,8 +148,9 @@ public class GammaDistribution(
     }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double get() =
-        shape - ln(rate) + lnGamma(shape) + (1.0 - shape) * digamma(shape)
+    override val entropy: Double
+        get() =
+            shape - ln(rate) + lnGamma(shape) + (1.0 - shape) * digamma(shape)
 
     /** The mean of this distribution, equal to shape / rate. */
     override val mean: Double get() = shape / rate
@@ -170,37 +173,31 @@ public class GammaDistribution(
      * @param random the source of randomness.
      * @return a random non-negative value drawn from this distribution.
      */
-    private val smallShapeHelper: GammaDistribution? =
-        if (shape < 1.0) GammaDistribution(shape + 1.0, 1.0) else null
-
     override fun sample(random: Random): Double {
         // Marsaglia and Tsang's method for shape >= 1
         // For shape < 1: use Gamma(shape+1)*U^(1/shape)
         if (shape < 1.0) {
-            val g1 = smallShapeHelper!!.sample(random)
+            val g1 = smallShapeHelper.sample(random)
             return g1 * random.nextDouble().pow(1.0 / shape) / rate
         }
-
-        val d = shape - 1.0 / 3.0
-        val c = 1.0 / sqrt(9.0 * d)
 
         while (true) {
             var x: Double
             var v: Double
             do {
                 x = NormalDistribution.STANDARD.sample(random)
-                v = 1.0 + c * x
+                v = 1.0 + marsagliaC * x
             } while (v <= 0.0)
 
             v = v * v * v
             val u = random.nextDouble()
 
             if (u < 1.0 - 0.0331 * x * x * x * x) {
-                return d * v / rate
+                return marsagliaD * v / rate
             }
 
-            if (ln(u) < 0.5 * x * x + d * (1.0 - v + ln(v))) {
-                return d * v / rate
+            if (ln(u) < 0.5 * x * x + marsagliaD * (1.0 - v + ln(v))) {
+                return marsagliaD * v / rate
             }
         }
     }

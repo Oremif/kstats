@@ -36,7 +36,13 @@ public class LaplaceDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
+        if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
+        if (!(scale > 0.0)) throw InvalidParameterException("scale must be positive, got $scale")
+    }
+
+    public companion object {
+        /** Standard Laplace distribution with mu = 0 and scale = 1. */
+        public val STANDARD: LaplaceDistribution = LaplaceDistribution(0.0, 1.0)
     }
 
     /**
@@ -142,12 +148,7 @@ public class LaplaceDistribution(
      * @return a random value drawn from this distribution.
      */
     override fun sample(random: Random): Double {
-        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 1.0 - Double.MIN_VALUE) - 0.5
-        return mu - scale * sign(u) * ln(1.0 - 2.0 * abs(u))
-    }
-
-    public companion object {
-        /** Standard Laplace distribution with mu = 0 and scale = 1. */
-        public val STANDARD: LaplaceDistribution = LaplaceDistribution(0.0, 1.0)
+        val u = random.nextDouble().coerceAtLeast(Double.MIN_VALUE) - 0.5
+        return mu - scale * sign(u) * ln1p(-2.0 * abs(u))
     }
 }

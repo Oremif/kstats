@@ -134,6 +134,9 @@ class GammaDistributionTest {
         assertFailsWith<InvalidParameterException> { GammaDistribution(-1.0, 1.0) }
         assertFailsWith<InvalidParameterException> { GammaDistribution(1.0, 0.0) }
         assertFailsWith<InvalidParameterException> { GammaDistribution(1.0, -1.0) }
+        assertFailsWith<InvalidParameterException> { GammaDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { GammaDistribution(1.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { GammaDistribution(Double.NaN, Double.NaN) }
     }
 
     @Test

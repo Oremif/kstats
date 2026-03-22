@@ -107,8 +107,7 @@ public class BinomialDistribution(
      * Returns the quantile (inverse CDF) for the given probability [p] as an integer.
      *
      * Finds the smallest number of successes k such that the cumulative probability
-     * of k or fewer successes is at least [p]. Uses a linear search starting from
-     * the expected value for efficiency.
+     * of k or fewer successes is at least [p]. Uses a binary search over `[0, trials]`.
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
      * @return the smallest integer k at which `cdf(k) >= p`.
@@ -116,7 +115,6 @@ public class BinomialDistribution(
     override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0
-        if (p == 1.0) return n
         // Binary search over [0, n]
         var lo = 0
         var hi = n
@@ -143,11 +141,12 @@ public class BinomialDistribution(
      *
      * @return the skewness, or [Double.NaN] for degenerate cases.
      */
-    override val skewness: Double get() {
-        val q = 1.0 - p
-        if (n == 0 || p == 0.0 || p == 1.0) return Double.NaN
-        return (1.0 - 2.0 * p) / sqrt(n.toDouble() * p * q)
-    }
+    override val skewness: Double
+        get() {
+            val q = 1.0 - p
+            if (n == 0 || p == 0.0 || p == 1.0) return Double.NaN
+            return (1.0 - 2.0 * p) / sqrt(n.toDouble() * p * q)
+        }
 
     /**
      * Returns the excess kurtosis (Fisher definition) of this binomial distribution.
@@ -159,11 +158,12 @@ public class BinomialDistribution(
      *
      * @return the excess kurtosis, or [Double.NaN] for degenerate cases.
      */
-    override val kurtosis: Double get() {
-        val q = 1.0 - p
-        if (n == 0 || p == 0.0 || p == 1.0) return Double.NaN
-        return (1.0 - 6.0 * p * q) / (n.toDouble() * p * q)
-    }
+    override val kurtosis: Double
+        get() {
+            val q = 1.0 - p
+            if (n == 0 || p == 0.0 || p == 1.0) return Double.NaN
+            return (1.0 - 6.0 * p * q) / (n.toDouble() * p * q)
+        }
 
     /**
      * Returns the Shannon entropy of this binomial distribution in nats.
@@ -174,15 +174,16 @@ public class BinomialDistribution(
      *
      * @return the entropy in nats. Always non-negative.
      */
-    override val entropy: Double get() {
-        if (n == 0) return 0.0
-        var h = 0.0
-        for (k in 0..n) {
-            val pk = pmf(k)
-            if (pk > 0.0) h -= pk * ln(pk)
+    override val entropy: Double
+        get() {
+            if (n == 0) return 0.0
+            var h = 0.0
+            for (k in 0..n) {
+                val pk = pmf(k)
+                if (pk > 0.0) h -= pk * ln(pk)
+            }
+            return h
         }
-        return h
-    }
 
     /**
      * Returns the survival function value at [k] for this binomial distribution.

@@ -4,11 +4,7 @@ import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.lnFactorial
 import org.oremif.kstats.core.regularizedGammaP
 import org.oremif.kstats.core.regularizedGammaQ
-import kotlin.math.ceil
-import kotlin.math.exp
-import kotlin.math.ln
-import kotlin.math.roundToInt
-import kotlin.math.sqrt
+import kotlin.math.*
 import kotlin.random.Random
 
 /**
@@ -43,10 +39,12 @@ public class PoissonDistribution(
 ) : DiscreteDistribution {
 
     init {
-        if (rate <= 0.0) throw InvalidParameterException("rate must be positive, got $rate")
+        if (rate.isNaN() || rate <= 0.0 || rate.isInfinite()) throw InvalidParameterException("rate must be finite and positive, got $rate")
     }
 
-    private val lambda = rate
+    private val normalApprox: NormalDistribution by lazy {
+        NormalDistribution(rate, sqrt(rate))
+    }
 
     /**
      * Returns the probability mass at [k] for this Poisson distribution.
@@ -75,7 +73,7 @@ public class PoissonDistribution(
      */
     override fun logPmf(k: Int): Double {
         if (k < 0) return Double.NEGATIVE_INFINITY
-        return k * ln(lambda) - lambda - lnFactorial(k)
+        return k * ln(rate) - rate - lnFactorial(k)
     }
 
     /**
@@ -91,7 +89,7 @@ public class PoissonDistribution(
     override fun cdf(k: Int): Double {
         if (k < 0) return 0.0
         // P(X <= k) = Q(k+1, lambda) = regularizedGammaQ(k+1, lambda)
-        return regularizedGammaQ((k + 1).toDouble(), lambda)
+        return regularizedGammaQ((k + 1).toDouble(), rate)
     }
 
     /**
@@ -107,9 +105,15 @@ public class PoissonDistribution(
     override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0
+        if (p == 1.0) {
+            // Infinite support: find the smallest k where cdf reaches 1.0 in floating point
+            var k = maxOf(ceil(rate + 20.0 * sqrt(rate)).toInt(), 100)
+            while (cdf(k) < 1.0) k *= 2
+            return k
+        }
         // Binary search with expanding upper bound
         var lo = 0
-        var hi = maxOf(ceil(lambda + 20.0 * sqrt(lambda)).toInt(), 100)
+        var hi = maxOf(ceil(rate + 20.0 * sqrt(rate)).toInt(), 100)
         while (cdf(hi) < p) hi *= 2
         while (lo < hi) {
             val mid = lo + (hi - lo) / 2
@@ -119,16 +123,16 @@ public class PoissonDistribution(
     }
 
     /** The mean of this distribution, equal to [rate] (lambda). */
-    override val mean: Double get() = lambda
+    override val mean: Double get() = rate
 
     /** The variance of this distribution, equal to [rate] (lambda). For the Poisson, mean and variance are equal. */
-    override val variance: Double get() = lambda
+    override val variance: Double get() = rate
 
     /** The skewness of this distribution, equal to 1 / sqrt(lambda). Always positive (right-skewed). */
-    override val skewness: Double get() = 1.0 / sqrt(lambda)
+    override val skewness: Double get() = 1.0 / sqrt(rate)
 
     /** The excess kurtosis of this distribution, equal to 1 / lambda. Always positive (leptokurtic). */
-    override val kurtosis: Double get() = 1.0 / lambda
+    override val kurtosis: Double get() = 1.0 / rate
 
     /**
      * Returns the Shannon entropy of this Poisson distribution in nats.
@@ -139,21 +143,23 @@ public class PoissonDistribution(
      *
      * @return the entropy in nats. Always non-negative.
      */
-    override val entropy: Double get() {
-        var h = 0.0
-        var cumP = 0.0
-        var k = 0
-        while (cumP < 1.0 - 1e-15) {
-            val pk = pmf(k)
-            if (pk > 0.0) {
-                h -= pk * ln(pk)
-                cumP += pk
+    override val entropy: Double
+        get() {
+            var h = 0.0
+            var cumP = 0.0
+            val start = maxOf(0, floor(rate - 10.0 * sqrt(rate)).toInt())
+            var k = start
+            while (cumP < 1.0 - 1e-15) {
+                val pk = pmf(k)
+                if (pk > 0.0) {
+                    h -= pk * ln(pk)
+                    cumP += pk
+                }
+                k++
+                if (k - start > 100_000) break
             }
-            k++
-            if (k > 100_000) break
+            return h
         }
-        return h
-    }
 
     /**
      * Returns the survival function value at [k] for this Poisson distribution.
@@ -166,7 +172,7 @@ public class PoissonDistribution(
      */
     override fun sf(k: Int): Double {
         if (k < 0) return 1.0
-        return regularizedGammaP((k + 1).toDouble(), lambda)
+        return regularizedGammaP((k + 1).toDouble(), rate)
     }
 
     /**
@@ -180,9 +186,9 @@ public class PoissonDistribution(
      * @return a random non-negative integer drawn from this distribution.
      */
     override fun sample(random: Random): Int {
-        // Knuth's algorithm for small lambda
-        if (lambda < 30) {
-            val l = exp(-lambda)
+        // Knuth's algorithm for small rate
+        if (rate < 30) {
+            val l = exp(-rate)
             var k = 0
             var p = 1.0
             do {
@@ -191,7 +197,7 @@ public class PoissonDistribution(
             } while (p > l)
             return k - 1
         }
-        // For large lambda, use normal approximation
-        return NormalDistribution(lambda, sqrt(lambda)).sample(random).roundToInt().coerceAtLeast(0)
+        // For large rate, use normal approximation
+        return normalApprox.sample(random).roundToInt().coerceAtLeast(0)
     }
 }

@@ -1,11 +1,7 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.digamma
+import org.oremif.kstats.core.*
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.core.findQuantile
-import org.oremif.kstats.core.lnGamma
-import org.oremif.kstats.core.regularizedGammaP
-import org.oremif.kstats.core.regularizedGammaQ
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
@@ -54,6 +50,8 @@ public class ChiSquaredDistribution(
     private val df = degreesOfFreedom
     private val halfDf = df / 2.0
 
+    private val gammaDelegate: GammaDistribution by lazy { GammaDistribution(halfDf, 0.5) }
+
     /**
      * Computes the probability density at [x].
      *
@@ -78,7 +76,7 @@ public class ChiSquaredDistribution(
      * @return the natural log of the density at [x].
      */
     override fun logPdf(x: Double): Double {
-        if (x < 0.0) return Double.NEGATIVE_INFINITY
+        if (x < 0.0 || x == Double.POSITIVE_INFINITY) return Double.NEGATIVE_INFINITY
         if (x == 0.0) return when {
             df == 2.0 -> -ln(2.0)
             df < 2.0 -> Double.POSITIVE_INFINITY
@@ -139,8 +137,9 @@ public class ChiSquaredDistribution(
     }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double get() =
-        halfDf + ln(2.0) + lnGamma(halfDf) + (1.0 - halfDf) * digamma(halfDf)
+    override val entropy: Double
+        get() =
+            halfDf + ln(2.0) + lnGamma(halfDf) + (1.0 - halfDf) * digamma(halfDf)
 
     /** The mean of this distribution, equal to the degrees of freedom. */
     override val mean: Double get() = df
@@ -163,8 +162,6 @@ public class ChiSquaredDistribution(
      * @param random the source of randomness.
      * @return a random non-negative value drawn from this distribution.
      */
-    private val gammaDelegate = GammaDistribution(halfDf, 0.5)
-
     override fun sample(random: Random): Double {
         return gammaDelegate.sample(random)
     }

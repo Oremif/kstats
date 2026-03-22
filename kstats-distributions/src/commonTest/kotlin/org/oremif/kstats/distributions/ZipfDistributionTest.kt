@@ -227,6 +227,9 @@ class ZipfDistributionTest {
         assertFailsWith<InvalidParameterException> { ZipfDistribution(-1, 1.0) }
         assertFailsWith<InvalidParameterException> { ZipfDistribution(10, 0.0) }
         assertFailsWith<InvalidParameterException> { ZipfDistribution(10, -1.0) }
+        assertFailsWith<InvalidParameterException> { ZipfDistribution(10, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { ZipfDistribution(10, Double.POSITIVE_INFINITY) }
+        assertFailsWith<InvalidParameterException> { ZipfDistribution(10, Double.NEGATIVE_INFINITY) }
     }
 
     // --- Property-based ---

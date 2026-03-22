@@ -58,6 +58,14 @@ class GeometricDistributionTest {
         assertEquals(1, d.quantileInt(0.5))
         assertEquals(3, d.quantileInt(0.75))
         assertEquals(0, d.quantileInt(0.0))
+        assertEquals(Int.MAX_VALUE, d.quantileInt(1.0))
+    }
+
+    @Test
+    fun testCdfSfAtIntMaxValue() {
+        val d = GeometricDistribution(0.3)
+        assertEquals(1.0, d.cdf(Int.MAX_VALUE), 1e-15)
+        assertEquals(0.0, d.sf(Int.MAX_VALUE), 1e-15)
     }
 
     // --- Moments ---
@@ -101,6 +109,14 @@ class GeometricDistributionTest {
         assertEquals(1.0, d.pmf(0), 1e-15)
         assertEquals(0.0, d.pmf(1), 1e-15)
         assertEquals(0.0, d.mean, 1e-15)
+        assertEquals(0.0, d.variance, 1e-15)
+        assertEquals(1.0, d.cdf(0), 1e-15)
+        assertEquals(1.0, d.cdf(5), 1e-15)
+        assertEquals(0.0, d.sf(0), 1e-15)
+        assertEquals(0.0, d.sf(5), 1e-15)
+        assertEquals(0.0, d.logPmf(0), 1e-15)
+        assertEquals(Double.NEGATIVE_INFINITY, d.logPmf(1))
+        assertEquals(0, d.quantileInt(0.5))
     }
 
     // --- Invalid input ---

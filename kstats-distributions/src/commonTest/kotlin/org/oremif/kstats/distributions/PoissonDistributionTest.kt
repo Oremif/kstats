@@ -101,6 +101,9 @@ class PoissonDistributionTest {
     fun testInvalidParameters() {
         assertFailsWith<InvalidParameterException> { PoissonDistribution(0.0) }
         assertFailsWith<InvalidParameterException> { PoissonDistribution(-1.0) }
+        assertFailsWith<InvalidParameterException> { PoissonDistribution(Double.NaN) }
+        assertFailsWith<InvalidParameterException> { PoissonDistribution(Double.POSITIVE_INFINITY) }
+        assertFailsWith<InvalidParameterException> { PoissonDistribution(Double.NEGATIVE_INFINITY) }
     }
 
     @Test

@@ -45,7 +45,8 @@ public class LogNormalDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (sigma <= 0.0) throw InvalidParameterException("sigma must be positive, got $sigma")
+        if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
+        if (sigma.isNaN() || sigma <= 0.0) throw InvalidParameterException("sigma must be positive, got $sigma")
     }
 
     private val normal = NormalDistribution(mu, sigma)
@@ -132,25 +133,28 @@ public class LogNormalDistribution(
     override val mean: Double get() = exp(mu + sigma * sigma / 2.0)
 
     /** Returns the variance of the log-normal distribution. */
-    override val variance: Double get() {
-        val s2 = sigma * sigma
-        return (exp(s2) - 1.0) * exp(2.0 * mu + s2)
-    }
+    override val variance: Double
+        get() {
+            val s2 = sigma * sigma
+            return (exp(s2) - 1.0) * exp(2.0 * mu + s2)
+        }
 
     /** Returns the skewness, which is always positive (right-skewed). */
-    override val skewness: Double get() {
-        val s2 = sigma * sigma
-        return (exp(s2) + 2.0) * sqrt(exp(s2) - 1.0)
-    }
+    override val skewness: Double
+        get() {
+            val s2 = sigma * sigma
+            return (exp(s2) + 2.0) * sqrt(exp(s2) - 1.0)
+        }
 
     /** Returns the excess kurtosis, which is always positive (heavier tails than a normal distribution). */
-    override val kurtosis: Double get() { // excess
-        val s2 = sigma * sigma
-        return exp(4.0 * s2) + 2.0 * exp(3.0 * s2) + 3.0 * exp(2.0 * s2) - 6.0
-    }
+    override val kurtosis: Double
+        get() { // excess
+            val s2 = sigma * sigma
+            return exp(4.0 * s2) + 2.0 * exp(3.0 * s2) + 3.0 * exp(2.0 * s2) - 6.0
+        }
 
     /** Returns the Shannon entropy of this distribution in nats. */
-    override val entropy: Double get() = mu + 0.5 + ln(sigma) + 0.5 * ln(2.0 * PI)
+    override val entropy: Double = mu + 0.5 + ln(sigma) + 0.5 * ln(2.0 * PI)
 
     /**
      * Draws a single random value from this log-normal distribution.

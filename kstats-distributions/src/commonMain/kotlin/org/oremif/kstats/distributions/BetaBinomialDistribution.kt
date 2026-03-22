@@ -57,6 +57,8 @@ public class BetaBinomialDistribution(
     private val b = beta
     private val lnBetaAB = lnBeta(a, b)
 
+    private val betaDelegate: BetaDistribution by lazy { BetaDistribution(a, b) }
+
     /**
      * Returns the probability of exactly [k] successes in this beta-binomial distribution.
      *
@@ -163,18 +165,20 @@ public class BetaBinomialDistribution(
     override val mean: Double get() = n * a / (a + b)
 
     /** The variance of this distribution, overdispersed relative to the binomial by a factor of (alpha + beta + n) / (alpha + beta + 1). */
-    override val variance: Double get() {
-        if (n == 0) return 0.0
-        val ab = a + b
-        return n * a * b * (ab + n) / (ab * ab * (ab + 1.0))
-    }
+    override val variance: Double
+        get() {
+            if (n == 0) return 0.0
+            val ab = a + b
+            return n * a * b * (ab + n) / (ab * ab * (ab + 1.0))
+        }
 
     /** The skewness of this distribution, computed from the shape parameters and trial count. Returns [Double.NaN] when trials is zero. */
-    override val skewness: Double get() {
-        if (n == 0) return Double.NaN
-        val ab = a + b
-        return (ab + 2.0 * n) * (b - a) / (ab + 2.0) * sqrt((1.0 + ab) / (n * a * b * (ab + n)))
-    }
+    override val skewness: Double
+        get() {
+            if (n == 0) return Double.NaN
+            val ab = a + b
+            return (ab + 2.0 * n) * (b - a) / (ab + 2.0) * sqrt((1.0 + ab) / (n * a * b * (ab + n)))
+        }
 
     /**
      * Returns the excess kurtosis (Fisher definition) of this beta-binomial distribution.
@@ -185,26 +189,27 @@ public class BetaBinomialDistribution(
      *
      * @return the excess kurtosis, or [Double.NaN] for degenerate cases.
      */
-    override val kurtosis: Double get() {
-        if (n == 0) return Double.NaN
-        val nd = n.toDouble()
-        val ab = a + b
-        // Falling factorial moments: e_k = [n]_k * prod_{i=0}^{k-1} (a+i)/(ab+i)
-        val e1 = nd * a / ab
-        val e2 = nd * (nd - 1) * a * (a + 1) / (ab * (ab + 1))
-        val e3 = nd * (nd - 1) * (nd - 2) * a * (a + 1) * (a + 2) / (ab * (ab + 1) * (ab + 2))
-        val e4 = nd * (nd - 1) * (nd - 2) * (nd - 3) * a * (a + 1) * (a + 2) * (a + 3) /
-            (ab * (ab + 1) * (ab + 2) * (ab + 3))
-        // Raw moments from factorial moments
-        val ex2 = e2 + e1
-        val ex3 = e3 + 3 * e2 + e1
-        val ex4 = e4 + 6 * e3 + 7 * e2 + e1
-        val mu = e1
-        val mu2 = ex2 - mu * mu
-        if (mu2 == 0.0) return Double.NaN
-        val mu4 = ex4 - 4 * mu * ex3 + 6 * mu * mu * ex2 - 3 * mu * mu * mu * mu
-        return mu4 / (mu2 * mu2) - 3.0
-    }
+    override val kurtosis: Double
+        get() {
+            if (n == 0) return Double.NaN
+            val nd = n.toDouble()
+            val ab = a + b
+            // Falling factorial moments: e_k = [n]_k * prod_{i=0}^{k-1} (a+i)/(ab+i)
+            val e1 = nd * a / ab
+            val e2 = nd * (nd - 1) * a * (a + 1) / (ab * (ab + 1))
+            val e3 = nd * (nd - 1) * (nd - 2) * a * (a + 1) * (a + 2) / (ab * (ab + 1) * (ab + 2))
+            val e4 = nd * (nd - 1) * (nd - 2) * (nd - 3) * a * (a + 1) * (a + 2) * (a + 3) /
+                (ab * (ab + 1) * (ab + 2) * (ab + 3))
+            // Raw moments from factorial moments
+            val ex2 = e2 + e1
+            val ex3 = e3 + 3 * e2 + e1
+            val ex4 = e4 + 6 * e3 + 7 * e2 + e1
+            val mu = e1
+            val mu2 = ex2 - mu * mu
+            if (mu2 == 0.0) return Double.NaN
+            val mu4 = ex4 - 4 * mu * ex3 + 6 * mu * mu * ex2 - 3 * mu * mu * mu * mu
+            return mu4 / (mu2 * mu2) - 3.0
+        }
 
     /**
      * Returns the Shannon entropy of this beta-binomial distribution in nats.
@@ -214,15 +219,16 @@ public class BetaBinomialDistribution(
      *
      * @return the entropy in nats. Always non-negative.
      */
-    override val entropy: Double get() {
-        if (n == 0) return 0.0
-        var h = 0.0
-        for (k in 0..n) {
-            val pk = pmf(k)
-            if (pk > 0.0) h -= pk * ln(pk)
+    override val entropy: Double
+        get() {
+            if (n == 0) return 0.0
+            var h = 0.0
+            for (k in 0..n) {
+                val lp = logPmf(k)
+                if (lp > Double.NEGATIVE_INFINITY) h -= exp(lp) * lp
+            }
+            return h
         }
-        return h
-    }
 
     /**
      * Draws a single random integer from this beta-binomial distribution using compound sampling.
@@ -235,7 +241,9 @@ public class BetaBinomialDistribution(
      * @return a random number of successes drawn from this distribution, in `[0, trials]`.
      */
     override fun sample(random: Random): Int {
-        val p = BetaDistribution(a, b).sample(random).coerceIn(0.0, 1.0)
+        var p = betaDelegate.sample(random)
+        if (p.isNaN()) p = a / (a + b)
+        p = p.coerceIn(0.0, 1.0)
         return BinomialDistribution(n, p).sample(random)
     }
 }

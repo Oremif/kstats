@@ -290,6 +290,21 @@ class ParetoDistributionTest {
         assertTrue(ParetoDistribution(3.0, 1.0).kurtosis.isNaN())
     }
 
+    // --- CDF precision near scale ---
+
+    @Test
+    fun testCdfPrecisionNearScale() {
+        // CDF at x barely above scale — uses expm1 to avoid cancellation in 1-(scale/x)^shape.
+        val d = ParetoDistribution(100.0, 1.0)
+        // mpmath: 1 - (1/1.0001)^100 ≈ 0.009949671258790518
+        assertEquals(0.009949671258790518, d.cdf(1.0001), 1e-12)
+
+        // shape=10, x=1.001 — small CDF value
+        val d2 = ParetoDistribution(10.0, 1.0)
+        // mpmath: 1 - (1/1.001)^10 ≈ 0.009945219286997006
+        assertEquals(0.009945219286997006, d2.cdf(1.001), 1e-12)
+    }
+
     // --- Extreme parameters ---
 
     @Test
@@ -329,6 +344,18 @@ class ParetoDistributionTest {
     }
 
     @Test
+    fun testPdfInfinity() {
+        assertEquals(0.0, std.pdf(Double.POSITIVE_INFINITY), 0.0)
+        assertEquals(0.0, std.pdf(Double.NEGATIVE_INFINITY), 0.0)
+    }
+
+    @Test
+    fun testLogPdfInfinity() {
+        assertEquals(Double.NEGATIVE_INFINITY, std.logPdf(Double.POSITIVE_INFINITY))
+        assertEquals(Double.NEGATIVE_INFINITY, std.logPdf(Double.NEGATIVE_INFINITY))
+    }
+
+    @Test
     fun testCdfNaN() {
         assertTrue(std.cdf(Double.NaN).isNaN())
     }
@@ -343,6 +370,11 @@ class ParetoDistributionTest {
     fun testSfInfinity() {
         assertEquals(0.0, std.sf(Double.POSITIVE_INFINITY), 0.0)
         assertEquals(1.0, std.sf(Double.NEGATIVE_INFINITY), 0.0)
+    }
+
+    @Test
+    fun testQuantileNaN() {
+        assertFailsWith<InvalidParameterException> { std.quantile(Double.NaN) }
     }
 
     // --- Property-based ---

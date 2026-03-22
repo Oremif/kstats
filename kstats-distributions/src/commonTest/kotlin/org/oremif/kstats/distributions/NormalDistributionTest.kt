@@ -1,10 +1,12 @@
 package org.oremif.kstats.distributions
 
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.PI
 import kotlin.math.exp
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class NormalDistributionTest {
@@ -134,5 +136,52 @@ class NormalDistributionTest {
             assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
             prev = cdfVal
         }
+    }
+
+    // --- Invalid input ---
+
+    @Test
+    fun testInvalidParameters() {
+        assertFailsWith<InvalidParameterException> { NormalDistribution(0.0, 0.0) }
+        assertFailsWith<InvalidParameterException> { NormalDistribution(0.0, -1.0) }
+        assertFailsWith<InvalidParameterException> { NormalDistribution(0.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { NormalDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { NormalDistribution(Double.NaN, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { NormalDistribution(Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { NormalDistribution(Double.NEGATIVE_INFINITY, 1.0) }
+    }
+
+    @Test
+    fun testQuantileInvalidP() {
+        assertFailsWith<InvalidParameterException> { std.quantile(-0.1) }
+        assertFailsWith<InvalidParameterException> { std.quantile(1.1) }
+        assertFailsWith<InvalidParameterException> { std.quantile(Double.NaN) }
+    }
+
+    @Test
+    fun testQuantileBoundary() {
+        assertEquals(Double.NEGATIVE_INFINITY, std.quantile(0.0))
+        assertEquals(Double.POSITIVE_INFINITY, std.quantile(1.0))
+    }
+
+    @Test
+    fun testCdfAtInfinity() {
+        assertEquals(0.0, std.cdf(Double.NEGATIVE_INFINITY), 0.0)
+        assertEquals(1.0, std.cdf(Double.POSITIVE_INFINITY), 0.0)
+        assertTrue(std.cdf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testPdfAtInfinity() {
+        assertEquals(0.0, std.pdf(Double.POSITIVE_INFINITY), 0.0)
+        assertEquals(0.0, std.pdf(Double.NEGATIVE_INFINITY), 0.0)
+        assertTrue(std.pdf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testSfAtInfinity() {
+        assertEquals(1.0, std.sf(Double.NEGATIVE_INFINITY), 0.0)
+        assertEquals(0.0, std.sf(Double.POSITIVE_INFINITY), 0.0)
+        assertTrue(std.sf(Double.NaN).isNaN())
     }
 }

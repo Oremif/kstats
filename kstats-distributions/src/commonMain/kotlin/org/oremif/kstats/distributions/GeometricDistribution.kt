@@ -77,6 +77,7 @@ public class GeometricDistribution(
      */
     override fun cdf(k: Int): Double {
         if (k < 0) return 0.0
+        if (k == Int.MAX_VALUE) return 1.0
         return 1.0 - q.pow(k + 1)
     }
 
@@ -107,10 +108,11 @@ public class GeometricDistribution(
     override val kurtosis: Double get() = 6.0 + p * p / q
 
     /** The Shannon entropy of this distribution in nats. Returns zero when [probability] is 1.0 (degenerate case). */
-    override val entropy: Double get() {
-        if (p == 1.0) return 0.0
-        return (-q * ln(q) - p * ln(p)) / p
-    }
+    override val entropy: Double
+        get() {
+            if (p == 1.0) return 0.0
+            return (-q * ln(q) - p * ln(p)) / p
+        }
 
     /**
      * Returns the survival function value at [k].
@@ -123,6 +125,7 @@ public class GeometricDistribution(
      */
     override fun sf(k: Int): Double {
         if (k < 0) return 1.0
+        if (k == Int.MAX_VALUE) return 0.0
         return q.pow(k + 1)
     }
 

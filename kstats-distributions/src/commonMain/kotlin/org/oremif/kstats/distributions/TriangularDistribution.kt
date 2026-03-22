@@ -54,6 +54,10 @@ public class TriangularDistribution(
     private val bc = b - c
     private val pc = ca / ba
 
+    private companion object {
+        private val SQRT2 = sqrt(2.0)
+    }
+
     /**
      * Computes the probability density at [x] using the piecewise linear density function.
      *
@@ -64,6 +68,7 @@ public class TriangularDistribution(
      * @return the probability density at [x], always non-negative.
      */
     override fun pdf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
         x !in a..b -> 0.0
         x < c -> 2.0 * (x - a) / (ba * ca)
         x > c -> 2.0 * (b - x) / (ba * bc)
@@ -81,6 +86,7 @@ public class TriangularDistribution(
      * outside the support.
      */
     override fun logPdf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
         x !in a..b -> Double.NEGATIVE_INFINITY
         x < c -> ln(2.0) + ln(x - a) - ln(ba) - ln(ca)
         x > c -> ln(2.0) + ln(b - x) - ln(ba) - ln(bc)
@@ -97,6 +103,7 @@ public class TriangularDistribution(
      * @return the probability that a value drawn from this distribution is less than or equal to [x].
      */
     override fun cdf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
         x <= a -> 0.0
         x <= c -> (x - a) * (x - a) / (ba * ca)
         x < b -> 1.0 - (b - x) * (b - x) / (ba * bc)
@@ -113,6 +120,7 @@ public class TriangularDistribution(
      * @return the probability that a value drawn from this distribution is greater than [x].
      */
     override fun sf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
         x <= a -> 1.0
         x <= c -> 1.0 - (x - a) * (x - a) / (ba * ca)
         x < b -> (b - x) * (b - x) / (ba * bc)
@@ -145,11 +153,12 @@ public class TriangularDistribution(
     override val variance: Double get() = (a * a + b * b + c * c - a * b - a * c - b * c) / 18.0
 
     /** The skewness of this distribution, computed from [a], [b], and [c]. Zero when the distribution is symmetric (`c = (a + b) / 2`). */
-    override val skewness: Double get() {
-        val num = SQRT2 * (a + b - 2.0 * c) * (2.0 * a - b - c) * (a - 2.0 * b + c)
-        val den = 5.0 * (a * a + b * b + c * c - a * b - a * c - b * c).let { it * sqrt(it) }
-        return num / den
-    }
+    override val skewness: Double
+        get() {
+            val num = SQRT2 * (a + b - 2.0 * c) * (2.0 * a - b - c) * (a - 2.0 * b + c)
+            val den = 5.0 * (a * a + b * b + c * c - a * b - a * c - b * c).let { it * sqrt(it) }
+            return num / den
+        }
 
     /** The excess kurtosis of this distribution, always `-0.6` for any triangular distribution regardless of parameters. */
     override val kurtosis: Double get() = -0.6
@@ -164,8 +173,4 @@ public class TriangularDistribution(
      * @return a random value in `[a, b]` drawn from this distribution.
      */
     override fun sample(random: Random): Double = quantile(random.nextDouble())
-
-    private companion object {
-        private val SQRT2 = sqrt(2.0)
-    }
 }

@@ -50,10 +50,19 @@ class UniformDiscreteDistributionTest {
     @Test
     fun testQuantileIntKnownValues() {
         val d = UniformDiscreteDistribution(1, 6)
+        assertEquals(1, d.quantileInt(0.0))
         assertEquals(2, d.quantileInt(0.25))
         assertEquals(3, d.quantileInt(0.5))
         assertEquals(6, d.quantileInt(0.99))
-        assertEquals(1, d.quantileInt(0.0))
+        assertEquals(6, d.quantileInt(1.0))
+    }
+
+    @Test
+    fun testQuantileDoubleInterface() {
+        val d: Distribution = UniformDiscreteDistribution(1, 6)
+        assertEquals(3.0, d.quantile(0.5), 1e-15)
+        assertEquals(1.0, d.quantile(0.0), 1e-15)
+        assertEquals(6.0, d.quantile(1.0), 1e-15)
     }
 
     // --- Moments ---
@@ -117,13 +126,24 @@ class UniformDiscreteDistributionTest {
         // cdf(0) = 1000001/2000001
         assertEquals(1_000_001.0 / 2_000_001.0, d1.cdf(0), 1e-10)
 
-        // Near Int.MAX_VALUE boundary: integer overflow bug in mean calculation
-        // (a + b) overflows Int — mean returns wrong value (known limitation)
+        // Near Int.MAX_VALUE boundary — no integer overflow after Long-based n
         val lo = Int.MAX_VALUE - 10
         val hi = Int.MAX_VALUE
         val d2 = UniformDiscreteDistribution(lo, hi)
         // 11 values: pmf = 1/11
         assertEquals(1.0 / 11.0, d2.pmf(lo), 1e-15)
+        assertEquals((lo / 2.0 + hi / 2.0), d2.mean, 1e-6)
+        // sample should not throw
+        d2.sample(kotlin.random.Random(0))
+    }
+
+    @Test
+    fun testFullIntRange() {
+        // Range spanning Int.MIN_VALUE to 0 — n > Int.MAX_VALUE (requires Long)
+        val d = UniformDiscreteDistribution(Int.MIN_VALUE, 0)
+        val expectedN = Int.MAX_VALUE.toLong() + 2 // 2147483649
+        assertEquals(1.0 / expectedN.toDouble(), d.pmf(0), 1e-25)
+        assertEquals(Int.MIN_VALUE / 2.0, d.mean, 1e-6)
     }
 
     // --- Invalid input ---

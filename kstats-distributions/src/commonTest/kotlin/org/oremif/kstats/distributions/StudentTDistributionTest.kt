@@ -142,6 +142,28 @@ class StudentTDistributionTest {
     }
 
     @Test
+    fun testNaNInput() {
+        val t = StudentTDistribution(5.0)
+        assertTrue(t.pdf(Double.NaN).isNaN())
+        assertTrue(t.logPdf(Double.NaN).isNaN())
+        assertTrue(t.cdf(Double.NaN).isNaN())
+        assertTrue(t.sf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testInfinityInput() {
+        val t = StudentTDistribution(5.0)
+        assertEquals(0.0, t.pdf(Double.POSITIVE_INFINITY))
+        assertEquals(0.0, t.pdf(Double.NEGATIVE_INFINITY))
+        assertEquals(Double.NEGATIVE_INFINITY, t.logPdf(Double.POSITIVE_INFINITY))
+        assertEquals(Double.NEGATIVE_INFINITY, t.logPdf(Double.NEGATIVE_INFINITY))
+        assertEquals(1.0, t.cdf(Double.POSITIVE_INFINITY))
+        assertEquals(0.0, t.cdf(Double.NEGATIVE_INFINITY))
+        assertEquals(0.0, t.sf(Double.POSITIVE_INFINITY))
+        assertEquals(1.0, t.sf(Double.NEGATIVE_INFINITY))
+    }
+
+    @Test
     fun testQuantileInvalidP() {
         val t = StudentTDistribution(5.0)
         assertFailsWith<InvalidParameterException> { t.quantile(-0.1) }

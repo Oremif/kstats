@@ -308,6 +308,22 @@ class LogisticDistributionTest {
     }
 
     @Test
+    fun testInvalidScaleNaN() {
+        assertFailsWith<InvalidParameterException> { LogisticDistribution(0.0, Double.NaN) }
+    }
+
+    @Test
+    fun testInvalidMuNaN() {
+        assertFailsWith<InvalidParameterException> { LogisticDistribution(Double.NaN, 1.0) }
+    }
+
+    @Test
+    fun testInvalidMuInfinity() {
+        assertFailsWith<InvalidParameterException> { LogisticDistribution(Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { LogisticDistribution(Double.NEGATIVE_INFINITY, 1.0) }
+    }
+
+    @Test
     fun testInvalidQuantileProbability() {
         assertFailsWith<InvalidParameterException> { std.quantile(-0.1) }
         assertFailsWith<InvalidParameterException> { std.quantile(1.1) }
