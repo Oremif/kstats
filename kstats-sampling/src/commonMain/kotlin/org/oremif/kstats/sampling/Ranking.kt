@@ -112,8 +112,13 @@ public fun DoubleArray.rank(tieMethod: TieMethod = TieMethod.AVERAGE): DoubleArr
  * fall at or below it.
  *
  * Percentile ranks are derived from average-method ranks and scaled to the range
- * 0 to 100. The smallest value receives 0 and the largest receives 100. For a
- * single-element array, the result is 0.
+ * 0 to 100 using the formula `(rank - 1) / (n - 1) * 100`. The smallest value
+ * receives 0 and the largest receives 100. For a single-element array, the result
+ * is 0 (the sole element is the minimum by convention).
+ *
+ * This formula maps ranks linearly so that the minimum and maximum always land on
+ * 0 and 100 respectively, which differs from the SciPy convention
+ * `100 * (rank - 0.5) / n` that would assign 50 to a single element.
  *
  * ### Example:
  * ```kotlin
@@ -132,3 +137,33 @@ public fun DoubleArray.percentileRank(): DoubleArray {
     val ranks = rank(TieMethod.AVERAGE)
     return DoubleArray(n) { (ranks[it] - 1.0) / (n - 1).coerceAtLeast(1) * 100.0 }
 }
+
+/**
+ * Computes ranks for each element based on its relative position when sorted.
+ *
+ * This is a convenience overload that accepts any [Iterable]. The collection is
+ * materialized to a [DoubleArray] internally.
+ *
+ * @param tieMethod how to handle tied (equal) values. Defaults to [TieMethod.AVERAGE].
+ * @return a list of ranks in the same order as the input.
+ * @throws InsufficientDataException if the collection is empty.
+ * @throws InvalidParameterException if the collection contains NaN or Infinity.
+ * @see DoubleArray.rank
+ */
+public fun Iterable<Double>.rank(tieMethod: TieMethod = TieMethod.AVERAGE): List<Double> =
+    toList().toDoubleArray().rank(tieMethod).toList()
+
+/**
+ * Computes the percentile rank of each element, indicating what percentage of values
+ * fall at or below it.
+ *
+ * This is a convenience overload that accepts any [Iterable]. The collection is
+ * materialized to a [DoubleArray] internally.
+ *
+ * @return a list of percentile ranks in the range [0, 100].
+ * @throws InsufficientDataException if the collection is empty.
+ * @throws InvalidParameterException if the collection contains NaN or Infinity.
+ * @see DoubleArray.percentileRank
+ */
+public fun Iterable<Double>.percentileRank(): List<Double> =
+    toList().toDoubleArray().percentileRank().toList()

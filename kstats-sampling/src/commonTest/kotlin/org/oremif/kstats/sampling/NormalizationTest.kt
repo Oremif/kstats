@@ -189,4 +189,61 @@ class NormalizationTest {
             doubleArrayOf(1.0, Double.NaN).minMaxNormalize(-1.0, 1.0)
         }
     }
+
+    // --- minMaxNormalize (Iterable) ---
+
+    @Test
+    fun testMinMaxNormalizeIterable() {
+        val data = listOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val norm = data.minMaxNormalize()
+        assertEquals(0.0, norm[0], 1e-10)
+        assertEquals(1.0, norm[4], 1e-10)
+        assertEquals(0.5, norm[2], 1e-10)
+    }
+
+    @Test
+    fun testMinMaxNormalizeIterableAllSame() {
+        val norm = listOf(3.0, 3.0, 3.0).minMaxNormalize()
+        for (v in norm) assertEquals(0.0, v, 1e-10)
+    }
+
+    @Test
+    fun testMinMaxNormalizeIterableEmptyThrows() {
+        assertFailsWith<InsufficientDataException> {
+            emptyList<Double>().minMaxNormalize()
+        }
+    }
+
+    @Test
+    fun testMinMaxNormalizeIterableCustomRange() {
+        val data = listOf(0.0, 5.0, 10.0)
+        val norm = data.minMaxNormalize(-1.0, 1.0)
+        assertEquals(-1.0, norm[0], 1e-10)
+        assertEquals(0.0, norm[1], 1e-10)
+        assertEquals(1.0, norm[2], 1e-10)
+    }
+
+    @Test
+    fun testMinMaxNormalizeIterableCustomRangeInvalidThrows() {
+        assertFailsWith<InvalidParameterException> {
+            listOf(1.0, 2.0).minMaxNormalize(5.0, 3.0)
+        }
+    }
+
+    // --- Large array tests ---
+
+    @Test
+    fun testZScoreLargeArray() {
+        val data = DoubleArray(5000) { it.toDouble() }
+        val z = data.zScore()
+        assertEquals(0.0, z.average(), 1e-10)
+    }
+
+    @Test
+    fun testMinMaxNormalizeLargeArray() {
+        val data = DoubleArray(5000) { it.toDouble() }
+        val norm = data.minMaxNormalize()
+        assertEquals(0.0, norm[0], 1e-10)
+        assertEquals(1.0, norm[4999], 1e-10)
+    }
 }

@@ -49,19 +49,13 @@ class WeightedSamplingTest {
 
     @Test
     fun testWeightedDiceDistribution() {
-        val dice = WeightedDice(mapOf("A" to 3.0, "B" to 1.0), Random(123))
+        val dice = WeightedDice(mapOf("A" to 3.0, "B" to 1.0), Random(456))
         val counts = mutableMapOf("A" to 0, "B" to 0)
-        repeat(10000) { counts[dice.roll()] = counts[dice.roll()]!! + 1 }
-        // A should appear ~75% of the time
-        // Use a wider range because we rolled twice per iteration (once to count, once to increment)
-        // Let's fix: just count properly
-        val countsFixed = mutableMapOf("A" to 0, "B" to 0)
-        val dice2 = WeightedDice(mapOf("A" to 3.0, "B" to 1.0), Random(456))
         repeat(10000) {
-            val result = dice2.roll()
-            countsFixed[result] = countsFixed[result]!! + 1
+            val result = dice.roll()
+            counts[result] = counts[result]!! + 1
         }
-        val aCount = countsFixed["A"]!!
+        val aCount = counts["A"]!!
         assertTrue(aCount in 7000..8000, "Expected ~7500 A rolls, got $aCount")
     }
 
@@ -189,5 +183,29 @@ class WeightedSamplingTest {
             val data: Iterable<Int> = emptySet()
             data.bootstrapSample(5)
         }
+    }
+
+    // --- Large collection tests ---
+
+    @Test
+    fun testRandomSampleLargeCollection() {
+        val data = (1..10000).toList()
+        val sample = data.randomSample(500, Random(42))
+        assertEquals(500, sample.size)
+        assertEquals(500, sample.toSet().size) // no duplicates
+        assertTrue(sample.all { it in 1..10000 })
+    }
+
+    @Test
+    fun testWeightedDiceManyOutcomes() {
+        val weights = (1..100).associate { "outcome_$it" to it.toDouble() }
+        val dice = WeightedDice(weights, Random(42))
+        val counts = mutableMapOf<String, Int>()
+        repeat(50000) {
+            val result = dice.roll()
+            counts[result] = (counts[result] ?: 0) + 1
+        }
+        // All outcomes should appear at least once
+        assertEquals(100, counts.size, "All 100 outcomes should appear")
     }
 }

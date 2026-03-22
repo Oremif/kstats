@@ -9,8 +9,13 @@ import kotlin.math.floor
  *
  * Bin boundaries follow the half-open interval convention: items are assigned to the bin
  * whose range contains them as `[start, end)`, except for the last bin which is `[start, end]`.
- * As a result, [range] (a [ClosedRange]) may report `contains(value) == true` for boundary
- * values that are actually assigned to the adjacent bin.
+ * Boundary values (values that fall exactly on an interior bin edge) are assigned to the
+ * higher bin via `floor(index)` arithmetic. As a result, [range] (a [ClosedRange]) may
+ * report `contains(value) == true` for boundary values that are actually assigned to the
+ * adjacent bin.
+ *
+ * This is a stable value type: its property set ([range], [items]) is fixed and will not
+ * change in future versions.
  *
  * ### Example:
  * ```kotlin
@@ -36,6 +41,9 @@ public data class Bin<T>(
 
 /**
  * A histogram bin with frequency statistics but without the original items.
+ *
+ * This is a stable value type: its property set ([range], [count], [relativeFrequency],
+ * [cumulativeFrequency]) is fixed and will not change in future versions.
  *
  * ### Example:
  * ```kotlin
@@ -66,9 +74,9 @@ public data class FrequencyBin(
  * minimum extracted value if not specified). The number of bins is determined automatically
  * to cover all values.
  *
- * Items on a bin boundary are assigned to the higher bin, except for items in the last bin
- * which includes its upper boundary (i.e., bins are `[start, end)` except the last which
- * is `[start, end]`).
+ * Items whose extracted value falls exactly on an interior bin boundary are assigned to the
+ * higher bin via `floor(index)` arithmetic. The last bin includes its upper boundary
+ * (i.e., bins are `[start, end)` except the last which is `[start, end]`).
  *
  * ### Example:
  * ```kotlin
@@ -124,7 +132,7 @@ public fun <T> Iterable<T>.binByDouble(
     val numBins = ceil((maxVal - minVal) / binSize).toInt().coerceAtLeast(1)
     val bins = Array(numBins) { i ->
         val start = minVal + i * binSize
-        val end = start + binSize
+        val end = if (i == numBins - 1) maxOf(start + binSize, maxVal) else start + binSize
         start..end to mutableListOf<T>()
     }
 
@@ -183,7 +191,7 @@ public fun <T> Iterable<T>.binByDouble(
 
     val bins = Array(effectiveCount) { i ->
         val start = minVal + i * binSize
-        val end = start + binSize
+        val end = if (i == effectiveCount - 1) maxOf(start + binSize, maxVal) else start + binSize
         start..end to mutableListOf<T>()
     }
 

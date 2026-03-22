@@ -209,6 +209,36 @@ class BinningTest {
         }
     }
 
+    @Test
+    fun testBoundaryAssignmentThreeBins() {
+        // Values on interior boundaries (2.0, 4.0) should go to the higher bin
+        val data = listOf(0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
+        val bins = data.bin(2.0)
+        assertEquals(3, bins.size)
+        // bin 0: [0, 2) -> {0.0, 1.0}
+        assertEquals(2, bins[0].count)
+        // bin 1: [2, 4) -> {2.0, 3.0}
+        assertEquals(2, bins[1].count)
+        // bin 2: [4, 6] -> {4.0, 5.0, 6.0}
+        assertEquals(3, bins[2].count)
+    }
+
+    @Test
+    fun testLastBinRangeCoversMaxValue() {
+        val data = listOf(1.0, 10.0)
+        val bins = data.bin(4.0)
+        // Last bin range should include maxVal (10.0)
+        assertTrue(bins.last().range.endInclusive >= 10.0)
+    }
+
+    @Test
+    fun testBinLargeArray() {
+        val data = (1..10000).map { it.toDouble() }
+        val bins = data.bin(7)
+        assertEquals(7, bins.size)
+        assertEquals(10000, bins.sumOf { it.count })
+    }
+
     // --- binByDouble with custom valueSelector ---
 
     @Test

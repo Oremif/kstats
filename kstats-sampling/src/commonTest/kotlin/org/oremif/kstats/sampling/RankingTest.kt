@@ -153,4 +153,73 @@ class RankingTest {
             doubleArrayOf(1.0, Double.NaN).percentileRank()
         }
     }
+
+    // --- Iterable overloads ---
+
+    @Test
+    fun testRankIterableAverage() {
+        val data = listOf(3.0, 1.0, 4.0, 1.0, 5.0)
+        val ranks = data.rank(TieMethod.AVERAGE)
+        assertEquals(3.0, ranks[0], 1e-10)
+        assertEquals(1.5, ranks[1], 1e-10)
+        assertEquals(4.0, ranks[2], 1e-10)
+        assertEquals(1.5, ranks[3], 1e-10)
+        assertEquals(5.0, ranks[4], 1e-10)
+    }
+
+    @Test
+    fun testRankIterableDense() {
+        val data = listOf(3.0, 1.0, 1.0, 5.0)
+        val ranks = data.rank(TieMethod.DENSE)
+        assertEquals(2.0, ranks[0], 1e-10)
+        assertEquals(1.0, ranks[1], 1e-10)
+        assertEquals(1.0, ranks[2], 1e-10)
+        assertEquals(3.0, ranks[3], 1e-10)
+    }
+
+    @Test
+    fun testRankIterableEmptyThrows() {
+        assertFailsWith<InsufficientDataException> {
+            emptyList<Double>().rank()
+        }
+    }
+
+    @Test
+    fun testPercentileRankIterable() {
+        val data = listOf(10.0, 20.0, 30.0, 40.0, 50.0)
+        val pr = data.percentileRank()
+        assertEquals(0.0, pr[0], 1e-10)
+        assertEquals(25.0, pr[1], 1e-10)
+        assertEquals(50.0, pr[2], 1e-10)
+        assertEquals(75.0, pr[3], 1e-10)
+        assertEquals(100.0, pr[4], 1e-10)
+    }
+
+    @Test
+    fun testPercentileRankIterableEmptyThrows() {
+        assertFailsWith<InsufficientDataException> {
+            emptyList<Double>().percentileRank()
+        }
+    }
+
+    // --- Large array tests ---
+
+    @Test
+    fun testRankLargeArray() {
+        val data = DoubleArray(5000) { it.toDouble() }
+        data.shuffle()
+        val ranks = data.rank(TieMethod.AVERAGE)
+        // Every element is unique, so rank[i] = sorted position + 1
+        for (i in data.indices) {
+            assertEquals(data[i] + 1.0, ranks[i], 1e-10)
+        }
+    }
+
+    @Test
+    fun testPercentileRankLargeArray() {
+        val data = DoubleArray(1000) { it.toDouble() }
+        val pr = data.percentileRank()
+        assertEquals(0.0, pr[0], 1e-10)
+        assertEquals(100.0, pr[999], 1e-10)
+    }
 }

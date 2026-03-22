@@ -84,11 +84,28 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
      */
     public fun roll(): T {
         val u = random.nextDouble()
-        val idx = cumulativeWeights.asList().binarySearch(u).let { i ->
-            if (i < 0) -(i + 1) else i
-        }
+        val idx = cumulativeBinarySearch(cumulativeWeights, u)
         return outcomes[idx.coerceIn(outcomes.indices)]
     }
+}
+
+/**
+ * Finds the leftmost index in a sorted [array] where `array[index] >= value`.
+ * Equivalent to `Arrays.binarySearch` insertion-point logic but without allocating
+ * a `List` wrapper on every call.
+ */
+private fun cumulativeBinarySearch(array: DoubleArray, value: Double): Int {
+    var low = 0
+    var high = array.size - 1
+    while (low < high) {
+        val mid = (low + high) ushr 1
+        if (array[mid] < value) {
+            low = mid + 1
+        } else {
+            high = mid
+        }
+    }
+    return low
 }
 
 /**

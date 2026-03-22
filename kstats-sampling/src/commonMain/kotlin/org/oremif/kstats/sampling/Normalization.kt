@@ -56,15 +56,15 @@ public fun DoubleArray.zScore(): DoubleArray {
  * @throws DegenerateDataException if the standard deviation is zero (all values are identical).
  */
 public fun Iterable<Double>.zScore(): List<Double> {
-    val list = toList()
-    if (list.size < 2) throw InsufficientDataException("Need at least 2 elements for z-score")
-    for (v in list) {
+    val arr = toList().toDoubleArray()
+    if (arr.size < 2) throw InsufficientDataException("Need at least 2 elements for z-score")
+    for (v in arr) {
         if (!v.isFinite()) throw InvalidParameterException("Collection contains non-finite value: $v")
     }
-    val m = list.mean()
-    val sd = list.standardDeviation()
+    val m = arr.mean()
+    val sd = arr.standardDeviation()
     if (sd <= 0.0) throw DegenerateDataException("Standard deviation is zero, cannot compute z-scores")
-    return list.map { (it - m) / sd }
+    return List(arr.size) { (arr[it] - m) / sd }
 }
 
 /**
@@ -130,3 +130,34 @@ public fun DoubleArray.minMaxNormalize(newMin: Double, newMax: Double): DoubleAr
     if (range == 0.0) return DoubleArray(size) { newMin }
     return DoubleArray(size) { (this[it] - minVal) / range * newRange + newMin }
 }
+
+/**
+ * Scales each element to the range [0, 1] using min-max normalization.
+ *
+ * This is a convenience overload that accepts any [Iterable]. The collection is
+ * materialized to a [DoubleArray] internally.
+ *
+ * @return a list of normalized values in [0, 1].
+ * @throws InsufficientDataException if the collection is empty.
+ * @throws InvalidParameterException if the collection contains NaN or Infinity.
+ * @see DoubleArray.minMaxNormalize
+ */
+public fun Iterable<Double>.minMaxNormalize(): List<Double> =
+    toList().toDoubleArray().minMaxNormalize().toList()
+
+/**
+ * Scales each element to the range [[newMin], [newMax]] using min-max normalization.
+ *
+ * This is a convenience overload that accepts any [Iterable]. The collection is
+ * materialized to a [DoubleArray] internally.
+ *
+ * @param newMin the lower bound of the target range. Must be finite.
+ * @param newMax the upper bound of the target range. Must be finite and greater than [newMin].
+ * @return a list of normalized values in [[newMin], [newMax]].
+ * @throws InsufficientDataException if the collection is empty.
+ * @throws InvalidParameterException if [newMin] >= [newMax], parameters are non-finite,
+ * or the collection contains NaN or Infinity.
+ * @see DoubleArray.minMaxNormalize
+ */
+public fun Iterable<Double>.minMaxNormalize(newMin: Double, newMax: Double): List<Double> =
+    toList().toDoubleArray().minMaxNormalize(newMin, newMax).toList()
