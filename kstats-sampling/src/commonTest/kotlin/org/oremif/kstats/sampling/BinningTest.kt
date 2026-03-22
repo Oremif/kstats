@@ -241,6 +241,42 @@ class BinningTest {
 
     // --- binByDouble with custom valueSelector ---
 
+    // --- DoubleArray overloads ---
+
+    @Test
+    fun testDoubleArrayBinBySize() {
+        val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+        val bins = data.bin(5.0)
+        assertEquals(2, bins.size)
+        assertEquals(10, bins.sumOf { it.count })
+    }
+
+    @Test
+    fun testDoubleArrayBinByCount() {
+        val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+        val bins = data.bin(3)
+        assertEquals(3, bins.size)
+        assertEquals(10, bins.sumOf { it.count })
+    }
+
+    @Test
+    fun testDoubleArrayFrequencyTableByCount() {
+        val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+        val freq = data.frequencyTable(2)
+        assertEquals(2, freq.size)
+        assertEquals(1.0, freq.last().cumulativeFrequency, 1e-10)
+    }
+
+    @Test
+    fun testDoubleArrayFrequencyTableBySize() {
+        val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val freq = data.frequencyTable(2.5)
+        assertEquals(1.0, freq.last().cumulativeFrequency, 1e-10)
+        assertEquals(5, freq.sumOf { it.count })
+    }
+
+    // --- binByDouble with custom valueSelector ---
+
     @Test
     fun testBinByDoubleCustomSelector() {
         data class Item(val value: Double, val name: String)

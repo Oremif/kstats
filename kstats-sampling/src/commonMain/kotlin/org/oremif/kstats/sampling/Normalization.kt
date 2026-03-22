@@ -32,7 +32,7 @@ public fun DoubleArray.zScore(): DoubleArray {
     }
     val m = mean()
     val sd = standardDeviation()
-    if (sd <= 0.0) throw DegenerateDataException("Standard deviation is zero, cannot compute z-scores")
+    if (sd < 1e-15) throw DegenerateDataException("Standard deviation is near-zero, cannot compute z-scores")
     return DoubleArray(size) { (this[it] - m) / sd }
 }
 

@@ -2,10 +2,11 @@ package org.oremif.kstats.sampling
 
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
+import kotlin.math.abs
 import kotlin.random.Random
 
 /**
- * A biased coin that lands heads (true) with probability [p].
+ * A biased coin that lands heads (true) with the given [probability].
  *
  * Useful for simulating Bernoulli trials with a specific success probability.
  *
@@ -15,20 +16,20 @@ import kotlin.random.Random
  * coin.flip() // true with 70% probability
  * ```
  *
- * @param p the probability of heads (true). Must be in [0, 1].
+ * @param probability the probability of heads (true). Must be in [0, 1].
  * @param random the random number generator. Defaults to [Random].
  */
-public class WeightedCoin(public val p: Double, private val random: Random = Random) {
+public class WeightedCoin(public val probability: Double, private val random: Random = Random) {
     init {
-        if (p !in 0.0..1.0) throw InvalidParameterException("probability must be in [0, 1], got $p")
+        if (probability !in 0.0..1.0) throw InvalidParameterException("probability must be in [0, 1], got $probability")
     }
 
     /**
      * Flips the coin and returns the result.
      *
-     * @return `true` (heads) with probability [p], `false` (tails) otherwise.
+     * @return `true` (heads) with the configured [probability], `false` (tails) otherwise.
      */
-    public fun flip(): Boolean = random.nextDouble() < p
+    public fun flip(): Boolean = random.nextDouble() < probability
 }
 
 /**
@@ -45,7 +46,9 @@ public class WeightedCoin(public val p: Double, private val random: Random = Ran
  *
  * @param T the type of outcomes.
  * @param weights a map from each outcome to its non-negative finite weight. At least one
- * weight must be positive.
+ * weight must be positive. The iteration order of the map determines the internal ordering
+ * of outcomes; use an insertion-ordered map (e.g. `linkedMapOf`) for reproducible results
+ * with a seeded [random].
  * @param random the random number generator. Defaults to [Random].
  * @throws InsufficientDataException if [weights] is empty.
  * @throws InvalidParameterException if any weight is negative, non-finite, or all weights
@@ -57,12 +60,17 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
 
     init {
         if (weights.isEmpty()) throw InsufficientDataException("weights must not be empty")
+        // Neumaier compensated summation for numerical precision with many outcomes
         var totalWeight = 0.0
+        var compensation = 0.0
         for (w in weights.values) {
             if (!w.isFinite()) throw InvalidParameterException("weights must be finite")
             if (w < 0.0) throw InvalidParameterException("weights must be non-negative")
-            totalWeight += w
+            val t = totalWeight + w
+            compensation += if (abs(totalWeight) >= abs(w)) (totalWeight - t) + w else (w - t) + totalWeight
+            totalWeight = t
         }
+        totalWeight += compensation
         if (totalWeight <= 0.0) throw InvalidParameterException("total weight must be positive")
 
         outcomes = weights.keys.toList()
@@ -111,7 +119,8 @@ private fun cumulativeBinarySearch(array: DoubleArray, value: Double): Int {
  * Draws a random sample of [n] elements without replacement.
  *
  * Uses a partial Fisher-Yates shuffle to select [n] elements in O(n) time.
- * Each element can appear at most once in the result.
+ * Each element can appear at most once in the result. The collection is materialized
+ * to a mutable list internally.
  *
  * ### Example:
  * ```kotlin

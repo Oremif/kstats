@@ -77,10 +77,13 @@ public fun DoubleArray.rank(tieMethod: TieMethod = TieMethod.AVERAGE): DoubleArr
     }
 
     val n = size
-    val indices = IntArray(n) { it }
     val values = this
-    // Sort indices by their corresponding values (avoids allocating Array<IndexedValue> wrappers)
-    val sortedIndices = indices.sortedBy { values[it] }.toIntArray()
+    // Sort indices by value, breaking ties by original position (guarantees stability for ORDINAL)
+    val sortedIndices = Array(n) { it }
+    sortedIndices.sortWith(Comparator { a, b ->
+        val cmp = values[a].compareTo(values[b])
+        if (cmp != 0) cmp else a - b
+    })
 
     val ranks = DoubleArray(n)
 

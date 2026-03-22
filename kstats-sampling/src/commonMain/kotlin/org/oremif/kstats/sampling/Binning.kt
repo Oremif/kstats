@@ -91,8 +91,8 @@ public data class FrequencyBin(
  * @param T the type of items being binned.
  * @param valueSelector extracts the numeric value to bin on from each item.
  * @param binSize the width of each bin. Must be a positive finite number.
- * @param rangeStart the lower bound of the first bin. Must be finite and not exceed the
- * minimum extracted value. Defaults to the minimum value in the collection.
+ * @param rangeStart the lower bound of the first bin. Must be finite and less than or equal
+ * to the minimum extracted value. Defaults to the minimum value in the collection.
  * @return a list of [Bin] objects ordered by range, each containing the items that fall
  * within that range. Returns an empty list if the collection is empty.
  * @throws InvalidParameterException if [binSize] is not positive or not finite, if
@@ -110,12 +110,17 @@ public fun <T> Iterable<T>.binByDouble(
     val items = toList()
     if (items.isEmpty()) return emptyList()
 
-    val values = items.map(valueSelector)
-    for (v in values) {
+    val values = DoubleArray(items.size)
+    var minActual = Double.POSITIVE_INFINITY
+    var maxActual = Double.NEGATIVE_INFINITY
+    for (i in items.indices) {
+        val v = valueSelector(items[i])
         if (!v.isFinite()) throw InvalidParameterException("valueSelector produced non-finite value: $v")
+        values[i] = v
+        if (v < minActual) minActual = v
+        if (v > maxActual) maxActual = v
     }
 
-    val minActual = values.min()
     if (rangeStart != null) {
         if (!rangeStart.isFinite()) {
             throw InvalidParameterException("rangeStart must be finite, got $rangeStart")
@@ -127,7 +132,7 @@ public fun <T> Iterable<T>.binByDouble(
         }
     }
     val minVal = rangeStart ?: minActual
-    val maxVal = values.max()
+    val maxVal = maxActual
 
     val numBins = ceil((maxVal - minVal) / binSize).toInt().coerceAtLeast(1)
     val bins = Array(numBins) { i ->
@@ -178,13 +183,19 @@ public fun <T> Iterable<T>.binByDouble(
     val items = toList()
     if (items.isEmpty()) return emptyList()
 
-    val values = items.map(valueSelector)
-    for (v in values) {
+    val values = DoubleArray(items.size)
+    var computedMin = Double.POSITIVE_INFINITY
+    var computedMax = Double.NEGATIVE_INFINITY
+    for (i in items.indices) {
+        val v = valueSelector(items[i])
         if (!v.isFinite()) throw InvalidParameterException("valueSelector produced non-finite value: $v")
+        values[i] = v
+        if (v < computedMin) computedMin = v
+        if (v > computedMax) computedMax = v
     }
 
-    val minVal = values.min()
-    val maxVal = values.max()
+    val minVal = computedMin
+    val maxVal = computedMax
     val range = maxVal - minVal
     val effectiveCount = if (range == 0.0) 1 else binCount
     val binSize = if (range == 0.0) 1.0 else range / binCount
@@ -200,8 +211,8 @@ public fun <T> Iterable<T>.binByDouble(
         val idx = if (range == 0.0) {
             0
         } else {
-            // Use binCount directly to avoid floating-point roundtrip error
-            ((v - minVal) / range * binCount).toInt().coerceIn(0, effectiveCount - 1)
+            // Use floor() consistent with binByDouble(binSize) for boundary assignment
+            floor((v - minVal) / range * binCount).toInt().coerceIn(0, effectiveCount - 1)
         }
         bins[idx].second.add(item)
     }
