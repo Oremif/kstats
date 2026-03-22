@@ -51,7 +51,6 @@ kotlin {
 
     // Desktop
     macosArm64()
-    macosX64()
     linuxArm64()
     linuxX64()
     mingwX64()
@@ -59,7 +58,6 @@ kotlin {
     // WatchOS
     watchosArm32()
     watchosArm64()
-    watchosX64()
     watchosDeviceArm64()
     watchosSimulatorArm64()
 
