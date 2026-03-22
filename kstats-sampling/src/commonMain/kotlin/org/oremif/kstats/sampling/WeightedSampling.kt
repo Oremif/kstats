@@ -35,7 +35,7 @@ public class WeightedCoin(public val p: Double, private val random: Random = Ran
  * A weighted die that produces outcomes with probabilities proportional to their weights.
  *
  * Weights are normalized internally so they do not need to sum to 1. Uses a cumulative
- * weight lookup for O(n) roll time, where n is the number of outcomes.
+ * weight lookup with binary search for O(log n) roll time, where n is the number of outcomes.
  *
  * ### Example:
  * ```kotlin
@@ -44,9 +44,12 @@ public class WeightedCoin(public val p: Double, private val random: Random = Ran
  * ```
  *
  * @param T the type of outcomes.
- * @param weights a map from each outcome to its non-negative weight. At least one weight
- * must be positive.
+ * @param weights a map from each outcome to its non-negative finite weight. At least one
+ * weight must be positive.
  * @param random the random number generator. Defaults to [Random].
+ * @throws InsufficientDataException if [weights] is empty.
+ * @throws InvalidParameterException if any weight is negative, non-finite, or all weights
+ * are zero.
  */
 public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random = Random) {
     private val outcomes: List<T>
@@ -54,7 +57,12 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
 
     init {
         if (weights.isEmpty()) throw InsufficientDataException("weights must not be empty")
-        if (!weights.values.all { it >= 0.0 }) throw InvalidParameterException("weights must be non-negative")
+        if (weights.values.any { !it.isFinite() }) {
+            throw InvalidParameterException("weights must be finite")
+        }
+        if (weights.values.any { it < 0.0 }) {
+            throw InvalidParameterException("weights must be non-negative")
+        }
         val totalWeight = weights.values.sum()
         if (totalWeight <= 0.0) throw InvalidParameterException("total weight must be positive")
 
@@ -76,10 +84,10 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
      */
     public fun roll(): T {
         val u = random.nextDouble()
-        for (i in cumulativeWeights.indices) {
-            if (u <= cumulativeWeights[i]) return outcomes[i]
+        val idx = cumulativeWeights.asList().binarySearch(u).let { i ->
+            if (i < 0) -(i + 1) else i
         }
-        return outcomes.last()
+        return outcomes[idx.coerceIn(outcomes.indices)]
     }
 }
 
@@ -136,3 +144,17 @@ public fun <T> List<T>.bootstrapSample(n: Int, random: Random = Random): List<T>
     if (n < 0) throw InvalidParameterException("n must be non-negative")
     return List(n) { this[random.nextInt(size)] }
 }
+
+/**
+ * Draws a bootstrap sample of [n] elements with replacement.
+ *
+ * This is a convenience overload that accepts any [Iterable]. The collection is
+ * materialized to a list internally.
+ *
+ * @param T the type of elements.
+ * @param n the number of elements to draw. Must be non-negative.
+ * @param random the random number generator. Defaults to [Random].
+ * @return a list of [n] randomly drawn elements, potentially with duplicates.
+ */
+public fun <T> Iterable<T>.bootstrapSample(n: Int, random: Random = Random): List<T> =
+    toList().bootstrapSample(n, random)

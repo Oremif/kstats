@@ -1,6 +1,7 @@
 package org.oremif.kstats.sampling
 
 import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 /**
  * Controls how tied (equal) values are assigned ranks.
@@ -66,9 +67,14 @@ public enum class TieMethod {
  * which assigns each tied element the mean of the positions they occupy.
  * @return an array of ranks in the same order as the input, where each element's rank
  * reflects its position in the sorted order.
+ * @throws InsufficientDataException if the array is empty.
+ * @throws InvalidParameterException if the array contains NaN or Infinity.
  */
 public fun DoubleArray.rank(tieMethod: TieMethod = TieMethod.AVERAGE): DoubleArray {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    for (v in this) {
+        if (!v.isFinite()) throw InvalidParameterException("Array contains non-finite value: $v")
+    }
 
     val n = size
     val indexed = Array(n) { IndexedValue(it, this[it]) }
@@ -117,6 +123,8 @@ public fun DoubleArray.rank(tieMethod: TieMethod = TieMethod.AVERAGE): DoubleArr
  *
  * @return an array of percentile ranks in the range [0, 100], preserving the original
  * element order.
+ * @throws InsufficientDataException if the array is empty.
+ * @throws InvalidParameterException if the array contains NaN or Infinity.
  */
 public fun DoubleArray.percentileRank(): DoubleArray {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")

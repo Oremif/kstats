@@ -21,10 +21,15 @@ import org.oremif.kstats.descriptive.standardDeviation
  * ```
  *
  * @return an array of z-scores in the same order as the input.
+ * @throws InsufficientDataException if the array has fewer than 2 elements.
+ * @throws InvalidParameterException if the array contains NaN or Infinity.
  * @throws DegenerateDataException if the standard deviation is zero (all values are identical).
  */
 public fun DoubleArray.zScore(): DoubleArray {
     if (size < 2) throw InsufficientDataException("Need at least 2 elements for z-score")
+    for (v in this) {
+        if (!v.isFinite()) throw InvalidParameterException("Array contains non-finite value: $v")
+    }
     val m = mean()
     val sd = standardDeviation()
     if (sd <= 0.0) throw DegenerateDataException("Standard deviation is zero, cannot compute z-scores")
@@ -46,11 +51,16 @@ public fun DoubleArray.zScore(): DoubleArray {
  * ```
  *
  * @return a list of z-scores in the same order as the input.
+ * @throws InsufficientDataException if the collection has fewer than 2 elements.
+ * @throws InvalidParameterException if the collection contains NaN or Infinity.
  * @throws DegenerateDataException if the standard deviation is zero (all values are identical).
  */
 public fun Iterable<Double>.zScore(): List<Double> {
     val list = toList()
     if (list.size < 2) throw InsufficientDataException("Need at least 2 elements for z-score")
+    for (v in list) {
+        if (!v.isFinite()) throw InvalidParameterException("Collection contains non-finite value: $v")
+    }
     val m = list.mean()
     val sd = list.standardDeviation()
     if (sd <= 0.0) throw DegenerateDataException("Standard deviation is zero, cannot compute z-scores")
@@ -71,9 +81,14 @@ public fun Iterable<Double>.zScore(): List<Double> {
  * ```
  *
  * @return an array of normalized values in [0, 1].
+ * @throws InsufficientDataException if the array is empty.
+ * @throws InvalidParameterException if the array contains NaN or Infinity.
  */
 public fun DoubleArray.minMaxNormalize(): DoubleArray {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    for (v in this) {
+        if (!v.isFinite()) throw InvalidParameterException("Array contains non-finite value: $v")
+    }
     val minVal = min()
     val maxVal = max()
     val range = maxVal - minVal
@@ -93,13 +108,21 @@ public fun DoubleArray.minMaxNormalize(): DoubleArray {
  * doubleArrayOf(0.0, 5.0, 10.0).minMaxNormalize(-1.0, 1.0) // [-1.0, 0.0, 1.0]
  * ```
  *
- * @param newMin the lower bound of the target range.
- * @param newMax the upper bound of the target range. Must be greater than [newMin].
+ * @param newMin the lower bound of the target range. Must be finite.
+ * @param newMax the upper bound of the target range. Must be finite and greater than [newMin].
  * @return an array of normalized values in [[newMin], [newMax]].
+ * @throws InsufficientDataException if the array is empty.
+ * @throws InvalidParameterException if [newMin] >= [newMax], parameters are non-finite,
+ * or the array contains NaN or Infinity.
  */
 public fun DoubleArray.minMaxNormalize(newMin: Double, newMax: Double): DoubleArray {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
+    if (!newMin.isFinite()) throw InvalidParameterException("newMin must be finite, got $newMin")
+    if (!newMax.isFinite()) throw InvalidParameterException("newMax must be finite, got $newMax")
     if (newMin >= newMax) throw InvalidParameterException("newMin must be less than newMax")
+    for (v in this) {
+        if (!v.isFinite()) throw InvalidParameterException("Array contains non-finite value: $v")
+    }
     val minVal = min()
     val maxVal = max()
     val range = maxVal - minVal
