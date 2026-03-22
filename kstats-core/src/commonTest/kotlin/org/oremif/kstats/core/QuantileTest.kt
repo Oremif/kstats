@@ -1,7 +1,10 @@
 package org.oremif.kstats.core
 
 import org.oremif.kstats.core.exceptions.ConvergenceException
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.exp
+import kotlin.math.ln
+import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

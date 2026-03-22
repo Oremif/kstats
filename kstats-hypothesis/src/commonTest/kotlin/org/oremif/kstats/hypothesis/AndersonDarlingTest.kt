@@ -155,8 +155,10 @@ class AndersonDarlingTest {
     fun testModifiedStatisticInAdditionalInfo() {
         val result = andersonDarlingTest(doubleArrayOf(-1.0, 0.0, 1.0, 2.0, 3.0))
         val a2Star = result.additionalInfo["modifiedStatistic"]
-        assertTrue(a2Star != null && a2Star > result.statistic,
-            "Modified A²* should be larger than raw A²")
+        assertTrue(
+            a2Star != null && a2Star > result.statistic,
+            "Modified A²* should be larger than raw A²"
+        )
     }
 
     // ===== Degenerate input =====
@@ -199,10 +201,14 @@ class AndersonDarlingTest {
         val n = 1000
         val data = DoubleArray(n) { i -> normal.quantile((i + 0.5) / n) }
         val result = andersonDarlingTest(data)
-        assertTrue(result.statistic < 0.01,
-            "Perfectly normal data should have very small A², got ${result.statistic}")
-        assertTrue(result.pValue > 0.05,
-            "Perfectly normal data should not reject normality, p=${result.pValue}")
+        assertTrue(
+            result.statistic < 0.01,
+            "Perfectly normal data should have very small A², got ${result.statistic}"
+        )
+        assertTrue(
+            result.pValue > 0.05,
+            "Perfectly normal data should not reject normality, p=${result.pValue}"
+        )
     }
 
     @Test
@@ -210,8 +216,10 @@ class AndersonDarlingTest {
         // Bimodal data: clearly non-normal
         val data = DoubleArray(50) { i -> if (i < 25) -10.0 + i * 0.01 else 10.0 + (i - 25) * 0.01 }
         val result = andersonDarlingTest(data)
-        assertTrue(result.pValue < 0.001,
-            "Bimodal data should have very small p-value, got ${result.pValue}")
+        assertTrue(
+            result.pValue < 0.001,
+            "Bimodal data should have very small p-value, got ${result.pValue}"
+        )
     }
 
     @Test
@@ -221,10 +229,14 @@ class AndersonDarlingTest {
         val n = 5000
         val data = DoubleArray(n) { i -> normal.quantile((i + 0.5) / n) }
         val result = andersonDarlingTest(data)
-        assertTrue(result.statistic < 0.01,
-            "n=5000 perfect normal should have tiny A², got ${result.statistic}")
-        assertTrue(result.pValue > 0.05,
-            "n=5000 perfect normal should not reject, p=${result.pValue}")
+        assertTrue(
+            result.statistic < 0.01,
+            "n=5000 perfect normal should have tiny A², got ${result.statistic}"
+        )
+        assertTrue(
+            result.pValue > 0.05,
+            "n=5000 perfect normal should not reject, p=${result.pValue}"
+        )
     }
 
     // ===== Non-finite input =====

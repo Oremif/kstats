@@ -1,11 +1,7 @@
 package org.oremif.kstats.hypothesis
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class BinomialTestTest {
 
@@ -13,7 +9,13 @@ class BinomialTestTest {
         assertEquals(expected, actual, tol, "p-value $message")
     }
 
-    private fun assertCI(expectedLow: Double, expectedHigh: Double, ci: Pair<Double, Double>?, tol: Double = 1e-8, message: String = "") {
+    private fun assertCI(
+        expectedLow: Double,
+        expectedHigh: Double,
+        ci: Pair<Double, Double>?,
+        tol: Double = 1e-8,
+        message: String = ""
+    ) {
         requireNotNull(ci) { "CI should not be null $message" }
         assertEquals(expectedLow, ci.first, tol, "CI lower $message")
         assertEquals(expectedHigh, ci.second, tol, "CI upper $message")
@@ -332,7 +334,13 @@ class BinomialTestTest {
     @Test
     fun testAlternativeInResult() {
         assertEquals(Alternative.TWO_SIDED, binomialTest(successes = 5, trials = 10).alternative)
-        assertEquals(Alternative.LESS, binomialTest(successes = 5, trials = 10, alternative = Alternative.LESS).alternative)
-        assertEquals(Alternative.GREATER, binomialTest(successes = 5, trials = 10, alternative = Alternative.GREATER).alternative)
+        assertEquals(
+            Alternative.LESS,
+            binomialTest(successes = 5, trials = 10, alternative = Alternative.LESS).alternative
+        )
+        assertEquals(
+            Alternative.GREATER,
+            binomialTest(successes = 5, trials = 10, alternative = Alternative.GREATER).alternative
+        )
     }
 }

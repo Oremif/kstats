@@ -62,6 +62,7 @@ public fun fisherExactTest(
             }
             p
         }
+
         Alternative.LESS -> {
             var p = 0.0
             for (i in minA..a) {
@@ -69,6 +70,7 @@ public fun fisherExactTest(
             }
             p
         }
+
         Alternative.GREATER -> {
             var p = 0.0
             for (i in a..maxA) {

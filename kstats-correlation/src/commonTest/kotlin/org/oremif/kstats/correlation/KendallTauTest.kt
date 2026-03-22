@@ -315,13 +315,17 @@ class KendallTauTest {
 
         // Brute-force calculation
         val n = x.size
-        var con = 0; var disc = 0; var tx = 0; var ty = 0
+        var con = 0;
+        var disc = 0;
+        var tx = 0;
+        var ty = 0
         for (i in 0 until n) {
             for (j in i + 1 until n) {
                 val xd = x[i].compareTo(x[j])
                 val yd = y[i].compareTo(y[j])
-                if (xd == 0 && yd == 0) { tx++; ty++ }
-                else if (xd == 0) tx++
+                if (xd == 0 && yd == 0) {
+                    tx++; ty++
+                } else if (xd == 0) tx++
                 else if (yd == 0) ty++
                 else if (xd * yd > 0) con++
                 else disc++

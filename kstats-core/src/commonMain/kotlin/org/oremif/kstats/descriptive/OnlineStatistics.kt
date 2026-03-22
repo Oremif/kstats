@@ -2,9 +2,9 @@ package org.oremif.kstats.descriptive
 
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 import kotlin.math.abs
-import kotlin.math.min as kMin
-import kotlin.math.max as kMax
 import kotlin.math.sqrt
+import kotlin.math.max as kMax
+import kotlin.math.min as kMin
 
 /**
  * A streaming one-pass accumulator for descriptive statistics.
@@ -110,11 +110,12 @@ public class OnlineStatistics {
      * correctly handles Inf) since the Neumaier compensation term produces NaN from
      * Inf - Inf arithmetic.
      */
-    public val mean: Double get() {
-        if (n == 0L) return Double.NaN
-        val total = compensatedTotal()
-        return total / n.toDouble()
-    }
+    public val mean: Double
+        get() {
+            if (n == 0L) return Double.NaN
+            val total = compensatedTotal()
+            return total / n.toDouble()
+        }
 
     /**
      * The sum of all observations, or [Double.NaN] if no observations have been added.
@@ -122,10 +123,11 @@ public class OnlineStatistics {
      * Uses Neumaier compensated summation for improved numerical precision with finite data.
      * When infinite values are present, falls back to the uncompensated sum.
      */
-    public val sum: Double get() {
-        if (n == 0L) return Double.NaN
-        return compensatedTotal()
-    }
+    public val sum: Double
+        get() {
+            if (n == 0L) return Double.NaN
+            return compensatedTotal()
+        }
 
     /**
      * Returns the compensated sum, falling back to the raw sum when

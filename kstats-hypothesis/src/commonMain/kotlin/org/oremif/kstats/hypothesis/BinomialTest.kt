@@ -94,7 +94,8 @@ public fun binomialTest(
     // Clopper-Pearson exact confidence interval
     val alpha = 1.0 - confidenceLevel
     val lower = if (k == 0) 0.0 else BetaDistribution(k.toDouble(), (n - k + 1).toDouble()).quantile(alpha / 2.0)
-    val upper = if (k == n) 1.0 else BetaDistribution((k + 1).toDouble(), (n - k).toDouble()).quantile(1.0 - alpha / 2.0)
+    val upper =
+        if (k == n) 1.0 else BetaDistribution((k + 1).toDouble(), (n - k).toDouble()).quantile(1.0 - alpha / 2.0)
 
     return TestResult(
         testName = "Binomial Test",

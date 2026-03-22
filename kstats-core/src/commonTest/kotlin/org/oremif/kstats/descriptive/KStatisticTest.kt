@@ -176,10 +176,14 @@ class KStatisticTest {
         val seq = data1.asSequence()
         for (order in 1..4) {
             val expected = data1.kStatistic(order)
-            assertEquals(expected, list.kStatistic(order), 1e-15,
-                "Iterable overload differs at order $order")
-            assertEquals(expected, seq.kStatistic(order), 1e-15,
-                "Sequence overload differs at order $order")
+            assertEquals(
+                expected, list.kStatistic(order), 1e-15,
+                "Iterable overload differs at order $order"
+            )
+            assertEquals(
+                expected, seq.kStatistic(order), 1e-15,
+                "Sequence overload differs at order $order"
+            )
         }
     }
 }

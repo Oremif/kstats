@@ -111,8 +111,10 @@ class JarqueBeraTest {
         assertJB(1.80801780745136, result.statistic, "symmetric n=30")
         assertP(0.404943023808853, result.pValue, "symmetric n=30")
         // Skewness should be zero for perfectly symmetric data
-        assertEquals(0.0, result.additionalInfo["skewness"]!!, 1e-15,
-            "Skewness should be 0 for symmetric data")
+        assertEquals(
+            0.0, result.additionalInfo["skewness"]!!, 1e-15,
+            "Skewness should be 0 for symmetric data"
+        )
     }
 
     // ===== Degenerate input =====
@@ -220,10 +222,14 @@ class JarqueBeraTest {
         val n = 1000
         val data = DoubleArray(n) { i -> normal.quantile((i + 0.5) / n) }
         val result = jarqueBeraTest(data)
-        assertTrue(result.statistic < 0.1,
-            "Perfect normal n=1000 should have small JB, got ${result.statistic}")
-        assertTrue(result.pValue > 0.9,
-            "Perfect normal n=1000 should have large p-value, p=${result.pValue}")
+        assertTrue(
+            result.statistic < 0.1,
+            "Perfect normal n=1000 should have small JB, got ${result.statistic}"
+        )
+        assertTrue(
+            result.pValue > 0.9,
+            "Perfect normal n=1000 should have large p-value, p=${result.pValue}"
+        )
     }
 
     @Test
@@ -233,10 +239,14 @@ class JarqueBeraTest {
         val n = 5000
         val data = DoubleArray(n) { i -> normal.quantile((i + 0.5) / n) }
         val result = jarqueBeraTest(data)
-        assertTrue(result.statistic < 0.1,
-            "Perfect normal n=5000 should have small JB, got ${result.statistic}")
-        assertTrue(result.pValue > 0.9,
-            "Perfect normal n=5000 should have large p-value, p=${result.pValue}")
+        assertTrue(
+            result.statistic < 0.1,
+            "Perfect normal n=5000 should have small JB, got ${result.statistic}"
+        )
+        assertTrue(
+            result.pValue > 0.9,
+            "Perfect normal n=5000 should have large p-value, p=${result.pValue}"
+        )
     }
 
     @Test
@@ -245,8 +255,10 @@ class JarqueBeraTest {
         val data = DoubleArray(50) { i -> if (i < 49) i.toDouble() / 10.0 else 1000.0 }
         val result = jarqueBeraTest(data)
         assertJB(4612.4836358838, result.statistic, "extreme outlier n=50")
-        assertTrue(result.pValue < 1e-10,
-            "Data with extreme outlier should reject normality, p=${result.pValue}")
+        assertTrue(
+            result.pValue < 1e-10,
+            "Data with extreme outlier should reject normality, p=${result.pValue}"
+        )
     }
 
     // ===== Non-finite input =====

@@ -2,11 +2,7 @@ package org.oremif.kstats.descriptive
 
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.random.Random
-import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class CentralTendencyTest {
 

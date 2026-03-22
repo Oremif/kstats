@@ -9,7 +9,10 @@ private fun intPow(base: Double, exp: Int): Double = when (exp) {
     1 -> base
     2 -> base * base
     3 -> base * base * base
-    4 -> { val b2 = base * base; b2 * b2 }
+    4 -> {
+        val b2 = base * base; b2 * b2
+    }
+
     else -> {
         var result = 1.0
         var b = base

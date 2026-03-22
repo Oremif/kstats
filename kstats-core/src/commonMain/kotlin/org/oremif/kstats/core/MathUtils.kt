@@ -1,16 +1,8 @@
 package org.oremif.kstats.core
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.exceptions.ConvergenceException
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.exp
-import kotlin.math.ln
-import kotlin.math.pow
-import kotlin.math.floor
-import kotlin.math.sin
-import kotlin.math.sqrt
-import kotlin.math.tan
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import kotlin.math.*
 
 // ── Mathematical constants ──────────────────────────────────────────────────
 

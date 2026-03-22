@@ -127,8 +127,10 @@ class DagostinoPearsonTest {
         // giving a different K². Our implementation is mathematically correct.
         val data = DoubleArray(20) { (it + 1).toDouble() }
         val result = dagostinoPearsonTest(data)
-        assertEquals(0.0, result.additionalInfo["z1"]!!, 1e-15,
-            "z1 should be 0 for perfectly symmetric data")
+        assertEquals(
+            0.0, result.additionalInfo["z1"]!!, 1e-15,
+            "z1 should be 0 for perfectly symmetric data"
+        )
         assertTrue(result.statistic > 0.0, "K² should be positive (kurtosis term)")
         assertTrue(result.pValue in 0.0..1.0)
     }
@@ -243,7 +245,7 @@ class DagostinoPearsonTest {
 
     @Test
     fun testNearConstantData() {
-        val data = DoubleArray(20) { 1.0 } .also { it[19] = 1.0 + 1e-10 }
+        val data = DoubleArray(20) { 1.0 }.also { it[19] = 1.0 + 1e-10 }
         val result = dagostinoPearsonTest(data)
         assertTrue(result.statistic >= 0.0, "K² should be non-negative")
         assertTrue(result.pValue in 0.0..1.0, "p-value should be in [0, 1]")
@@ -256,8 +258,10 @@ class DagostinoPearsonTest {
         val result = dagostinoPearsonTest(data)
         assertK2(5.41918814715635, result.statistic, "symmetric n=30")
         // z1 should be nearly zero for symmetric data
-        assertTrue(abs(result.additionalInfo["z1"]!!) < 1e-10,
-            "z1 should be ~0 for symmetric data, got ${result.additionalInfo["z1"]}")
+        assertTrue(
+            abs(result.additionalInfo["z1"]!!) < 1e-10,
+            "z1 should be ~0 for symmetric data, got ${result.additionalInfo["z1"]}"
+        )
     }
 
     // ===== Extreme parameters =====
@@ -270,10 +274,14 @@ class DagostinoPearsonTest {
         val n = 1000
         val data = DoubleArray(n) { i -> normal.quantile((i + 0.5) / n) }
         val result = dagostinoPearsonTest(data)
-        assertTrue(result.statistic < 0.1,
-            "Perfect normal n=1000 should have small K², got ${result.statistic}")
-        assertTrue(result.pValue > 0.9,
-            "Perfect normal n=1000 should have large p-value, p=${result.pValue}")
+        assertTrue(
+            result.statistic < 0.1,
+            "Perfect normal n=1000 should have small K², got ${result.statistic}"
+        )
+        assertTrue(
+            result.pValue > 0.9,
+            "Perfect normal n=1000 should have large p-value, p=${result.pValue}"
+        )
     }
 
     @Test
@@ -284,10 +292,14 @@ class DagostinoPearsonTest {
         val n = 5000
         val data = DoubleArray(n) { i -> normal.quantile((i + 0.5) / n) }
         val result = dagostinoPearsonTest(data)
-        assertTrue(result.statistic < 0.1,
-            "Perfect normal n=5000 should have small K², got ${result.statistic}")
-        assertTrue(result.pValue > 0.9,
-            "Perfect normal n=5000 should have large p-value, p=${result.pValue}")
+        assertTrue(
+            result.statistic < 0.1,
+            "Perfect normal n=5000 should have small K², got ${result.statistic}"
+        )
+        assertTrue(
+            result.pValue > 0.9,
+            "Perfect normal n=5000 should have large p-value, p=${result.pValue}"
+        )
     }
 
     @Test
@@ -295,8 +307,10 @@ class DagostinoPearsonTest {
         // Normal data with extreme outlier → should detect non-normality
         val data = DoubleArray(50) { i -> if (i < 49) i.toDouble() / 10.0 else 1000.0 }
         val result = dagostinoPearsonTest(data)
-        assertTrue(result.pValue < 0.001,
-            "Data with extreme outlier should reject normality, p=${result.pValue}")
+        assertTrue(
+            result.pValue < 0.001,
+            "Data with extreme outlier should reject normality, p=${result.pValue}"
+        )
     }
 
     // ===== Non-finite input =====

@@ -91,8 +91,10 @@ class CentralMomentTest {
     fun testConstantDataReturnsZero() {
         val constant = doubleArrayOf(5.0, 5.0, 5.0, 5.0)
         for (order in 1..5) {
-            assertEquals(0.0, constant.centralMoment(order), 1e-15,
-                "centralMoment($order) of constant data should be 0.0")
+            assertEquals(
+                0.0, constant.centralMoment(order), 1e-15,
+                "centralMoment($order) of constant data should be 0.0"
+            )
         }
     }
 
@@ -154,10 +156,14 @@ class CentralMomentTest {
         val seq = data1.asSequence()
         for (order in 0..5) {
             val expected = data1.centralMoment(order)
-            assertEquals(expected, list.centralMoment(order), 1e-15,
-                "Iterable overload differs at order $order")
-            assertEquals(expected, seq.centralMoment(order), 1e-15,
-                "Sequence overload differs at order $order")
+            assertEquals(
+                expected, list.centralMoment(order), 1e-15,
+                "Iterable overload differs at order $order"
+            )
+            assertEquals(
+                expected, seq.centralMoment(order), 1e-15,
+                "Sequence overload differs at order $order"
+            )
         }
     }
 }

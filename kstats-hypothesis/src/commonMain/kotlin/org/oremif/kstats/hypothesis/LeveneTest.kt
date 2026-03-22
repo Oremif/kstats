@@ -17,6 +17,7 @@ import kotlin.math.abs
 public enum class LeveneCenter {
     /** Classic Levene's test: deviations from the group mean. */
     MEAN,
+
     /** Brown-Forsythe variant: deviations from the group median (more robust). */
     MEDIAN
 }
