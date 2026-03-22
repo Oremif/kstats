@@ -77,8 +77,10 @@ public fun DoubleArray.rank(tieMethod: TieMethod = TieMethod.AVERAGE): DoubleArr
     }
 
     val n = size
-    val indexed = Array(n) { IndexedValue(it, this[it]) }
-    indexed.sortBy { it.value }
+    val indices = IntArray(n) { it }
+    val values = this
+    // Sort indices by their corresponding values (avoids boxing DoubleArray into Array<IndexedValue>)
+    val sortedIndices = indices.sortedBy { values[it] }.toIntArray()
 
     val ranks = DoubleArray(n)
 
@@ -86,14 +88,14 @@ public fun DoubleArray.rank(tieMethod: TieMethod = TieMethod.AVERAGE): DoubleArr
     var denseRank = 0
     while (i < n) {
         var j = i
-        while (j < n - 1 && indexed[j + 1].value == indexed[i].value) {
+        while (j < n - 1 && values[sortedIndices[j + 1]] == values[sortedIndices[i]]) {
             j++
         }
         denseRank++
 
         // Positions i..j are tied
         for (k in i..j) {
-            ranks[indexed[k].index] = when (tieMethod) {
+            ranks[sortedIndices[k]] = when (tieMethod) {
                 TieMethod.AVERAGE -> (i + j + 2.0) / 2.0 // 1-based average
                 TieMethod.MIN -> (i + 1).toDouble()
                 TieMethod.MAX -> (j + 1).toDouble()

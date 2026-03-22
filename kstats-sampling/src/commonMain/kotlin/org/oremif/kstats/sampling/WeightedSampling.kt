@@ -57,13 +57,12 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
 
     init {
         if (weights.isEmpty()) throw InsufficientDataException("weights must not be empty")
-        if (weights.values.any { !it.isFinite() }) {
-            throw InvalidParameterException("weights must be finite")
+        var totalWeight = 0.0
+        for (w in weights.values) {
+            if (!w.isFinite()) throw InvalidParameterException("weights must be finite")
+            if (w < 0.0) throw InvalidParameterException("weights must be non-negative")
+            totalWeight += w
         }
-        if (weights.values.any { it < 0.0 }) {
-            throw InvalidParameterException("weights must be non-negative")
-        }
-        val totalWeight = weights.values.sum()
         if (totalWeight <= 0.0) throw InvalidParameterException("total weight must be positive")
 
         outcomes = weights.keys.toList()
@@ -90,16 +89,16 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
 }
 
 /**
- * Finds the leftmost index in a sorted [array] where `array[index] >= value`.
- * Equivalent to `Arrays.binarySearch` insertion-point logic but without allocating
- * a `List` wrapper on every call.
+ * Finds the leftmost index in a sorted [array] where `array[index] > value`.
+ * Uses strict `>` so that zero-weight outcomes (whose cumulative weight equals
+ * the previous one) are never selected.
  */
 private fun cumulativeBinarySearch(array: DoubleArray, value: Double): Int {
     var low = 0
     var high = array.size - 1
     while (low < high) {
         val mid = (low + high) ushr 1
-        if (array[mid] < value) {
+        if (array[mid] <= value) {
             low = mid + 1
         } else {
             high = mid
@@ -157,8 +156,8 @@ public fun <T> Iterable<T>.randomSample(n: Int, random: Random = Random): List<T
  * @return a list of [n] randomly drawn elements, potentially with duplicates.
  */
 public fun <T> List<T>.bootstrapSample(n: Int, random: Random = Random): List<T> {
-    if (isEmpty()) throw InsufficientDataException("List must not be empty")
     if (n < 0) throw InvalidParameterException("n must be non-negative")
+    if (isEmpty() && n > 0) throw InsufficientDataException("List must not be empty")
     return List(n) { this[random.nextInt(size)] }
 }
 

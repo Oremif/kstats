@@ -94,6 +94,15 @@ class WeightedSamplingTest {
         }
     }
 
+    @Test
+    fun testWeightedDiceZeroWeightOutcomeNeverSelected() {
+        // Zero-weight outcomes should never be selected, even with seeded random
+        val dice = WeightedDice(mapOf("A" to 0.0, "B" to 1.0, "C" to 0.0), Random(42))
+        repeat(10000) {
+            assertEquals("B", dice.roll(), "Zero-weight outcome should never be selected")
+        }
+    }
+
     // --- randomSample ---
 
     @Test
@@ -165,6 +174,12 @@ class WeightedSamplingTest {
         assertFailsWith<InvalidParameterException> {
             listOf(1, 2, 3).bootstrapSample(-1)
         }
+    }
+
+    @Test
+    fun testBootstrapSampleZeroFromEmptyList() {
+        val sample = emptyList<Int>().bootstrapSample(0)
+        assertTrue(sample.isEmpty())
     }
 
     // --- bootstrapSample (Iterable) ---

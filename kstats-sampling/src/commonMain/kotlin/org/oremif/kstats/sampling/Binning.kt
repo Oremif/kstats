@@ -283,14 +283,69 @@ public fun Iterable<Double>.frequencyTable(binCount: Int): List<FrequencyBin> =
 public fun Iterable<Double>.frequencyTable(binSize: Double): List<FrequencyBin> =
     bin(binSize).toFrequencyBins()
 
+/**
+ * Groups the values into equal-width bins of the given [binSize].
+ *
+ * This is a convenience overload that accepts a [DoubleArray]. The array is
+ * converted to a list internally.
+ *
+ * @param binSize the width of each bin. Must be positive.
+ * @return a list of [Bin] objects containing the values that fall within each range.
+ * @see Iterable.bin
+ */
+public fun DoubleArray.bin(binSize: Double): List<Bin<Double>> =
+    toList().bin(binSize)
+
+/**
+ * Groups the values into a fixed number of equal-width bins.
+ *
+ * This is a convenience overload that accepts a [DoubleArray]. The array is
+ * converted to a list internally.
+ *
+ * @param binCount the desired number of bins. Must be positive.
+ * @return a list of [Bin] objects containing the values that fall within each range.
+ * @see Iterable.bin
+ */
+public fun DoubleArray.bin(binCount: Int): List<Bin<Double>> =
+    toList().bin(binCount)
+
+/**
+ * Builds a frequency table by dividing the values into a fixed number of equal-width bins.
+ *
+ * This is a convenience overload that accepts a [DoubleArray]. The array is
+ * converted to a list internally.
+ *
+ * @param binCount the desired number of bins. Must be positive.
+ * @return a list of [FrequencyBin] objects ordered by range. Returns an empty list if the
+ * array is empty.
+ * @see Iterable.frequencyTable
+ */
+public fun DoubleArray.frequencyTable(binCount: Int): List<FrequencyBin> =
+    toList().frequencyTable(binCount)
+
+/**
+ * Builds a frequency table by dividing the values into equal-width bins of the given size.
+ *
+ * This is a convenience overload that accepts a [DoubleArray]. The array is
+ * converted to a list internally.
+ *
+ * @param binSize the width of each bin. Must be positive.
+ * @return a list of [FrequencyBin] objects ordered by range. Returns an empty list if the
+ * array is empty.
+ * @see Iterable.frequencyTable
+ */
+public fun DoubleArray.frequencyTable(binSize: Double): List<FrequencyBin> =
+    toList().frequencyTable(binSize)
+
 private fun List<Bin<Double>>.toFrequencyBins(): List<FrequencyBin> {
     val total = sumOf { it.count }.toDouble()
     if (total == 0.0) return emptyList()
 
     var cumulative = 0.0
-    return map { bin ->
+    return mapIndexed { index, bin ->
         val relative = bin.count / total
         cumulative += relative
-        FrequencyBin(bin.range, bin.count, relative, cumulative)
+        val cumulativeFrequency = if (index == lastIndex) 1.0 else cumulative
+        FrequencyBin(bin.range, bin.count, relative, cumulativeFrequency)
     }
 }

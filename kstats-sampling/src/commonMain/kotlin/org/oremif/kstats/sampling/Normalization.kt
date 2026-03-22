@@ -39,10 +39,8 @@ public fun DoubleArray.zScore(): DoubleArray {
 /**
  * Computes the z-score (standard score) of each element in this iterable.
  *
- * The z-score expresses how many standard deviations an element is from the mean.
- * Each value is transformed by subtracting the sample mean and dividing by the
- * sample standard deviation. The resulting list has a mean of approximately 0
- * and a standard deviation of approximately 1.
+ * This is a convenience overload that accepts any [Iterable]. The collection is
+ * materialized to a [DoubleArray] internally.
  *
  * ### Example:
  * ```kotlin
@@ -54,18 +52,10 @@ public fun DoubleArray.zScore(): DoubleArray {
  * @throws InsufficientDataException if the collection has fewer than 2 elements.
  * @throws InvalidParameterException if the collection contains NaN or Infinity.
  * @throws DegenerateDataException if the standard deviation is zero (all values are identical).
+ * @see DoubleArray.zScore
  */
-public fun Iterable<Double>.zScore(): List<Double> {
-    val arr = toList().toDoubleArray()
-    if (arr.size < 2) throw InsufficientDataException("Need at least 2 elements for z-score")
-    for (v in arr) {
-        if (!v.isFinite()) throw InvalidParameterException("Collection contains non-finite value: $v")
-    }
-    val m = arr.mean()
-    val sd = arr.standardDeviation()
-    if (sd <= 0.0) throw DegenerateDataException("Standard deviation is zero, cannot compute z-scores")
-    return List(arr.size) { (arr[it] - m) / sd }
-}
+public fun Iterable<Double>.zScore(): List<Double> =
+    toList().toDoubleArray().zScore().toList()
 
 /**
  * Scales each element to the range [0, 1] using min-max normalization.
