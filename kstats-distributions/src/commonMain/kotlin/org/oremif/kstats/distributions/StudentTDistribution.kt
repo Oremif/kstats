@@ -43,7 +43,7 @@ public class StudentTDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (degreesOfFreedom <= 0.0) throw InvalidParameterException("Degrees of freedom must be positive, got $degreesOfFreedom")
+        if (!degreesOfFreedom.isFinite() || degreesOfFreedom <= 0.0) throw InvalidParameterException("Degrees of freedom must be finite and positive, got $degreesOfFreedom")
     }
 
     private val df = degreesOfFreedom
@@ -131,10 +131,9 @@ public class StudentTDistribution(
     }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double
-        get() =
-            (df + 1.0) / 2.0 * (digamma((df + 1.0) / 2.0) - digamma(df / 2.0)) +
-                0.5 * ln(df) + lnBeta(df / 2.0, 0.5)
+    override val entropy: Double =
+        (df + 1.0) / 2.0 * (digamma((df + 1.0) / 2.0) - digamma(df / 2.0)) +
+            0.5 * ln(df) + lnBeta(df / 2.0, 0.5)
 
     /** The mean of this distribution, which is 0 when degrees of freedom exceeds 1, or NaN otherwise. */
     override val mean: Double get() = if (df > 1) 0.0 else Double.NaN

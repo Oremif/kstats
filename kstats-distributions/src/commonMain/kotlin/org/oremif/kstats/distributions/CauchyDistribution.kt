@@ -48,7 +48,8 @@ public class CauchyDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (scale.isNaN() || scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
+        if (!location.isFinite()) throw InvalidParameterException("location must be finite, got $location")
+        if (!scale.isFinite() || scale <= 0.0) throw InvalidParameterException("scale must be finite and positive, got $scale")
     }
 
     /**
@@ -114,7 +115,7 @@ public class CauchyDistribution(
     }
 
     /** Returns the Shannon entropy of this distribution in nats. The Cauchy entropy is always defined even though the moments are not. */
-    override val entropy: Double get() = ln(4.0 * PI * scale)
+    override val entropy: Double = ln(4.0 * PI * scale)
 
     /**
      * Returns the quantile (inverse CDF) for the given probability [p].

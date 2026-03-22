@@ -46,8 +46,8 @@ public class FDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (dfNumerator <= 0.0) throw InvalidParameterException("dfNumerator must be positive, got $dfNumerator")
-        if (dfDenominator <= 0.0) throw InvalidParameterException("dfDenominator must be positive, got $dfDenominator")
+        if (!dfNumerator.isFinite() || dfNumerator <= 0.0) throw InvalidParameterException("dfNumerator must be finite and positive, got $dfNumerator")
+        if (!dfDenominator.isFinite() || dfDenominator <= 0.0) throw InvalidParameterException("dfDenominator must be finite and positive, got $dfDenominator")
     }
 
     private val d1 = dfNumerator
@@ -146,11 +146,10 @@ public class FDistribution(
     }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double
-        get() =
-            ln(d2 / d1) + lnBeta(d1 / 2.0, d2 / 2.0) +
-                (1.0 - d1 / 2.0) * digamma(d1 / 2.0) - (1.0 + d2 / 2.0) * digamma(d2 / 2.0) +
-                (d1 + d2) / 2.0 * digamma((d1 + d2) / 2.0)
+    override val entropy: Double =
+        ln(d2 / d1) + lnBeta(d1 / 2.0, d2 / 2.0) +
+            (1.0 - d1 / 2.0) * digamma(d1 / 2.0) - (1.0 + d2 / 2.0) * digamma(d2 / 2.0) +
+            (d1 + d2) / 2.0 * digamma((d1 + d2) / 2.0)
 
     /** Returns the mean, defined only when the denominator degrees of freedom exceeds 2. Returns [Double.NaN] otherwise. */
     override val mean: Double get() = if (d2 > 2) d2 / (d2 - 2) else Double.NaN

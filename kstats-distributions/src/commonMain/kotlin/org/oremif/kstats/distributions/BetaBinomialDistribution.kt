@@ -48,8 +48,8 @@ public class BetaBinomialDistribution(
 
     init {
         if (trials < 0) throw InvalidParameterException("trials must be non-negative, got $trials")
-        if (alpha <= 0.0) throw InvalidParameterException("alpha must be positive, got $alpha")
-        if (beta <= 0.0) throw InvalidParameterException("beta must be positive, got $beta")
+        if (!alpha.isFinite() || alpha <= 0.0) throw InvalidParameterException("alpha must be finite and positive, got $alpha")
+        if (!beta.isFinite() || beta <= 0.0) throw InvalidParameterException("beta must be finite and positive, got $beta")
     }
 
     private val n = trials
@@ -244,6 +244,13 @@ public class BetaBinomialDistribution(
         var p = betaDelegate.sample(random)
         if (p.isNaN()) p = a / (a + b)
         p = p.coerceIn(0.0, 1.0)
-        return BinomialDistribution(n, p).sample(random)
+        if (p == 0.0) return 0
+        if (p == 1.0) return n
+        // Inline binomial sampling to avoid per-call allocation
+        var successes = 0
+        for (i in 0 until n) {
+            if (random.nextDouble() < p) successes++
+        }
+        return successes
     }
 }

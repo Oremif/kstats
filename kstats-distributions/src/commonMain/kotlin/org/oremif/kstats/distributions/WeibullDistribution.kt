@@ -43,8 +43,8 @@ public class WeibullDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (shape <= 0.0) throw InvalidParameterException("shape must be positive, got $shape")
-        if (scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
+        if (!shape.isFinite() || shape <= 0.0) throw InvalidParameterException("shape must be finite and positive, got $shape")
+        if (!scale.isFinite() || scale <= 0.0) throw InvalidParameterException("scale must be finite and positive, got $scale")
     }
 
     private val k = shape
@@ -144,7 +144,6 @@ public class WeibullDistribution(
     override val skewness: Double
         get() {
             val g1 = gamma(1.0 + 1.0 / k)
-            val g2 = gamma(1.0 + 2.0 / k)
             val g3 = gamma(1.0 + 3.0 / k)
             val mu = lambda * g1
             val sigma = sqrt(variance)
@@ -163,8 +162,7 @@ public class WeibullDistribution(
         }
 
     /** Returns the Shannon entropy of this distribution in nats, using the Euler-Mascheroni constant. */
-    override val entropy: Double
-        get() = EULER_MASCHERONI * (1.0 - 1.0 / k) + ln(lambda / k) + 1.0
+    override val entropy: Double = EULER_MASCHERONI * (1.0 - 1.0 / k) + ln(lambda / k) + 1.0
 
     /**
      * Draws a single random value from this Weibull distribution.

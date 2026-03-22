@@ -6,6 +6,7 @@ import org.oremif.kstats.core.regularizedBeta
 import kotlin.math.ceil
 import kotlin.math.exp
 import kotlin.math.ln
+import kotlin.math.roundToInt
 import kotlin.math.sqrt
 import kotlin.random.Random
 
@@ -49,14 +50,15 @@ public class NegativeBinomialDistribution(
 
     init {
         if (successes <= 0) throw InvalidParameterException("successes must be positive, got $successes")
-        if (probability <= 0.0 || probability > 1.0) throw InvalidParameterException("probability must be in (0, 1], got $probability")
+        if (probability.isNaN() || probability <= 0.0 || probability > 1.0) throw InvalidParameterException("probability must be in (0, 1], got $probability")
     }
 
     private val r = successes
     private val p = probability
     private val q = 1.0 - p
 
-    private val geoDelegate = GeometricDistribution(p)
+    // Gamma-Poisson compound: NegBin(r, p) = Poisson(Gamma(r, q/p))
+    private val gammaDelegate: GammaDistribution by lazy { GammaDistribution(r.toDouble(), p / q) }
 
     /**
      * Returns the probability mass at [k], the probability of exactly [k] failures before
@@ -186,11 +188,23 @@ public class NegativeBinomialDistribution(
      * required successes.
      */
     override fun sample(random: Random): Int {
-        // Sum of r geometric(p) random variables
-        var sum = 0
-        for (i in 0 until r) {
-            sum += geoDelegate.sample(random)
+        if (p == 1.0) return 0
+        // Gamma-Poisson compound: draw lambda ~ Gamma(r, p/q), then X ~ Poisson(lambda)
+        val lambda = gammaDelegate.sample(random)
+        if (lambda == 0.0) return 0
+        // Poisson sampling with Knuth's algorithm for small lambda, normal approximation for large
+        if (lambda < 30.0) {
+            val l = kotlin.math.exp(-lambda)
+            var k = 0
+            var prod = 1.0
+            do {
+                k++
+                prod *= random.nextDouble()
+            } while (prod > l)
+            return k - 1
         }
-        return sum
+        val normal = kotlin.math.sqrt(lambda)
+        return (lambda + normal * NormalDistribution.STANDARD.sample(random))
+            .roundToInt().coerceAtLeast(0)
     }
 }

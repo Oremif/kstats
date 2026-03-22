@@ -55,7 +55,7 @@ public class LevyDistribution(
 
     init {
         if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
-        if (!(c > 0.0)) throw InvalidParameterException("c must be positive, got $c")
+        if (!c.isFinite() || c <= 0.0) throw InvalidParameterException("c must be finite and positive, got $c")
     }
 
     /** Provides the standard Levy distribution instance. */

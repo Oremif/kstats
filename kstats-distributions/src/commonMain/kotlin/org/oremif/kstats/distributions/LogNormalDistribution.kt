@@ -46,7 +46,7 @@ public class LogNormalDistribution(
 
     init {
         if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
-        if (sigma.isNaN() || sigma <= 0.0) throw InvalidParameterException("sigma must be positive, got $sigma")
+        if (!sigma.isFinite() || sigma <= 0.0) throw InvalidParameterException("sigma must be finite and positive, got $sigma")
     }
 
     private val normal = NormalDistribution(mu, sigma)

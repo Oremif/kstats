@@ -46,8 +46,8 @@ public class GammaDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (shape.isNaN() || shape <= 0.0) throw InvalidParameterException("shape must be positive, got $shape")
-        if (rate.isNaN() || rate <= 0.0) throw InvalidParameterException("rate must be positive, got $rate")
+        if (!shape.isFinite() || shape <= 0.0) throw InvalidParameterException("shape must be finite and positive, got $shape")
+        if (!rate.isFinite() || rate <= 0.0) throw InvalidParameterException("rate must be finite and positive, got $rate")
     }
 
     private val smallShapeHelper: GammaDistribution by lazy {
@@ -148,9 +148,8 @@ public class GammaDistribution(
     }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double
-        get() =
-            shape - ln(rate) + lnGamma(shape) + (1.0 - shape) * digamma(shape)
+    override val entropy: Double =
+        shape - ln(rate) + lnGamma(shape) + (1.0 - shape) * digamma(shape)
 
     /** The mean of this distribution, equal to shape / rate. */
     override val mean: Double get() = shape / rate

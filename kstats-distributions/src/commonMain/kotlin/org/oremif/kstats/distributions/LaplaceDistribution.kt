@@ -37,7 +37,7 @@ public class LaplaceDistribution(
 
     init {
         if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
-        if (!(scale > 0.0)) throw InvalidParameterException("scale must be positive, got $scale")
+        if (!scale.isFinite() || scale <= 0.0) throw InvalidParameterException("scale must be finite and positive, got $scale")
     }
 
     public companion object {

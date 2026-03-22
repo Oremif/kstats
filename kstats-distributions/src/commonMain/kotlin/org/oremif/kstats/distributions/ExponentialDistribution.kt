@@ -49,7 +49,7 @@ public class ExponentialDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (rate.isNaN() || rate <= 0.0) throw InvalidParameterException("rate must be positive, got $rate")
+        if (!rate.isFinite() || rate <= 0.0) throw InvalidParameterException("rate must be finite and positive, got $rate")
     }
 
     /** Provides the pre-built standard exponential distribution constant. */
@@ -64,7 +64,11 @@ public class ExponentialDistribution(
      * @param x the point at which to evaluate the density.
      * @return the probability density at [x], or `0.0` if [x] is negative.
      */
-    override fun pdf(x: Double): Double = if (x >= 0.0) rate * exp(-rate * x) else 0.0
+    override fun pdf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
+        x >= 0.0 -> rate * exp(-rate * x)
+        else -> 0.0
+    }
 
     /**
      * Computes the natural logarithm of the probability density at [x].
@@ -72,7 +76,11 @@ public class ExponentialDistribution(
      * @param x the point at which to evaluate the log-density.
      * @return the natural log of the density at [x], or [Double.NEGATIVE_INFINITY] if [x] is negative.
      */
-    override fun logPdf(x: Double): Double = if (x >= 0.0) ln(rate) - rate * x else Double.NEGATIVE_INFINITY
+    override fun logPdf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
+        x >= 0.0 -> ln(rate) - rate * x
+        else -> Double.NEGATIVE_INFINITY
+    }
 
     /**
      * Computes the cumulative distribution function at [x].
@@ -81,7 +89,11 @@ public class ExponentialDistribution(
      * @return the probability that a value drawn from this distribution is less than or equal to [x],
      * or `0.0` if [x] is negative.
      */
-    override fun cdf(x: Double): Double = if (x >= 0.0) -expm1(-rate * x) else 0.0
+    override fun cdf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
+        x >= 0.0 -> -expm1(-rate * x)
+        else -> 0.0
+    }
 
     /**
      * Computes the survival function at [x].
@@ -94,7 +106,11 @@ public class ExponentialDistribution(
      * @return the probability that a value drawn from this distribution is greater than [x],
      * or `1.0` if [x] is negative.
      */
-    override fun sf(x: Double): Double = if (x >= 0.0) exp(-rate * x) else 1.0
+    override fun sf(x: Double): Double = when {
+        x.isNaN() -> Double.NaN
+        x >= 0.0 -> exp(-rate * x)
+        else -> 1.0
+    }
 
     /**
      * Computes the quantile (inverse CDF) for the given probability [p].

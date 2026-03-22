@@ -45,6 +45,9 @@ public class TriangularDistribution(
 ) : ContinuousDistribution {
 
     init {
+        if (!a.isFinite()) throw InvalidParameterException("a must be finite, got $a")
+        if (!b.isFinite()) throw InvalidParameterException("b must be finite, got $b")
+        if (!c.isFinite()) throw InvalidParameterException("c must be finite, got $c")
         if (a >= b) throw InvalidParameterException("a must be less than b, got a=$a, b=$b")
         if (c !in a..b) throw InvalidParameterException("c must be in [a, b], got a=$a, b=$b, c=$c")
     }
@@ -164,7 +167,7 @@ public class TriangularDistribution(
     override val kurtosis: Double get() = -0.6
 
     /** The differential entropy of this distribution in nats, equal to `0.5 + ln((b - a) / 2)`. */
-    override val entropy: Double get() = 0.5 + ln(ba / 2.0)
+    override val entropy: Double = 0.5 + ln(ba / 2.0)
 
     /**
      * Draws a single random value from this triangular distribution using inverse CDF sampling.

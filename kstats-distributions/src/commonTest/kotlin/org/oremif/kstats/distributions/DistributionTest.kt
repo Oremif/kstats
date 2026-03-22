@@ -350,4 +350,183 @@ class DistributionTest {
         val samples = d.sample(100_000, Random(42))
         assertTrue(samples.all { it.isFinite() }, "all Logistic samples should be finite")
     }
+
+    @Test
+    fun paretoSampleProducesFiniteValues() {
+        val d = ParetoDistribution.STANDARD
+        val samples = d.sample(100_000, Random(42))
+        assertTrue(samples.all { it.isFinite() }, "all Pareto samples should be finite")
+    }
+
+    // --- ExponentialDistribution NaN propagation ---
+
+    @Test
+    fun exponentialPdfNaNReturnsNaN() {
+        val d = ExponentialDistribution.STANDARD
+        assertTrue(d.pdf(Double.NaN).isNaN(), "pdf(NaN) should return NaN")
+    }
+
+    @Test
+    fun exponentialLogPdfNaNReturnsNaN() {
+        val d = ExponentialDistribution.STANDARD
+        assertTrue(d.logPdf(Double.NaN).isNaN(), "logPdf(NaN) should return NaN")
+    }
+
+    @Test
+    fun exponentialCdfNaNReturnsNaN() {
+        val d = ExponentialDistribution.STANDARD
+        assertTrue(d.cdf(Double.NaN).isNaN(), "cdf(NaN) should return NaN")
+    }
+
+    @Test
+    fun exponentialSfNaNReturnsNaN() {
+        val d = ExponentialDistribution.STANDARD
+        assertTrue(d.sf(Double.NaN).isNaN(), "sf(NaN) should return NaN")
+    }
+
+    // --- Parameter validation: NaN and Infinity rejection ---
+
+    @Test
+    fun normalRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { NormalDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { NormalDistribution(0.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { NormalDistribution(0.0, Double.POSITIVE_INFINITY) }
+        assertFailsWith<InvalidParameterException> { NormalDistribution(Double.POSITIVE_INFINITY, 1.0) }
+    }
+
+    @Test
+    fun gammaRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { GammaDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { GammaDistribution(1.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { GammaDistribution(Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { GammaDistribution(1.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun exponentialRejectsNaNAndInfinityRate() {
+        assertFailsWith<InvalidParameterException> { ExponentialDistribution(Double.NaN) }
+        assertFailsWith<InvalidParameterException> { ExponentialDistribution(Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun betaRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { BetaDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { BetaDistribution(1.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { BetaDistribution(Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { BetaDistribution(1.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun studentTRejectsNaNAndInfinityDf() {
+        assertFailsWith<InvalidParameterException> { StudentTDistribution(Double.NaN) }
+        assertFailsWith<InvalidParameterException> { StudentTDistribution(Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun chiSquaredRejectsNaNAndInfinityDf() {
+        assertFailsWith<InvalidParameterException> { ChiSquaredDistribution(Double.NaN) }
+        assertFailsWith<InvalidParameterException> { ChiSquaredDistribution(Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun fDistributionRejectsNaNAndInfinityDf() {
+        assertFailsWith<InvalidParameterException> { FDistribution(Double.NaN, 10.0) }
+        assertFailsWith<InvalidParameterException> { FDistribution(10.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { FDistribution(Double.POSITIVE_INFINITY, 10.0) }
+        assertFailsWith<InvalidParameterException> { FDistribution(10.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun cauchyRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { CauchyDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { CauchyDistribution(0.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { CauchyDistribution(Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { CauchyDistribution(0.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun gumbelRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { GumbelDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { GumbelDistribution(0.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { GumbelDistribution(Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { GumbelDistribution(0.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun weibullRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { WeibullDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { WeibullDistribution(1.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { WeibullDistribution(Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { WeibullDistribution(1.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun paretoRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { ParetoDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { ParetoDistribution(1.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { ParetoDistribution(Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { ParetoDistribution(1.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun logNormalRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { LogNormalDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { LogNormalDistribution(0.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { LogNormalDistribution(0.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun logisticRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { LogisticDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { LogisticDistribution(0.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { LogisticDistribution(0.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun nakagamiRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { NakagamiDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { NakagamiDistribution(1.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { NakagamiDistribution(Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { NakagamiDistribution(1.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun levyRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { LevyDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { LevyDistribution(0.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { LevyDistribution(0.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun laplaceRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { LaplaceDistribution(Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { LaplaceDistribution(0.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { LaplaceDistribution(0.0, Double.POSITIVE_INFINITY) }
+    }
+
+    @Test
+    fun triangularRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { TriangularDistribution(Double.NaN, 1.0, 0.5) }
+        assertFailsWith<InvalidParameterException> { TriangularDistribution(0.0, Double.NaN, 0.5) }
+        assertFailsWith<InvalidParameterException> { TriangularDistribution(0.0, 1.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { TriangularDistribution(Double.POSITIVE_INFINITY, 1.0, 0.5) }
+    }
+
+    @Test
+    fun geometricRejectsNaN() {
+        assertFailsWith<InvalidParameterException> { GeometricDistribution(Double.NaN) }
+    }
+
+    @Test
+    fun negativeBinomialRejectsNaN() {
+        assertFailsWith<InvalidParameterException> { NegativeBinomialDistribution(5, Double.NaN) }
+    }
+
+    @Test
+    fun betaBinomialRejectsNaNAndInfinityParameters() {
+        assertFailsWith<InvalidParameterException> { BetaBinomialDistribution(10, Double.NaN, 1.0) }
+        assertFailsWith<InvalidParameterException> { BetaBinomialDistribution(10, 1.0, Double.NaN) }
+        assertFailsWith<InvalidParameterException> { BetaBinomialDistribution(10, Double.POSITIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> { BetaBinomialDistribution(10, 1.0, Double.POSITIVE_INFINITY) }
+    }
 }

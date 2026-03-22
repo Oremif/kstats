@@ -32,8 +32,8 @@ public class ParetoDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (shape <= 0.0) throw InvalidParameterException("shape must be positive, got $shape")
-        if (scale <= 0.0) throw InvalidParameterException("scale must be positive, got $scale")
+        if (!shape.isFinite() || shape <= 0.0) throw InvalidParameterException("shape must be finite and positive, got $shape")
+        if (!scale.isFinite() || scale <= 0.0) throw InvalidParameterException("scale must be finite and positive, got $scale")
     }
 
     public companion object {
@@ -147,7 +147,7 @@ public class ParetoDistribution(
      * @return a random value drawn from this distribution (always ≥ scale).
      */
     override fun sample(random: Random): Double {
-        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 1.0 - Double.MIN_VALUE)
+        val u = random.nextDouble().coerceIn(1e-300, 1.0 - Double.MIN_VALUE)
         return scale * u.pow(-1.0 / shape)
     }
 }

@@ -47,8 +47,8 @@ public class BetaDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (alpha <= 0.0) throw InvalidParameterException("alpha must be positive, got $alpha")
-        if (beta <= 0.0) throw InvalidParameterException("beta must be positive, got $beta")
+        if (!alpha.isFinite() || alpha <= 0.0) throw InvalidParameterException("alpha must be finite and positive, got $alpha")
+        if (!beta.isFinite() || beta <= 0.0) throw InvalidParameterException("beta must be finite and positive, got $beta")
     }
 
     private val gammaAlpha = GammaDistribution(alpha, 1.0)
@@ -138,10 +138,9 @@ public class BetaDistribution(
     }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double
-        get() =
-            lnBeta(alpha, beta) - (alpha - 1.0) * digamma(alpha) - (beta - 1.0) * digamma(beta) +
-                (alpha + beta - 2.0) * digamma(alpha + beta)
+    override val entropy: Double =
+        lnBeta(alpha, beta) - (alpha - 1.0) * digamma(alpha) - (beta - 1.0) * digamma(beta) +
+            (alpha + beta - 2.0) * digamma(alpha + beta)
 
     /**
      * Computes the quantile (inverse CDF) for the given probability [p].

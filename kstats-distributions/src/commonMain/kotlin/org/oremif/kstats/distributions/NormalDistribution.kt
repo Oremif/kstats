@@ -51,8 +51,8 @@ public class NormalDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (mu.isNaN() || mu.isInfinite()) throw InvalidParameterException("mu must be finite, got $mu")
-        if (sigma.isNaN() || sigma <= 0.0) throw InvalidParameterException("sigma must be positive, got $sigma")
+        if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
+        if (!sigma.isFinite() || sigma <= 0.0) throw InvalidParameterException("sigma must be finite and positive, got $sigma")
     }
 
     /** Provides the pre-built standard normal distribution constant. */

@@ -38,7 +38,7 @@ public class GeometricDistribution(
 ) : DiscreteDistribution {
 
     init {
-        if (probability <= 0.0 || probability > 1.0) throw InvalidParameterException("probability must be in (0, 1], got $probability")
+        if (probability.isNaN() || probability <= 0.0 || probability > 1.0) throw InvalidParameterException("probability must be in (0, 1], got $probability")
     }
 
     private val p = probability

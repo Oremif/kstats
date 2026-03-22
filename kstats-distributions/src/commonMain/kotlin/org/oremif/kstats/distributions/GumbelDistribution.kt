@@ -35,7 +35,8 @@ public class GumbelDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (beta <= 0.0) throw InvalidParameterException("beta must be positive, got $beta")
+        if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
+        if (!beta.isFinite() || beta <= 0.0) throw InvalidParameterException("beta must be finite and positive, got $beta")
     }
 
     public companion object {
@@ -129,7 +130,7 @@ public class GumbelDistribution(
     /** The standard deviation of this distribution, equal to pi * beta / sqrt(6). */
     override val standardDeviation: Double get() = PI * beta / sqrt(6.0)
 
-    /** The skewness of this distribution, a positive constant approximately equal to 1.1395. */
+    /** The skewness of this distribution, equal to 12 * sqrt(6) * zeta(3) / pi^3, approximately 1.1395. */
     override val skewness: Double get() = 1.1395470994717452
 
     /** The excess kurtosis of this distribution, always 12/5 = 2.4. */

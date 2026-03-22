@@ -41,8 +41,8 @@ public class NakagamiDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (mu.isNaN() || mu < 0.5) throw InvalidParameterException("mu must be >= 0.5, got $mu")
-        if (omega.isNaN() || omega <= 0.0) throw InvalidParameterException("omega must be positive, got $omega")
+        if (!mu.isFinite() || mu < 0.5) throw InvalidParameterException("mu must be finite and >= 0.5, got $mu")
+        if (!omega.isFinite() || omega <= 0.0) throw InvalidParameterException("omega must be finite and positive, got $omega")
     }
 
     // Pre-computed log normalization constant: ln(2) + mu*ln(mu) - lnGamma(mu) - mu*ln(omega)
@@ -159,9 +159,8 @@ public class NakagamiDistribution(
         }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double
-        get() =
-            lnGamma(mu) + mu - (mu - 0.5) * digamma(mu) - 0.5 * ln(mu) - ln(2.0) + 0.5 * ln(omega)
+    override val entropy: Double =
+        lnGamma(mu) + mu - (mu - 0.5) * digamma(mu) - 0.5 * ln(mu) - ln(2.0) + 0.5 * ln(omega)
 
     /**
      * Draws a single random value from this Nakagami distribution.

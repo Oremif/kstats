@@ -44,7 +44,7 @@ public class ChiSquaredDistribution(
 ) : ContinuousDistribution {
 
     init {
-        if (degreesOfFreedom <= 0.0) throw InvalidParameterException("Degrees of freedom must be positive, got $degreesOfFreedom")
+        if (!degreesOfFreedom.isFinite() || degreesOfFreedom <= 0.0) throw InvalidParameterException("Degrees of freedom must be finite and positive, got $degreesOfFreedom")
     }
 
     private val df = degreesOfFreedom
@@ -137,9 +137,8 @@ public class ChiSquaredDistribution(
     }
 
     /** The differential entropy of this distribution. */
-    override val entropy: Double
-        get() =
-            halfDf + ln(2.0) + lnGamma(halfDf) + (1.0 - halfDf) * digamma(halfDf)
+    override val entropy: Double =
+        halfDf + ln(2.0) + lnGamma(halfDf) + (1.0 - halfDf) * digamma(halfDf)
 
     /** The mean of this distribution, equal to the degrees of freedom. */
     override val mean: Double get() = df
