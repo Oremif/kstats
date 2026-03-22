@@ -291,10 +291,10 @@ public fun Iterable<Double>.frequencyTable(binSize: Double): List<FrequencyBin> 
  *
  * @param binSize the width of each bin. Must be positive.
  * @return a list of [Bin] objects containing the values that fall within each range.
- * @see Iterable.bin
+ * @see [Iterable.bin]
  */
 public fun DoubleArray.bin(binSize: Double): List<Bin<Double>> =
-    toList().bin(binSize)
+    asList().bin(binSize)
 
 /**
  * Groups the values into a fixed number of equal-width bins.
@@ -304,10 +304,10 @@ public fun DoubleArray.bin(binSize: Double): List<Bin<Double>> =
  *
  * @param binCount the desired number of bins. Must be positive.
  * @return a list of [Bin] objects containing the values that fall within each range.
- * @see Iterable.bin
+ * @see [Iterable.bin]
  */
 public fun DoubleArray.bin(binCount: Int): List<Bin<Double>> =
-    toList().bin(binCount)
+    asList().bin(binCount)
 
 /**
  * Builds a frequency table by dividing the values into a fixed number of equal-width bins.
@@ -318,10 +318,10 @@ public fun DoubleArray.bin(binCount: Int): List<Bin<Double>> =
  * @param binCount the desired number of bins. Must be positive.
  * @return a list of [FrequencyBin] objects ordered by range. Returns an empty list if the
  * array is empty.
- * @see Iterable.frequencyTable
+ * @see [Iterable.frequencyTable]
  */
 public fun DoubleArray.frequencyTable(binCount: Int): List<FrequencyBin> =
-    toList().frequencyTable(binCount)
+    asList().frequencyTable(binCount)
 
 /**
  * Builds a frequency table by dividing the values into equal-width bins of the given size.
@@ -332,10 +332,10 @@ public fun DoubleArray.frequencyTable(binCount: Int): List<FrequencyBin> =
  * @param binSize the width of each bin. Must be positive.
  * @return a list of [FrequencyBin] objects ordered by range. Returns an empty list if the
  * array is empty.
- * @see Iterable.frequencyTable
+ * @see [Iterable.frequencyTable]
  */
 public fun DoubleArray.frequencyTable(binSize: Double): List<FrequencyBin> =
-    toList().frequencyTable(binSize)
+    asList().frequencyTable(binSize)
 
 private fun List<Bin<Double>>.toFrequencyBins(): List<FrequencyBin> {
     val total = sumOf { it.count }.toDouble()

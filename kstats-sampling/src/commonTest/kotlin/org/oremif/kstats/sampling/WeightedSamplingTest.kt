@@ -103,6 +103,15 @@ class WeightedSamplingTest {
         }
     }
 
+    @Test
+    fun testWeightedDiceZeroWeightAtEndNeverSelected() {
+        // Zero-weight outcome at the end should never be selected
+        val dice = WeightedDice(mapOf("A" to 1.0, "B" to 0.0), Random(42))
+        repeat(10000) {
+            assertEquals("A", dice.roll(), "Trailing zero-weight outcome should never be selected")
+        }
+    }
+
     // --- randomSample ---
 
     @Test
