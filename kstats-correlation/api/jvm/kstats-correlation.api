@@ -1,0 +1,48 @@
+public final class org/oremif/kstats/correlation/CorrelationKt {
+	public static final fun correlationMatrix ([[D)[[D
+	public static final fun covariance ([D[DLorg/oremif/kstats/descriptive/PopulationKind;)D
+	public static synthetic fun covariance$default ([D[DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
+	public static final fun covarianceMatrix ([[DLorg/oremif/kstats/descriptive/PopulationKind;)[[D
+	public static synthetic fun covarianceMatrix$default ([[DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)[[D
+	public static final fun kendallTau ([D[D)Lorg/oremif/kstats/correlation/CorrelationResult;
+	public static final fun partialCorrelation ([D[D[[D)Lorg/oremif/kstats/correlation/CorrelationResult;
+	public static final fun pearsonCorrelation ([D[D)Lorg/oremif/kstats/correlation/CorrelationResult;
+	public static final fun pointBiserialCorrelation ([D[D)Lorg/oremif/kstats/correlation/CorrelationResult;
+	public static final fun pointBiserialCorrelation ([I[D)Lorg/oremif/kstats/correlation/CorrelationResult;
+	public static final fun pointBiserialCorrelation ([Z[D)Lorg/oremif/kstats/correlation/CorrelationResult;
+	public static final fun spearmanCorrelation ([D[D)Lorg/oremif/kstats/correlation/CorrelationResult;
+}
+
+public final class org/oremif/kstats/correlation/CorrelationResult {
+	public fun <init> (DDI)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCoefficient ()D
+	public final fun getN ()I
+	public final fun getPValue ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/oremif/kstats/correlation/RegressionKt {
+	public static final fun simpleLinearRegression ([D[D)Lorg/oremif/kstats/correlation/SimpleLinearRegressionResult;
+}
+
+public final class org/oremif/kstats/correlation/SimpleLinearRegressionResult {
+	public fun <init> (DDDDD[DI)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIntercept ()D
+	public final fun getN ()I
+	public final fun getRSquared ()D
+	public final fun getResiduals ()[D
+	public final fun getSlope ()D
+	public final fun getStandardErrorIntercept ()D
+	public final fun getStandardErrorSlope ()D
+	public fun hashCode ()I
+	public final fun predict (D)D
+	public final fun predict ([D)[D
+	public fun toString ()Ljava/lang/String;
+}
+

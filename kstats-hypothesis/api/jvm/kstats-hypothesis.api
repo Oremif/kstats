@@ -1,0 +1,139 @@
+public final class org/oremif/kstats/hypothesis/Alternative : java/lang/Enum {
+	public static final field GREATER Lorg/oremif/kstats/hypothesis/Alternative;
+	public static final field LESS Lorg/oremif/kstats/hypothesis/Alternative;
+	public static final field TWO_SIDED Lorg/oremif/kstats/hypothesis/Alternative;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/hypothesis/Alternative;
+	public static fun values ()[Lorg/oremif/kstats/hypothesis/Alternative;
+}
+
+public final class org/oremif/kstats/hypothesis/AnovaKt {
+	public static final fun oneWayAnova ([[D)Lorg/oremif/kstats/hypothesis/AnovaResult;
+}
+
+public final class org/oremif/kstats/hypothesis/AnovaResult {
+	public fun <init> (DDIIDDDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()D
+	public final fun component6 ()D
+	public final fun component7 ()D
+	public final fun component8 ()D
+	public final fun copy (DDIIDDDD)Lorg/oremif/kstats/hypothesis/AnovaResult;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/hypothesis/AnovaResult;DDIIDDDDILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/AnovaResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDfBetween ()I
+	public final fun getDfWithin ()I
+	public final fun getFStatistic ()D
+	public final fun getMsBetween ()D
+	public final fun getMsWithin ()D
+	public final fun getPValue ()D
+	public final fun getSsBetween ()D
+	public final fun getSsWithin ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/oremif/kstats/hypothesis/BartlettTestKt {
+	public static final fun bartlettTest ([[D)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/BinomialTestKt {
+	public static final fun binomialTest (IIDLorg/oremif/kstats/hypothesis/Alternative;D)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun binomialTest$default (IIDLorg/oremif/kstats/hypothesis/Alternative;DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/ChiSquaredTestKt {
+	public static final fun chiSquaredIndependenceTest ([[I)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun chiSquaredTest ([I[D)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun chiSquaredTest$default ([I[DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/FisherExactTestKt {
+	public static final fun fisherExactTest ([[ILorg/oremif/kstats/hypothesis/Alternative;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun fisherExactTest$default ([[ILorg/oremif/kstats/hypothesis/Alternative;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/FlignerKilleenTestKt {
+	public static final fun flignerKilleenTest ([[D)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/FriedmanTestKt {
+	public static final fun friedmanTest ([[D)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/GTestKt {
+	public static final fun gIndependenceTest ([[I)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun gTest ([I[D)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun gTest$default ([I[DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/KolmogorovSmirnovTestKt {
+	public static final fun kolmogorovSmirnovTest ([DLorg/oremif/kstats/distributions/ContinuousDistribution;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun kolmogorovSmirnovTest ([D[D)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/LeveneCenter : java/lang/Enum {
+	public static final field MEAN Lorg/oremif/kstats/hypothesis/LeveneCenter;
+	public static final field MEDIAN Lorg/oremif/kstats/hypothesis/LeveneCenter;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/hypothesis/LeveneCenter;
+	public static fun values ()[Lorg/oremif/kstats/hypothesis/LeveneCenter;
+}
+
+public final class org/oremif/kstats/hypothesis/LeveneTestKt {
+	public static final fun leveneTest ([[DLorg/oremif/kstats/hypothesis/LeveneCenter;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun leveneTest$default ([[DLorg/oremif/kstats/hypothesis/LeveneCenter;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/NonParametricKt {
+	public static final fun mannWhitneyUTest ([D[DLorg/oremif/kstats/hypothesis/Alternative;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun mannWhitneyUTest$default ([D[DLorg/oremif/kstats/hypothesis/Alternative;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun wilcoxonSignedRankTest ([D[DLorg/oremif/kstats/hypothesis/Alternative;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun wilcoxonSignedRankTest$default ([D[DLorg/oremif/kstats/hypothesis/Alternative;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/NormalityTestsKt {
+	public static final fun andersonDarlingTest ([D)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun dagostinoPearsonTest ([D)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun jarqueBeraTest ([D)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun shapiroWilkTest ([D)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/TTestKt {
+	public static final fun pairedTTest ([D[DLorg/oremif/kstats/hypothesis/Alternative;D)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun pairedTTest$default ([D[DLorg/oremif/kstats/hypothesis/Alternative;DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun tTest ([DDLorg/oremif/kstats/hypothesis/Alternative;D)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun tTest ([D[DLorg/oremif/kstats/hypothesis/Alternative;ZD)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun tTest$default ([DDLorg/oremif/kstats/hypothesis/Alternative;DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun tTest$default ([D[DLorg/oremif/kstats/hypothesis/Alternative;ZDILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/TestResult {
+	public fun <init> (Ljava/lang/String;DDDLorg/oremif/kstats/hypothesis/Alternative;Lkotlin/Pair;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;DDDLorg/oremif/kstats/hypothesis/Alternative;Lkotlin/Pair;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()Lorg/oremif/kstats/hypothesis/Alternative;
+	public final fun component6 ()Lkotlin/Pair;
+	public final fun component7 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;DDDLorg/oremif/kstats/hypothesis/Alternative;Lkotlin/Pair;Ljava/util/Map;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/hypothesis/TestResult;Ljava/lang/String;DDDLorg/oremif/kstats/hypothesis/Alternative;Lkotlin/Pair;Ljava/util/Map;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdditionalInfo ()Ljava/util/Map;
+	public final fun getAlternative ()Lorg/oremif/kstats/hypothesis/Alternative;
+	public final fun getConfidenceInterval ()Lkotlin/Pair;
+	public final fun getDegreesOfFreedom ()D
+	public final fun getPValue ()D
+	public final fun getStatistic ()D
+	public final fun getTestName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isSignificant (D)Z
+	public static synthetic fun isSignificant$default (Lorg/oremif/kstats/hypothesis/TestResult;DILjava/lang/Object;)Z
+	public fun toString ()Ljava/lang/String;
+}
+

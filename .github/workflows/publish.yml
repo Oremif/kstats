@@ -2,35 +2,55 @@ name: Publish
 
 on:
   release:
-    types: [released, prereleased]
+    types: [published]
   workflow_dispatch:
 
-permissions:
-  contents: read
+env:
+  JAVA_OPTS: "-Xmx4g -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=768m -Djava.awt.headless=true"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process"
 
 jobs:
   publish:
     name: Release build and publish
     runs-on: macOS-latest
     environment: release
+
+    permissions:
+      checks: write
+      contents: write
+      packages: write
+
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build and Test
+        run: ./gradlew build --continue --parallel --max-workers 2
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v6
+        if: ${{ !cancelled() }}
+        with:
+          annotate_only: true
+          detailed_summary: true
+          report_paths: '**/build/test-results/**/TEST-*.xml'
 
       - name: Publish to MavenCentral
         run: ./gradlew publishToMavenCentral --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_CONTENTS }}

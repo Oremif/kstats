@@ -23,7 +23,7 @@ mavenPublishing {
     pom {
         name = project.name
         description = "Kotlin Multiplatform statistics library"
-        inceptionYear = "2025"
+        inceptionYear = "2026"
         url = "https://github.com/oremif/kstats"
         licenses {
             license {
@@ -31,6 +31,10 @@ mavenPublishing {
                 url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
                 distribution = "repo"
             }
+        }
+        organization {
+            name = "Oremif"
+            url = "https://oremif.org"
         }
         developers {
             developer {

@@ -1,61 +1,60 @@
 name: Build & Test
 
 on:
-  push:
-    branches: [ "master" ]
+  workflow_dispatch:
   pull_request:
-    branches: [ "master" ]
+    branches: [ master ]
+  push:
+    branches: [ master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 permissions:
   contents: read
 
+env:
+  JAVA_VERSION: 21
+  JAVA_DISTRIBUTION: temurin
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
 jobs:
   build:
-    strategy:
-      matrix:
-        include:
-          - target: iosSimulatorArm64Test
-            os: macos-latest
-          - target: jvmTest
-            os: ubuntu-latest
-          - target: linuxX64Test
-            os: ubuntu-latest
-          - target: testAndroidHostTest
-            os: ubuntu-latest
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      checks: write
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v4
-
-      - uses: actions/cache@v4
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v5
         with:
-          path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.lock') }}
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          validate-wrappers: true
+          add-job-summary: always
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
       - name: Run tests
-        run: ./gradlew ${{ matrix.target }}
+        run: ./gradlew jvmTest linuxX64Test wasmJsNodeTest --continue --parallel
 
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.target }}
+          name: test-results
           path: '**/build/test-results/**/TEST-*.xml'
 
-      - name: Report test results
-        uses: mikepenz/action-junit-report@v5
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v6
         if: always()
         with:
           report_paths: '**/build/test-results/**/TEST-*.xml'

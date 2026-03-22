@@ -6,6 +6,8 @@ plugins {
 
 dokka {
     dokkaSourceSets.configureEach {
+        includes.from("Module.md")
+
         sourceLink {
             localDirectory.set(projectDir.resolve("src"))
             remoteUrl("https://github.com/oremif/kstats/tree/master/${project.name}/src")
@@ -21,7 +23,7 @@ dokka {
 
     pluginsConfiguration {
         html {
-            footerMessage.set("kstats — Kotlin Multiplatform Statistics Library")
+            footerMessage = "Copyright © 2025-2026 Oremif"
         }
     }
 }

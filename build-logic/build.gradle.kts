@@ -3,8 +3,9 @@ plugins {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin.get()}")
-    implementation("com.android.tools.build:gradle:${libs.versions.agp.get()}")
-    implementation("com.vanniktech:gradle-maven-publish-plugin:${libs.versions.vanniktechMavenPublish.get()}")
-    implementation("org.jetbrains.dokka:dokka-gradle-plugin:${libs.versions.dokka.get()}")
+    implementation(libs.kotlin.gradle)
+    implementation(libs.android.kotlin)
+    implementation(libs.vanniktech.maven.publish)
+    implementation(libs.dokka)
+    implementation(libs.binary.compatibility.validator)
 }

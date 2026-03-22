@@ -5,10 +5,11 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.jetbrains.kotlin.multiplatform")
-    id("com.android.kotlin.multiplatform.library")
     id("kstats.maven-publish")
     id("kstats.dokka")
+    id("org.jetbrains.kotlin.multiplatform")
+    id("com.android.kotlin.multiplatform.library")
+    id("org.jetbrains.kotlinx.binary-compatibility-validator")
 }
 
 val libs = the<VersionCatalogsExtension>().named("libs")
@@ -19,7 +20,16 @@ version = libs.findVersion("kstats").get().toString()
 kotlin {
     explicitApi()
 
-    jvm()
+    jvmToolchain(21)
+
+    jvm {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+        tasks.withType<Test>().configureEach {
+            useJUnitPlatform()
+        }
+    }
 
     android {
         namespace = "org.oremif.${project.name.replace("-", ".")}"
