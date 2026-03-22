@@ -75,7 +75,9 @@ public fun oneWayAnova(vararg groups: DoubleArray): AnovaResult {
     val groupMeans = groups.map { it.average() }
     val groupSizes = groups.map { it.size }
     val totalN = groupSizes.sum()
-    val grandMean = groups.flatMap { it.toList() }.average()
+    var grandSum = 0.0
+    for (group in groups) for (x in group) grandSum += x
+    val grandMean = grandSum / totalN
 
     // SS between
     var ssBetween = 0.0

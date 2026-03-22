@@ -46,20 +46,35 @@ public fun mannWhitneyUTest(
     val n1 = sample1.size
     val n2 = sample2.size
 
+    val n = n1 + n2
+
     // Combine and rank
     val combined = sample1 + sample2
     val ranks = combined.rank(TieMethod.AVERAGE)
 
     // Sum of ranks for sample 1
-    val r1 = ranks.take(n1).sum()
+    var r1 = 0.0
+    for (i in 0 until n1) r1 += ranks[i]
     val u1 = r1 - n1 * (n1 + 1.0) / 2.0
     val u2 = n1.toDouble() * n2 - u1
     val u = minOf(u1, u2)
 
-    // Normal approximation (for n > 10)
+    // Normal approximation with tie correction
     val mu = n1.toDouble() * n2 / 2.0
-    val sigma = sqrt(n1.toDouble() * n2 * (n1 + n2 + 1) / 12.0)
-    val z = (u1 - mu) / sigma
+
+    // Compute tie correction: sum(t^3 - t) for each group of tied values
+    val sorted = combined.copyOf().also { it.sort() }
+    var tieCorrection = 0.0
+    var ti = 0
+    while (ti < n) {
+        var tj = ti + 1
+        while (tj < n && sorted[tj] == sorted[ti]) tj++
+        val t = (tj - ti).toDouble()
+        tieCorrection += t * t * t - t
+        ti = tj
+    }
+    val sigma = sqrt(n1.toDouble() * n2 / 12.0 * ((n + 1) - tieCorrection / (n.toDouble() * (n - 1))))
+    val z = if (sigma == 0.0) 0.0 else (u1 - mu) / sigma
 
     val normal = NormalDistribution.STANDARD
     val pValue = when (alternative) {
@@ -120,20 +135,31 @@ public fun wilcoxonSignedRankTest(
         sample1
     }
 
-    // Remove zeros
-    val nonZero = diffs.filter { it != 0.0 }
-    if (nonZero.isEmpty()) throw DegenerateDataException("All differences are zero")
-    val n = nonZero.size
+    // Remove zeros and extract absolute values + signs in one pass
+    var nonZeroCount = 0
+    for (d in diffs) { if (d != 0.0) nonZeroCount++ }
+    if (nonZeroCount == 0) throw DegenerateDataException("All differences are zero")
+    val n = nonZeroCount
+
+    val absDiffs = DoubleArray(n)
+    val positive = BooleanArray(n)
+    var idx = 0
+    for (d in diffs) {
+        if (d != 0.0) {
+            absDiffs[idx] = abs(d)
+            positive[idx] = d > 0
+            idx++
+        }
+    }
 
     // Rank absolute values
-    val absDiffs = nonZero.map { abs(it) }.toDoubleArray()
     val ranks = absDiffs.rank(TieMethod.AVERAGE)
 
     // Signed ranks
     var wPlus = 0.0
     var wMinus = 0.0
-    for (i in nonZero.indices) {
-        if (nonZero[i] > 0) wPlus += ranks[i] else wMinus += ranks[i]
+    for (i in 0 until n) {
+        if (positive[i]) wPlus += ranks[i] else wMinus += ranks[i]
     }
 
     val w = wPlus
@@ -202,7 +228,7 @@ public fun kolmogorovSmirnovTest(
     }
     val d = max(dPlus, dMinus)
 
-    val pValue = kolmogorovSmirnovPValue(d, n)
+    val pValue = kolmogorovSmirnovPValue(d, n.toDouble())
 
     return TestResult(
         testName = "Kolmogorov-Smirnov Test (One-Sample)",
@@ -247,28 +273,18 @@ public fun kolmogorovSmirnovTest(
     var d = 0.0
     var i = 0
     var j = 0
-    while (i < n1 && j < n2) {
-        val cdf1 = (i + 1).toDouble() / n1
-        val cdf2 = (j + 1).toDouble() / n2
-        if (sorted1[i] <= sorted2[j]) {
-            d = max(d, abs(cdf1 - j.toDouble() / n2))
-            i++
-        } else {
-            d = max(d, abs(i.toDouble() / n1 - cdf2))
-            j++
-        }
-    }
-    while (i < n1) {
-        d = max(d, abs((i + 1).toDouble() / n1 - 1.0))
-        i++
-    }
-    while (j < n2) {
-        d = max(d, abs(1.0 - (j + 1).toDouble() / n2))
-        j++
+    while (i < n1 || j < n2) {
+        val v1 = if (i < n1) sorted1[i] else Double.POSITIVE_INFINITY
+        val v2 = if (j < n2) sorted2[j] else Double.POSITIVE_INFINITY
+        val v = min(v1, v2)
+        // Advance past all values equal to v in both samples
+        while (i < n1 && sorted1[i] == v) i++
+        while (j < n2 && sorted2[j] == v) j++
+        d = max(d, abs(i.toDouble() / n1 - j.toDouble() / n2))
     }
 
     val en = sqrt(n1.toDouble() * n2 / (n1 + n2))
-    val pValue = kolmogorovSmirnovPValue(d, en.toInt().coerceAtLeast(1))
+    val pValue = kolmogorovSmirnovPValue(d, en)
 
     return TestResult(
         testName = "Kolmogorov-Smirnov Test (Two-Sample)",
@@ -583,8 +599,8 @@ private fun andersonDarlingPValue(a2Star: Double): Double {
  * Applies a continuity correction to the D statistic and evaluates the alternating
  * series until convergence (term < 1e-12) or 100 terms.
  */
-private fun kolmogorovSmirnovPValue(d: Double, n: Int): Double {
-    val sqrtN = sqrt(n.toDouble())
+private fun kolmogorovSmirnovPValue(d: Double, n: Double): Double {
+    val sqrtN = sqrt(n)
     val z = (sqrtN + 0.12 + 0.11 / sqrtN) * d
 
     if (z < 0.27) return 1.0

@@ -194,7 +194,7 @@ public class NegativeBinomialDistribution(
         if (lambda == 0.0) return 0
         // Poisson sampling with Knuth's algorithm for small lambda, normal approximation for large
         if (lambda < 30.0) {
-            val l = kotlin.math.exp(-lambda)
+            val l = exp(-lambda)
             var k = 0
             var prod = 1.0
             do {
@@ -203,7 +203,7 @@ public class NegativeBinomialDistribution(
             } while (prod > l)
             return k - 1
         }
-        val normal = kotlin.math.sqrt(lambda)
+        val normal = sqrt(lambda)
         return (lambda + normal * NormalDistribution.STANDARD.sample(random))
             .roundToInt().coerceAtLeast(0)
     }

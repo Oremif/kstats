@@ -40,6 +40,9 @@ public fun tTest(
     confidenceLevel: Double = 0.95
 ): TestResult {
     if (sample.size < 2) throw InsufficientDataException("Sample must have at least 2 elements")
+    if (confidenceLevel <= 0.0 || confidenceLevel >= 1.0) throw InvalidParameterException(
+        "confidenceLevel must be in (0, 1), got $confidenceLevel"
+    )
 
     val n = sample.size
     val mean = sample.mean()
@@ -56,8 +59,20 @@ public fun tTest(
     }
 
     val alpha = 1.0 - confidenceLevel
-    val tCrit = dist.quantile(1.0 - alpha / 2.0)
-    val ci = Pair(mean - tCrit * se, mean + tCrit * se)
+    val ci = when (alternative) {
+        Alternative.TWO_SIDED -> {
+            val tCrit = dist.quantile(1.0 - alpha / 2.0)
+            Pair(mean - tCrit * se, mean + tCrit * se)
+        }
+        Alternative.LESS -> {
+            val tCrit = dist.quantile(1.0 - alpha)
+            Pair(Double.NEGATIVE_INFINITY, mean + tCrit * se)
+        }
+        Alternative.GREATER -> {
+            val tCrit = dist.quantile(1.0 - alpha)
+            Pair(mean - tCrit * se, Double.POSITIVE_INFINITY)
+        }
+    }
 
     return TestResult(
         testName = "One-Sample t-Test",
@@ -107,6 +122,9 @@ public fun tTest(
 ): TestResult {
     if (sample1.size < 2) throw InsufficientDataException("Sample 1 must have at least 2 elements")
     if (sample2.size < 2) throw InsufficientDataException("Sample 2 must have at least 2 elements")
+    if (confidenceLevel <= 0.0 || confidenceLevel >= 1.0) throw InvalidParameterException(
+        "confidenceLevel must be in (0, 1), got $confidenceLevel"
+    )
 
     val n1 = sample1.size.toDouble()
     val n2 = sample2.size.toDouble()
@@ -141,10 +159,22 @@ public fun tTest(
         Alternative.GREATER -> dist.sf(t)
     }
 
-    val alpha = 1.0 - confidenceLevel
-    val tCrit = dist.quantile(1.0 - alpha / 2.0)
     val diff = mean1 - mean2
-    val ci = Pair(diff - tCrit * se, diff + tCrit * se)
+    val alpha = 1.0 - confidenceLevel
+    val ci = when (alternative) {
+        Alternative.TWO_SIDED -> {
+            val tCrit = dist.quantile(1.0 - alpha / 2.0)
+            Pair(diff - tCrit * se, diff + tCrit * se)
+        }
+        Alternative.LESS -> {
+            val tCrit = dist.quantile(1.0 - alpha)
+            Pair(Double.NEGATIVE_INFINITY, diff + tCrit * se)
+        }
+        Alternative.GREATER -> {
+            val tCrit = dist.quantile(1.0 - alpha)
+            Pair(diff - tCrit * se, Double.POSITIVE_INFINITY)
+        }
+    }
 
     return TestResult(
         testName = if (equalVariances) "Two-Sample t-Test (Equal Variances)" else "Welch's t-Test",
@@ -191,6 +221,9 @@ public fun pairedTTest(
 ): TestResult {
     if (sample1.size != sample2.size) throw InvalidParameterException("Samples must have the same size")
     if (sample1.size < 2) throw InsufficientDataException("Samples must have at least 2 elements")
+    if (confidenceLevel <= 0.0 || confidenceLevel >= 1.0) throw InvalidParameterException(
+        "confidenceLevel must be in (0, 1), got $confidenceLevel"
+    )
 
     val differences = DoubleArray(sample1.size) { sample1[it] - sample2[it] }
     val result = tTest(differences, mu = 0.0, alternative = alternative, confidenceLevel = confidenceLevel)

@@ -73,6 +73,19 @@ public fun bartlettTest(vararg groups: DoubleArray): TestResult {
         )
     }
 
+    // Some groups constant, others not → variances are clearly unequal
+    if (variances.any { it == 0.0 }) {
+        var pooledNum = 0.0
+        for (i in 0 until k) pooledNum += (sizes[i] - 1) * variances[i]
+        return TestResult(
+            testName = "Bartlett's Test",
+            statistic = Double.POSITIVE_INFINITY,
+            pValue = 0.0,
+            degreesOfFreedom = df.toDouble(),
+            additionalInfo = mapOf("pooledVariance" to pooledNum / (totalN - k))
+        )
+    }
+
     // Pooled variance: Sp² = Σ(n_i - 1) * S_i² / (N - k)
     var pooledNum = 0.0
     for (i in 0 until k) {

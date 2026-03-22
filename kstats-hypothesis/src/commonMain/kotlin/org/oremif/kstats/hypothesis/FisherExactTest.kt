@@ -96,9 +96,15 @@ public fun fisherExactTest(
  * Log-probability mass function for the hypergeometric distribution.
  *
  * Computes in log-space to avoid overflow with large factorials.
+ *
+ * @param k number of successes drawn
+ * @param rowSum total count in the first row (a + b)
+ * @param colSum total count in the first column (a + c)
+ * @param total grand total of the table (a + b + c + d)
  */
-private fun hypergeometricLogPmf(k: Int, n1: Int, n2: Int, n: Int): Double {
-    return lnFactorial(n1) + lnFactorial(n - n1) + lnFactorial(n2) + lnFactorial(n - n2) -
-        lnFactorial(n) - lnFactorial(k) - lnFactorial(n1 - k) -
-        lnFactorial(n2 - k) - lnFactorial(n - n1 - n2 + k)
+private fun hypergeometricLogPmf(k: Int, rowSum: Int, colSum: Int, total: Int): Double {
+    return lnFactorial(rowSum) + lnFactorial(total - rowSum) +
+        lnFactorial(colSum) + lnFactorial(total - colSum) -
+        lnFactorial(total) - lnFactorial(k) - lnFactorial(rowSum - k) -
+        lnFactorial(colSum - k) - lnFactorial(total - rowSum - colSum + k)
 }
