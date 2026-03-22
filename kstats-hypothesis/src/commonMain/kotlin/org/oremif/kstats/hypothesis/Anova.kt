@@ -97,6 +97,21 @@ public fun oneWayAnova(vararg groups: DoubleArray): AnovaResult {
     val dfWithin = totalN - k
     val msBetween = ssBetween / dfBetween
     val msWithin = ssWithin / dfWithin
+
+    // Degenerate case: all values within groups are identical
+    if (msWithin == 0.0) {
+        return AnovaResult(
+            fStatistic = if (msBetween == 0.0) 0.0 else Double.POSITIVE_INFINITY,
+            pValue = if (msBetween == 0.0) 1.0 else 0.0,
+            dfBetween = dfBetween,
+            dfWithin = dfWithin,
+            ssBetween = ssBetween,
+            ssWithin = ssWithin,
+            msBetween = msBetween,
+            msWithin = msWithin
+        )
+    }
+
     val f = msBetween / msWithin
 
     val dist = FDistribution(dfBetween.toDouble(), dfWithin.toDouble())

@@ -48,6 +48,25 @@ public fun tTest(
     val mean = sample.mean()
     val sd = sample.standardDeviation()
     val se = sd / sqrt(n.toDouble())
+
+    // Degenerate case: zero standard deviation (all values identical)
+    if (se == 0.0) {
+        val diff = mean - mu
+        return TestResult(
+            testName = "One-Sample t-Test",
+            statistic = if (diff == 0.0) Double.NaN else if (diff > 0) Double.POSITIVE_INFINITY else Double.NEGATIVE_INFINITY,
+            pValue = if (diff == 0.0) Double.NaN else when (alternative) {
+                Alternative.TWO_SIDED -> 0.0
+                Alternative.LESS -> if (diff < 0) 0.0 else 1.0
+                Alternative.GREATER -> if (diff > 0) 0.0 else 1.0
+            },
+            degreesOfFreedom = (n - 1).toDouble(),
+            alternative = alternative,
+            confidenceInterval = Pair(mean, mean),
+            additionalInfo = mapOf("mean" to mean, "standardError" to 0.0)
+        )
+    }
+
     val t = (mean - mu) / se
     val df = (n - 1).toDouble()
 
@@ -150,6 +169,24 @@ public fun tTest(
         val num = (var1 / n1 + var2 / n2) * (var1 / n1 + var2 / n2)
         val den = (var1 / n1) * (var1 / n1) / (n1 - 1) + (var2 / n2) * (var2 / n2) / (n2 - 1)
         df = num / den
+    }
+
+    // Degenerate case: zero standard error (both samples constant)
+    if (se == 0.0) {
+        val diff = mean1 - mean2
+        return TestResult(
+            testName = if (equalVariances) "Two-Sample t-Test (Equal Variances)" else "Welch's t-Test",
+            statistic = if (diff == 0.0) Double.NaN else if (diff > 0) Double.POSITIVE_INFINITY else Double.NEGATIVE_INFINITY,
+            pValue = if (diff == 0.0) Double.NaN else when (alternative) {
+                Alternative.TWO_SIDED -> 0.0
+                Alternative.LESS -> if (diff < 0) 0.0 else 1.0
+                Alternative.GREATER -> if (diff > 0) 0.0 else 1.0
+            },
+            degreesOfFreedom = df,
+            alternative = alternative,
+            confidenceInterval = Pair(diff, diff),
+            additionalInfo = mapOf("mean1" to mean1, "mean2" to mean2, "meanDifference" to diff)
+        )
     }
 
     val dist = StudentTDistribution(df)

@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.exceptions.DegenerateDataException
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs
@@ -193,5 +194,96 @@ class TTestTest {
         val s2 = doubleArrayOf(4.0, 5.0, 6.0)
         assertFailsWith<InvalidParameterException> { pairedTTest(s1, s2, confidenceLevel = 0.0) }
         assertFailsWith<InvalidParameterException> { pairedTTest(s1, s2, confidenceLevel = 1.0) }
+    }
+
+    // ===== Degenerate cases: constant samples =====
+
+    @Test
+    fun testOneSampleConstantEqualsMu() {
+        // All values = mu: se=0, diff=0 → t=NaN, p=NaN
+        val sample = doubleArrayOf(5.0, 5.0, 5.0, 5.0, 5.0)
+        val result = tTest(sample, mu = 5.0)
+        assertTrue(result.statistic.isNaN(), "t should be NaN when all values equal mu")
+        assertTrue(result.pValue.isNaN(), "p should be NaN when all values equal mu")
+        assertEquals(4.0, result.degreesOfFreedom, 1e-10)
+        // Confidence interval collapses to a point
+        val ci = result.confidenceInterval!!
+        assertEquals(5.0, ci.first, 1e-10, "CI lower = mean when se=0")
+        assertEquals(5.0, ci.second, 1e-10, "CI upper = mean when se=0")
+    }
+
+    @Test
+    fun testOneSampleConstantNotEqualToMu() {
+        // All values = 5.0, mu = 3.0: se=0, diff>0 → t=+Inf, p=0 (two-sided)
+        val sample = doubleArrayOf(5.0, 5.0, 5.0, 5.0, 5.0)
+        val result = tTest(sample, mu = 3.0)
+        assertEquals(Double.POSITIVE_INFINITY, result.statistic, "t should be +Inf when mean > mu and se=0")
+        assertEquals(0.0, result.pValue, 1e-15, "p should be 0 for two-sided when mean != mu and se=0")
+    }
+
+    @Test
+    fun testOneSampleConstantBelowMu() {
+        // All values = 2.0, mu = 5.0: se=0, diff<0 → t=-Inf, p=0 (two-sided)
+        val sample = doubleArrayOf(2.0, 2.0, 2.0, 2.0)
+        val result = tTest(sample, mu = 5.0)
+        assertEquals(Double.NEGATIVE_INFINITY, result.statistic, "t should be -Inf when mean < mu and se=0")
+        assertEquals(0.0, result.pValue, 1e-15, "p should be 0 for two-sided when mean != mu and se=0")
+    }
+
+    @Test
+    fun testOneSampleConstantAlternatives() {
+        val sample = doubleArrayOf(5.0, 5.0, 5.0, 5.0)
+        // mean > mu, so GREATER → p=0, LESS → p=1
+        val greater = tTest(sample, mu = 3.0, alternative = Alternative.GREATER)
+        assertEquals(0.0, greater.pValue, 1e-15, "GREATER p should be 0 when mean > mu and se=0")
+        val less = tTest(sample, mu = 3.0, alternative = Alternative.LESS)
+        assertEquals(1.0, less.pValue, 1e-15, "LESS p should be 1 when mean > mu and se=0")
+    }
+
+    @Test
+    fun testTwoSampleBothConstantSameMean() {
+        // Both samples constant with same mean: se=0, diff=0 → t=NaN, p=NaN
+        val s1 = doubleArrayOf(5.0, 5.0, 5.0)
+        val s2 = doubleArrayOf(5.0, 5.0, 5.0)
+        val result = tTest(s1, s2)
+        assertTrue(result.statistic.isNaN(), "t should be NaN when both constant and same mean")
+        assertTrue(result.pValue.isNaN(), "p should be NaN when both constant and same mean")
+        val ci = result.confidenceInterval!!
+        assertEquals(0.0, ci.first, 1e-10, "CI lower = 0 when diff=0 and se=0")
+        assertEquals(0.0, ci.second, 1e-10, "CI upper = 0 when diff=0 and se=0")
+    }
+
+    @Test
+    fun testTwoSampleBothConstantDifferentMeans() {
+        // Both constant but different means: se=0, diff!=0 → t=+/-Inf, p=0
+        val s1 = doubleArrayOf(10.0, 10.0, 10.0)
+        val s2 = doubleArrayOf(5.0, 5.0, 5.0)
+        val result = tTest(s1, s2)
+        assertEquals(Double.POSITIVE_INFINITY, result.statistic, "t should be +Inf when mean1 > mean2 and se=0")
+        assertEquals(0.0, result.pValue, 1e-15, "p should be 0 when means differ and se=0")
+        val ci = result.confidenceInterval!!
+        assertEquals(5.0, ci.first, 1e-10, "CI should be a point at the difference")
+        assertEquals(5.0, ci.second, 1e-10, "CI should be a point at the difference")
+    }
+
+    @Test
+    fun testTwoSampleBothConstantDifferentMeansEqualVariances() {
+        // Equal variances variant
+        val s1 = doubleArrayOf(10.0, 10.0, 10.0)
+        val s2 = doubleArrayOf(5.0, 5.0, 5.0)
+        val result = tTest(s1, s2, equalVariances = true)
+        assertEquals(Double.POSITIVE_INFINITY, result.statistic, "t should be +Inf")
+        assertEquals(0.0, result.pValue, 1e-15, "p should be 0")
+    }
+
+    @Test
+    fun testTwoSampleBothConstantDifferentMeansAlternatives() {
+        val s1 = doubleArrayOf(10.0, 10.0, 10.0)
+        val s2 = doubleArrayOf(5.0, 5.0, 5.0)
+        // mean1 > mean2, so GREATER → p=0, LESS → p=1
+        val greater = tTest(s1, s2, alternative = Alternative.GREATER)
+        assertEquals(0.0, greater.pValue, 1e-15, "GREATER p should be 0 when mean1 > mean2 and se=0")
+        val less = tTest(s1, s2, alternative = Alternative.LESS)
+        assertEquals(1.0, less.pValue, 1e-15, "LESS p should be 1 when mean1 > mean2 and se=0")
     }
 }

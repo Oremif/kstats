@@ -97,6 +97,8 @@ public fun chiSquaredIndependenceTest(
 
     val rowTotals = IntArray(rows) { r -> contingencyTable[r].sum() }
     val colTotals = IntArray(cols) { c -> contingencyTable.sumOf { it[c] } }
+    if (rowTotals.any { it == 0 }) throw InvalidParameterException("All row totals must be positive")
+    if (colTotals.any { it == 0 }) throw InvalidParameterException("All column totals must be positive")
     val total = rowTotals.sum().toDouble()
 
     var chi2 = 0.0
