@@ -68,12 +68,12 @@ public enum class TieMethod {
  * @return an array of ranks in the same order as the input, where each element's rank
  * reflects its position in the sorted order.
  * @throws InsufficientDataException if the array is empty.
- * @throws InvalidParameterException if the array contains NaN or Infinity.
+ * @throws InvalidParameterException if the array contains NaN.
  */
 public fun DoubleArray.rank(tieMethod: TieMethod = TieMethod.AVERAGE): DoubleArray {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     for (v in this) {
-        if (!v.isFinite()) throw InvalidParameterException("Array contains non-finite value: $v")
+        if (v.isNaN()) throw InvalidParameterException("Array contains NaN")
     }
 
     val n = size

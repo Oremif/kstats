@@ -109,17 +109,17 @@ class RankingTest {
     }
 
     @Test
-    fun testRankPositiveInfinityThrows() {
-        assertFailsWith<InvalidParameterException> {
-            doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0).rank()
-        }
+    fun testRankPositiveInfinity() {
+        // +Infinity sorts as the largest value, so it gets the highest rank
+        val ranks = doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0).rank()
+        assertEquals(listOf(1.0, 3.0, 2.0), ranks.asList())
     }
 
     @Test
-    fun testRankNegativeInfinityThrows() {
-        assertFailsWith<InvalidParameterException> {
-            doubleArrayOf(Double.NEGATIVE_INFINITY, 1.0).rank()
-        }
+    fun testRankNegativeInfinity() {
+        // -Infinity sorts as the smallest value, so it gets rank 1
+        val ranks = doubleArrayOf(Double.NEGATIVE_INFINITY, 1.0).rank()
+        assertEquals(listOf(1.0, 2.0), ranks.asList())
     }
 
     @Test
