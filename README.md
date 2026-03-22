@@ -178,6 +178,7 @@ kstats targets every platform Kotlin supports.
 
 - **Guides and tutorials**: [kstats.oremif.org](https://kstats.oremif.org/)
 - **API reference**: [Dokka site](https://oremif.github.io/kstats)
+- **Interactive notebooks**: [samples/](samples/) — Kotlin Notebooks with Kandy visualizations for each guide
 - **Benchmarks**: [benchmark/README.md](benchmark/README.md) — JMH results comparing kstats vs Apache Commons Math
 
 ## Development
