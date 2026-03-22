@@ -155,12 +155,16 @@ class FriedmanTestTest {
         // Block 0: [1,1] → ranks [1.5,1.5]; Block 1: [1,2] → ranks [1,2]
         // Block 2: [1,3] → ranks [1,2]; Block 3: [3,4] → ranks [1,2]
         // Block 4: [5,5] → ranks [1.5,1.5]
-        // R_1=6, R_2=9; Q = (12/(5*2*3))*(36+81)-45 = 0.4*117-45 = 1.8
+        // R_1=6, R_2=9; Q_raw = (12/(5*2*3))*(36+81)-45 = 1.8
+        // Tie correction: blocks 0,4 each have t=2 (tieSum = 2*(8-2)=12)
+        // C = 1 - 12/(5*2*(4-1)) = 1 - 12/30 = 0.6
+        // Q_corrected = 1.8 / 0.6 = 3.0
         val g1 = doubleArrayOf(1.0, 1.0, 1.0, 3.0, 5.0)
         val g2 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         val result = friedmanTest(g1, g2)
-        assertEquals(1.8, result.statistic, tolStat)
-        assertEquals(0.179712494878996, result.pValue, tolP)
+        assertEquals(3.0, result.statistic, tolStat)
+        // chi2.sf(3.0, 1) ≈ 0.08326
+        assertEquals(0.08326, result.pValue, tolP)
     }
 
     // ── 3. Degenerate cases ────────────────────────────────────────────────

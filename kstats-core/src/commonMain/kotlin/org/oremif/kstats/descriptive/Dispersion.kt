@@ -660,10 +660,31 @@ public fun DoubleArray.semiVariance(
  * @see variance
  */
 public fun Iterable<Double>.semiVariance(
-    threshold: Double = mean(),
+    threshold: Double,
     direction: SemiVarianceDirection = SemiVarianceDirection.DOWNSIDE,
     kind: PopulationKind = SAMPLE,
 ): Double = toList().toDoubleArray().semiVariance(threshold, direction, kind)
+
+/**
+ * Computes the semi-variance using the mean as the threshold.
+ *
+ * This overload materializes the iterable once and computes the mean from the
+ * materialized array, avoiding double iteration of single-use iterables.
+ *
+ * @param direction which side of the threshold to measure. Defaults to
+ * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
+ * @param kind whether to compute sample or population semi-variance. Defaults to
+ * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
+ * @return the semi-variance on the selected side of the mean.
+ * @see variance
+ */
+public fun Iterable<Double>.semiVariance(
+    direction: SemiVarianceDirection = SemiVarianceDirection.DOWNSIDE,
+    kind: PopulationKind = SAMPLE,
+): Double {
+    val arr = toList().toDoubleArray()
+    return arr.semiVariance(arr.mean(), direction, kind)
+}
 
 /**
  * Computes the semi-variance of the values on one side of a threshold.

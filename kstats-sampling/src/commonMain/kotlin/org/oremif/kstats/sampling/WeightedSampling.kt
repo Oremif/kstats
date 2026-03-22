@@ -81,6 +81,8 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
             cumulative += normalized[i]
             cumulativeWeights[i] = cumulative
         }
+        // Force CDF closure to exactly 1.0 to prevent binary search edge cases
+        cumulativeWeights[cumulativeWeights.lastIndex] = 1.0
     }
 
     /**

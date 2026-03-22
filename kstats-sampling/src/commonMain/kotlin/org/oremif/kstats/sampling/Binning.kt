@@ -1,8 +1,10 @@
 package org.oremif.kstats.sampling
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
+import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.round
 
 /**
  * A histogram bin containing the items that fall within a value range.
@@ -134,7 +136,9 @@ public fun <T> Iterable<T>.binByDouble(
     val minVal = rangeStart ?: minActual
     val maxVal = maxActual
 
-    val numBins = ceil((maxVal - minVal) / binSize).toInt().coerceAtLeast(1)
+    val raw = (maxVal - minVal) / binSize
+    val rounded = round(raw)
+    val numBins = (if (abs(raw - rounded) < 1e-9) rounded.toInt() else ceil(raw).toInt()).coerceAtLeast(1)
     val bins = Array(numBins) { i ->
         val start = minVal + i * binSize
         val end = if (i == numBins - 1) maxOf(start + binSize, maxVal) else start + binSize

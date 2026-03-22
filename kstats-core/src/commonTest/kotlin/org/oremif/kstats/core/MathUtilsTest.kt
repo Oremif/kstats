@@ -133,6 +133,18 @@ class MathUtilsTest {
         assertFailsWith<InvalidParameterException> { regularizedGammaQ(-1.0, 1.0) }
     }
 
+    @Test
+    fun testRegularizedGammaLargeParameters() {
+        // Large a values that previously exceeded the 200-iteration limit (Poisson lambda=500+)
+        // scipy.special.gammaincc(501, 500) ≈ 0.5178
+        val q501 = regularizedGammaQ(501.0, 500.0)
+        assertTrue(q501 in 0.4..0.6, "Q(501, 500) should be near 0.5, got $q501")
+
+        // scipy.special.gammaincc(1001, 1000) ≈ 0.5063
+        val q1001 = regularizedGammaQ(1001.0, 1000.0)
+        assertTrue(q1001 in 0.4..0.6, "Q(1001, 1000) should be near 0.5, got $q1001")
+    }
+
     // ── Error function ──────────────────────────────────────────────────
 
     @Test
@@ -167,6 +179,19 @@ class MathUtilsTest {
     @Test
     fun testErfInvNaN() {
         assertTrue(erfInv(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun testErfInvExtremeValues() {
+        // scipy.special.erfinv reference values for inputs near ±1
+        // erfInv(0.999) = 2.3267537655135246
+        assertEquals(2.3267537655135246, erfInv(0.999), 1e-6)
+        // erfInv(0.9999) = 2.7510639057120607
+        assertEquals(2.7510639057120607, erfInv(0.9999), 1e-5)
+        // erfInv(0.99999) = 3.1234132743415708
+        assertEquals(3.1234132743415708, erfInv(0.99999), 1e-4)
+        // Symmetry
+        assertEquals(-erfInv(0.999), erfInv(-0.999), 1e-6)
     }
 
     // ── erfcInv ──────────────────────────────────────────────────────────

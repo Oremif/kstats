@@ -140,7 +140,6 @@ private fun kolmogorovSmirnovPValue(d: Double, n: Double): Double {
     val z = (sqrtN + 0.12 + 0.11 / sqrtN) * d
 
     if (z < 0.27) return 1.0
-    if (z > 3.1) return 0.0
 
     // Kolmogorov's asymptotic formula
     var sum = 0.0

@@ -222,4 +222,25 @@ class RankingTest {
         assertEquals(0.0, pr[0], 1e-10)
         assertEquals(100.0, pr[999], 1e-10)
     }
+
+    @Test
+    fun testPercentileRankWithInfinity() {
+        // Infinity is valid in percentileRank (handled by rank())
+        val data = doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0)
+        val pr = data.percentileRank()
+        // Sorted: 1.0 (rank 1), 3.0 (rank 2), +Inf (rank 3)
+        assertEquals(0.0, pr[0], 1e-10)   // 1.0 → rank 1 → (1-1)/2*100 = 0
+        assertEquals(100.0, pr[1], 1e-10)  // +Inf → rank 3 → (3-1)/2*100 = 100
+        assertEquals(50.0, pr[2], 1e-10)   // 3.0 → rank 2 → (2-1)/2*100 = 50
+    }
+
+    @Test
+    fun testPercentileRankWithTies() {
+        val data = doubleArrayOf(1.0, 1.0, 2.0)
+        val pr = data.percentileRank()
+        // ranks: [1.5, 1.5, 3.0] → PR: [(1.5-1)/2*100=25, 25, (3-1)/2*100=100]
+        assertEquals(25.0, pr[0], 1e-10)
+        assertEquals(25.0, pr[1], 1e-10)
+        assertEquals(100.0, pr[2], 1e-10)
+    }
 }

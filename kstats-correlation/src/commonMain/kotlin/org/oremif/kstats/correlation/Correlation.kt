@@ -201,9 +201,9 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
     // Step 2: Scan sorted indices for x-tied groups and joint ties
     var n1 = 0L // x-tied pairs
     var n3 = 0L // jointly tied pairs (same x and y)
-    var vt = 0L // Σ t(t-1)(2t+5)
-    var v1x = 0L // Σ t(t-1)
-    var v2x = 0L // Σ t(t-1)(t-2)
+    var vt = 0.0 // Σ t(t-1)(2t+5) — Double to avoid Long overflow for large n
+    var v1x = 0.0 // Σ t(t-1)
+    var v2x = 0.0 // Σ t(t-1)(t-2)
 
     var i = 0
     while (i < n) {
@@ -213,9 +213,10 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
         val t = (j - i).toLong()
         if (t > 1) {
             n1 += t * (t - 1) / 2
-            vt += t * (t - 1) * (2 * t + 5)
-            v1x += t * (t - 1)
-            v2x += t * (t - 1) * (t - 2)
+            val td = t.toDouble()
+            vt += td * (td - 1.0) * (2.0 * td + 5.0)
+            v1x += td * (td - 1.0)
+            v2x += td * (td - 1.0) * (td - 2.0)
             // Within this x-tied group, scan for joint ties (same y too)
             var k = i
             while (k < j) {
@@ -238,9 +239,9 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
     val ySorted = y.copyOf()
     ySorted.sort()
     var n2 = 0L // y-tied pairs
-    var vu = 0L // Σ u(u-1)(2u+5)
-    var v1y = 0L // Σ u(u-1)
-    var v2y = 0L // Σ u(u-1)(u-2)
+    var vu = 0.0 // Σ u(u-1)(2u+5) — Double to avoid Long overflow for large n
+    var v1y = 0.0 // Σ u(u-1)
+    var v2y = 0.0 // Σ u(u-1)(u-2)
 
     i = 0
     while (i < n) {
@@ -249,9 +250,10 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
         val u = (j - i).toLong()
         if (u > 1) {
             n2 += u * (u - 1) / 2
-            vu += u * (u - 1) * (2 * u + 5)
-            v1y += u * (u - 1)
-            v2y += u * (u - 1) * (u - 2)
+            val ud = u.toDouble()
+            vu += ud * (ud - 1.0) * (2.0 * ud + 5.0)
+            v1y += ud * (ud - 1.0)
+            v2y += ud * (ud - 1.0) * (ud - 2.0)
         }
         i = j
     }
@@ -273,12 +275,13 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
     val tau = nS.toDouble() / sqrt(denom1.toDouble() * denom2.toDouble())
 
     // Step 6: Ties-adjusted p-value (Kendall, 1970)
-    val nL = n.toLong()
-    val v0 = nL * (nL - 1) * (2 * nL + 5)
+    // Use Double arithmetic to avoid Long overflow for large n (n > ~1.5M would overflow Long)
+    val nD = n.toDouble()
+    val v0 = nD * (nD - 1.0) * (2.0 * nD + 5.0)
     // n >= 3 is guaranteed by the guard at the top, so all terms are always computed
-    val varS = (v0 - vt - vu).toDouble() / 18.0 +
-        v1x.toDouble() * v1y.toDouble() / (2.0 * nL * (nL - 1)) +
-        v2x.toDouble() * v2y.toDouble() / (9.0 * nL * (nL - 1) * (nL - 2))
+    val varS = (v0 - vt - vu) / 18.0 +
+        v1x * v1y / (2.0 * nD * (nD - 1.0)) +
+        v2x * v2y / (9.0 * nD * (nD - 1.0) * (nD - 2.0))
 
     if (varS <= 0.0) {
         return CorrelationResult(tau, if (tau == 0.0) 1.0 else 0.0, n)
@@ -693,15 +696,25 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
     // Pass 1: compute means
     val means = DoubleArray(k) { variables[it].mean() }
 
-    // Pass 2: compute all cross-products in a single pass (diagonal = sum of squares)
+    // Pass 2: compute all cross-products with Neumaier compensated summation
     val cp = Array(k) { DoubleArray(k) }
+    val cpComp = Array(k) { DoubleArray(k) } // compensation terms
     val devs = DoubleArray(k)
     for (idx in 0 until n) {
         for (i in 0 until k) devs[i] = variables[i][idx] - means[i]
         for (i in 0 until k) {
             for (j in i until k) {
-                cp[i][j] += devs[i] * devs[j]
+                val prod = devs[i] * devs[j]
+                val t = cp[i][j] + prod
+                cpComp[i][j] += if (abs(cp[i][j]) >= abs(prod)) (cp[i][j] - t) + prod else (prod - t) + cp[i][j]
+                cp[i][j] = t
             }
+        }
+    }
+    // Apply compensation
+    for (i in 0 until k) {
+        for (j in i until k) {
+            cp[i][j] += cpComp[i][j]
         }
     }
 

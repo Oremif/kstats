@@ -147,7 +147,7 @@ public class ParetoDistribution(
      * @return a random value drawn from this distribution (always ≥ scale).
      */
     override fun sample(random: Random): Double {
-        val u = random.nextDouble().coerceIn(1e-300, 1.0 - Double.MIN_VALUE)
+        val u = random.nextDouble().coerceIn(1e-300, 0.9999999999999998)
         return scale * u.pow(-1.0 / shape)
     }
 }

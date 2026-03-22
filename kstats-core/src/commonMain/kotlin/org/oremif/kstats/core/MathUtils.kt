@@ -214,8 +214,11 @@ public fun regularizedBeta(x: Double, a: Double, b: Double): Double {
 
 // ── Regularized incomplete gamma functions ──────────────────────────────────
 
-private const val GAMMA_MAX_ITERATIONS = 200
+private const val GAMMA_BASE_MAX_ITERATIONS = 200
 private const val GAMMA_EPSILON = 1e-14
+
+/** Dynamic iteration limit for regularized gamma — scales with sqrt(a) for large shape parameters. */
+private fun gammaMaxIterations(a: Double): Int = maxOf(GAMMA_BASE_MAX_ITERATIONS, (10.0 * sqrt(a)).toInt())
 
 /**
  * Computes the lower regularized incomplete gamma function P(a, x).
@@ -234,7 +237,7 @@ private const val GAMMA_EPSILON = 1e-14
  * @param a the shape parameter. Must be positive.
  * @param x the upper integration limit. Returns 0.0 for non-positive values.
  * @return the value of P([a], [x]), in the range [0, 1].
- * @throws ConvergenceException if the iterative computation does not converge within 200 iterations.
+ * @throws ConvergenceException if the iterative computation does not converge.
  */
 public fun regularizedGammaP(a: Double, x: Double): Double {
     if (a.isNaN() || x.isNaN()) return Double.NaN
@@ -268,7 +271,7 @@ public fun regularizedGammaP(a: Double, x: Double): Double {
  * @param a the shape parameter. Must be positive.
  * @param x the lower integration limit. Returns 1.0 for non-positive values.
  * @return the value of Q([a], [x]), in the range [0, 1].
- * @throws ConvergenceException if the iterative computation does not converge within 200 iterations.
+ * @throws ConvergenceException if the iterative computation does not converge.
  */
 public fun regularizedGammaQ(a: Double, x: Double): Double {
     if (a.isNaN() || x.isNaN()) return Double.NaN
@@ -285,11 +288,12 @@ public fun regularizedGammaQ(a: Double, x: Double): Double {
 }
 
 private fun gammaSeriesP(a: Double, x: Double): Double {
+    val maxIter = gammaMaxIterations(a)
     val lnPrefix = a * ln(x) - x - lnGamma(a)
     var sum = 1.0 / a
     var term = 1.0 / a
     var converged = false
-    for (n in 1..GAMMA_MAX_ITERATIONS) {
+    for (n in 1..maxIter) {
         term *= x / (a + n)
         sum += term
         if (abs(term) < abs(sum) * GAMMA_EPSILON) {
@@ -297,13 +301,14 @@ private fun gammaSeriesP(a: Double, x: Double): Double {
             break
         }
     }
-    checkConvergence(converged, GAMMA_MAX_ITERATIONS, sum * exp(lnPrefix)) {
-        "gammaSeriesP did not converge for a=$a, x=$x after $GAMMA_MAX_ITERATIONS iterations"
+    checkConvergence(converged, maxIter, sum * exp(lnPrefix)) {
+        "gammaSeriesP did not converge for a=$a, x=$x after $maxIter iterations"
     }
     return sum * exp(lnPrefix)
 }
 
 private fun gammaContinuedFractionQ(a: Double, x: Double): Double {
+    val maxIter = gammaMaxIterations(a)
     val lnPrefix = a * ln(x) - x - lnGamma(a)
     // Modified Lentz's method
     val b0 = x + 1.0 - a
@@ -312,7 +317,7 @@ private fun gammaContinuedFractionQ(a: Double, x: Double): Double {
     var h = d
 
     var converged = false
-    for (i in 1..GAMMA_MAX_ITERATIONS) {
+    for (i in 1..maxIter) {
         val an = -i.toDouble() * (i.toDouble() - a)
         val bn = x + 2.0 * i + 1.0 - a
 
@@ -330,8 +335,8 @@ private fun gammaContinuedFractionQ(a: Double, x: Double): Double {
         }
     }
 
-    checkConvergence(converged, GAMMA_MAX_ITERATIONS, exp(lnPrefix) * h) {
-        "gammaContinuedFractionQ did not converge for a=$a, x=$x after $GAMMA_MAX_ITERATIONS iterations"
+    checkConvergence(converged, maxIter, exp(lnPrefix) * h) {
+        "gammaContinuedFractionQ did not converge for a=$a, x=$x after $maxIter iterations"
     }
 
     return exp(lnPrefix) * h
@@ -424,7 +429,7 @@ public fun erfInv(x: Double): Double {
 
     // Winitzki's approximation as initial guess
     // erfInv(x) ≈ sign(x) * sqrt(sqrt((2/(pi*a) + ln(1-x^2)/2)^2 - ln(1-x^2)/a) - (2/(pi*a) + ln(1-x^2)/2))
-    val lnOneMinusA2 = ln(1.0 - a * a)
+    val lnOneMinusA2 = ln1p(-a * a)
     val c = 2.0 / (PI * 0.147) + lnOneMinusA2 / 2.0
     var p = sqrt(sqrt(c * c - lnOneMinusA2 / 0.147) - c)
 

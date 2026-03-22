@@ -166,9 +166,15 @@ class PoissonDistributionTest {
 
     @Test
     fun testExtremeParameters() {
-        // λ=1000: triggers ConvergenceException in regularizedGammaP (known limitation)
-        // gammaSeriesP does not converge for a=1001, x=1000 within 200 iterations
-        // Skipped — requires improved continued-fraction or asymptotic expansion
+        // λ=500: previously triggered ConvergenceException, now handled by dynamic iteration limit
+        val d500 = PoissonDistribution(500.0)
+        val cdf500 = d500.cdf(500)
+        assertTrue(cdf500 > 0.4 && cdf500 < 0.6, "Poisson(500).cdf(500) should be near 0.5, got $cdf500")
+
+        // λ=1000: large parameter
+        val d1000 = PoissonDistribution(1000.0)
+        val cdf1000 = d1000.cdf(1000)
+        assertTrue(cdf1000 > 0.4 && cdf1000 < 0.6, "Poisson(1000).cdf(1000) should be near 0.5, got $cdf1000")
 
         // λ=100: moderately large parameter
         val d1 = PoissonDistribution(100.0)

@@ -4,6 +4,7 @@ import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.descriptive.standardDeviation
+import org.oremif.kstats.descriptive.variance
 import org.oremif.kstats.distributions.StudentTDistribution
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -151,8 +152,8 @@ public fun tTest(
     val n2 = sample2.size.toDouble()
     val mean1 = sample1.mean()
     val mean2 = sample2.mean()
-    val var1 = sample1.sumOf { (it - mean1) * (it - mean1) } / (n1 - 1.0)
-    val var2 = sample2.sumOf { (it - mean2) * (it - mean2) } / (n2 - 1.0)
+    val var1 = sample1.variance()
+    val var2 = sample2.variance()
 
     val t: Double
     val df: Double

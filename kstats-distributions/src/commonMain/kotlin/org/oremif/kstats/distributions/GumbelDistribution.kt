@@ -146,7 +146,8 @@ public class GumbelDistribution(
      * @return a random value drawn from this distribution.
      */
     override fun sample(random: Random): Double {
-        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 1.0 - Double.MIN_VALUE)
+        // Clamp to (0, 1) exclusive — upper bound is the largest double < 1.0 (1.0 - ulp)
+        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 0.9999999999999998)
         return mu - beta * ln(-ln(u))
     }
 }

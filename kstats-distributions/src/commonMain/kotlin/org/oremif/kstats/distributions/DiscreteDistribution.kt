@@ -92,6 +92,8 @@ public interface DiscreteDistribution : Distribution {
      */
     override fun sf(x: Double): Double {
         if (x.isNaN()) return Double.NaN
+        if (x >= Int.MAX_VALUE.toDouble()) return 0.0
+        if (x < Int.MIN_VALUE.toDouble()) return 1.0
         return sf(floor(x).toInt())
     }
 
@@ -107,6 +109,8 @@ public interface DiscreteDistribution : Distribution {
      */
     override fun cdf(x: Double): Double {
         if (x.isNaN()) return Double.NaN
+        if (x >= Int.MAX_VALUE.toDouble()) return 1.0
+        if (x < Int.MIN_VALUE.toDouble()) return 0.0
         return cdf(floor(x).toInt())
     }
 

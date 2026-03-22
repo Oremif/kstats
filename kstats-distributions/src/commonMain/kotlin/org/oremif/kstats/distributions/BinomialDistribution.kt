@@ -5,6 +5,7 @@ import org.oremif.kstats.core.lnCombination
 import org.oremif.kstats.core.regularizedBeta
 import kotlin.math.exp
 import kotlin.math.ln
+import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 import kotlin.random.Random
@@ -177,9 +178,13 @@ public class BinomialDistribution(
     override val entropy: Double
         get() {
             if (n == 0) return 0.0
+            if (p == 0.0 || p == 1.0) return 0.0
+            val q = 1.0 - p
             var h = 0.0
-            for (k in 0..n) {
-                val pk = pmf(k)
+            var pk = q.pow(n.toDouble()) // pmf(0) = (1-p)^n
+            if (pk > 0.0) h -= pk * ln(pk)
+            for (k in 0 until n) {
+                pk *= (n - k).toDouble() / (k + 1).toDouble() * p / q
                 if (pk > 0.0) h -= pk * ln(pk)
             }
             return h

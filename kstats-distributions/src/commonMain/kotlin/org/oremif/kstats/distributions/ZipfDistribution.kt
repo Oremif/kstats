@@ -43,6 +43,9 @@ public class ZipfDistribution(
         if (numberOfElements < 1) throw InvalidParameterException(
             "numberOfElements must be >= 1, got $numberOfElements"
         )
+        if (numberOfElements > 10_000_000) throw InvalidParameterException(
+            "numberOfElements must be <= 10,000,000, got $numberOfElements"
+        )
         if (exponent.isNaN() || exponent <= 0.0 || exponent.isInfinite()) throw InvalidParameterException(
             "exponent must be finite and positive, got $exponent"
         )

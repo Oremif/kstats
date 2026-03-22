@@ -29,12 +29,24 @@ internal fun DoubleArray.requireMinSize(minSize: Int, name: String = "array"): D
     return this
 }
 
-/** Throws [InvalidParameterException] if [value] is not strictly positive (> 0). */
+/**
+ * Throws [InvalidParameterException] if [value] is not strictly positive (> 0).
+ *
+ * NaN passes validation intentionally (`NaN <= 0.0` is `false` per IEEE 754).
+ * This allows NaN to propagate through subsequent computation rather than being
+ * rejected at the validation boundary.
+ */
 internal fun requirePositive(value: Double, name: String = "value") {
     if (value <= 0.0) throw InvalidParameterException("$name must be positive, got $value")
 }
 
-/** Throws [InvalidParameterException] if [value] is negative (< 0). */
+/**
+ * Throws [InvalidParameterException] if [value] is negative (< 0).
+ *
+ * NaN passes validation intentionally (`NaN < 0.0` is `false` per IEEE 754).
+ * This allows NaN to propagate through subsequent computation rather than being
+ * rejected at the validation boundary.
+ */
 internal fun requireNonNegative(value: Double, name: String = "value") {
     if (value < 0.0) throw InvalidParameterException("$name must be non-negative, got $value")
 }

@@ -97,7 +97,7 @@ public class WeibullDistribution(
      */
     override fun cdf(x: Double): Double {
         if (x <= 0.0) return 0.0
-        return 1.0 - exp(-(x / lambda).pow(k))
+        return -expm1(-(x / lambda).pow(k))
     }
 
     /**

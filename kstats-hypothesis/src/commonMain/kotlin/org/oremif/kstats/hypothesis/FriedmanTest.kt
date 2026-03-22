@@ -63,13 +63,24 @@ public fun friedmanTest(vararg groups: DoubleArray): TestResult {
         }
     }
 
-    // Step 1: Rank within each block
+    // Step 1: Rank within each block and compute tie correction
     val rankSums = DoubleArray(k)
+    var tieSum = 0.0 // sum over all blocks of sum_j(t_j^3 - t_j)
     for (i in 0 until n) {
         val blockValues = DoubleArray(k) { j -> groups[j][i] }
         val blockRanks = blockValues.rank(TieMethod.AVERAGE)
         for (j in 0 until k) {
             rankSums[j] += blockRanks[j]
+        }
+        // Count ties within this block
+        val sortedBlock = blockValues.copyOf().also { it.sort() }
+        var ti = 0
+        while (ti < k) {
+            var tj = ti + 1
+            while (tj < k && sortedBlock[tj] == sortedBlock[ti]) tj++
+            val t = (tj - ti).toDouble()
+            tieSum += t * t * t - t
+            ti = tj
         }
     }
 
@@ -85,12 +96,15 @@ public fun friedmanTest(vararg groups: DoubleArray): TestResult {
         )
     }
 
-    // Step 2: Compute Q statistic
+    // Step 2: Compute Q statistic with tie correction
     var sumRjSquared = 0.0
     for (j in 0 until k) {
         sumRjSquared += rankSums[j] * rankSums[j]
     }
-    val q = (12.0 / (n * k * (k + 1))) * sumRjSquared - 3.0 * n * (k + 1)
+    val qRaw = (12.0 / (n * k * (k + 1))) * sumRjSquared - 3.0 * n * (k + 1)
+    // Tie correction factor: C = 1 - tieSum / (n * k * (k^2 - 1))
+    val correction = 1.0 - tieSum / (n.toDouble() * k * (k.toDouble() * k - 1.0))
+    val q = if (correction == 0.0) 0.0 else qRaw / correction
 
     // p-value from chi-squared distribution with k-1 degrees of freedom
     val pValue = ChiSquaredDistribution(df.toDouble()).sf(q)

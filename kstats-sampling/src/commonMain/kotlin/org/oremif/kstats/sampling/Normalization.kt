@@ -7,6 +7,13 @@ import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.descriptive.standardDeviation
 
 /**
+ * Threshold below which the standard deviation is considered effectively zero.
+ * Chosen to be well above machine epsilon (~2.2e-16) to avoid division
+ * by near-zero values that would produce unreliable z-scores.
+ */
+private const val NEAR_ZERO_SD_THRESHOLD = 1e-15
+
+/**
  * Computes the z-score (standard score) of each element.
  *
  * The z-score expresses how many standard deviations an element is from the mean.
@@ -32,7 +39,7 @@ public fun DoubleArray.zScore(): DoubleArray {
     }
     val m = mean()
     val sd = standardDeviation()
-    if (sd < 1e-15) throw DegenerateDataException("Standard deviation is near-zero, cannot compute z-scores")
+    if (sd < NEAR_ZERO_SD_THRESHOLD) throw DegenerateDataException("Standard deviation is near-zero, cannot compute z-scores")
     return DoubleArray(size) { (this[it] - m) / sd }
 }
 

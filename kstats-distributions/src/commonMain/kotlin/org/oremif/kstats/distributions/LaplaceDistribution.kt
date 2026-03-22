@@ -148,7 +148,7 @@ public class LaplaceDistribution(
      * @return a random value drawn from this distribution.
      */
     override fun sample(random: Random): Double {
-        val u = random.nextDouble().coerceAtLeast(Double.MIN_VALUE) - 0.5
+        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 0.9999999999999998) - 0.5
         return mu - scale * sign(u) * ln1p(-2.0 * abs(u))
     }
 }

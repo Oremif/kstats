@@ -75,16 +75,26 @@ public fun mannWhitneyUTest(
     val sigma = sqrt(n1.toDouble() * n2 / 12.0 * ((n + 1) - tieCorrection / (n.toDouble() * (n - 1))))
     val z = if (sigma == 0.0) 0.0 else (u1 - mu) / sigma
 
+    // Continuity correction (matches scipy default use_continuity=True)
     val normal = NormalDistribution.STANDARD
     val pValue = when (alternative) {
-        Alternative.TWO_SIDED -> 2.0 * normal.sf(abs(z))
-        Alternative.LESS -> normal.cdf(z)
-        Alternative.GREATER -> normal.sf(z)
+        Alternative.TWO_SIDED -> {
+            val zc = if (sigma == 0.0) 0.0 else (abs(u1 - mu) - 0.5).coerceAtLeast(0.0) / sigma
+            2.0 * normal.sf(zc)
+        }
+        Alternative.LESS -> {
+            val zc = if (sigma == 0.0) 0.0 else (u1 - mu + 0.5) / sigma
+            normal.cdf(zc)
+        }
+        Alternative.GREATER -> {
+            val zc = if (sigma == 0.0) 0.0 else (u1 - mu - 0.5) / sigma
+            normal.sf(zc)
+        }
     }
 
     return TestResult(
         testName = "Mann-Whitney U Test",
-        statistic = u,
+        statistic = u1,
         pValue = pValue.coerceIn(0.0, 1.0),
         alternative = alternative,
         additionalInfo = mapOf("U1" to u1, "U2" to u2, "z" to z)
@@ -182,11 +192,21 @@ public fun wilcoxonSignedRankTest(
     val sigma = sqrt(n * (n + 1.0) * (2.0 * n + 1.0) / 24.0 - tieCorrection / 48.0)
     val z = if (sigma == 0.0) 0.0 else (w - mu) / sigma
 
+    // Continuity correction (matches scipy default correction=True)
     val normal = NormalDistribution.STANDARD
     val pValue = when (alternative) {
-        Alternative.TWO_SIDED -> 2.0 * normal.sf(abs(z))
-        Alternative.LESS -> normal.cdf(z)
-        Alternative.GREATER -> normal.sf(z)
+        Alternative.TWO_SIDED -> {
+            val zc = if (sigma == 0.0) 0.0 else (abs(w - mu) - 0.5).coerceAtLeast(0.0) / sigma
+            2.0 * normal.sf(zc)
+        }
+        Alternative.LESS -> {
+            val zc = if (sigma == 0.0) 0.0 else (w - mu + 0.5) / sigma
+            normal.cdf(zc)
+        }
+        Alternative.GREATER -> {
+            val zc = if (sigma == 0.0) 0.0 else (w - mu - 0.5) / sigma
+            normal.sf(zc)
+        }
     }
 
     return TestResult(

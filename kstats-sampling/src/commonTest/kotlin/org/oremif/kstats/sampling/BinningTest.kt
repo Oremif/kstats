@@ -289,4 +289,13 @@ class BinningTest {
         assertEquals(2, bins[0].count) // 1.0, 3.5
         assertEquals(2, bins[1].count) // 7.0, 8.0
     }
+
+    @Test
+    fun testBinBySizeExactMultiple() {
+        // When range is an exact multiple of binSize, should produce the correct number of bins
+        // (not one extra due to floating-point ceil rounding)
+        val data = listOf(0.0, 2.5, 5.0, 7.5, 10.0)
+        val bins = data.binByDouble({ it }, binSize = 2.5)
+        assertEquals(4, bins.size, "Range 10.0 / binSize 2.5 should produce exactly 4 bins")
+    }
 }

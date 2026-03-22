@@ -146,8 +146,8 @@ public class PoissonDistribution(
     override val entropy: Double
         get() {
             var h = 0.0
-            var cumP = 0.0
             val start = maxOf(0, floor(rate - 10.0 * sqrt(rate)).toInt())
+            var cumP = if (start > 0) cdf(start - 1) else 0.0
             var k = start
             while (cumP < 1.0 - 1e-15) {
                 val pk = pmf(k)

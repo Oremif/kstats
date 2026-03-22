@@ -137,7 +137,7 @@ public class LogisticDistribution(
      * @return a random value drawn from this distribution.
      */
     override fun sample(random: Random): Double {
-        val u = random.nextDouble().coerceAtLeast(Double.MIN_VALUE)
+        val u = random.nextDouble().coerceIn(Double.MIN_VALUE, 0.9999999999999998)
         return mu + scale * ln(u / (1.0 - u))
     }
 }

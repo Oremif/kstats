@@ -529,4 +529,32 @@ class DistributionTest {
         assertFailsWith<InvalidParameterException> { BetaBinomialDistribution(10, Double.POSITIVE_INFINITY, 1.0) }
         assertFailsWith<InvalidParameterException> { BetaBinomialDistribution(10, 1.0, Double.POSITIVE_INFINITY) }
     }
+
+    // ── DiscreteDistribution.cdf(Double) integer overflow fix ────────────
+
+    @Test
+    fun discreteCdfHandlesExtremeDoubleValues() {
+        val dist = BinomialDistribution(100, 0.5)
+        // Values beyond Int range should not overflow
+        assertEquals(1.0, dist.cdf(3e9), tol)
+        assertEquals(1.0, dist.cdf(Double.POSITIVE_INFINITY), tol)
+        assertEquals(0.0, dist.cdf(-3e9), tol)
+        assertEquals(0.0, dist.cdf(Double.NEGATIVE_INFINITY), tol)
+        assertTrue(dist.cdf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun discreteSfHandlesExtremeDoubleValues() {
+        val dist = BinomialDistribution(100, 0.5)
+        assertEquals(0.0, dist.sf(3e9), tol)
+        assertEquals(0.0, dist.sf(Double.POSITIVE_INFINITY), tol)
+        assertEquals(1.0, dist.sf(-3e9), tol)
+        assertEquals(1.0, dist.sf(Double.NEGATIVE_INFINITY), tol)
+        assertTrue(dist.sf(Double.NaN).isNaN())
+    }
+
+    @Test
+    fun zipfRejectsLargeNumberOfElements() {
+        assertFailsWith<InvalidParameterException> { ZipfDistribution(20_000_000, 1.0) }
+    }
 }

@@ -373,6 +373,10 @@ private fun medianInPlace(work: DoubleArray): Double {
  * frequency, all of them are returned (multimodal). Works with any type that supports
  * equality checks, not just numeric types.
  *
+ * **NaN handling (for `Double`):** Each `NaN` is treated as a unique value because `NaN != NaN`
+ * per IEEE 754. NaN values will not be grouped together and will not appear as the mode unless
+ * no other value is more frequent. Filter NaN values before calling if that is not desired.
+ *
  * ### Example:
  * ```kotlin
  * listOf(1.0, 2.0, 2.0, 3.0).mode()       // setOf(2.0)

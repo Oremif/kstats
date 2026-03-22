@@ -134,7 +134,7 @@ public fun DoubleArray.rank(tieMethod: TieMethod = TieMethod.AVERAGE): DoubleArr
  * @return an array of percentile ranks in the range [0, 100], preserving the original
  * element order.
  * @throws InsufficientDataException if the array is empty.
- * @throws InvalidParameterException if the array contains NaN or Infinity.
+ * @throws InvalidParameterException if the array contains NaN.
  */
 public fun DoubleArray.percentileRank(): DoubleArray {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
@@ -152,7 +152,7 @@ public fun DoubleArray.percentileRank(): DoubleArray {
  * @param tieMethod how to handle tied (equal) values. Defaults to [TieMethod.AVERAGE].
  * @return a list of ranks in the same order as the input.
  * @throws InsufficientDataException if the collection is empty.
- * @throws InvalidParameterException if the collection contains NaN or Infinity.
+ * @throws InvalidParameterException if the collection contains NaN.
  * @see DoubleArray.rank
  */
 public fun Iterable<Double>.rank(tieMethod: TieMethod = TieMethod.AVERAGE): List<Double> =
@@ -167,7 +167,7 @@ public fun Iterable<Double>.rank(tieMethod: TieMethod = TieMethod.AVERAGE): List
  *
  * @return a list of percentile ranks in the range [0, 100].
  * @throws InsufficientDataException if the collection is empty.
- * @throws InvalidParameterException if the collection contains NaN or Infinity.
+ * @throws InvalidParameterException if the collection contains NaN.
  * @see DoubleArray.percentileRank
  */
 public fun Iterable<Double>.percentileRank(): List<Double> =

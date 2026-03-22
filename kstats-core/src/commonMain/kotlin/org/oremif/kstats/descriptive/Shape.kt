@@ -1,5 +1,6 @@
 package org.oremif.kstats.descriptive
 
+import org.oremif.kstats.core.compensatedSum
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 import kotlin.math.sqrt
@@ -37,12 +38,8 @@ public fun Iterable<Double>.skewness(kind: PopulationKind = SAMPLE): Double {
         if (variance == 0.0) return 0.0
         val sd = sqrt(variance)
 
-        var sumZ3 = 0.0
-        for (x in list) {
-            val z = (x - mean) / sd
-            sumZ3 += z * z * z
-        }
-        val g1 = sumZ3 / n
+        val zCubed = DoubleArray(n) { val z = (list[it] - mean) / sd; z * z * z }
+        val g1 = zCubed.compensatedSum() / n
 
         if (kind == SAMPLE) {
             val adj = sqrt(n.toDouble() * (n - 1)) / (n - 2)
@@ -81,12 +78,8 @@ public fun DoubleArray.skewness(kind: PopulationKind = SAMPLE): Double {
         if (variance == 0.0) return 0.0
         val sd = sqrt(variance)
 
-        var sumZ3 = 0.0
-        for (x in this) {
-            val z = (x - mean) / sd
-            sumZ3 += z * z * z
-        }
-        val g1 = sumZ3 / n
+        val zCubed = DoubleArray(n) { val z = (this[it] - mean) / sd; z * z * z }
+        val g1 = zCubed.compensatedSum() / n
 
         if (kind == SAMPLE) {
             val adj = sqrt(n.toDouble() * (n - 1)) / (n - 2)
@@ -132,13 +125,8 @@ public fun Iterable<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Bool
         if (variance == 0.0) return if (excess) -3.0 else 0.0
         val sd = sqrt(variance)
 
-        var sumZ4 = 0.0
-        for (x in list) {
-            val z = (x - mean) / sd
-            val z2 = z * z
-            sumZ4 += z2 * z2
-        }
-        val g2 = sumZ4 / n
+        val zFourth = DoubleArray(n) { val z = (list[it] - mean) / sd; val z2 = z * z; z2 * z2 }
+        val g2 = zFourth.compensatedSum() / n
 
         if (kind == SAMPLE) {
             val nd = n.toDouble()
@@ -179,13 +167,8 @@ public fun DoubleArray.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean =
         if (variance == 0.0) return if (excess) -3.0 else 0.0
         val sd = sqrt(variance)
 
-        var sumZ4 = 0.0
-        for (x in this) {
-            val z = (x - mean) / sd
-            val z2 = z * z
-            sumZ4 += z2 * z2
-        }
-        val g2 = sumZ4 / n
+        val zFourth = DoubleArray(n) { val z = (this[it] - mean) / sd; val z2 = z * z; z2 * z2 }
+        val g2 = zFourth.compensatedSum() / n
 
         if (kind == SAMPLE) {
             val nd = n.toDouble()
