@@ -1,0 +1,18 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "kstats",
+  "description": "Kotlin Multiplatform statistics library — distributions, hypothesis tests, descriptive stats, correlation, and sampling",
+  "excludeFolders": [
+    "build-logic",
+    "gradle",
+    "dokka",
+    "kstats-bom",
+    "docs/de",
+    "docs/images",
+    ".github",
+    "benchmark"
+  ],
+  "excludeFiles": [
+    "SECURITY.md"
+  ]
+}
