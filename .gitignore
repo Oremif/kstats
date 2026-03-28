@@ -52,3 +52,5 @@ xcuserdata/
 *.swo
 *.tmp
 *~
+
+.claude
