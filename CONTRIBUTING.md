@@ -38,7 +38,7 @@ Discuss large changes or new public API in an issue before starting work.
   the project has `explicitApi()` enabled.
 - New public API must include KDoc documentation.
 - After adding or changing public API, run `./gradlew apiDump` and commit the updated `.api` files.
-- Do not add external dependencies to library modules — kstats is a **zero-dependency** library.
+- Do not add external dependencies to library modules.
 
 ### New Statistical Methods
 

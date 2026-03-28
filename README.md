@@ -18,7 +18,7 @@
 # kstats
 
 A Kotlin Multiplatform statistics toolkit covering descriptive analysis, probability distributions, hypothesis testing,
-correlation, regression, and sampling. Zero dependencies, pure Kotlin, published to Maven Central as focused modules.
+correlation, regression, and sampling. Pure Kotlin, published to Maven Central as focused modules.
 
 ## Quickstart
 

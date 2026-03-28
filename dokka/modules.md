@@ -5,7 +5,7 @@
 <!---IMPORT org.oremif.kstats.correlation.samples.DokkaSamples-->
 <!---IMPORT org.oremif.kstats.sampling.samples.DokkaSamples-->
 
-Zero-dependency Kotlin Multiplatform statistics library. All math is implemented from scratch
+Kotlin Multiplatform statistics library. All math is implemented from scratch
 in pure Kotlin common code — no platform-specific dependencies, no JVM-only numerics.
 Targets JVM, Android, iOS, macOS, watchOS, tvOS, Linux, Windows, JS, and Wasm.
 
