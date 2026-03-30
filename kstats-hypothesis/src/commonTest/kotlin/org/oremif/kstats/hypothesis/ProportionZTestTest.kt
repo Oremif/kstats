@@ -312,11 +312,12 @@ class ProportionZTestTest {
 
     @Test
     fun testOneSampleNaNConfidenceLevel() {
-        // Kotlin compareTo treats NaN as greater than all values,
-        // so confidenceLevel=NaN triggers "NaN >= 1.0" => true => throws
-        assertFailsWith<InvalidParameterException> {
-            proportionZTest(successes = 50, trials = 100, p0 = 0.5, confidenceLevel = Double.NaN)
-        }
+        // IEEE 754: NaN passes <= / >= validation. NaN propagates through alpha -> CI bounds.
+        val result = proportionZTest(successes = 50, trials = 100, p0 = 0.5, confidenceLevel = Double.NaN)
+        assertTrue(result.statistic.isFinite(), "statistic should be finite (NaN only affects CI)")
+        val ci = result.confidenceInterval!!
+        assertTrue(ci.first.isNaN(), "CI lower should be NaN when confidenceLevel is NaN")
+        assertTrue(ci.second.isNaN(), "CI upper should be NaN when confidenceLevel is NaN")
     }
 
     @Test
@@ -734,15 +735,16 @@ class ProportionZTestTest {
 
     @Test
     fun testTwoSampleNaNConfidenceLevel() {
-        // Kotlin compareTo treats NaN as greater than all values,
-        // so confidenceLevel=NaN triggers "NaN >= 1.0" => true => throws
-        assertFailsWith<InvalidParameterException> {
-            proportionZTest(
-                successes1 = 60, trials1 = 100,
-                successes2 = 40, trials2 = 100,
-                confidenceLevel = Double.NaN
-            )
-        }
+        // IEEE 754: NaN passes <= / >= validation. NaN propagates through alpha -> CI bounds.
+        val result = proportionZTest(
+            successes1 = 60, trials1 = 100,
+            successes2 = 40, trials2 = 100,
+            confidenceLevel = Double.NaN
+        )
+        assertTrue(result.statistic.isFinite(), "statistic should be finite (NaN only affects CI)")
+        val ci = result.confidenceInterval!!
+        assertTrue(ci.first.isNaN(), "CI lower should be NaN when confidenceLevel is NaN")
+        assertTrue(ci.second.isNaN(), "CI upper should be NaN when confidenceLevel is NaN")
     }
 
     // =========================================================================
