@@ -44,6 +44,50 @@ final class <#A: kotlin/Any?> org.oremif.kstats.sampling/WeightedDice { // org.o
     final fun roll(): #A // org.oremif.kstats.sampling/WeightedDice.roll|roll(){}[0]
 }
 
+final class org.oremif.kstats.sampling/BootstrapCIResult { // org.oremif.kstats.sampling/BootstrapCIResult|null[0]
+    constructor <init>(org.oremif.kstats.sampling/ConfidenceInterval, org.oremif.kstats.sampling/ConfidenceInterval, org.oremif.kstats.sampling/ConfidenceInterval, kotlin/Double, kotlin/Int, kotlin/Double) // org.oremif.kstats.sampling/BootstrapCIResult.<init>|<init>(org.oremif.kstats.sampling.ConfidenceInterval;org.oremif.kstats.sampling.ConfidenceInterval;org.oremif.kstats.sampling.ConfidenceInterval;kotlin.Double;kotlin.Int;kotlin.Double){}[0]
+
+    final val basic // org.oremif.kstats.sampling/BootstrapCIResult.basic|{}basic[0]
+        final fun <get-basic>(): org.oremif.kstats.sampling/ConfidenceInterval // org.oremif.kstats.sampling/BootstrapCIResult.basic.<get-basic>|<get-basic>(){}[0]
+    final val bca // org.oremif.kstats.sampling/BootstrapCIResult.bca|{}bca[0]
+        final fun <get-bca>(): org.oremif.kstats.sampling/ConfidenceInterval // org.oremif.kstats.sampling/BootstrapCIResult.bca.<get-bca>|<get-bca>(){}[0]
+    final val confidenceLevel // org.oremif.kstats.sampling/BootstrapCIResult.confidenceLevel|{}confidenceLevel[0]
+        final fun <get-confidenceLevel>(): kotlin/Double // org.oremif.kstats.sampling/BootstrapCIResult.confidenceLevel.<get-confidenceLevel>|<get-confidenceLevel>(){}[0]
+    final val nResamples // org.oremif.kstats.sampling/BootstrapCIResult.nResamples|{}nResamples[0]
+        final fun <get-nResamples>(): kotlin/Int // org.oremif.kstats.sampling/BootstrapCIResult.nResamples.<get-nResamples>|<get-nResamples>(){}[0]
+    final val observedStatistic // org.oremif.kstats.sampling/BootstrapCIResult.observedStatistic|{}observedStatistic[0]
+        final fun <get-observedStatistic>(): kotlin/Double // org.oremif.kstats.sampling/BootstrapCIResult.observedStatistic.<get-observedStatistic>|<get-observedStatistic>(){}[0]
+    final val percentile // org.oremif.kstats.sampling/BootstrapCIResult.percentile|{}percentile[0]
+        final fun <get-percentile>(): org.oremif.kstats.sampling/ConfidenceInterval // org.oremif.kstats.sampling/BootstrapCIResult.percentile.<get-percentile>|<get-percentile>(){}[0]
+
+    final fun component1(): org.oremif.kstats.sampling/ConfidenceInterval // org.oremif.kstats.sampling/BootstrapCIResult.component1|component1(){}[0]
+    final fun component2(): org.oremif.kstats.sampling/ConfidenceInterval // org.oremif.kstats.sampling/BootstrapCIResult.component2|component2(){}[0]
+    final fun component3(): org.oremif.kstats.sampling/ConfidenceInterval // org.oremif.kstats.sampling/BootstrapCIResult.component3|component3(){}[0]
+    final fun component4(): kotlin/Double // org.oremif.kstats.sampling/BootstrapCIResult.component4|component4(){}[0]
+    final fun component5(): kotlin/Int // org.oremif.kstats.sampling/BootstrapCIResult.component5|component5(){}[0]
+    final fun component6(): kotlin/Double // org.oremif.kstats.sampling/BootstrapCIResult.component6|component6(){}[0]
+    final fun copy(org.oremif.kstats.sampling/ConfidenceInterval = ..., org.oremif.kstats.sampling/ConfidenceInterval = ..., org.oremif.kstats.sampling/ConfidenceInterval = ..., kotlin/Double = ..., kotlin/Int = ..., kotlin/Double = ...): org.oremif.kstats.sampling/BootstrapCIResult // org.oremif.kstats.sampling/BootstrapCIResult.copy|copy(org.oremif.kstats.sampling.ConfidenceInterval;org.oremif.kstats.sampling.ConfidenceInterval;org.oremif.kstats.sampling.ConfidenceInterval;kotlin.Double;kotlin.Int;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.sampling/BootstrapCIResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.sampling/BootstrapCIResult.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.sampling/BootstrapCIResult.toString|toString(){}[0]
+}
+
+final class org.oremif.kstats.sampling/ConfidenceInterval { // org.oremif.kstats.sampling/ConfidenceInterval|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double) // org.oremif.kstats.sampling/ConfidenceInterval.<init>|<init>(kotlin.Double;kotlin.Double){}[0]
+
+    final val lower // org.oremif.kstats.sampling/ConfidenceInterval.lower|{}lower[0]
+        final fun <get-lower>(): kotlin/Double // org.oremif.kstats.sampling/ConfidenceInterval.lower.<get-lower>|<get-lower>(){}[0]
+    final val upper // org.oremif.kstats.sampling/ConfidenceInterval.upper|{}upper[0]
+        final fun <get-upper>(): kotlin/Double // org.oremif.kstats.sampling/ConfidenceInterval.upper.<get-upper>|<get-upper>(){}[0]
+
+    final fun component1(): kotlin/Double // org.oremif.kstats.sampling/ConfidenceInterval.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // org.oremif.kstats.sampling/ConfidenceInterval.component2|component2(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ...): org.oremif.kstats.sampling/ConfidenceInterval // org.oremif.kstats.sampling/ConfidenceInterval.copy|copy(kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.sampling/ConfidenceInterval.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.sampling/ConfidenceInterval.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.sampling/ConfidenceInterval.toString|toString(){}[0]
+}
+
 final class org.oremif.kstats.sampling/FrequencyBin { // org.oremif.kstats.sampling/FrequencyBin|null[0]
     constructor <init>(kotlin.ranges/ClosedRange<kotlin/Double>, kotlin/Int, kotlin/Double, kotlin/Double) // org.oremif.kstats.sampling/FrequencyBin.<init>|<init>(kotlin.ranges.ClosedRange<kotlin.Double>;kotlin.Int;kotlin.Double;kotlin.Double){}[0]
 
@@ -98,3 +142,5 @@ final fun <#A: kotlin/Any?> (kotlin.collections/Iterable<#A>).org.oremif.kstats.
 final fun <#A: kotlin/Any?> (kotlin.collections/Iterable<#A>).org.oremif.kstats.sampling/bootstrapSample(kotlin/Int, kotlin.random/Random = ...): kotlin.collections/List<#A> // org.oremif.kstats.sampling/bootstrapSample|bootstrapSample@kotlin.collections.Iterable<0:0>(kotlin.Int;kotlin.random.Random){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlin.collections/Iterable<#A>).org.oremif.kstats.sampling/randomSample(kotlin/Int, kotlin.random/Random = ...): kotlin.collections/List<#A> // org.oremif.kstats.sampling/randomSample|randomSample@kotlin.collections.Iterable<0:0>(kotlin.Int;kotlin.random.Random){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlin.collections/List<#A>).org.oremif.kstats.sampling/bootstrapSample(kotlin/Int, kotlin.random/Random = ...): kotlin.collections/List<#A> // org.oremif.kstats.sampling/bootstrapSample|bootstrapSample@kotlin.collections.List<0:0>(kotlin.Int;kotlin.random.Random){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> org.oremif.kstats.sampling/bootstrapCI(kotlin.collections/List<#A>, kotlin/Int = ..., kotlin/Double = ..., kotlin.random/Random = ..., kotlin/Function1<kotlin.collections/List<#A>, kotlin/Double>): org.oremif.kstats.sampling/BootstrapCIResult // org.oremif.kstats.sampling/bootstrapCI|bootstrapCI(kotlin.collections.List<0:0>;kotlin.Int;kotlin.Double;kotlin.random.Random;kotlin.Function1<kotlin.collections.List<0:0>,kotlin.Double>){0§<kotlin.Any?>}[0]
+final fun org.oremif.kstats.sampling/bootstrapCI(kotlin/DoubleArray, kotlin/Int = ..., kotlin/Double = ..., kotlin.random/Random = ..., kotlin/Function1<kotlin/DoubleArray, kotlin/Double>): org.oremif.kstats.sampling/BootstrapCIResult // org.oremif.kstats.sampling/bootstrapCI|bootstrapCI(kotlin.DoubleArray;kotlin.Int;kotlin.Double;kotlin.random.Random;kotlin.Function1<kotlin.DoubleArray,kotlin.Double>){}[0]
