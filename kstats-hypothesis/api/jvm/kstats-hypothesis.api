@@ -51,6 +51,13 @@ public final class org/oremif/kstats/hypothesis/ChiSquaredTestKt {
 	public static synthetic fun chiSquaredTest$default ([I[DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
 }
 
+public final class org/oremif/kstats/hypothesis/ContingencyMeasuresKt {
+	public static final fun oddsRatio ([[ID)Lorg/oremif/kstats/hypothesis/RiskEstimate;
+	public static synthetic fun oddsRatio$default ([[IDILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/RiskEstimate;
+	public static final fun relativeRisk ([[ID)Lorg/oremif/kstats/hypothesis/RiskEstimate;
+	public static synthetic fun relativeRisk$default ([[IDILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/RiskEstimate;
+}
+
 public final class org/oremif/kstats/hypothesis/EffectSizeKt {
 	public static final fun cohensD ([D[DZ)D
 	public static synthetic fun cohensD$default ([D[DZILjava/lang/Object;)D
@@ -115,6 +122,21 @@ public final class org/oremif/kstats/hypothesis/ProportionZTestKt {
 	public static final fun proportionZTest (IIIILorg/oremif/kstats/hypothesis/Alternative;D)Lorg/oremif/kstats/hypothesis/TestResult;
 	public static synthetic fun proportionZTest$default (IIDLorg/oremif/kstats/hypothesis/Alternative;DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
 	public static synthetic fun proportionZTest$default (IIIILorg/oremif/kstats/hypothesis/Alternative;DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/RiskEstimate {
+	public fun <init> (DLkotlin/Pair;D)V
+	public final fun component1 ()D
+	public final fun component2 ()Lkotlin/Pair;
+	public final fun component3 ()D
+	public final fun copy (DLkotlin/Pair;D)Lorg/oremif/kstats/hypothesis/RiskEstimate;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/hypothesis/RiskEstimate;DLkotlin/Pair;DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/RiskEstimate;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCi ()Lkotlin/Pair;
+	public final fun getConfidenceLevel ()D
+	public final fun getEstimate ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/oremif/kstats/hypothesis/TTestKt {

@@ -63,6 +63,25 @@ final class org.oremif.kstats.hypothesis/AnovaResult { // org.oremif.kstats.hypo
     final fun toString(): kotlin/String // org.oremif.kstats.hypothesis/AnovaResult.toString|toString(){}[0]
 }
 
+final class org.oremif.kstats.hypothesis/RiskEstimate { // org.oremif.kstats.hypothesis/RiskEstimate|null[0]
+    constructor <init>(kotlin/Double, kotlin/Pair<kotlin/Double, kotlin/Double>, kotlin/Double) // org.oremif.kstats.hypothesis/RiskEstimate.<init>|<init>(kotlin.Double;kotlin.Pair<kotlin.Double,kotlin.Double>;kotlin.Double){}[0]
+
+    final val ci // org.oremif.kstats.hypothesis/RiskEstimate.ci|{}ci[0]
+        final fun <get-ci>(): kotlin/Pair<kotlin/Double, kotlin/Double> // org.oremif.kstats.hypothesis/RiskEstimate.ci.<get-ci>|<get-ci>(){}[0]
+    final val confidenceLevel // org.oremif.kstats.hypothesis/RiskEstimate.confidenceLevel|{}confidenceLevel[0]
+        final fun <get-confidenceLevel>(): kotlin/Double // org.oremif.kstats.hypothesis/RiskEstimate.confidenceLevel.<get-confidenceLevel>|<get-confidenceLevel>(){}[0]
+    final val estimate // org.oremif.kstats.hypothesis/RiskEstimate.estimate|{}estimate[0]
+        final fun <get-estimate>(): kotlin/Double // org.oremif.kstats.hypothesis/RiskEstimate.estimate.<get-estimate>|<get-estimate>(){}[0]
+
+    final fun component1(): kotlin/Double // org.oremif.kstats.hypothesis/RiskEstimate.component1|component1(){}[0]
+    final fun component2(): kotlin/Pair<kotlin/Double, kotlin/Double> // org.oremif.kstats.hypothesis/RiskEstimate.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // org.oremif.kstats.hypothesis/RiskEstimate.component3|component3(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Pair<kotlin/Double, kotlin/Double> = ..., kotlin/Double = ...): org.oremif.kstats.hypothesis/RiskEstimate // org.oremif.kstats.hypothesis/RiskEstimate.copy|copy(kotlin.Double;kotlin.Pair<kotlin.Double,kotlin.Double>;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.hypothesis/RiskEstimate.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.hypothesis/RiskEstimate.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.hypothesis/RiskEstimate.toString|toString(){}[0]
+}
+
 final class org.oremif.kstats.hypothesis/TestResult { // org.oremif.kstats.hypothesis/TestResult|null[0]
     constructor <init>(kotlin/String, kotlin/Double, kotlin/Double, kotlin/Double = ..., org.oremif.kstats.hypothesis/Alternative = ..., kotlin/Pair<kotlin/Double, kotlin/Double>? = ..., kotlin.collections/Map<kotlin/String, kotlin/Double> = ...) // org.oremif.kstats.hypothesis/TestResult.<init>|<init>(kotlin.String;kotlin.Double;kotlin.Double;kotlin.Double;org.oremif.kstats.hypothesis.Alternative;kotlin.Pair<kotlin.Double,kotlin.Double>?;kotlin.collections.Map<kotlin.String,kotlin.Double>){}[0]
 
@@ -114,10 +133,12 @@ final fun org.oremif.kstats.hypothesis/kolmogorovSmirnovTest(kotlin/DoubleArray,
 final fun org.oremif.kstats.hypothesis/kolmogorovSmirnovTest(kotlin/DoubleArray, org.oremif.kstats.distributions/ContinuousDistribution): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/kolmogorovSmirnovTest|kolmogorovSmirnovTest(kotlin.DoubleArray;org.oremif.kstats.distributions.ContinuousDistribution){}[0]
 final fun org.oremif.kstats.hypothesis/leveneTest(kotlin/Array<out kotlin/DoubleArray>..., org.oremif.kstats.hypothesis/LeveneCenter = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/leveneTest|leveneTest(kotlin.Array<out|kotlin.DoubleArray>...;org.oremif.kstats.hypothesis.LeveneCenter){}[0]
 final fun org.oremif.kstats.hypothesis/mannWhitneyUTest(kotlin/DoubleArray, kotlin/DoubleArray, org.oremif.kstats.hypothesis/Alternative = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/mannWhitneyUTest|mannWhitneyUTest(kotlin.DoubleArray;kotlin.DoubleArray;org.oremif.kstats.hypothesis.Alternative){}[0]
+final fun org.oremif.kstats.hypothesis/oddsRatio(kotlin/Array<kotlin/IntArray>, kotlin/Double = ...): org.oremif.kstats.hypothesis/RiskEstimate // org.oremif.kstats.hypothesis/oddsRatio|oddsRatio(kotlin.Array<kotlin.IntArray>;kotlin.Double){}[0]
 final fun org.oremif.kstats.hypothesis/oneWayAnova(kotlin/Array<out kotlin/DoubleArray>...): org.oremif.kstats.hypothesis/AnovaResult // org.oremif.kstats.hypothesis/oneWayAnova|oneWayAnova(kotlin.Array<out|kotlin.DoubleArray>...){}[0]
 final fun org.oremif.kstats.hypothesis/pairedTTest(kotlin/DoubleArray, kotlin/DoubleArray, org.oremif.kstats.hypothesis/Alternative = ..., kotlin/Double = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/pairedTTest|pairedTTest(kotlin.DoubleArray;kotlin.DoubleArray;org.oremif.kstats.hypothesis.Alternative;kotlin.Double){}[0]
 final fun org.oremif.kstats.hypothesis/proportionZTest(kotlin/Int, kotlin/Int, kotlin/Double = ..., org.oremif.kstats.hypothesis/Alternative = ..., kotlin/Double = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/proportionZTest|proportionZTest(kotlin.Int;kotlin.Int;kotlin.Double;org.oremif.kstats.hypothesis.Alternative;kotlin.Double){}[0]
 final fun org.oremif.kstats.hypothesis/proportionZTest(kotlin/Int, kotlin/Int, kotlin/Int, kotlin/Int, org.oremif.kstats.hypothesis/Alternative = ..., kotlin/Double = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/proportionZTest|proportionZTest(kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int;org.oremif.kstats.hypothesis.Alternative;kotlin.Double){}[0]
+final fun org.oremif.kstats.hypothesis/relativeRisk(kotlin/Array<kotlin/IntArray>, kotlin/Double = ...): org.oremif.kstats.hypothesis/RiskEstimate // org.oremif.kstats.hypothesis/relativeRisk|relativeRisk(kotlin.Array<kotlin.IntArray>;kotlin.Double){}[0]
 final fun org.oremif.kstats.hypothesis/shapiroWilkTest(kotlin/DoubleArray): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/shapiroWilkTest|shapiroWilkTest(kotlin.DoubleArray){}[0]
 final fun org.oremif.kstats.hypothesis/tTest(kotlin/DoubleArray, kotlin/Double = ..., org.oremif.kstats.hypothesis/Alternative = ..., kotlin/Double = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/tTest|tTest(kotlin.DoubleArray;kotlin.Double;org.oremif.kstats.hypothesis.Alternative;kotlin.Double){}[0]
 final fun org.oremif.kstats.hypothesis/tTest(kotlin/DoubleArray, kotlin/DoubleArray, org.oremif.kstats.hypothesis/Alternative = ..., kotlin/Boolean = ..., kotlin/Double = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/tTest|tTest(kotlin.DoubleArray;kotlin.DoubleArray;org.oremif.kstats.hypothesis.Alternative;kotlin.Boolean;kotlin.Double){}[0]
