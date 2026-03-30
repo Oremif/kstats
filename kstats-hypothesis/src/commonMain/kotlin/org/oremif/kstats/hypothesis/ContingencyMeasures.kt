@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.distributions.NormalDistribution
 import kotlin.math.exp
@@ -25,13 +26,13 @@ private val standardNormal = NormalDistribution(0.0, 1.0)
  *
  * @property estimate the point estimate of the association measure. May be `0.0`,
  * [Double.POSITIVE_INFINITY], or [Double.NaN] when the contingency table contains zero cells.
- * @property ci the confidence interval as a (lower, upper) pair. Both bounds are [Double.NaN]
+ * @property ci the confidence interval. Both bounds are [Double.NaN]
  * when the interval cannot be computed (e.g. when a cell is zero or the confidence level is NaN).
  * @property confidenceLevel the confidence level at which [ci] was computed.
  */
 public data class RiskEstimate(
     val estimate: Double,
-    val ci: Pair<Double, Double>,
+    val ci: ConfidenceInterval,
     val confidenceLevel: Double,
 )
 
@@ -91,14 +92,14 @@ public fun oddsRatio(
     // Requires all cells > 0 for log(OR) and SE to be finite
     val alpha = 1.0 - confidenceLevel
     val ci = if (alpha.isNaN()) {
-        Pair(Double.NaN, Double.NaN)
+        ConfidenceInterval(Double.NaN, Double.NaN)
     } else if (a > 0.0 && b > 0.0 && c > 0.0 && d > 0.0) {
         val logOr = ln(or)
         val se = sqrt(1.0 / a + 1.0 / b + 1.0 / c + 1.0 / d)
         val z = standardNormal.quantile(1.0 - alpha / 2.0)
-        Pair(exp(logOr - z * se), exp(logOr + z * se))
+        ConfidenceInterval(exp(logOr - z * se), exp(logOr + z * se))
     } else {
-        Pair(Double.NaN, Double.NaN)
+        ConfidenceInterval(Double.NaN, Double.NaN)
     }
 
     return RiskEstimate(estimate = or, ci = ci, confidenceLevel = confidenceLevel)
@@ -162,14 +163,14 @@ public fun relativeRisk(
     // Requires a > 0 and c > 0 for log(RR) and SE to be finite
     val alpha = 1.0 - confidenceLevel
     val ci = if (alpha.isNaN()) {
-        Pair(Double.NaN, Double.NaN)
+        ConfidenceInterval(Double.NaN, Double.NaN)
     } else if (a > 0.0 && c > 0.0 && row1 > 0.0 && row2 > 0.0) {
         val logRr = ln(rr)
         val se = sqrt(b / (a * row1) + d / (c * row2))
         val z = standardNormal.quantile(1.0 - alpha / 2.0)
-        Pair(exp(logRr - z * se), exp(logRr + z * se))
+        ConfidenceInterval(exp(logRr - z * se), exp(logRr + z * se))
     } else {
-        Pair(Double.NaN, Double.NaN)
+        ConfidenceInterval(Double.NaN, Double.NaN)
     }
 
     return RiskEstimate(estimate = rr, ci = ci, confidenceLevel = confidenceLevel)

@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.distributions.BetaDistribution
 import org.oremif.kstats.distributions.BinomialDistribution
@@ -64,7 +65,7 @@ public fun binomialTest(
             statistic = statistic,
             pValue = 1.0,
             alternative = alternative,
-            confidenceInterval = Pair(0.0, 1.0),
+            confidenceInterval = ConfidenceInterval(0.0, 1.0),
             additionalInfo = mapOf(
                 "successes" to k.toDouble(),
                 "trials" to n.toDouble(),
@@ -102,7 +103,7 @@ public fun binomialTest(
         statistic = statistic,
         pValue = pValue.coerceIn(0.0, 1.0),
         alternative = alternative,
-        confidenceInterval = Pair(lower, upper),
+        confidenceInterval = ConfidenceInterval(lower, upper),
         additionalInfo = mapOf(
             "successes" to k.toDouble(),
             "trials" to n.toDouble(),

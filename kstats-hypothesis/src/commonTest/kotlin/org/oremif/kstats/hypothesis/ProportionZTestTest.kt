@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.*
@@ -15,13 +16,13 @@ class ProportionZTestTest {
     private fun assertCI(
         expectedLow: Double,
         expectedHigh: Double,
-        ci: Pair<Double, Double>?,
+        ci: ConfidenceInterval?,
         tol: Double = 1e-10,
         message: String = ""
     ) {
         requireNotNull(ci) { "CI should not be null $message" }
-        assertEquals(expectedLow, ci.first, tol, "CI lower $message")
-        assertEquals(expectedHigh, ci.second, tol, "CI upper $message")
+        assertEquals(expectedLow, ci.lower, tol, "CI lower $message")
+        assertEquals(expectedHigh, ci.upper, tol, "CI upper $message")
     }
 
     // =========================================================================
@@ -284,8 +285,8 @@ class ProportionZTestTest {
         // When pHat=0, Wald SE=0, so CI should be (0, 0) for two-sided
         val result = proportionZTest(successes = 0, trials = 100, p0 = 0.5)
         val ci = result.confidenceInterval!!
-        assertEquals(0.0, ci.first, tol)
-        assertEquals(0.0, ci.second, tol)
+        assertEquals(0.0, ci.lower, tol)
+        assertEquals(0.0, ci.upper, tol)
     }
 
     @Test
@@ -293,8 +294,8 @@ class ProportionZTestTest {
         // When pHat=1.0, Wald SE=0, so CI should be (1, 1) for two-sided
         val result = proportionZTest(successes = 100, trials = 100, p0 = 0.5)
         val ci = result.confidenceInterval!!
-        assertEquals(1.0, ci.first, tol)
-        assertEquals(1.0, ci.second, tol)
+        assertEquals(1.0, ci.lower, tol)
+        assertEquals(1.0, ci.upper, tol)
     }
 
     // =========================================================================
@@ -315,8 +316,8 @@ class ProportionZTestTest {
         val result = proportionZTest(successes = 50, trials = 100, p0 = 0.5, confidenceLevel = Double.NaN)
         assertTrue(result.statistic.isFinite(), "statistic should be finite (NaN only affects CI)")
         val ci = result.confidenceInterval!!
-        assertTrue(ci.first.isNaN(), "CI lower should be NaN when confidenceLevel is NaN")
-        assertTrue(ci.second.isNaN(), "CI upper should be NaN when confidenceLevel is NaN")
+        assertTrue(ci.lower.isNaN(), "CI lower should be NaN when confidenceLevel is NaN")
+        assertTrue(ci.upper.isNaN(), "CI upper should be NaN when confidenceLevel is NaN")
     }
 
     @Test
@@ -416,10 +417,10 @@ class ProportionZTestTest {
         val ci99 = proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.99).confidenceInterval!!
 
         // Higher confidence = wider CI
-        assertTrue(ci90.first > ci95.first, "90% lower > 95% lower")
-        assertTrue(ci90.second < ci95.second, "90% upper < 95% upper")
-        assertTrue(ci95.first > ci99.first, "95% lower > 99% lower")
-        assertTrue(ci95.second < ci99.second, "95% upper < 99% upper")
+        assertTrue(ci90.lower > ci95.lower, "90% lower > 95% lower")
+        assertTrue(ci90.upper < ci95.upper, "90% upper < 95% upper")
+        assertTrue(ci95.lower > ci99.lower, "95% lower > 99% lower")
+        assertTrue(ci95.upper < ci99.upper, "95% upper < 99% upper")
     }
 
     @Test
@@ -606,8 +607,8 @@ class ProportionZTestTest {
             alternative = Alternative.LESS
         )
         val ci = result.confidenceInterval!!
-        assertEquals(Double.NEGATIVE_INFINITY, ci.first, "LESS CI lower should be -Inf")
-        assertTrue(ci.second.isFinite(), "LESS CI upper should be finite")
+        assertEquals(Double.NEGATIVE_INFINITY, ci.lower, "LESS CI lower should be -Inf")
+        assertTrue(ci.upper.isFinite(), "LESS CI upper should be finite")
     }
 
     @Test
@@ -618,8 +619,8 @@ class ProportionZTestTest {
             alternative = Alternative.GREATER
         )
         val ci = result.confidenceInterval!!
-        assertTrue(ci.first.isFinite(), "GREATER CI lower should be finite")
-        assertEquals(Double.POSITIVE_INFINITY, ci.second, "GREATER CI upper should be +Inf")
+        assertTrue(ci.lower.isFinite(), "GREATER CI lower should be finite")
+        assertEquals(Double.POSITIVE_INFINITY, ci.upper, "GREATER CI upper should be +Inf")
     }
 
     // =========================================================================
@@ -756,8 +757,8 @@ class ProportionZTestTest {
         )
         assertTrue(result.statistic.isFinite(), "statistic should be finite (NaN only affects CI)")
         val ci = result.confidenceInterval!!
-        assertTrue(ci.first.isNaN(), "CI lower should be NaN when confidenceLevel is NaN")
-        assertTrue(ci.second.isNaN(), "CI upper should be NaN when confidenceLevel is NaN")
+        assertTrue(ci.lower.isNaN(), "CI lower should be NaN when confidenceLevel is NaN")
+        assertTrue(ci.upper.isNaN(), "CI upper should be NaN when confidenceLevel is NaN")
     }
 
     // =========================================================================
@@ -861,8 +862,8 @@ class ProportionZTestTest {
             val diff = result.additionalInfo["proportionDifference"]!!
             val ci = result.confidenceInterval!!
             assertTrue(
-                diff >= ci.first && diff <= ci.second,
-                "CI should contain observed difference $diff, got [${ci.first}, ${ci.second}]"
+                diff >= ci.lower && diff <= ci.upper,
+                "CI should contain observed difference $diff, got [${ci.lower}, ${ci.upper}]"
             )
         }
     }

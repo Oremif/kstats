@@ -1,5 +1,7 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.ConfidenceInterval
+
 /**
  * The result of a statistical hypothesis test.
  *
@@ -25,8 +27,8 @@ package org.oremif.kstats.hypothesis
  * if not applicable. Defaults to [Double.NaN].
  * @property alternative the direction of the alternative hypothesis that was tested.
  * Defaults to [Alternative.TWO_SIDED].
- * @property confidenceInterval the confidence interval for the estimated parameter as a
- * (lower, upper) pair, or `null` if not computed. Defaults to `null`.
+ * @property confidenceInterval the confidence interval for the estimated parameter,
+ * or `null` if not computed. Defaults to `null`.
  * @property additionalInfo a map of supplementary statistics (e.g. "mean", "standardError",
  * "oddsRatio") that vary by test type. Defaults to an empty map.
  */
@@ -36,7 +38,7 @@ public data class TestResult(
     val pValue: Double,
     val degreesOfFreedom: Double = Double.NaN,
     val alternative: Alternative = Alternative.TWO_SIDED,
-    val confidenceInterval: Pair<Double, Double>? = null,
+    val confidenceInterval: ConfidenceInterval? = null,
     val additionalInfo: Map<String, Double> = emptyMap()
 ) {
     /**

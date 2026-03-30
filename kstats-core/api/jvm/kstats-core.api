@@ -1,3 +1,16 @@
+public final class org/oremif/kstats/core/ConfidenceInterval {
+	public fun <init> (DD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun copy (DD)Lorg/oremif/kstats/core/ConfidenceInterval;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/core/ConfidenceInterval;DDILjava/lang/Object;)Lorg/oremif/kstats/core/ConfidenceInterval;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLower ()D
+	public final fun getUpper ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/oremif/kstats/core/MathUtilsKt {
 	public static final field EULER_MASCHERONI D
 	public static final fun beta (DD)D

@@ -136,8 +136,8 @@ class DocsSamples {
         assertEquals(0.0474, result.pValue, 1e-4)
         assertEquals(4.0, result.degreesOfFreedom, 1e-4)
         assertEquals(true, result.isSignificant())
-        assertEquals(5.02, result.confidenceInterval!!.first, 0.01)
-        assertEquals(6.98, result.confidenceInterval!!.second, 0.01)
+        assertEquals(5.02, result.confidenceInterval!!.lower, 0.01)
+        assertEquals(6.98, result.confidenceInterval!!.upper, 0.01)
     }
 
     @Test

@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis.samples
 
+import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.descriptive.DescriptiveStatistics
 import org.oremif.kstats.descriptive.describe
 import org.oremif.kstats.hypothesis.leveneTest
@@ -22,7 +23,7 @@ class PipelineSamples {
         val testName: String,
         val pValue: Double,
         val isSignificant: Boolean,
-        val confidenceInterval: Pair<Double, Double>?
+        val confidenceInterval: ConfidenceInterval?
     )
 
     private data class AnalysisReport(
@@ -106,7 +107,7 @@ class PipelineSamples {
             val testName: String,
             val pValue: Double,
             val isSignificant: Boolean,
-            val confidenceInterval: Pair<Double, Double>?
+            val confidenceInterval: ConfidenceInterval?
         )
 
         data class AnalysisReport(

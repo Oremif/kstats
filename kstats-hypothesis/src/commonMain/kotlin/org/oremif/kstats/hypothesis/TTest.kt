@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.mean
@@ -63,7 +64,7 @@ public fun tTest(
             },
             degreesOfFreedom = (n - 1).toDouble(),
             alternative = alternative,
-            confidenceInterval = Pair(mean, mean),
+            confidenceInterval = ConfidenceInterval(mean, mean),
             additionalInfo = mapOf("mean" to mean, "standardError" to 0.0)
         )
     }
@@ -82,17 +83,17 @@ public fun tTest(
     val ci = when (alternative) {
         Alternative.TWO_SIDED -> {
             val tCrit = dist.quantile(1.0 - alpha / 2.0)
-            Pair(mean - tCrit * se, mean + tCrit * se)
+            ConfidenceInterval(mean - tCrit * se, mean + tCrit * se)
         }
 
         Alternative.LESS -> {
             val tCrit = dist.quantile(1.0 - alpha)
-            Pair(Double.NEGATIVE_INFINITY, mean + tCrit * se)
+            ConfidenceInterval(Double.NEGATIVE_INFINITY, mean + tCrit * se)
         }
 
         Alternative.GREATER -> {
             val tCrit = dist.quantile(1.0 - alpha)
-            Pair(mean - tCrit * se, Double.POSITIVE_INFINITY)
+            ConfidenceInterval(mean - tCrit * se, Double.POSITIVE_INFINITY)
         }
     }
 
@@ -187,7 +188,7 @@ public fun tTest(
             },
             degreesOfFreedom = df,
             alternative = alternative,
-            confidenceInterval = Pair(diff, diff),
+            confidenceInterval = ConfidenceInterval(diff, diff),
             additionalInfo = mapOf("mean1" to mean1, "mean2" to mean2, "meanDifference" to diff)
         )
     }
@@ -204,17 +205,17 @@ public fun tTest(
     val ci = when (alternative) {
         Alternative.TWO_SIDED -> {
             val tCrit = dist.quantile(1.0 - alpha / 2.0)
-            Pair(diff - tCrit * se, diff + tCrit * se)
+            ConfidenceInterval(diff - tCrit * se, diff + tCrit * se)
         }
 
         Alternative.LESS -> {
             val tCrit = dist.quantile(1.0 - alpha)
-            Pair(Double.NEGATIVE_INFINITY, diff + tCrit * se)
+            ConfidenceInterval(Double.NEGATIVE_INFINITY, diff + tCrit * se)
         }
 
         Alternative.GREATER -> {
             val tCrit = dist.quantile(1.0 - alpha)
-            Pair(diff - tCrit * se, Double.POSITIVE_INFINITY)
+            ConfidenceInterval(diff - tCrit * se, Double.POSITIVE_INFINITY)
         }
     }
 
