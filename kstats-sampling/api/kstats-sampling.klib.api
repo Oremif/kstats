@@ -1,0 +1,100 @@
+// Klib ABI Dump
+// Targets: [androidNativeArm32, androidNativeArm64, androidNativeX64, androidNativeX86, iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, mingwX64, tvosArm64, tvosSimulatorArm64, wasmJs, wasmWasi, watchosArm32, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <org.oremif:kstats-sampling>
+final enum class org.oremif.kstats.sampling/TieMethod : kotlin/Enum<org.oremif.kstats.sampling/TieMethod> { // org.oremif.kstats.sampling/TieMethod|null[0]
+    enum entry AVERAGE // org.oremif.kstats.sampling/TieMethod.AVERAGE|null[0]
+    enum entry DENSE // org.oremif.kstats.sampling/TieMethod.DENSE|null[0]
+    enum entry MAX // org.oremif.kstats.sampling/TieMethod.MAX|null[0]
+    enum entry MIN // org.oremif.kstats.sampling/TieMethod.MIN|null[0]
+    enum entry ORDINAL // org.oremif.kstats.sampling/TieMethod.ORDINAL|null[0]
+
+    final val entries // org.oremif.kstats.sampling/TieMethod.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<org.oremif.kstats.sampling/TieMethod> // org.oremif.kstats.sampling/TieMethod.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): org.oremif.kstats.sampling/TieMethod // org.oremif.kstats.sampling/TieMethod.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<org.oremif.kstats.sampling/TieMethod> // org.oremif.kstats.sampling/TieMethod.values|values#static(){}[0]
+}
+
+final class <#A: kotlin/Any?> org.oremif.kstats.sampling/Bin { // org.oremif.kstats.sampling/Bin|null[0]
+    constructor <init>(kotlin.ranges/ClosedRange<kotlin/Double>, kotlin.collections/List<#A>) // org.oremif.kstats.sampling/Bin.<init>|<init>(kotlin.ranges.ClosedRange<kotlin.Double>;kotlin.collections.List<1:0>){}[0]
+
+    final val count // org.oremif.kstats.sampling/Bin.count|{}count[0]
+        final fun <get-count>(): kotlin/Int // org.oremif.kstats.sampling/Bin.count.<get-count>|<get-count>(){}[0]
+    final val items // org.oremif.kstats.sampling/Bin.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/List<#A> // org.oremif.kstats.sampling/Bin.items.<get-items>|<get-items>(){}[0]
+    final val range // org.oremif.kstats.sampling/Bin.range|{}range[0]
+        final fun <get-range>(): kotlin.ranges/ClosedRange<kotlin/Double> // org.oremif.kstats.sampling/Bin.range.<get-range>|<get-range>(){}[0]
+
+    final fun component1(): kotlin.ranges/ClosedRange<kotlin/Double> // org.oremif.kstats.sampling/Bin.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<#A> // org.oremif.kstats.sampling/Bin.component2|component2(){}[0]
+    final fun copy(kotlin.ranges/ClosedRange<kotlin/Double> = ..., kotlin.collections/List<#A> = ...): org.oremif.kstats.sampling/Bin<#A> // org.oremif.kstats.sampling/Bin.copy|copy(kotlin.ranges.ClosedRange<kotlin.Double>;kotlin.collections.List<1:0>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.sampling/Bin.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.sampling/Bin.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.sampling/Bin.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> org.oremif.kstats.sampling/WeightedDice { // org.oremif.kstats.sampling/WeightedDice|null[0]
+    constructor <init>(kotlin.collections/Map<#A, kotlin/Double>, kotlin.random/Random = ...) // org.oremif.kstats.sampling/WeightedDice.<init>|<init>(kotlin.collections.Map<1:0,kotlin.Double>;kotlin.random.Random){}[0]
+
+    final fun roll(): #A // org.oremif.kstats.sampling/WeightedDice.roll|roll(){}[0]
+}
+
+final class org.oremif.kstats.sampling/FrequencyBin { // org.oremif.kstats.sampling/FrequencyBin|null[0]
+    constructor <init>(kotlin.ranges/ClosedRange<kotlin/Double>, kotlin/Int, kotlin/Double, kotlin/Double) // org.oremif.kstats.sampling/FrequencyBin.<init>|<init>(kotlin.ranges.ClosedRange<kotlin.Double>;kotlin.Int;kotlin.Double;kotlin.Double){}[0]
+
+    final val count // org.oremif.kstats.sampling/FrequencyBin.count|{}count[0]
+        final fun <get-count>(): kotlin/Int // org.oremif.kstats.sampling/FrequencyBin.count.<get-count>|<get-count>(){}[0]
+    final val cumulativeFrequency // org.oremif.kstats.sampling/FrequencyBin.cumulativeFrequency|{}cumulativeFrequency[0]
+        final fun <get-cumulativeFrequency>(): kotlin/Double // org.oremif.kstats.sampling/FrequencyBin.cumulativeFrequency.<get-cumulativeFrequency>|<get-cumulativeFrequency>(){}[0]
+    final val range // org.oremif.kstats.sampling/FrequencyBin.range|{}range[0]
+        final fun <get-range>(): kotlin.ranges/ClosedRange<kotlin/Double> // org.oremif.kstats.sampling/FrequencyBin.range.<get-range>|<get-range>(){}[0]
+    final val relativeFrequency // org.oremif.kstats.sampling/FrequencyBin.relativeFrequency|{}relativeFrequency[0]
+        final fun <get-relativeFrequency>(): kotlin/Double // org.oremif.kstats.sampling/FrequencyBin.relativeFrequency.<get-relativeFrequency>|<get-relativeFrequency>(){}[0]
+
+    final fun component1(): kotlin.ranges/ClosedRange<kotlin/Double> // org.oremif.kstats.sampling/FrequencyBin.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // org.oremif.kstats.sampling/FrequencyBin.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // org.oremif.kstats.sampling/FrequencyBin.component3|component3(){}[0]
+    final fun component4(): kotlin/Double // org.oremif.kstats.sampling/FrequencyBin.component4|component4(){}[0]
+    final fun copy(kotlin.ranges/ClosedRange<kotlin/Double> = ..., kotlin/Int = ..., kotlin/Double = ..., kotlin/Double = ...): org.oremif.kstats.sampling/FrequencyBin // org.oremif.kstats.sampling/FrequencyBin.copy|copy(kotlin.ranges.ClosedRange<kotlin.Double>;kotlin.Int;kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.sampling/FrequencyBin.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.sampling/FrequencyBin.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.sampling/FrequencyBin.toString|toString(){}[0]
+}
+
+final class org.oremif.kstats.sampling/WeightedCoin { // org.oremif.kstats.sampling/WeightedCoin|null[0]
+    constructor <init>(kotlin/Double, kotlin.random/Random = ...) // org.oremif.kstats.sampling/WeightedCoin.<init>|<init>(kotlin.Double;kotlin.random.Random){}[0]
+
+    final val probability // org.oremif.kstats.sampling/WeightedCoin.probability|{}probability[0]
+        final fun <get-probability>(): kotlin/Double // org.oremif.kstats.sampling/WeightedCoin.probability.<get-probability>|<get-probability>(){}[0]
+
+    final fun flip(): kotlin/Boolean // org.oremif.kstats.sampling/WeightedCoin.flip|flip(){}[0]
+}
+
+final fun (kotlin.collections/Iterable<kotlin/Double>).org.oremif.kstats.sampling/bin(kotlin/Double): kotlin.collections/List<org.oremif.kstats.sampling/Bin<kotlin/Double>> // org.oremif.kstats.sampling/bin|bin@kotlin.collections.Iterable<kotlin.Double>(kotlin.Double){}[0]
+final fun (kotlin.collections/Iterable<kotlin/Double>).org.oremif.kstats.sampling/bin(kotlin/Int): kotlin.collections/List<org.oremif.kstats.sampling/Bin<kotlin/Double>> // org.oremif.kstats.sampling/bin|bin@kotlin.collections.Iterable<kotlin.Double>(kotlin.Int){}[0]
+final fun (kotlin.collections/Iterable<kotlin/Double>).org.oremif.kstats.sampling/frequencyTable(kotlin/Double): kotlin.collections/List<org.oremif.kstats.sampling/FrequencyBin> // org.oremif.kstats.sampling/frequencyTable|frequencyTable@kotlin.collections.Iterable<kotlin.Double>(kotlin.Double){}[0]
+final fun (kotlin.collections/Iterable<kotlin/Double>).org.oremif.kstats.sampling/frequencyTable(kotlin/Int): kotlin.collections/List<org.oremif.kstats.sampling/FrequencyBin> // org.oremif.kstats.sampling/frequencyTable|frequencyTable@kotlin.collections.Iterable<kotlin.Double>(kotlin.Int){}[0]
+final fun (kotlin.collections/Iterable<kotlin/Double>).org.oremif.kstats.sampling/minMaxNormalize(): kotlin.collections/List<kotlin/Double> // org.oremif.kstats.sampling/minMaxNormalize|minMaxNormalize@kotlin.collections.Iterable<kotlin.Double>(){}[0]
+final fun (kotlin.collections/Iterable<kotlin/Double>).org.oremif.kstats.sampling/minMaxNormalize(kotlin/Double, kotlin/Double): kotlin.collections/List<kotlin/Double> // org.oremif.kstats.sampling/minMaxNormalize|minMaxNormalize@kotlin.collections.Iterable<kotlin.Double>(kotlin.Double;kotlin.Double){}[0]
+final fun (kotlin.collections/Iterable<kotlin/Double>).org.oremif.kstats.sampling/percentileRank(): kotlin.collections/List<kotlin/Double> // org.oremif.kstats.sampling/percentileRank|percentileRank@kotlin.collections.Iterable<kotlin.Double>(){}[0]
+final fun (kotlin.collections/Iterable<kotlin/Double>).org.oremif.kstats.sampling/rank(org.oremif.kstats.sampling/TieMethod = ...): kotlin.collections/List<kotlin/Double> // org.oremif.kstats.sampling/rank|rank@kotlin.collections.Iterable<kotlin.Double>(org.oremif.kstats.sampling.TieMethod){}[0]
+final fun (kotlin.collections/Iterable<kotlin/Double>).org.oremif.kstats.sampling/zScore(): kotlin.collections/List<kotlin/Double> // org.oremif.kstats.sampling/zScore|zScore@kotlin.collections.Iterable<kotlin.Double>(){}[0]
+final fun (kotlin/DoubleArray).org.oremif.kstats.sampling/bin(kotlin/Double): kotlin.collections/List<org.oremif.kstats.sampling/Bin<kotlin/Double>> // org.oremif.kstats.sampling/bin|bin@kotlin.DoubleArray(kotlin.Double){}[0]
+final fun (kotlin/DoubleArray).org.oremif.kstats.sampling/bin(kotlin/Int): kotlin.collections/List<org.oremif.kstats.sampling/Bin<kotlin/Double>> // org.oremif.kstats.sampling/bin|bin@kotlin.DoubleArray(kotlin.Int){}[0]
+final fun (kotlin/DoubleArray).org.oremif.kstats.sampling/frequencyTable(kotlin/Double): kotlin.collections/List<org.oremif.kstats.sampling/FrequencyBin> // org.oremif.kstats.sampling/frequencyTable|frequencyTable@kotlin.DoubleArray(kotlin.Double){}[0]
+final fun (kotlin/DoubleArray).org.oremif.kstats.sampling/frequencyTable(kotlin/Int): kotlin.collections/List<org.oremif.kstats.sampling/FrequencyBin> // org.oremif.kstats.sampling/frequencyTable|frequencyTable@kotlin.DoubleArray(kotlin.Int){}[0]
+final fun (kotlin/DoubleArray).org.oremif.kstats.sampling/minMaxNormalize(): kotlin/DoubleArray // org.oremif.kstats.sampling/minMaxNormalize|minMaxNormalize@kotlin.DoubleArray(){}[0]
+final fun (kotlin/DoubleArray).org.oremif.kstats.sampling/minMaxNormalize(kotlin/Double, kotlin/Double): kotlin/DoubleArray // org.oremif.kstats.sampling/minMaxNormalize|minMaxNormalize@kotlin.DoubleArray(kotlin.Double;kotlin.Double){}[0]
+final fun (kotlin/DoubleArray).org.oremif.kstats.sampling/percentileRank(): kotlin/DoubleArray // org.oremif.kstats.sampling/percentileRank|percentileRank@kotlin.DoubleArray(){}[0]
+final fun (kotlin/DoubleArray).org.oremif.kstats.sampling/rank(org.oremif.kstats.sampling/TieMethod = ...): kotlin/DoubleArray // org.oremif.kstats.sampling/rank|rank@kotlin.DoubleArray(org.oremif.kstats.sampling.TieMethod){}[0]
+final fun (kotlin/DoubleArray).org.oremif.kstats.sampling/zScore(): kotlin/DoubleArray // org.oremif.kstats.sampling/zScore|zScore@kotlin.DoubleArray(){}[0]
+final fun <#A: kotlin/Any?> (kotlin.collections/Iterable<#A>).org.oremif.kstats.sampling/binByDouble(kotlin/Function1<#A, kotlin/Double>, kotlin/Double, kotlin/Double? = ...): kotlin.collections/List<org.oremif.kstats.sampling/Bin<#A>> // org.oremif.kstats.sampling/binByDouble|binByDouble@kotlin.collections.Iterable<0:0>(kotlin.Function1<0:0,kotlin.Double>;kotlin.Double;kotlin.Double?){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlin.collections/Iterable<#A>).org.oremif.kstats.sampling/binByDouble(kotlin/Function1<#A, kotlin/Double>, kotlin/Int): kotlin.collections/List<org.oremif.kstats.sampling/Bin<#A>> // org.oremif.kstats.sampling/binByDouble|binByDouble@kotlin.collections.Iterable<0:0>(kotlin.Function1<0:0,kotlin.Double>;kotlin.Int){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlin.collections/Iterable<#A>).org.oremif.kstats.sampling/bootstrapSample(kotlin/Int, kotlin.random/Random = ...): kotlin.collections/List<#A> // org.oremif.kstats.sampling/bootstrapSample|bootstrapSample@kotlin.collections.Iterable<0:0>(kotlin.Int;kotlin.random.Random){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlin.collections/Iterable<#A>).org.oremif.kstats.sampling/randomSample(kotlin/Int, kotlin.random/Random = ...): kotlin.collections/List<#A> // org.oremif.kstats.sampling/randomSample|randomSample@kotlin.collections.Iterable<0:0>(kotlin.Int;kotlin.random.Random){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlin.collections/List<#A>).org.oremif.kstats.sampling/bootstrapSample(kotlin/Int, kotlin.random/Random = ...): kotlin.collections/List<#A> // org.oremif.kstats.sampling/bootstrapSample|bootstrapSample@kotlin.collections.List<0:0>(kotlin.Int;kotlin.random.Random){0§<kotlin.Any?>}[0]
