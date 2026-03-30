@@ -1,0 +1,62 @@
+// Klib ABI Dump
+// Targets: [androidNativeArm32, androidNativeArm64, androidNativeX64, androidNativeX86, iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, mingwX64, tvosArm64, tvosSimulatorArm64, wasmJs, wasmWasi, watchosArm32, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <org.oremif:kstats-correlation>
+final class org.oremif.kstats.correlation/CorrelationResult { // org.oremif.kstats.correlation/CorrelationResult|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/Int) // org.oremif.kstats.correlation/CorrelationResult.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Int){}[0]
+
+    final val coefficient // org.oremif.kstats.correlation/CorrelationResult.coefficient|{}coefficient[0]
+        final fun <get-coefficient>(): kotlin/Double // org.oremif.kstats.correlation/CorrelationResult.coefficient.<get-coefficient>|<get-coefficient>(){}[0]
+    final val n // org.oremif.kstats.correlation/CorrelationResult.n|{}n[0]
+        final fun <get-n>(): kotlin/Int // org.oremif.kstats.correlation/CorrelationResult.n.<get-n>|<get-n>(){}[0]
+    final val pValue // org.oremif.kstats.correlation/CorrelationResult.pValue|{}pValue[0]
+        final fun <get-pValue>(): kotlin/Double // org.oremif.kstats.correlation/CorrelationResult.pValue.<get-pValue>|<get-pValue>(){}[0]
+
+    final fun component1(): kotlin/Double // org.oremif.kstats.correlation/CorrelationResult.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // org.oremif.kstats.correlation/CorrelationResult.component2|component2(){}[0]
+    final fun component3(): kotlin/Int // org.oremif.kstats.correlation/CorrelationResult.component3|component3(){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.correlation/CorrelationResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.correlation/CorrelationResult.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.correlation/CorrelationResult.toString|toString(){}[0]
+}
+
+final class org.oremif.kstats.correlation/SimpleLinearRegressionResult { // org.oremif.kstats.correlation/SimpleLinearRegressionResult|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/DoubleArray, kotlin/Int) // org.oremif.kstats.correlation/SimpleLinearRegressionResult.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.DoubleArray;kotlin.Int){}[0]
+
+    final val intercept // org.oremif.kstats.correlation/SimpleLinearRegressionResult.intercept|{}intercept[0]
+        final fun <get-intercept>(): kotlin/Double // org.oremif.kstats.correlation/SimpleLinearRegressionResult.intercept.<get-intercept>|<get-intercept>(){}[0]
+    final val n // org.oremif.kstats.correlation/SimpleLinearRegressionResult.n|{}n[0]
+        final fun <get-n>(): kotlin/Int // org.oremif.kstats.correlation/SimpleLinearRegressionResult.n.<get-n>|<get-n>(){}[0]
+    final val rSquared // org.oremif.kstats.correlation/SimpleLinearRegressionResult.rSquared|{}rSquared[0]
+        final fun <get-rSquared>(): kotlin/Double // org.oremif.kstats.correlation/SimpleLinearRegressionResult.rSquared.<get-rSquared>|<get-rSquared>(){}[0]
+    final val residuals // org.oremif.kstats.correlation/SimpleLinearRegressionResult.residuals|{}residuals[0]
+        final fun <get-residuals>(): kotlin/DoubleArray // org.oremif.kstats.correlation/SimpleLinearRegressionResult.residuals.<get-residuals>|<get-residuals>(){}[0]
+    final val slope // org.oremif.kstats.correlation/SimpleLinearRegressionResult.slope|{}slope[0]
+        final fun <get-slope>(): kotlin/Double // org.oremif.kstats.correlation/SimpleLinearRegressionResult.slope.<get-slope>|<get-slope>(){}[0]
+    final val standardErrorIntercept // org.oremif.kstats.correlation/SimpleLinearRegressionResult.standardErrorIntercept|{}standardErrorIntercept[0]
+        final fun <get-standardErrorIntercept>(): kotlin/Double // org.oremif.kstats.correlation/SimpleLinearRegressionResult.standardErrorIntercept.<get-standardErrorIntercept>|<get-standardErrorIntercept>(){}[0]
+    final val standardErrorSlope // org.oremif.kstats.correlation/SimpleLinearRegressionResult.standardErrorSlope|{}standardErrorSlope[0]
+        final fun <get-standardErrorSlope>(): kotlin/Double // org.oremif.kstats.correlation/SimpleLinearRegressionResult.standardErrorSlope.<get-standardErrorSlope>|<get-standardErrorSlope>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.correlation/SimpleLinearRegressionResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.correlation/SimpleLinearRegressionResult.hashCode|hashCode(){}[0]
+    final fun predict(kotlin/Double): kotlin/Double // org.oremif.kstats.correlation/SimpleLinearRegressionResult.predict|predict(kotlin.Double){}[0]
+    final fun predict(kotlin/DoubleArray): kotlin/DoubleArray // org.oremif.kstats.correlation/SimpleLinearRegressionResult.predict|predict(kotlin.DoubleArray){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.correlation/SimpleLinearRegressionResult.toString|toString(){}[0]
+}
+
+final fun org.oremif.kstats.correlation/correlationMatrix(kotlin/Array<out kotlin/DoubleArray>...): kotlin/Array<kotlin/DoubleArray> // org.oremif.kstats.correlation/correlationMatrix|correlationMatrix(kotlin.Array<out|kotlin.DoubleArray>...){}[0]
+final fun org.oremif.kstats.correlation/covariance(kotlin/DoubleArray, kotlin/DoubleArray, org.oremif.kstats.descriptive/PopulationKind = ...): kotlin/Double // org.oremif.kstats.correlation/covariance|covariance(kotlin.DoubleArray;kotlin.DoubleArray;org.oremif.kstats.descriptive.PopulationKind){}[0]
+final fun org.oremif.kstats.correlation/covarianceMatrix(kotlin/Array<out kotlin/DoubleArray>..., org.oremif.kstats.descriptive/PopulationKind = ...): kotlin/Array<kotlin/DoubleArray> // org.oremif.kstats.correlation/covarianceMatrix|covarianceMatrix(kotlin.Array<out|kotlin.DoubleArray>...;org.oremif.kstats.descriptive.PopulationKind){}[0]
+final fun org.oremif.kstats.correlation/kendallTau(kotlin/DoubleArray, kotlin/DoubleArray): org.oremif.kstats.correlation/CorrelationResult // org.oremif.kstats.correlation/kendallTau|kendallTau(kotlin.DoubleArray;kotlin.DoubleArray){}[0]
+final fun org.oremif.kstats.correlation/partialCorrelation(kotlin/DoubleArray, kotlin/DoubleArray, kotlin/Array<out kotlin/DoubleArray>...): org.oremif.kstats.correlation/CorrelationResult // org.oremif.kstats.correlation/partialCorrelation|partialCorrelation(kotlin.DoubleArray;kotlin.DoubleArray;kotlin.Array<out|kotlin.DoubleArray>...){}[0]
+final fun org.oremif.kstats.correlation/pearsonCorrelation(kotlin/DoubleArray, kotlin/DoubleArray): org.oremif.kstats.correlation/CorrelationResult // org.oremif.kstats.correlation/pearsonCorrelation|pearsonCorrelation(kotlin.DoubleArray;kotlin.DoubleArray){}[0]
+final fun org.oremif.kstats.correlation/pointBiserialCorrelation(kotlin/BooleanArray, kotlin/DoubleArray): org.oremif.kstats.correlation/CorrelationResult // org.oremif.kstats.correlation/pointBiserialCorrelation|pointBiserialCorrelation(kotlin.BooleanArray;kotlin.DoubleArray){}[0]
+final fun org.oremif.kstats.correlation/pointBiserialCorrelation(kotlin/DoubleArray, kotlin/DoubleArray): org.oremif.kstats.correlation/CorrelationResult // org.oremif.kstats.correlation/pointBiserialCorrelation|pointBiserialCorrelation(kotlin.DoubleArray;kotlin.DoubleArray){}[0]
+final fun org.oremif.kstats.correlation/pointBiserialCorrelation(kotlin/IntArray, kotlin/DoubleArray): org.oremif.kstats.correlation/CorrelationResult // org.oremif.kstats.correlation/pointBiserialCorrelation|pointBiserialCorrelation(kotlin.IntArray;kotlin.DoubleArray){}[0]
+final fun org.oremif.kstats.correlation/simpleLinearRegression(kotlin/DoubleArray, kotlin/DoubleArray): org.oremif.kstats.correlation/SimpleLinearRegressionResult // org.oremif.kstats.correlation/simpleLinearRegression|simpleLinearRegression(kotlin.DoubleArray;kotlin.DoubleArray){}[0]
+final fun org.oremif.kstats.correlation/spearmanCorrelation(kotlin/DoubleArray, kotlin/DoubleArray): org.oremif.kstats.correlation/CorrelationResult // org.oremif.kstats.correlation/spearmanCorrelation|spearmanCorrelation(kotlin.DoubleArray;kotlin.DoubleArray){}[0]
