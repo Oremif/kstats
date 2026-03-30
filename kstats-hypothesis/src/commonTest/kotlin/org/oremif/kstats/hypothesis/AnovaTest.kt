@@ -7,10 +7,7 @@ class AnovaTest {
 
     @Test
     fun testOneWayAnovaSignificant() {
-        val g1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
-        val g2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
-        val g3 = doubleArrayOf(11.0, 12.0, 13.0, 14.0, 15.0)
-        val result = oneWayAnova(g1, g2, g3)
+        val result = oneWayAnova(TestData.SEQUENTIAL_1_5, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
         assertTrue(result.pValue < 0.001, "Very different groups should have low p-value")
         assertEquals(2, result.dfBetween)
         assertEquals(12, result.dfWithin)
@@ -27,10 +24,7 @@ class AnovaTest {
     @Test
     fun testReference() {
         // ssBetween=250, ssWithin=30, msBetween=125, msWithin=2.5, F=50.0
-        val g1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
-        val g2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
-        val g3 = doubleArrayOf(11.0, 12.0, 13.0, 14.0, 15.0)
-        val result = oneWayAnova(g1, g2, g3)
+        val result = oneWayAnova(TestData.SEQUENTIAL_1_5, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
         assertEquals(50.0, result.fStatistic, 1e-10)
         assertTrue(result.pValue < 1e-5, "p-value should be very small, got ${result.pValue}")
     }
@@ -47,9 +41,7 @@ class AnovaTest {
 
     @Test
     fun testDecomposition() {
-        val g1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
-        val g2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
-        val result = oneWayAnova(g1, g2)
+        val result = oneWayAnova(TestData.SEQUENTIAL_1_5, TestData.SEQUENTIAL_6_10)
         // msBetween / msWithin should equal fStatistic
         assertEquals(result.fStatistic, result.msBetween / result.msWithin, 1e-10)
         // ssBetween + ssWithin should equal total SS

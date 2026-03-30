@@ -1,6 +1,8 @@
 package org.oremif.kstats.hypothesis.samples
 
-import org.oremif.kstats.descriptive.*
+import org.oremif.kstats.descriptive.describe
+import org.oremif.kstats.descriptive.mean
+import org.oremif.kstats.descriptive.standardDeviation
 import org.oremif.kstats.distributions.NormalDistribution
 import org.oremif.kstats.hypothesis.*
 import kotlin.test.Test
@@ -174,7 +176,7 @@ class DocsSamples {
     fun hypPaired() {
         // SampleStart
         val before = doubleArrayOf(200.0, 190.0, 210.0, 180.0, 195.0)
-        val after  = doubleArrayOf(190.0, 180.0, 195.0, 170.0, 185.0)
+        val after = doubleArrayOf(190.0, 180.0, 195.0, 170.0, 185.0)
 
         val result = pairedTTest(before, after)
         result.statistic         // positive t (before > after)
@@ -202,7 +204,7 @@ class DocsSamples {
     fun hypWilcoxon() {
         // SampleStart
         val before = doubleArrayOf(10.0, 12.0, 14.0, 16.0, 18.0)
-        val after  = doubleArrayOf(8.0, 9.0, 11.0, 12.0, 13.0)
+        val after = doubleArrayOf(8.0, 9.0, 11.0, 12.0, 13.0)
 
         val result = wilcoxonSignedRankTest(before, after)
         result.statistic         // W+ = 15.0

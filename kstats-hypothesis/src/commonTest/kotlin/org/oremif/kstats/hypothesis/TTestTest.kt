@@ -2,13 +2,12 @@ package org.oremif.kstats.hypothesis
 
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.abs
 import kotlin.test.*
 
 class TTestTest {
 
     private fun assertP(expected: Double, actual: Double, tol: Double = 1e-6, message: String = "") {
-        assertTrue(abs(expected - actual) < tol, "p-value $message: expected=$expected, actual=$actual")
+        TestAssertions.assertPValue(expected, actual, tol, message)
     }
 
     // ===== One-sample t-test: basic correctness =====

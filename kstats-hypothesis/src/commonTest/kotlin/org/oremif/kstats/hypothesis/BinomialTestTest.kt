@@ -6,19 +6,14 @@ import kotlin.test.*
 class BinomialTestTest {
 
     private fun assertP(expected: Double, actual: Double, tol: Double = 1e-10, message: String = "") {
-        assertEquals(expected, actual, tol, "p-value $message")
+        TestAssertions.assertPValue(expected, actual, tol, message)
     }
 
     private fun assertCI(
-        expectedLow: Double,
-        expectedHigh: Double,
-        ci: Pair<Double, Double>?,
-        tol: Double = 1e-8,
-        message: String = ""
+        expectedLow: Double, expectedHigh: Double,
+        ci: Pair<Double, Double>?, tol: Double = 1e-8, message: String = ""
     ) {
-        requireNotNull(ci) { "CI should not be null $message" }
-        assertEquals(expectedLow, ci.first, tol, "CI lower $message")
-        assertEquals(expectedHigh, ci.second, tol, "CI upper $message")
+        TestAssertions.assertCI(expectedLow, expectedHigh, ci, tol, message)
     }
 
     // ===== Basic correctness: fair coin =====
