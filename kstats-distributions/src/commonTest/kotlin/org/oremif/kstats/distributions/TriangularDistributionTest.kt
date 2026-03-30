@@ -1,15 +1,17 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.abs
 import kotlin.math.ln
-import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class TriangularDistributionTest {
+class TriangularDistributionTest : ContinuousDistributionPropertyTests() {
+
+    override fun createDistribution(): ContinuousDistribution = TriangularDistribution(0.0, 1.0, 0.5)
+    override val testPoints = listOf(0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0)
+
     // Config 1: Symmetric — a=0, b=1, c=0.5
     private val sym = TriangularDistribution(0.0, 1.0, 0.5)
 
@@ -24,7 +26,6 @@ class TriangularDistributionTest {
 
     private val tol = 1e-10
     private val pdfTol = 1e-12
-    private val statTol = 0.05
 
     // ========================================
     // Config 1: Symmetric (a=0, b=1, c=0.5)
@@ -267,115 +268,6 @@ class TriangularDistributionTest {
         assertTrue(d.cdf(500000.0) in 0.0..1.0)
         assertEquals(0.0, d.cdf(-1.0), 0.0)
         assertEquals(1.0, d.cdf(2e6), 0.0)
-    }
-
-    // ========================================
-    // Property-based tests
-    // ========================================
-
-    @Test
-    fun testCdfQuantileRoundTrip() {
-        val ps = doubleArrayOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)
-        for (dist in listOf(sym, asym, modeLeft, modeRight)) {
-            for (p in ps) {
-                assertEquals(p, dist.cdf(dist.quantile(p)), tol, "cdf(quantile($p)) ≈ $p for $dist")
-            }
-        }
-    }
-
-    @Test
-    fun testQuantileCdfRoundTrip() {
-        for (dist in listOf(sym, asym)) {
-            val xs = doubleArrayOf(
-                dist.quantile(0.1), dist.quantile(0.3), dist.quantile(0.5),
-                dist.quantile(0.7), dist.quantile(0.9)
-            )
-            for (x in xs) {
-                assertEquals(x, dist.quantile(dist.cdf(x)), tol, "quantile(cdf($x)) ≈ $x for $dist")
-            }
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        for (dist in listOf(sym, asym, modeLeft, modeRight)) {
-            val xs = doubleArrayOf(
-                dist.quantile(0.01), dist.quantile(0.1), dist.quantile(0.25),
-                dist.quantile(0.5), dist.quantile(0.75), dist.quantile(0.9), dist.quantile(0.99)
-            )
-            for (x in xs) {
-                assertEquals(1.0, dist.sf(x) + dist.cdf(x), 1e-14, "sf($x) + cdf($x) ≈ 1 for $dist")
-            }
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        for (dist in listOf(sym, asym)) {
-            val xs = doubleArrayOf(
-                dist.quantile(0.1), dist.quantile(0.3), dist.quantile(0.5),
-                dist.quantile(0.7), dist.quantile(0.9)
-            )
-            for (x in xs) {
-                assertEquals(ln(dist.pdf(x)), dist.logPdf(x), pdfTol, "logPdf($x) ≈ ln(pdf($x))")
-            }
-        }
-    }
-
-    @Test
-    fun testPdfNonNegative() {
-        for (dist in listOf(sym, asym, modeLeft, modeRight)) {
-            for (i in 0..100) {
-                val x = dist.quantile(i / 100.0)
-                assertTrue(dist.pdf(x) >= 0.0, "pdf($x) should be non-negative for $dist")
-            }
-        }
-    }
-
-    @Test
-    fun testCdfMonotonic() {
-        for (dist in listOf(sym, asym, modeLeft, modeRight)) {
-            val xs = (0..100).map { dist.quantile(it / 100.0) }
-            for (i in 1 until xs.size) {
-                assertTrue(
-                    dist.cdf(xs[i]) >= dist.cdf(xs[i - 1]),
-                    "cdf should be monotonically non-decreasing for $dist"
-                )
-            }
-        }
-    }
-
-    @Test
-    fun testPdfIntegration() {
-        for (dist in listOf(sym, asym, modeLeft, modeRight)) {
-            val eps = 1e-6
-            val lower = dist.quantile(eps)
-            val upper = dist.quantile(1.0 - eps)
-            val integral = trapezoidalIntegral({ dist.pdf(it) }, lower, upper)
-            assertEquals(dist.cdf(upper) - dist.cdf(lower), integral, 1e-4, "pdf integration for $dist")
-        }
-    }
-
-    @Test
-    fun testSampleMean() {
-        for (dist in listOf(sym, asym, modeLeft, modeRight)) {
-            val samples = dist.sample(100_000, Random(42))
-            val sampleMean = samples.average()
-            assertEquals(dist.mean, sampleMean, statTol * abs(dist.mean).coerceAtLeast(1.0), "sample mean for $dist")
-        }
-    }
-
-    @Test
-    fun testSampleVariance() {
-        for (dist in listOf(sym, asym)) {
-            val samples = dist.sample(100_000, Random(42))
-            val sampleMean = samples.average()
-            val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-            assertEquals(
-                dist.variance, sampleVar,
-                statTol * dist.variance.coerceAtLeast(1.0), "sample variance for $dist"
-            )
-        }
     }
 
     // ========================================

@@ -1,14 +1,16 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class WeibullDistributionTest {
+class WeibullDistributionTest : ContinuousDistributionPropertyTests() {
+    override fun createDistribution() = WeibullDistribution(1.5, 2.0)
+    override val testPoints = listOf(0.0, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0)
+    override val roundTripTol = 1e-12
 
     // --- Basic correctness (scipy 15-digit refs) ---
 
@@ -206,61 +208,4 @@ class WeibullDistributionTest {
         assertFailsWith<InvalidParameterException> { w.quantile(1.1) }
     }
 
-    // --- Property-based ---
-
-    @Test
-    fun testCdfQuantileRoundTrip() {
-        val w = WeibullDistribution(1.5, 2.0)
-        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
-            assertEquals(p, w.cdf(w.quantile(p)), 1e-12, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val w = WeibullDistribution(1.5, 2.0)
-        for (x in listOf(0.0, 0.5, 1.0, 2.0, 3.0, 5.0)) {
-            assertEquals(1.0, w.sf(x) + w.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val w = WeibullDistribution(1.5, 2.0)
-        for (x in listOf(0.5, 1.0, 2.0, 3.0, 5.0)) {
-            assertEquals(w.pdf(x), exp(w.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val w = WeibullDistribution(1.5, 2.0) // mean ≈ 1.805
-        val rng = kotlin.random.Random(42)
-        val samples = w.sample(100_000, rng)
-        val sampleMean = samples.average()
-        assertEquals(1.805, sampleMean, 0.1, "sample mean ≈ 1.805")
-        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-        assertEquals(w.variance, sampleVar, maxOf(w.variance * 0.1, 0.05), "sample variance ≈ ${w.variance}")
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val w = WeibullDistribution(1.5, 2.0)
-        var prev = 0.0
-        for (x in listOf(0.0, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0)) {
-            val cdfVal = w.cdf(x)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
-    }
-
-    @Test
-    fun testPdfIntegration() {
-        val d = WeibullDistribution(1.5, 2.0)
-        val eps = 1e-6
-        val lower = d.quantile(eps)
-        val upper = d.quantile(1.0 - eps)
-        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
-        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
-    }
 }

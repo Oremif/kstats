@@ -1,13 +1,17 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class BernoulliDistributionTest {
+class BernoulliDistributionTest : DiscreteDistributionPropertyTests() {
+
+    override fun createDistribution() = BernoulliDistribution(0.7)
+    override val testKRange = -1..2
+    override val consistencyTol = 1e-15
+    override val sfCdfTol = 1e-15
 
     // --- Basic correctness (scipy 15-digit refs) ---
 
@@ -143,36 +147,6 @@ class BernoulliDistributionTest {
         assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
     }
 
-    // --- Property-based ---
-
-    @Test
-    fun testExpLogPmfConsistency() {
-        val d = BernoulliDistribution(0.7)
-        for (k in listOf(0, 1)) {
-            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-15, "exp(logPmf($k)) ≈ pmf($k)")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val d = BernoulliDistribution(0.7)
-        for (k in -1..2) {
-            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-15, "sf($k) + cdf($k) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val d = BernoulliDistribution(0.7)
-        val rng = kotlin.random.Random(42)
-        val samples = d.sample(100_000, rng)
-        val doubles = samples.map { it.toDouble() }
-        val sampleMean = doubles.average()
-        assertEquals(0.7, sampleMean, 0.03, "sample mean ≈ 0.7")
-        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
-        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
-    }
-
     @Test
     fun testExtremeParameters() {
         // p ≈ 0: near-zero probability
@@ -191,31 +165,4 @@ class BernoulliDistributionTest {
         assertTrue(d2.logPmf(0).isFinite())
     }
 
-    @Test
-    fun testCdfQuantileRoundTrip() {
-        val d = BernoulliDistribution(0.7)
-        for (p in listOf(0.1, 0.25, 0.5, 0.75, 0.9)) {
-            val k = d.quantileInt(p)
-            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
-            if (k > 0) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
-        }
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val d = BernoulliDistribution(0.7)
-        var prev = 0.0
-        for (k in -1..2) {
-            val cdfVal = d.cdf(k)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
-    }
-
-    @Test
-    fun testPmfSumsToOne() {
-        val d = BernoulliDistribution(0.7)
-        val total = (0..1).sumOf { d.pmf(it) }
-        assertEquals(1.0, total, 1e-10)
-    }
 }

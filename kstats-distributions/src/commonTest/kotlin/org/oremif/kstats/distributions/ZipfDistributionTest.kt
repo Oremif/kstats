@@ -1,13 +1,16 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class ZipfDistributionTest {
+class ZipfDistributionTest : DiscreteDistributionPropertyTests() {
+
+    override fun createDistribution() = ZipfDistribution(10, 1.0)
+    override val testKRange = 0..11
+    override val supportMin = 1
 
     // --- PMF / logPMF known values (scipy 15-digit refs) ---
 
@@ -232,71 +235,4 @@ class ZipfDistributionTest {
         assertFailsWith<InvalidParameterException> { ZipfDistribution(10, Double.NEGATIVE_INFINITY) }
     }
 
-    // --- Property-based ---
-
-    @Test
-    fun testExpLogPmfConsistency() {
-        val d = ZipfDistribution(10, 2.0)
-        for (k in 0..11) {
-            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-12, "exp(logPmf($k)) ≈ pmf($k)")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val d = ZipfDistribution(10, 1.0)
-        for (k in 0..11) {
-            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-10, "sf($k) + cdf($k) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val d = ZipfDistribution(10, 1.0)
-        var prev = 0.0
-        for (k in 1..10) {
-            val cdfVal = d.cdf(k)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing at k=$k")
-            prev = cdfVal
-        }
-    }
-
-    @Test
-    fun testCdfQuantileRoundTrip() {
-        val d = ZipfDistribution(10, 1.0)
-        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
-            val k = d.quantileInt(p)
-            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
-            if (k > 1) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
-        }
-    }
-
-    @Test
-    fun testPmfSumsToOne() {
-        val d = ZipfDistribution(10, 1.0)
-        val total = (1..10).sumOf { d.pmf(it) }
-        assertEquals(1.0, total, 1e-10)
-    }
-
-    @Test
-    fun testPmfNonNegative() {
-        val d = ZipfDistribution(100, 0.5)
-        for (k in 0..101) {
-            assertTrue(d.pmf(k) >= 0.0, "pmf($k) >= 0")
-        }
-    }
-
-    // --- Sampling ---
-
-    @Test
-    fun testSampleStats() {
-        val d = ZipfDistribution(10, 1.0)
-        val rng = kotlin.random.Random(42)
-        val samples = d.sample(100_000, rng)
-        val doubles = samples.map { it.toDouble() }
-        val sampleMean = doubles.average()
-        assertEquals(d.mean, sampleMean, d.mean * 0.05, "sample mean ≈ ${d.mean}")
-        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
-        assertEquals(d.variance, sampleVar, d.variance * 0.1, "sample variance ≈ ${d.variance}")
-    }
 }

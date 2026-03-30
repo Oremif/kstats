@@ -7,7 +7,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class LogNormalDistributionTest {
+class LogNormalDistributionTest : ContinuousDistributionPropertyTests() {
+
+    override fun createDistribution(): ContinuousDistribution = LogNormalDistribution(0.0, 1.0)
+    override val testPoints = listOf(0.5, 1.0, 2.0, 5.0, 10.0)
 
     // --- Basic correctness (scipy 15-digit refs) ---
 
@@ -167,52 +170,6 @@ class LogNormalDistributionTest {
     // --- Property-based ---
 
     @Test
-    fun testCdfQuantileRoundTrip() {
-        val d = LogNormalDistribution(0.0, 1.0)
-        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
-            assertEquals(p, d.cdf(d.quantile(p)), 1e-10, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val d = LogNormalDistribution(0.0, 1.0)
-        for (x in listOf(0.0, 0.5, 1.0, 2.0, 5.0, 10.0)) {
-            assertEquals(1.0, d.sf(x) + d.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val d = LogNormalDistribution(0.0, 1.0)
-        for (x in listOf(0.5, 1.0, 2.0, 5.0, 10.0)) {
-            assertEquals(d.pdf(x), exp(d.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val d = LogNormalDistribution(0.0, 1.0) // mean ≈ 1.649
-        val rng = kotlin.random.Random(42)
-        val samples = d.sample(100_000, rng)
-        val sampleMean = samples.average()
-        assertEquals(1.649, sampleMean, 0.15, "sample mean ≈ 1.649")
-        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val d = LogNormalDistribution(0.0, 1.0)
-        var prev = 0.0
-        for (x in listOf(0.0, 0.5, 1.0, 2.0, 5.0, 10.0, 50.0)) {
-            val cdfVal = d.cdf(x)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
-    }
-
-    @Test
     fun testCdfSymmetryInLogSpace() {
         // LogNormal(mu, sigma): cdf(exp(mu)) = 0.5
         val d = LogNormalDistribution(2.0, 0.5)
@@ -237,13 +194,4 @@ class LogNormalDistributionTest {
         assertEquals(0.5, d3.cdf(exp(50.0)), 1e-10)
     }
 
-    @Test
-    fun testPdfIntegration() {
-        val d = LogNormalDistribution(0.0, 1.0)
-        val eps = 1e-6
-        val lower = d.quantile(eps)
-        val upper = d.quantile(1.0 - eps)
-        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
-        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
-    }
 }

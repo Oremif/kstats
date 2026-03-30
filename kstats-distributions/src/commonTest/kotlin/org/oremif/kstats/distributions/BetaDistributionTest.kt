@@ -1,13 +1,15 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class BetaDistributionTest {
+class BetaDistributionTest : ContinuousDistributionPropertyTests() {
+    override fun createDistribution() = BetaDistribution(2.0, 5.0)
+    override val testPoints = listOf(0.0, 0.1, 0.2, 0.3, 0.5, 0.8, 1.0)
+    override val roundTripTol = 1e-8
 
     // --- Basic correctness (scipy 15-digit refs) ---
 
@@ -158,24 +160,6 @@ class BetaDistributionTest {
         assertFailsWith<InvalidParameterException> { b.quantile(1.1) }
     }
 
-    // --- Property-based ---
-
-    @Test
-    fun testCdfQuantileRoundTrip() {
-        val b = BetaDistribution(2.0, 5.0)
-        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
-            assertEquals(p, b.cdf(b.quantile(p)), 1e-8, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val b = BetaDistribution(2.0, 5.0)
-        for (x in listOf(0.0, 0.1, 0.3, 0.5, 0.8, 1.0)) {
-            assertEquals(1.0, b.sf(x) + b.cdf(x), 1e-10, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
     @Test
     fun testSfKnownValues() {
         val b = BetaDistribution(2.0, 5.0)
@@ -193,36 +177,6 @@ class BetaDistributionTest {
         val b2 = BetaDistribution(5.0, 2.0)
         for (x in listOf(0.1, 0.3, 0.5, 0.7, 0.9)) {
             assertEquals(b1.sf(x), b2.cdf(1.0 - x), 1e-10, "sf($x) = cdf_mirror(1-$x)")
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val b = BetaDistribution(2.0, 5.0)
-        for (x in listOf(0.1, 0.2, 0.3, 0.5, 0.8)) {
-            assertEquals(b.pdf(x), exp(b.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val b = BetaDistribution(2.0, 5.0) // mean=0.2857
-        val rng = kotlin.random.Random(42)
-        val samples = b.sample(100_000, rng)
-        val sampleMean = samples.average()
-        assertEquals(0.2857, sampleMean, 0.02, "sample mean ≈ 0.2857")
-        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-        assertEquals(b.variance, sampleVar, maxOf(b.variance * 0.1, 0.05), "sample variance ≈ ${b.variance}")
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val b = BetaDistribution(2.0, 5.0)
-        var prev = 0.0
-        for (x in listOf(0.0, 0.1, 0.2, 0.3, 0.5, 0.8, 1.0)) {
-            val cdfVal = b.cdf(x)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
         }
     }
 
@@ -260,13 +214,4 @@ class BetaDistributionTest {
         assertEquals(0.975892711294802, d3.cdf(0.01), 1e-4)
     }
 
-    @Test
-    fun testPdfIntegration() {
-        val d = BetaDistribution(2.0, 5.0)
-        val eps = 1e-6
-        val lower = d.quantile(eps)
-        val upper = d.quantile(1.0 - eps)
-        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
-        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
-    }
 }

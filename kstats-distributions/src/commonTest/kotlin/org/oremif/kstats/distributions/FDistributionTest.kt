@@ -1,14 +1,18 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class FDistributionTest {
+class FDistributionTest : ContinuousDistributionPropertyTests() {
+
+    override fun createDistribution(): ContinuousDistribution = FDistribution(5.0, 10.0)
+    override val testPoints = listOf(0.0, 0.5, 1.0, 2.0, 5.0, 10.0)
+    override val pValues = listOf(0.25, 0.5, 0.75, 0.9)
+    override val roundTripTol = 1e-6
 
     // --- Basic correctness (scipy 15-digit refs) ---
 
@@ -157,53 +161,6 @@ class FDistributionTest {
     // --- Property-based ---
 
     @Test
-    fun testCdfQuantileRoundTrip() {
-        val f = FDistribution(5.0, 10.0)
-        // Note: small p values may not converge well — see DIST-010
-        for (p in listOf(0.25, 0.5, 0.75, 0.9)) {
-            assertEquals(p, f.cdf(f.quantile(p)), 1e-6, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val f = FDistribution(5.0, 10.0)
-        for (x in listOf(0.0, 0.5, 1.0, 2.0, 5.0, 10.0)) {
-            assertEquals(1.0, f.sf(x) + f.cdf(x), 1e-10, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val f = FDistribution(5.0, 10.0)
-        for (x in listOf(0.5, 1.0, 2.0, 5.0)) {
-            assertEquals(f.pdf(x), exp(f.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val f = FDistribution(5.0, 10.0) // mean=1.25
-        val rng = kotlin.random.Random(42)
-        val samples = f.sample(100_000, rng)
-        val sampleMean = samples.average()
-        assertEquals(1.25, sampleMean, 0.15, "sample mean ≈ 1.25")
-        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-        assertEquals(f.variance, sampleVar, maxOf(f.variance * 0.1, 0.05), "sample variance ≈ ${f.variance}")
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val f = FDistribution(5.0, 10.0)
-        var prev = 0.0
-        for (x in listOf(0.0, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0)) {
-            val cdfVal = f.cdf(x)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
-    }
-
-    @Test
     fun testEntropy() {
         assertEquals(1.130759804909061, FDistribution(5.0, 10.0).entropy, 1e-10)
         assertEquals(2.531024246969291, FDistribution(1.0, 1.0).entropy, 1e-10)
@@ -228,13 +185,4 @@ class FDistributionTest {
         assertEquals(0.5, d2.cdf(1.0), 1e-6)
     }
 
-    @Test
-    fun testPdfIntegration() {
-        val d = FDistribution(5.0, 10.0)
-        val eps = 1e-6
-        val lower = d.quantile(eps)
-        val upper = d.quantile(1.0 - eps)
-        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
-        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
-    }
 }

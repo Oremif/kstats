@@ -1,13 +1,15 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class UniformDiscreteDistributionTest {
+class UniformDiscreteDistributionTest : DiscreteDistributionPropertyTests() {
+
+    override fun createDistribution() = UniformDiscreteDistribution(1, 6)
+    override val testKRange = 0..7
 
     // --- Basic correctness (scipy 15-digit refs) ---
 
@@ -160,61 +162,4 @@ class UniformDiscreteDistributionTest {
         assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
     }
 
-    // --- Property-based ---
-
-    @Test
-    fun testExpLogPmfConsistency() {
-        val d = UniformDiscreteDistribution(1, 6)
-        for (k in 1..6) {
-            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-15, "exp(logPmf($k)) ≈ pmf($k)")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val d = UniformDiscreteDistribution(1, 6)
-        for (k in 0..7) {
-            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-15, "sf($k) + cdf($k) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val d = UniformDiscreteDistribution(1, 6)
-        val rng = kotlin.random.Random(42)
-        val samples = d.sample(100_000, rng)
-        val doubles = samples.map { it.toDouble() }
-        val sampleMean = doubles.average()
-        assertEquals(3.5, sampleMean, 0.15, "sample mean ≈ 3.5")
-        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
-        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val d = UniformDiscreteDistribution(1, 6)
-        var prev = 0.0
-        for (k in 1..6) {
-            val cdfVal = d.cdf(k)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
-    }
-
-    @Test
-    fun testCdfQuantileRoundTrip() {
-        val d = UniformDiscreteDistribution(1, 6)
-        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
-            val k = d.quantileInt(p)
-            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
-            if (k > 0) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
-        }
-    }
-
-    @Test
-    fun testPmfSumsToOne() {
-        val d = UniformDiscreteDistribution(1, 6)
-        val total = (1..6).sumOf { d.pmf(it) }
-        assertEquals(1.0, total, 1e-10)
-    }
 }
