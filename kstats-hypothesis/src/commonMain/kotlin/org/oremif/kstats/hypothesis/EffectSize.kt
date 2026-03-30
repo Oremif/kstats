@@ -59,6 +59,46 @@ public fun cohensD(
 }
 
 /**
+ * Computes Hedges' g effect size, a bias-corrected version of Cohen's d for small samples.
+ *
+ * Cohen's d overestimates the true effect size when sample sizes are small. Hedges' g
+ * corrects this by multiplying Cohen's d by a correction factor J that approaches 1.0
+ * as sample sizes grow. For large samples (combined n > 50), the difference between
+ * Cohen's d and Hedges' g is negligible. The same conventional thresholds apply:
+ * values around 0.2, 0.5, and 0.8 are considered small, medium, and large effects.
+ *
+ * ### Example:
+ * ```kotlin
+ * val treatment = doubleArrayOf(2.0, 4.0, 6.0)
+ * val control = doubleArrayOf(1.0, 2.0, 3.0)
+ * hedgesG(treatment, control)                // bias-corrected effect size
+ * hedgesG(treatment, control, pooled = false) // with unweighted standard deviation
+ * ```
+ *
+ * @param x the first sample. Must contain at least 2 elements.
+ * @param y the second sample. Must contain at least 2 elements.
+ * @param pooled whether to use the pooled standard deviation when computing the underlying
+ * Cohen's d. Defaults to `true`. When `false`, uses the unweighted root-mean-square of
+ * the two group standard deviations.
+ * @return the Hedges' g effect size.
+ * @see cohensD for the uncorrected version.
+ */
+public fun hedgesG(
+    x: DoubleArray,
+    y: DoubleArray,
+    pooled: Boolean = true,
+): Double {
+    if (x.size < 2) throw InsufficientDataException("Sample x must have at least 2 elements")
+    if (y.size < 2) throw InsufficientDataException("Sample y must have at least 2 elements")
+
+    val d = cohensD(x, y, pooled)
+    // Hedges' correction factor: J = 1 - 3 / (4*df - 1), df = n1 + n2 - 2
+    val df = (x.size + y.size - 2).toDouble()
+    val j = 1.0 - 3.0 / (4.0 * df - 1.0)
+    return d * j
+}
+
+/**
  * Computes Cohen's h effect size for the difference between two proportions.
  *
  * Cohen's h measures how far apart two proportions are on a scale that accounts for the
