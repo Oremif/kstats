@@ -76,7 +76,9 @@ public fun proportionZTest(
     // Wald confidence interval using the observed proportion
     val seWald = sqrt(pHat * (1.0 - pHat) / n)
     val alpha = 1.0 - confidenceLevel
-    val ci = when (alternative) {
+    val ci = if (alpha.isNaN()) {
+        Pair(Double.NaN, Double.NaN)
+    } else when (alternative) {
         Alternative.TWO_SIDED -> {
             val zCrit = standardNormal.quantile(1.0 - alpha / 2.0)
             Pair(pHat - zCrit * seWald, pHat + zCrit * seWald)
@@ -198,7 +200,9 @@ public fun proportionZTest(
     val diff = pHat1 - pHat2
     val seUnpooled = sqrt(pHat1 * (1.0 - pHat1) / n1 + pHat2 * (1.0 - pHat2) / n2)
     val alpha = 1.0 - confidenceLevel
-    val ci = when (alternative) {
+    val ci = if (alpha.isNaN()) {
+        Pair(Double.NaN, Double.NaN)
+    } else when (alternative) {
         Alternative.TWO_SIDED -> {
             val zCrit = standardNormal.quantile(1.0 - alpha / 2.0)
             Pair(diff - zCrit * seUnpooled, diff + zCrit * seUnpooled)
