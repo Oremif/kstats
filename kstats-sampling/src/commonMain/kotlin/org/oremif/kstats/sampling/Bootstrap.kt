@@ -256,13 +256,24 @@ private fun computeBca(
     val jackMean = (jackSum + compensation) / n
 
     var sumCubed = 0.0
+    var compCubed = 0.0
     var sumSquared = 0.0
+    var compSquared = 0.0
     for (v in jackknife) {
         val diff = jackMean - v
         val diffSq = diff * diff
-        sumSquared += diffSq
-        sumCubed += diffSq * diff
+        val diffCu = diffSq * diff
+
+        var t = sumSquared + diffSq
+        compSquared += if (abs(sumSquared) >= abs(diffSq)) (sumSquared - t) + diffSq else (diffSq - t) + sumSquared
+        sumSquared = t
+
+        t = sumCubed + diffCu
+        compCubed += if (abs(sumCubed) >= abs(diffCu)) (sumCubed - t) + diffCu else (diffCu - t) + sumCubed
+        sumCubed = t
     }
+    sumSquared += compSquared
+    sumCubed += compCubed
 
     // â = Σ(θ̄ − θ̂₍₋ᵢ₎)³ / [6 · (Σ(θ̄ − θ̂₍₋ᵢ₎)²)^(3/2)]
     // If all jackknife estimates are equal, acceleration is zero (no skewness)

@@ -13,8 +13,8 @@ package org.oremif.kstats.core
  * ```
  *
  * @property lower the lower bound of the interval.
- * @property upper the upper bound of the interval. Always greater than or equal to [lower]
- * for well-behaved statistics with sufficient data.
+ * @property upper the upper bound of the interval. Typically greater than or equal to [lower],
+ * but may be inverted for small samples or highly skewed bootstrap distributions.
  */
 public data class ConfidenceInterval(
     public val lower: Double,
