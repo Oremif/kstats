@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.*
 
@@ -11,7 +12,7 @@ class BinomialTestTest {
 
     private fun assertCI(
         expectedLow: Double, expectedHigh: Double,
-        ci: Pair<Double, Double>?, tol: Double = 1e-8, message: String = ""
+        ci: ConfidenceInterval?, tol: Double = 1e-8, message: String = ""
     ) {
         TestAssertions.assertCI(expectedLow, expectedHigh, ci, tol, message)
     }
@@ -219,8 +220,8 @@ class BinomialTestTest {
         // Verify that narrower CI at 90% is a subset of 95% CI
         val ci95 = binomialTest(successes = 60, trials = 100).confidenceInterval!!
         val ci90 = binomialTest(successes = 60, trials = 100, confidenceLevel = 0.90).confidenceInterval!!
-        assertTrue(ci90.first >= ci95.first, "90% lower should be >= 95% lower")
-        assertTrue(ci90.second <= ci95.second, "90% upper should be <= 95% upper")
+        assertTrue(ci90.lower >= ci95.lower, "90% lower should be >= 95% lower")
+        assertTrue(ci90.upper <= ci95.upper, "90% upper should be <= 95% upper")
     }
 
     // ===== Validation =====

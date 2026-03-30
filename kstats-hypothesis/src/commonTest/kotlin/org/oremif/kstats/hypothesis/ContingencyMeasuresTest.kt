@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,18 +42,18 @@ internal class ContingencyMeasuresTest {
 
         // [[10,5],[3,12]]: CI95 = (1.52228295380014, 42.0421182804644)
         val r1 = oddsRatio(arrayOf(intArrayOf(10, 5), intArrayOf(3, 12)))
-        assertEquals(1.52228295380014, r1.ci.first, ciTol, "OR CI lower [[10,5],[3,12]]")
-        assertEquals(42.0421182804644, r1.ci.second, ciTol, "OR CI upper [[10,5],[3,12]]")
+        assertEquals(1.52228295380014, r1.ci.lower, ciTol, "OR CI lower [[10,5],[3,12]]")
+        assertEquals(42.0421182804644, r1.ci.upper, ciTol, "OR CI upper [[10,5],[3,12]]")
 
         // [[20,10],[15,25]]: CI95 = (1.23492513961453, 8.99739648557105)
         val r2 = oddsRatio(arrayOf(intArrayOf(20, 10), intArrayOf(15, 25)))
-        assertEquals(1.23492513961453, r2.ci.first, ciTol, "OR CI lower [[20,10],[15,25]]")
-        assertEquals(8.99739648557105, r2.ci.second, ciTol, "OR CI upper [[20,10],[15,25]]")
+        assertEquals(1.23492513961453, r2.ci.lower, ciTol, "OR CI lower [[20,10],[15,25]]")
+        assertEquals(8.99739648557105, r2.ci.upper, ciTol, "OR CI upper [[20,10],[15,25]]")
 
         // [[30,70],[40,60]]: CI95 = (0.357906317718833, 1.15467452141235)
         val r3 = oddsRatio(arrayOf(intArrayOf(30, 70), intArrayOf(40, 60)))
-        assertEquals(0.357906317718833, r3.ci.first, ciTol, "OR CI lower [[30,70],[40,60]]")
-        assertEquals(1.15467452141235, r3.ci.second, ciTol, "OR CI upper [[30,70],[40,60]]")
+        assertEquals(0.357906317718833, r3.ci.lower, ciTol, "OR CI lower [[30,70],[40,60]]")
+        assertEquals(1.15467452141235, r3.ci.upper, ciTol, "OR CI upper [[30,70],[40,60]]")
     }
 
     @Test
@@ -62,14 +63,14 @@ internal class ContingencyMeasuresTest {
         // CI90 = (1.44867949128189, 7.66982012099808)
         val r90 = oddsRatio(table, confidenceLevel = 0.90)
         assertEquals(0.90, r90.confidenceLevel, 0.0)
-        assertEquals(1.44867949128189, r90.ci.first, ciTol, "OR CI90 lower")
-        assertEquals(7.66982012099808, r90.ci.second, ciTol, "OR CI90 upper")
+        assertEquals(1.44867949128189, r90.ci.lower, ciTol, "OR CI90 lower")
+        assertEquals(7.66982012099808, r90.ci.upper, ciTol, "OR CI90 upper")
 
         // CI99 = (0.903932072054568, 12.2919757519571)
         val r99 = oddsRatio(table, confidenceLevel = 0.99)
         assertEquals(0.99, r99.confidenceLevel, 0.0)
-        assertEquals(0.903932072054568, r99.ci.first, ciTol, "OR CI99 lower")
-        assertEquals(12.2919757519571, r99.ci.second, ciTol, "OR CI99 upper")
+        assertEquals(0.903932072054568, r99.ci.lower, ciTol, "OR CI99 lower")
+        assertEquals(12.2919757519571, r99.ci.upper, ciTol, "OR CI99 upper")
     }
 
     // ===== oddsRatio: Edge cases =====
@@ -79,8 +80,8 @@ internal class ContingencyMeasuresTest {
         // [[10,10],[10,10]]: OR = 1, CI95 = (0.289502871089946, 3.45419717681939)
         val r = oddsRatio(arrayOf(intArrayOf(10, 10), intArrayOf(10, 10)))
         assertEquals(1.0, r.estimate, tol, "OR symmetric")
-        assertEquals(0.289502871089946, r.ci.first, ciTol, "OR CI lower symmetric")
-        assertEquals(3.45419717681939, r.ci.second, ciTol, "OR CI upper symmetric")
+        assertEquals(0.289502871089946, r.ci.lower, ciTol, "OR CI lower symmetric")
+        assertEquals(3.45419717681939, r.ci.upper, ciTol, "OR CI upper symmetric")
     }
 
     @Test
@@ -88,8 +89,8 @@ internal class ContingencyMeasuresTest {
         // [[1,1],[1,1]]: OR = 1, CI95 = (0.0198425239681499, 50.3968145184122)
         val r = oddsRatio(arrayOf(intArrayOf(1, 1), intArrayOf(1, 1)))
         assertEquals(1.0, r.estimate, tol, "OR [[1,1],[1,1]]")
-        assertEquals(0.0198425239681499, r.ci.first, ciTol, "OR CI lower [[1,1],[1,1]]")
-        assertEquals(50.3968145184122, r.ci.second, ciTol, "OR CI upper [[1,1],[1,1]]")
+        assertEquals(0.0198425239681499, r.ci.lower, ciTol, "OR CI lower [[1,1],[1,1]]")
+        assertEquals(50.3968145184122, r.ci.upper, ciTol, "OR CI upper [[1,1],[1,1]]")
     }
 
     @Test
@@ -98,8 +99,8 @@ internal class ContingencyMeasuresTest {
         val r = oddsRatio(arrayOf(intArrayOf(0, 5), intArrayOf(5, 0)))
         assertEquals(0.0, r.estimate, 0.0, "OR with a=0, d=0")
         // CI should be NaN (not all cells > 0)
-        assertTrue(r.ci.first.isNaN(), "CI lower should be NaN when zero cells")
-        assertTrue(r.ci.second.isNaN(), "CI upper should be NaN when zero cells")
+        assertTrue(r.ci.lower.isNaN(), "CI lower should be NaN when zero cells")
+        assertTrue(r.ci.upper.isNaN(), "CI upper should be NaN when zero cells")
     }
 
     @Test
@@ -108,8 +109,8 @@ internal class ContingencyMeasuresTest {
         val r = oddsRatio(arrayOf(intArrayOf(5, 0), intArrayOf(0, 5)))
         assertEquals(Double.POSITIVE_INFINITY, r.estimate, "OR with b=0, c=0")
         // CI should be NaN (not all cells > 0)
-        assertTrue(r.ci.first.isNaN(), "CI lower should be NaN when zero cells")
-        assertTrue(r.ci.second.isNaN(), "CI upper should be NaN when zero cells")
+        assertTrue(r.ci.lower.isNaN(), "CI lower should be NaN when zero cells")
+        assertTrue(r.ci.upper.isNaN(), "CI upper should be NaN when zero cells")
     }
 
     @Test
@@ -117,26 +118,26 @@ internal class ContingencyMeasuresTest {
         // [[0,5],[5,5]]: a=0 -> OR = 0, CI = NaN (a not > 0)
         val r1 = oddsRatio(arrayOf(intArrayOf(0, 5), intArrayOf(5, 5)))
         assertEquals(0.0, r1.estimate, 0.0, "OR with a=0")
-        assertTrue(r1.ci.first.isNaN(), "CI lower when a=0")
-        assertTrue(r1.ci.second.isNaN(), "CI upper when a=0")
+        assertTrue(r1.ci.lower.isNaN(), "CI lower when a=0")
+        assertTrue(r1.ci.upper.isNaN(), "CI upper when a=0")
 
         // [[5,0],[5,5]]: b=0 -> OR = Inf, CI = NaN (b not > 0)
         val r2 = oddsRatio(arrayOf(intArrayOf(5, 0), intArrayOf(5, 5)))
         assertEquals(Double.POSITIVE_INFINITY, r2.estimate, "OR with b=0")
-        assertTrue(r2.ci.first.isNaN(), "CI lower when b=0")
-        assertTrue(r2.ci.second.isNaN(), "CI upper when b=0")
+        assertTrue(r2.ci.lower.isNaN(), "CI lower when b=0")
+        assertTrue(r2.ci.upper.isNaN(), "CI upper when b=0")
 
         // [[5,5],[0,5]]: c=0 -> OR = Inf, CI = NaN (c not > 0)
         val r3 = oddsRatio(arrayOf(intArrayOf(5, 5), intArrayOf(0, 5)))
         assertEquals(Double.POSITIVE_INFINITY, r3.estimate, "OR with c=0")
-        assertTrue(r3.ci.first.isNaN(), "CI lower when c=0")
-        assertTrue(r3.ci.second.isNaN(), "CI upper when c=0")
+        assertTrue(r3.ci.lower.isNaN(), "CI lower when c=0")
+        assertTrue(r3.ci.upper.isNaN(), "CI upper when c=0")
 
         // [[5,5],[5,0]]: d=0 -> OR = 0, CI = NaN (d not > 0)
         val r4 = oddsRatio(arrayOf(intArrayOf(5, 5), intArrayOf(5, 0)))
         assertEquals(0.0, r4.estimate, 0.0, "OR with d=0")
-        assertTrue(r4.ci.first.isNaN(), "CI lower when d=0")
-        assertTrue(r4.ci.second.isNaN(), "CI upper when d=0")
+        assertTrue(r4.ci.lower.isNaN(), "CI lower when d=0")
+        assertTrue(r4.ci.upper.isNaN(), "CI upper when d=0")
     }
 
     @Test
@@ -144,8 +145,8 @@ internal class ContingencyMeasuresTest {
         // [[0,0],[0,0]]: OR = (0*0)/(0*0) = NaN (IEEE 754)
         val r = oddsRatio(arrayOf(intArrayOf(0, 0), intArrayOf(0, 0)))
         assertTrue(r.estimate.isNaN(), "OR all zeros should be NaN")
-        assertTrue(r.ci.first.isNaN(), "CI lower all zeros")
-        assertTrue(r.ci.second.isNaN(), "CI upper all zeros")
+        assertTrue(r.ci.lower.isNaN(), "CI lower all zeros")
+        assertTrue(r.ci.upper.isNaN(), "CI upper all zeros")
     }
 
     // ===== oddsRatio: Degenerate input =====
@@ -201,8 +202,8 @@ internal class ContingencyMeasuresTest {
         // CI95 = (0.125599638548958, 0.221161287553786)
         val r = oddsRatio(arrayOf(intArrayOf(200, 300), intArrayOf(400, 100)))
         assertEquals(1.0 / 6.0, r.estimate, tol, "OR large counts")
-        assertEquals(0.125599638548958, r.ci.first, ciTol, "OR CI lower large counts")
-        assertEquals(0.221161287553786, r.ci.second, ciTol, "OR CI upper large counts")
+        assertEquals(0.125599638548958, r.ci.lower, ciTol, "OR CI lower large counts")
+        assertEquals(0.221161287553786, r.ci.upper, ciTol, "OR CI upper large counts")
     }
 
     @Test
@@ -211,10 +212,10 @@ internal class ContingencyMeasuresTest {
         // CI95 = (62462.2311676586, 16009674.6674937)
         val r = oddsRatio(arrayOf(intArrayOf(1000, 1), intArrayOf(1, 1000)))
         assertEquals(1e6, r.estimate, tol, "OR very large")
-        assertTrue(r.ci.first.isFinite(), "CI lower should be finite for large OR")
-        assertTrue(r.ci.second.isFinite(), "CI upper should be finite for large OR")
-        assertEquals(62462.2311676586, r.ci.first, 1.0, "OR CI lower very large")
-        assertEquals(16009674.6674937, r.ci.second, 10.0, "OR CI upper very large")
+        assertTrue(r.ci.lower.isFinite(), "CI lower should be finite for large OR")
+        assertTrue(r.ci.upper.isFinite(), "CI upper should be finite for large OR")
+        assertEquals(62462.2311676586, r.ci.lower, 1.0, "OR CI lower very large")
+        assertEquals(16009674.6674937, r.ci.upper, 10.0, "OR CI upper very large")
     }
 
     // ===== oddsRatio: Non-finite input =====
@@ -227,8 +228,8 @@ internal class ContingencyMeasuresTest {
         val table = arrayOf(intArrayOf(10, 5), intArrayOf(3, 12))
         val r = oddsRatio(table, confidenceLevel = Double.NaN)
         assertEquals(8.0, r.estimate, tol, "OR estimate unaffected by NaN CL")
-        assertTrue(r.ci.first.isNaN(), "CI lower should be NaN for NaN CL")
-        assertTrue(r.ci.second.isNaN(), "CI upper should be NaN for NaN CL")
+        assertTrue(r.ci.lower.isNaN(), "CI lower should be NaN for NaN CL")
+        assertTrue(r.ci.upper.isNaN(), "CI upper should be NaN for NaN CL")
     }
 
     // ===== oddsRatio: Property-based =====
@@ -246,7 +247,7 @@ internal class ContingencyMeasuresTest {
         for (table in tables) {
             val r = oddsRatio(table)
             assertTrue(
-                r.ci.first <= r.estimate && r.estimate <= r.ci.second,
+                r.ci.lower <= r.estimate && r.estimate <= r.ci.upper,
                 "CI should contain OR for ${table.map { it.toList() }}"
             )
         }
@@ -265,9 +266,9 @@ internal class ContingencyMeasuresTest {
         assertEquals(r95.estimate, r99.estimate, 0.0)
 
         // CI widths: 90% < 95% < 99%
-        val w90 = r90.ci.second - r90.ci.first
-        val w95 = r95.ci.second - r95.ci.first
-        val w99 = r99.ci.second - r99.ci.first
+        val w90 = r90.ci.upper - r90.ci.lower
+        val w95 = r95.ci.upper - r95.ci.lower
+        val w99 = r99.ci.upper - r99.ci.lower
         assertTrue(w90 < w95, "90% CI should be narrower than 95%")
         assertTrue(w95 < w99, "95% CI should be narrower than 99%")
     }
@@ -333,18 +334,18 @@ internal class ContingencyMeasuresTest {
 
         // [[10,5],[3,12]]: CI95 = (1.13934816990876, 9.75216479436741)
         val r1 = relativeRisk(arrayOf(intArrayOf(10, 5), intArrayOf(3, 12)))
-        assertEquals(1.13934816990876, r1.ci.first, ciTol, "RR CI lower [[10,5],[3,12]]")
-        assertEquals(9.75216479436741, r1.ci.second, ciTol, "RR CI upper [[10,5],[3,12]]")
+        assertEquals(1.13934816990876, r1.ci.lower, ciTol, "RR CI lower [[10,5],[3,12]]")
+        assertEquals(9.75216479436741, r1.ci.upper, ciTol, "RR CI upper [[10,5],[3,12]]")
 
         // [[20,10],[15,25]]: CI95 = (1.10737003897624, 2.8540539439575)
         val r2 = relativeRisk(arrayOf(intArrayOf(20, 10), intArrayOf(15, 25)))
-        assertEquals(1.10737003897624, r2.ci.first, ciTol, "RR CI lower [[20,10],[15,25]]")
-        assertEquals(2.8540539439575, r2.ci.second, ciTol, "RR CI upper [[20,10],[15,25]]")
+        assertEquals(1.10737003897624, r2.ci.lower, ciTol, "RR CI lower [[20,10],[15,25]]")
+        assertEquals(2.8540539439575, r2.ci.upper, ciTol, "RR CI upper [[20,10],[15,25]]")
 
         // [[30,70],[40,60]]: CI95 = (0.510981718633414, 1.10082216151366)
         val r3 = relativeRisk(arrayOf(intArrayOf(30, 70), intArrayOf(40, 60)))
-        assertEquals(0.510981718633414, r3.ci.first, ciTol, "RR CI lower [[30,70],[40,60]]")
-        assertEquals(1.10082216151366, r3.ci.second, ciTol, "RR CI upper [[30,70],[40,60]]")
+        assertEquals(0.510981718633414, r3.ci.lower, ciTol, "RR CI lower [[30,70],[40,60]]")
+        assertEquals(1.10082216151366, r3.ci.upper, ciTol, "RR CI upper [[30,70],[40,60]]")
     }
 
     @Test
@@ -354,14 +355,14 @@ internal class ContingencyMeasuresTest {
         // CI90 = (1.19493794069492, 2.64490206522567)
         val r90 = relativeRisk(table, confidenceLevel = 0.90)
         assertEquals(0.90, r90.confidenceLevel, 0.0)
-        assertEquals(1.19493794069492, r90.ci.first, ciTol, "RR CI90 lower")
-        assertEquals(2.64490206522567, r90.ci.second, ciTol, "RR CI90 upper")
+        assertEquals(1.19493794069492, r90.ci.lower, ciTol, "RR CI90 lower")
+        assertEquals(2.64490206522567, r90.ci.upper, ciTol, "RR CI90 upper")
 
         // CI99 = (0.954318566343933, 3.31178071832825)
         val r99 = relativeRisk(table, confidenceLevel = 0.99)
         assertEquals(0.99, r99.confidenceLevel, 0.0)
-        assertEquals(0.954318566343933, r99.ci.first, ciTol, "RR CI99 lower")
-        assertEquals(3.31178071832825, r99.ci.second, ciTol, "RR CI99 upper")
+        assertEquals(0.954318566343933, r99.ci.lower, ciTol, "RR CI99 lower")
+        assertEquals(3.31178071832825, r99.ci.upper, ciTol, "RR CI99 upper")
     }
 
     // ===== relativeRisk: Edge cases =====
@@ -372,8 +373,8 @@ internal class ContingencyMeasuresTest {
         // CI95 = (0.53805471012709, 1.85854706069537)
         val r = relativeRisk(arrayOf(intArrayOf(10, 10), intArrayOf(10, 10)))
         assertEquals(1.0, r.estimate, tol, "RR symmetric")
-        assertEquals(0.53805471012709, r.ci.first, ciTol, "RR CI lower symmetric")
-        assertEquals(1.85854706069537, r.ci.second, ciTol, "RR CI upper symmetric")
+        assertEquals(0.53805471012709, r.ci.lower, ciTol, "RR CI lower symmetric")
+        assertEquals(1.85854706069537, r.ci.upper, ciTol, "RR CI upper symmetric")
     }
 
     @Test
@@ -382,8 +383,8 @@ internal class ContingencyMeasuresTest {
         // CI95 = (0.140863494093217, 7.09907138423134)
         val r = relativeRisk(arrayOf(intArrayOf(1, 1), intArrayOf(1, 1)))
         assertEquals(1.0, r.estimate, tol, "RR [[1,1],[1,1]]")
-        assertEquals(0.140863494093217, r.ci.first, ciTol, "RR CI lower [[1,1],[1,1]]")
-        assertEquals(7.09907138423134, r.ci.second, ciTol, "RR CI upper [[1,1],[1,1]]")
+        assertEquals(0.140863494093217, r.ci.lower, ciTol, "RR CI lower [[1,1],[1,1]]")
+        assertEquals(7.09907138423134, r.ci.upper, ciTol, "RR CI upper [[1,1],[1,1]]")
     }
 
     @Test
@@ -392,8 +393,8 @@ internal class ContingencyMeasuresTest {
         val r = relativeRisk(arrayOf(intArrayOf(0, 10), intArrayOf(5, 5)))
         assertEquals(0.0, r.estimate, 0.0, "RR with a=0")
         // CI should be NaN (a not > 0 for log-based CI)
-        assertTrue(r.ci.first.isNaN(), "CI lower when a=0")
-        assertTrue(r.ci.second.isNaN(), "CI upper when a=0")
+        assertTrue(r.ci.lower.isNaN(), "CI lower when a=0")
+        assertTrue(r.ci.upper.isNaN(), "CI upper when a=0")
     }
 
     @Test
@@ -402,8 +403,8 @@ internal class ContingencyMeasuresTest {
         val r = relativeRisk(arrayOf(intArrayOf(5, 5), intArrayOf(0, 10)))
         assertEquals(Double.POSITIVE_INFINITY, r.estimate, "RR with c=0")
         // CI should be NaN (c not > 0)
-        assertTrue(r.ci.first.isNaN(), "CI lower when c=0")
-        assertTrue(r.ci.second.isNaN(), "CI upper when c=0")
+        assertTrue(r.ci.lower.isNaN(), "CI lower when c=0")
+        assertTrue(r.ci.upper.isNaN(), "CI upper when c=0")
     }
 
     @Test
@@ -411,8 +412,8 @@ internal class ContingencyMeasuresTest {
         // [[0,0],[5,5]]: row1 = 0 -> a/row1 = 0/0 = NaN (IEEE 754)
         val r = relativeRisk(arrayOf(intArrayOf(0, 0), intArrayOf(5, 5)))
         assertTrue(r.estimate.isNaN(), "RR with zero row sum should be NaN")
-        assertTrue(r.ci.first.isNaN(), "CI lower zero row sum")
-        assertTrue(r.ci.second.isNaN(), "CI upper zero row sum")
+        assertTrue(r.ci.lower.isNaN(), "CI lower zero row sum")
+        assertTrue(r.ci.upper.isNaN(), "CI upper zero row sum")
     }
 
     @Test
@@ -420,8 +421,8 @@ internal class ContingencyMeasuresTest {
         // [[0,0],[0,0]]: both row sums = 0 -> NaN
         val r = relativeRisk(arrayOf(intArrayOf(0, 0), intArrayOf(0, 0)))
         assertTrue(r.estimate.isNaN(), "RR all zeros should be NaN")
-        assertTrue(r.ci.first.isNaN(), "CI lower all zeros")
-        assertTrue(r.ci.second.isNaN(), "CI upper all zeros")
+        assertTrue(r.ci.lower.isNaN(), "CI lower all zeros")
+        assertTrue(r.ci.upper.isNaN(), "CI upper all zeros")
     }
 
     // ===== relativeRisk: Degenerate input =====
@@ -477,8 +478,8 @@ internal class ContingencyMeasuresTest {
         // CI95 = (0.445258523594507, 0.561471564837854)
         val r = relativeRisk(arrayOf(intArrayOf(200, 300), intArrayOf(400, 100)))
         assertEquals(0.5, r.estimate, tol, "RR large counts")
-        assertEquals(0.445258523594507, r.ci.first, ciTol, "RR CI lower large counts")
-        assertEquals(0.561471564837854, r.ci.second, ciTol, "RR CI upper large counts")
+        assertEquals(0.445258523594507, r.ci.lower, ciTol, "RR CI lower large counts")
+        assertEquals(0.561471564837854, r.ci.upper, ciTol, "RR CI upper large counts")
     }
 
     @Test
@@ -487,10 +488,10 @@ internal class ContingencyMeasuresTest {
         // CI95 = (141.001363785318, 7092.12998480322)
         val r = relativeRisk(arrayOf(intArrayOf(1000, 1), intArrayOf(1, 1000)))
         assertEquals(1000.0, r.estimate, tol, "RR very large")
-        assertTrue(r.ci.first.isFinite(), "CI lower should be finite for large RR")
-        assertTrue(r.ci.second.isFinite(), "CI upper should be finite for large RR")
-        assertEquals(141.001363785318, r.ci.first, 0.1, "RR CI lower very large")
-        assertEquals(7092.12998480322, r.ci.second, 1.0, "RR CI upper very large")
+        assertTrue(r.ci.lower.isFinite(), "CI lower should be finite for large RR")
+        assertTrue(r.ci.upper.isFinite(), "CI upper should be finite for large RR")
+        assertEquals(141.001363785318, r.ci.lower, 0.1, "RR CI lower very large")
+        assertEquals(7092.12998480322, r.ci.upper, 1.0, "RR CI upper very large")
     }
 
     // ===== relativeRisk: Non-finite input =====
@@ -502,8 +503,8 @@ internal class ContingencyMeasuresTest {
         val table = arrayOf(intArrayOf(10, 5), intArrayOf(3, 12))
         val r = relativeRisk(table, confidenceLevel = Double.NaN)
         assertEquals(10.0 / 3.0, r.estimate, tol, "RR estimate unaffected by NaN CL")
-        assertTrue(r.ci.first.isNaN(), "CI lower should be NaN for NaN CL")
-        assertTrue(r.ci.second.isNaN(), "CI upper should be NaN for NaN CL")
+        assertTrue(r.ci.lower.isNaN(), "CI lower should be NaN for NaN CL")
+        assertTrue(r.ci.upper.isNaN(), "CI upper should be NaN for NaN CL")
     }
 
     // ===== relativeRisk: Property-based =====
@@ -520,7 +521,7 @@ internal class ContingencyMeasuresTest {
         for (table in tables) {
             val r = relativeRisk(table)
             assertTrue(
-                r.ci.first <= r.estimate && r.estimate <= r.ci.second,
+                r.ci.lower <= r.estimate && r.estimate <= r.ci.upper,
                 "CI should contain RR for ${table.map { it.toList() }}"
             )
         }
@@ -536,9 +537,9 @@ internal class ContingencyMeasuresTest {
         assertEquals(r90.estimate, r95.estimate, 0.0)
         assertEquals(r95.estimate, r99.estimate, 0.0)
 
-        val w90 = r90.ci.second - r90.ci.first
-        val w95 = r95.ci.second - r95.ci.first
-        val w99 = r99.ci.second - r99.ci.first
+        val w90 = r90.ci.upper - r90.ci.lower
+        val w95 = r95.ci.upper - r95.ci.lower
+        val w99 = r99.ci.upper - r99.ci.lower
         assertTrue(w90 < w95, "90% CI should be narrower than 95%")
         assertTrue(w95 < w99, "95% CI should be narrower than 99%")
     }
@@ -570,24 +571,24 @@ internal class ContingencyMeasuresTest {
 
     @Test
     fun testRiskEstimateDataClassEquality() {
-        val r1 = RiskEstimate(estimate = 2.0, ci = Pair(1.0, 3.0), confidenceLevel = 0.95)
-        val r2 = RiskEstimate(estimate = 2.0, ci = Pair(1.0, 3.0), confidenceLevel = 0.95)
+        val r1 = RiskEstimate(estimate = 2.0, ci = ConfidenceInterval(1.0, 3.0), confidenceLevel = 0.95)
+        val r2 = RiskEstimate(estimate = 2.0, ci = ConfidenceInterval(1.0, 3.0), confidenceLevel = 0.95)
         assertEquals(r1, r2)
         assertEquals(r1.hashCode(), r2.hashCode())
     }
 
     @Test
     fun testRiskEstimateFields() {
-        val r = RiskEstimate(estimate = 5.0, ci = Pair(2.0, 10.0), confidenceLevel = 0.99)
+        val r = RiskEstimate(estimate = 5.0, ci = ConfidenceInterval(2.0, 10.0), confidenceLevel = 0.99)
         assertEquals(5.0, r.estimate, 0.0)
-        assertEquals(2.0, r.ci.first, 0.0)
-        assertEquals(10.0, r.ci.second, 0.0)
+        assertEquals(2.0, r.ci.lower, 0.0)
+        assertEquals(10.0, r.ci.upper, 0.0)
         assertEquals(0.99, r.confidenceLevel, 0.0)
     }
 
     @Test
     fun testRiskEstimateCopy() {
-        val r1 = RiskEstimate(estimate = 3.0, ci = Pair(1.0, 5.0), confidenceLevel = 0.95)
+        val r1 = RiskEstimate(estimate = 3.0, ci = ConfidenceInterval(1.0, 5.0), confidenceLevel = 0.95)
         val r2 = r1.copy(estimate = 4.0)
         assertEquals(4.0, r2.estimate, 0.0)
         assertEquals(r1.ci, r2.ci)

@@ -100,7 +100,7 @@ class TTestTest {
         val result = tTest(sample, mu = 0.0, confidenceLevel = 0.95)
         val ci = result.confidenceInterval!!
         val mean = sample.average()
-        assertTrue(ci.first < mean && mean < ci.second)
+        assertTrue(ci.lower < mean && mean < ci.upper)
     }
 
     // ===== Confidence interval: one-sided =====
@@ -110,8 +110,8 @@ class TTestTest {
         val sample = doubleArrayOf(5.0, 6.0, 7.0, 5.5, 6.5)
         val result = tTest(sample, mu = 5.0, alternative = Alternative.LESS)
         val ci = result.confidenceInterval!!
-        assertEquals(Double.NEGATIVE_INFINITY, ci.first, "LESS CI lower should be -Inf")
-        assertTrue(ci.second.isFinite(), "LESS CI upper should be finite")
+        assertEquals(Double.NEGATIVE_INFINITY, ci.lower, "LESS CI lower should be -Inf")
+        assertTrue(ci.upper.isFinite(), "LESS CI upper should be finite")
     }
 
     @Test
@@ -119,8 +119,8 @@ class TTestTest {
         val sample = doubleArrayOf(5.0, 6.0, 7.0, 5.5, 6.5)
         val result = tTest(sample, mu = 5.0, alternative = Alternative.GREATER)
         val ci = result.confidenceInterval!!
-        assertTrue(ci.first.isFinite(), "GREATER CI lower should be finite")
-        assertEquals(Double.POSITIVE_INFINITY, ci.second, "GREATER CI upper should be +Inf")
+        assertTrue(ci.lower.isFinite(), "GREATER CI lower should be finite")
+        assertEquals(Double.POSITIVE_INFINITY, ci.upper, "GREATER CI upper should be +Inf")
     }
 
     @Test
@@ -131,10 +131,10 @@ class TTestTest {
         val greater = tTest(s1, s2, alternative = Alternative.GREATER)
         val lessCI = less.confidenceInterval!!
         val greaterCI = greater.confidenceInterval!!
-        assertEquals(Double.NEGATIVE_INFINITY, lessCI.first)
-        assertTrue(lessCI.second.isFinite())
-        assertTrue(greaterCI.first.isFinite())
-        assertEquals(Double.POSITIVE_INFINITY, greaterCI.second)
+        assertEquals(Double.NEGATIVE_INFINITY, lessCI.lower)
+        assertTrue(lessCI.upper.isFinite())
+        assertTrue(greaterCI.lower.isFinite())
+        assertEquals(Double.POSITIVE_INFINITY, greaterCI.upper)
     }
 
     // ===== Validation =====
@@ -206,8 +206,8 @@ class TTestTest {
         assertEquals(4.0, result.degreesOfFreedom, 1e-10)
         // Confidence interval collapses to a point
         val ci = result.confidenceInterval!!
-        assertEquals(5.0, ci.first, 1e-10, "CI lower = mean when se=0")
-        assertEquals(5.0, ci.second, 1e-10, "CI upper = mean when se=0")
+        assertEquals(5.0, ci.lower, 1e-10, "CI lower = mean when se=0")
+        assertEquals(5.0, ci.upper, 1e-10, "CI upper = mean when se=0")
     }
 
     @Test
@@ -247,8 +247,8 @@ class TTestTest {
         assertTrue(result.statistic.isNaN(), "t should be NaN when both constant and same mean")
         assertTrue(result.pValue.isNaN(), "p should be NaN when both constant and same mean")
         val ci = result.confidenceInterval!!
-        assertEquals(0.0, ci.first, 1e-10, "CI lower = 0 when diff=0 and se=0")
-        assertEquals(0.0, ci.second, 1e-10, "CI upper = 0 when diff=0 and se=0")
+        assertEquals(0.0, ci.lower, 1e-10, "CI lower = 0 when diff=0 and se=0")
+        assertEquals(0.0, ci.upper, 1e-10, "CI upper = 0 when diff=0 and se=0")
     }
 
     @Test
@@ -260,8 +260,8 @@ class TTestTest {
         assertEquals(Double.POSITIVE_INFINITY, result.statistic, "t should be +Inf when mean1 > mean2 and se=0")
         assertEquals(0.0, result.pValue, 1e-15, "p should be 0 when means differ and se=0")
         val ci = result.confidenceInterval!!
-        assertEquals(5.0, ci.first, 1e-10, "CI should be a point at the difference")
-        assertEquals(5.0, ci.second, 1e-10, "CI should be a point at the difference")
+        assertEquals(5.0, ci.lower, 1e-10, "CI should be a point at the difference")
+        assertEquals(5.0, ci.upper, 1e-10, "CI should be a point at the difference")
     }
 
     @Test

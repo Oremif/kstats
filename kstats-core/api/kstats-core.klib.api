@@ -103,6 +103,22 @@ final class org.oremif.kstats.core.exceptions/InvalidParameterException : org.or
     constructor <init>(kotlin/String) // org.oremif.kstats.core.exceptions/InvalidParameterException.<init>|<init>(kotlin.String){}[0]
 }
 
+final class org.oremif.kstats.core/ConfidenceInterval { // org.oremif.kstats.core/ConfidenceInterval|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double) // org.oremif.kstats.core/ConfidenceInterval.<init>|<init>(kotlin.Double;kotlin.Double){}[0]
+
+    final val lower // org.oremif.kstats.core/ConfidenceInterval.lower|{}lower[0]
+        final fun <get-lower>(): kotlin/Double // org.oremif.kstats.core/ConfidenceInterval.lower.<get-lower>|<get-lower>(){}[0]
+    final val upper // org.oremif.kstats.core/ConfidenceInterval.upper|{}upper[0]
+        final fun <get-upper>(): kotlin/Double // org.oremif.kstats.core/ConfidenceInterval.upper.<get-upper>|<get-upper>(){}[0]
+
+    final fun component1(): kotlin/Double // org.oremif.kstats.core/ConfidenceInterval.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // org.oremif.kstats.core/ConfidenceInterval.component2|component2(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ...): org.oremif.kstats.core/ConfidenceInterval // org.oremif.kstats.core/ConfidenceInterval.copy|copy(kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.core/ConfidenceInterval.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.core/ConfidenceInterval.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.core/ConfidenceInterval.toString|toString(){}[0]
+}
+
 final class org.oremif.kstats.descriptive/DescriptiveStatistics { // org.oremif.kstats.descriptive/DescriptiveStatistics|null[0]
     constructor <init>(kotlin/Long, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double) // org.oremif.kstats.descriptive/DescriptiveStatistics.<init>|<init>(kotlin.Long;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
 

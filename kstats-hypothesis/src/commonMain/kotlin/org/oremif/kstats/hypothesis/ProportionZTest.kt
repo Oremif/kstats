@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.distributions.NormalDistribution
@@ -77,19 +78,19 @@ public fun proportionZTest(
     val seWald = sqrt(pHat * (1.0 - pHat) / n)
     val alpha = 1.0 - confidenceLevel
     val ci = if (alpha.isNaN()) {
-        Pair(Double.NaN, Double.NaN)
+        ConfidenceInterval(Double.NaN, Double.NaN)
     } else when (alternative) {
         Alternative.TWO_SIDED -> {
             val zCrit = standardNormal.quantile(1.0 - alpha / 2.0)
-            Pair(pHat - zCrit * seWald, pHat + zCrit * seWald)
+            ConfidenceInterval(pHat - zCrit * seWald, pHat + zCrit * seWald)
         }
         Alternative.LESS -> {
             val zCrit = standardNormal.quantile(1.0 - alpha)
-            Pair(0.0, pHat + zCrit * seWald)
+            ConfidenceInterval(0.0, pHat + zCrit * seWald)
         }
         Alternative.GREATER -> {
             val zCrit = standardNormal.quantile(1.0 - alpha)
-            Pair(pHat - zCrit * seWald, 1.0)
+            ConfidenceInterval(pHat - zCrit * seWald, 1.0)
         }
     }
 
@@ -201,19 +202,19 @@ public fun proportionZTest(
     val seUnpooled = sqrt(pHat1 * (1.0 - pHat1) / n1 + pHat2 * (1.0 - pHat2) / n2)
     val alpha = 1.0 - confidenceLevel
     val ci = if (alpha.isNaN()) {
-        Pair(Double.NaN, Double.NaN)
+        ConfidenceInterval(Double.NaN, Double.NaN)
     } else when (alternative) {
         Alternative.TWO_SIDED -> {
             val zCrit = standardNormal.quantile(1.0 - alpha / 2.0)
-            Pair(diff - zCrit * seUnpooled, diff + zCrit * seUnpooled)
+            ConfidenceInterval(diff - zCrit * seUnpooled, diff + zCrit * seUnpooled)
         }
         Alternative.LESS -> {
             val zCrit = standardNormal.quantile(1.0 - alpha)
-            Pair(Double.NEGATIVE_INFINITY, diff + zCrit * seUnpooled)
+            ConfidenceInterval(Double.NEGATIVE_INFINITY, diff + zCrit * seUnpooled)
         }
         Alternative.GREATER -> {
             val zCrit = standardNormal.quantile(1.0 - alpha)
-            Pair(diff - zCrit * seUnpooled, Double.POSITIVE_INFINITY)
+            ConfidenceInterval(diff - zCrit * seUnpooled, Double.POSITIVE_INFINITY)
         }
     }
 

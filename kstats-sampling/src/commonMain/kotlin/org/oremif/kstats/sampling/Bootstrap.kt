@@ -1,5 +1,6 @@
 package org.oremif.kstats.sampling
 
+import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.erf
 import org.oremif.kstats.core.erfInv
 import org.oremif.kstats.core.exceptions.InsufficientDataException
@@ -8,22 +9,6 @@ import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.sqrt
 import kotlin.random.Random
-
-/**
- * A confidence interval with a lower and upper bound.
- *
- * A confidence interval gives a range of plausible values for a population parameter.
- * If you compute a 95% confidence interval from many independent samples, approximately
- * 95% of those intervals will contain the true parameter value.
- *
- * @property lower the lower bound of the interval.
- * @property upper the upper bound of the interval. Always greater than or equal to [lower]
- * for well-behaved statistics with sufficient resamples.
- */
-public data class ConfidenceInterval(
-    public val lower: Double,
-    public val upper: Double,
-)
 
 /**
  * The result of a bootstrap confidence interval computation, containing three CI methods.

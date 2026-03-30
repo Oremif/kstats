@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis
 
+import org.oremif.kstats.core.ConfidenceInterval
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -28,16 +29,16 @@ internal object TestAssertions {
         assertEquals(expected, actual, tol, "p-value $message")
     }
 
-    /** Assert a confidence interval pair. */
+    /** Assert a confidence interval. */
     fun assertCI(
         expectedLow: Double,
         expectedHigh: Double,
-        ci: Pair<Double, Double>?,
+        ci: ConfidenceInterval?,
         tol: Double = 1e-8,
         message: String = ""
     ) {
         requireNotNull(ci) { "CI should not be null $message" }
-        assertEquals(expectedLow, ci.first, tol, "CI lower $message")
-        assertEquals(expectedHigh, ci.second, tol, "CI upper $message")
+        assertEquals(expectedLow, ci.lower, tol, "CI lower $message")
+        assertEquals(expectedHigh, ci.upper, tol, "CI upper $message")
     }
 }

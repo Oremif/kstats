@@ -1,5 +1,6 @@
 package org.oremif.kstats.correlation.samples
 
+import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.correlation.pearsonCorrelation
 import org.oremif.kstats.correlation.simpleLinearRegression
 import org.oremif.kstats.descriptive.DescriptiveStatistics
@@ -24,7 +25,7 @@ class PipelineSamples {
         val testName: String,
         val pValue: Double,
         val isSignificant: Boolean,
-        val confidenceInterval: Pair<Double, Double>?
+        val confidenceInterval: ConfidenceInterval?
     )
 
     private data class AnalysisReport(
