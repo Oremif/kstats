@@ -724,4 +724,454 @@ internal class EffectSizeTest {
             assertEquals(expected[i], cohensH(p1Values[i], p2), tol, "cohensH(${p1Values[i]}, $p2)")
         }
     }
+
+    // =============================================================================
+    // Hedges' g: Basic correctness (pooled)
+    // =============================================================================
+
+    @Test
+    fun testHedgesGPooledKnownValues() {
+        // scipy (manual): hedges_g([1,2,3,4,5], [2,4,6,8,10], pooled=True) = -1.08387096774194
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
+        assertEquals(-1.08387096774194, hedgesG(x, y, pooled = true), tol, "pooled g for simple arrays")
+    }
+
+    @Test
+    fun testHedgesGPooledUnequalSizes() {
+        // scipy (manual): hedges_g([10,12,11,13,14,15], [8,9,7,10], pooled=True) = 2.15431925574173
+        val x = doubleArrayOf(10.0, 12.0, 11.0, 13.0, 14.0, 15.0)
+        val y = doubleArrayOf(8.0, 9.0, 7.0, 10.0)
+        assertEquals(2.15431925574173, hedgesG(x, y, pooled = true), tol, "pooled g with unequal sizes")
+    }
+
+    @Test
+    fun testHedgesGPooledLargeEffect() {
+        // scipy (manual): hedges_g([100,101,102,103,104], [0,1,2,3,4], pooled=True) = 57.1250157965901
+        val x = doubleArrayOf(100.0, 101.0, 102.0, 103.0, 104.0)
+        val y = doubleArrayOf(0.0, 1.0, 2.0, 3.0, 4.0)
+        assertEquals(57.1250157965901, hedgesG(x, y, pooled = true), tol, "pooled g for large effect")
+    }
+
+    @Test
+    fun testHedgesGPooledNegativeEffect() {
+        // scipy (manual): hedges_g([1,2,3], [10,11,12], pooled=True) = -7.2
+        val x = doubleArrayOf(1.0, 2.0, 3.0)
+        val y = doubleArrayOf(10.0, 11.0, 12.0)
+        assertEquals(-7.2, hedgesG(x, y, pooled = true), tol, "pooled g for negative effect")
+    }
+
+    @Test
+    fun testHedgesGPooledDifferentVariances() {
+        // scipy (manual): hedges_g([1,2,3,4,5], [10,20,30,40,50], pooled=True) = -2.17042312628664
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(10.0, 20.0, 30.0, 40.0, 50.0)
+        assertEquals(-2.17042312628664, hedgesG(x, y, pooled = true), tol, "pooled g with different variances")
+    }
+
+    // =============================================================================
+    // Hedges' g: Basic correctness (unpooled)
+    // =============================================================================
+
+    @Test
+    fun testHedgesGUnpooledKnownValues() {
+        // When n1 == n2, pooled and unpooled give same result
+        // scipy (manual): hedges_g([1,2,3,4,5], [2,4,6,8,10], pooled=False) = -1.08387096774194
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
+        assertEquals(-1.08387096774194, hedgesG(x, y, pooled = false), tol, "unpooled g for simple arrays")
+    }
+
+    @Test
+    fun testHedgesGUnpooledUnequalSizes() {
+        // scipy (manual): hedges_g([10,12,11,13,14,15], [8,9,7,10], pooled=False) = 2.24784367373821
+        val x = doubleArrayOf(10.0, 12.0, 11.0, 13.0, 14.0, 15.0)
+        val y = doubleArrayOf(8.0, 9.0, 7.0, 10.0)
+        assertEquals(2.24784367373821, hedgesG(x, y, pooled = false), tol, "unpooled g with unequal sizes")
+    }
+
+    @Test
+    fun testHedgesGUnpooledDifferentVariances() {
+        // scipy (manual): hedges_g([1,2,3,4,5], [10,20,30,40,50], pooled=False) = -2.17042312628664
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(10.0, 20.0, 30.0, 40.0, 50.0)
+        assertEquals(-2.17042312628664, hedgesG(x, y, pooled = false), tol, "unpooled g with different variances")
+    }
+
+    // =============================================================================
+    // Hedges' g: Default parameter
+    // =============================================================================
+
+    @Test
+    fun testHedgesGDefaultIsPooled() {
+        val x = doubleArrayOf(10.0, 12.0, 11.0, 13.0, 14.0, 15.0)
+        val y = doubleArrayOf(8.0, 9.0, 7.0, 10.0)
+        assertEquals(
+            hedgesG(x, y, pooled = true),
+            hedgesG(x, y),
+            0.0,
+            "default should be pooled"
+        )
+    }
+
+    // =============================================================================
+    // Hedges' g: Edge cases
+    // =============================================================================
+
+    @Test
+    fun testHedgesGMinimumSampleSize() {
+        // Minimum valid: 2 elements per array, df=2, J=0.571428571428571
+        // scipy (manual): hedges_g([1,3], [5,7], pooled=True) = -1.61624407128354
+        val x = doubleArrayOf(1.0, 3.0)
+        val y = doubleArrayOf(5.0, 7.0)
+        assertEquals(-1.61624407128354, hedgesG(x, y, pooled = true), tol, "min sample pooled")
+        assertEquals(-1.61624407128354, hedgesG(x, y, pooled = false), tol, "min sample unpooled")
+    }
+
+    @Test
+    fun testHedgesGIdenticalMeans() {
+        // When means are identical, g should be exactly 0
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        assertEquals(0.0, hedgesG(x, y, pooled = true), tol, "g for identical arrays")
+        assertEquals(0.0, hedgesG(x, y, pooled = false), tol, "g for identical arrays (unpooled)")
+    }
+
+    @Test
+    fun testHedgesGIdenticalMeansDifferentVariances() {
+        // Same mean but different spreads: g should be 0
+        val x = doubleArrayOf(4.0, 5.0, 6.0)
+        val y = doubleArrayOf(1.0, 5.0, 9.0)
+        assertEquals(0.0, hedgesG(x, y, pooled = true), tol, "g = 0 when means equal (pooled)")
+        assertEquals(0.0, hedgesG(x, y, pooled = false), tol, "g = 0 when means equal (unpooled)")
+    }
+
+    @Test
+    fun testHedgesGLargeSizeDifference() {
+        // scipy (manual): hedges_g([1,2], [10..19], pooled=True) = -4.16526080700374
+        val x = doubleArrayOf(1.0, 2.0)
+        val y = doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0)
+        assertEquals(-4.16526080700374, hedgesG(x, y, pooled = true), tol, "pooled g with large size diff")
+        // scipy (manual): hedges_g([1,2], [10..19], pooled=False) = -5.45830591376811
+        assertEquals(-5.45830591376811, hedgesG(x, y, pooled = false), tol, "unpooled g with large size diff")
+    }
+
+    // =============================================================================
+    // Hedges' g: Degenerate input
+    // =============================================================================
+
+    @Test
+    fun testHedgesGEmptyArrayX() {
+        assertFailsWith<InsufficientDataException> {
+            hedgesG(doubleArrayOf(), doubleArrayOf(1.0, 2.0))
+        }
+    }
+
+    @Test
+    fun testHedgesGEmptyArrayY() {
+        assertFailsWith<InsufficientDataException> {
+            hedgesG(doubleArrayOf(1.0, 2.0), doubleArrayOf())
+        }
+    }
+
+    @Test
+    fun testHedgesGSingleElementX() {
+        assertFailsWith<InsufficientDataException> {
+            hedgesG(doubleArrayOf(1.0), doubleArrayOf(2.0, 3.0))
+        }
+    }
+
+    @Test
+    fun testHedgesGSingleElementY() {
+        assertFailsWith<InsufficientDataException> {
+            hedgesG(doubleArrayOf(1.0, 2.0), doubleArrayOf(3.0))
+        }
+    }
+
+    @Test
+    fun testHedgesGSingleElementBoth() {
+        assertFailsWith<InsufficientDataException> {
+            hedgesG(doubleArrayOf(1.0), doubleArrayOf(2.0))
+        }
+    }
+
+    @Test
+    fun testHedgesGConstantArraysSameMean() {
+        // Both arrays constant with same value: d = NaN -> g = NaN
+        val x = doubleArrayOf(5.0, 5.0, 5.0)
+        val y = doubleArrayOf(5.0, 5.0, 5.0)
+        assertTrue(hedgesG(x, y, pooled = true).isNaN(), "constant same mean -> NaN (pooled)")
+        assertTrue(hedgesG(x, y, pooled = false).isNaN(), "constant same mean -> NaN (unpooled)")
+    }
+
+    @Test
+    fun testHedgesGConstantArraysDifferentMeans() {
+        // Both constant, different values: d = +/-Inf -> g = +/-Inf
+        val x = doubleArrayOf(5.0, 5.0, 5.0)
+        val y = doubleArrayOf(3.0, 3.0, 3.0)
+        val g = hedgesG(x, y, pooled = true)
+        assertEquals(Double.POSITIVE_INFINITY, g, "constant different means -> +Inf (pooled)")
+    }
+
+    @Test
+    fun testHedgesGOneConstantArray() {
+        // scipy (manual): hedges_g([5,5,5], [1,2,3], pooled=True) = d * J = 4.24264068711928 * 0.8 = 3.39411254969543
+        val x = doubleArrayOf(5.0, 5.0, 5.0)
+        val y = doubleArrayOf(1.0, 2.0, 3.0)
+        val expected = 4.24264068711928 * 0.8 // d * J(df=4)
+        assertEquals(expected, hedgesG(x, y, pooled = true), tol, "one constant array pooled")
+    }
+
+    // =============================================================================
+    // Hedges' g: Extreme parameters
+    // =============================================================================
+
+    @Test
+    fun testHedgesGLargeValues() {
+        // scipy (manual): hedges_g(large_offset, pooled=True) = -80.0
+        val x = doubleArrayOf(1e10, 1e10 + 1.0, 1e10 + 2.0)
+        val y = doubleArrayOf(1e10 + 100.0, 1e10 + 101.0, 1e10 + 102.0)
+        assertEquals(-80.0, hedgesG(x, y, pooled = true), tol, "large offset values pooled")
+    }
+
+    @Test
+    fun testHedgesGSmallValues() {
+        // scipy (manual): hedges_g(small, pooled=True) = -2.4
+        val x = doubleArrayOf(1e-10, 2e-10, 3e-10)
+        val y = doubleArrayOf(4e-10, 5e-10, 6e-10)
+        assertEquals(-2.4, hedgesG(x, y, pooled = true), tol, "very small values pooled")
+        assertEquals(-2.4, hedgesG(x, y, pooled = false), tol, "very small values unpooled")
+    }
+
+    @Test
+    fun testHedgesGVeryLargeSample() {
+        // Large arrays should not overflow or produce NaN
+        val x = DoubleArray(10_000) { it.toDouble() }
+        val y = DoubleArray(10_000) { it.toDouble() + 100.0 }
+        val g = hedgesG(x, y, pooled = true)
+        assertTrue(g.isFinite(), "g should be finite for large arrays")
+        assertTrue(g < 0.0, "g should be negative when x < y")
+    }
+
+    @Test
+    fun testHedgesGLargeSampleCorrectionNearOne() {
+        // For very large samples, J -> 1, so g -> d
+        // scipy (manual): hedges_g(1..100, 51..150, pooled=True) = -1.71691847719981
+        // scipy (manual): cohens_d(1..100, 51..150, pooled=True) = -1.72345496886428
+        val x = DoubleArray(100) { it.toDouble() + 1.0 }
+        val y = DoubleArray(100) { it.toDouble() + 51.0 }
+        val g = hedgesG(x, y, pooled = true)
+        val d = cohensD(x, y, pooled = true)
+        assertEquals(-1.71691847719981, g, tol, "g with large sample")
+        // J for df=198 is 0.996207332490518, so g should be very close to d
+        assertTrue(abs(g) < abs(d), "|g| < |d| due to Hedges' correction")
+        assertTrue(abs(g / d - 0.996207332490518) < 1e-10, "g/d should equal J")
+    }
+
+    // =============================================================================
+    // Hedges' g: Non-finite input
+    // =============================================================================
+
+    @Test
+    fun testHedgesGNaNInX() {
+        val x = doubleArrayOf(1.0, Double.NaN, 3.0)
+        val y = doubleArrayOf(4.0, 5.0, 6.0)
+        assertTrue(hedgesG(x, y).isNaN(), "NaN in x should propagate")
+    }
+
+    @Test
+    fun testHedgesGNaNInY() {
+        val x = doubleArrayOf(1.0, 2.0, 3.0)
+        val y = doubleArrayOf(4.0, Double.NaN, 6.0)
+        assertTrue(hedgesG(x, y).isNaN(), "NaN in y should propagate")
+    }
+
+    @Test
+    fun testHedgesGNaNInBoth() {
+        val x = doubleArrayOf(Double.NaN, 2.0, 3.0)
+        val y = doubleArrayOf(4.0, 5.0, Double.NaN)
+        assertTrue(hedgesG(x, y).isNaN(), "NaN in both arrays should propagate")
+    }
+
+    @Test
+    fun testHedgesGPositiveInfinityInX() {
+        val x = doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0)
+        val y = doubleArrayOf(4.0, 5.0, 6.0)
+        val g = hedgesG(x, y)
+        assertTrue(g.isNaN() || g.isInfinite(), "Infinity in x should produce non-finite result")
+    }
+
+    @Test
+    fun testHedgesGNegativeInfinityInY() {
+        val x = doubleArrayOf(1.0, 2.0, 3.0)
+        val y = doubleArrayOf(4.0, Double.NEGATIVE_INFINITY, 6.0)
+        val g = hedgesG(x, y)
+        assertTrue(g.isNaN() || g.isInfinite(), "Negative Infinity in y should produce non-finite result")
+    }
+
+    // =============================================================================
+    // Hedges' g: Property-based tests
+    // =============================================================================
+
+    @Test
+    fun testHedgesGSignReversal() {
+        // Property: hedgesG(x, y) = -hedgesG(y, x) (J depends on n1+n2, not order)
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+        assertEquals(
+            hedgesG(x, y, pooled = true),
+            -hedgesG(y, x, pooled = true),
+            1e-14,
+            "pooled: g(x,y) = -g(y,x)"
+        )
+        assertEquals(
+            hedgesG(x, y, pooled = false),
+            -hedgesG(y, x, pooled = false),
+            1e-14,
+            "unpooled: g(x,y) = -g(y,x)"
+        )
+    }
+
+    @Test
+    fun testHedgesGSignReversalUnequalSizes() {
+        // Sign reversal holds even with unequal sizes
+        val x = doubleArrayOf(1.0, 2.0, 3.0)
+        val y = doubleArrayOf(10.0, 20.0, 30.0, 40.0, 50.0)
+        assertEquals(
+            hedgesG(x, y, pooled = true),
+            -hedgesG(y, x, pooled = true),
+            1e-14,
+            "sign reversal pooled, unequal sizes"
+        )
+        assertEquals(
+            hedgesG(x, y, pooled = false),
+            -hedgesG(y, x, pooled = false),
+            1e-14,
+            "sign reversal unpooled, unequal sizes"
+        )
+    }
+
+    @Test
+    fun testHedgesGPooledEqualsUnpooledForEqualSizes() {
+        // When n1 == n2, pooled and unpooled should give identical results
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+        assertEquals(
+            hedgesG(x, y, pooled = true),
+            hedgesG(x, y, pooled = false),
+            1e-14,
+            "pooled = unpooled when n1 = n2"
+        )
+    }
+
+    @Test
+    fun testHedgesGPooledDiffersFromUnpooledForUnequalSizes() {
+        // When n1 != n2 and variances differ, pooled != unpooled
+        val x = doubleArrayOf(10.0, 12.0, 11.0, 13.0, 14.0, 15.0)
+        val y = doubleArrayOf(8.0, 9.0, 7.0, 10.0)
+        val pooled = hedgesG(x, y, pooled = true)
+        val unpooled = hedgesG(x, y, pooled = false)
+        assertTrue(
+            abs(pooled - unpooled) > 0.01,
+            "pooled ($pooled) and unpooled ($unpooled) should differ for unequal sizes"
+        )
+    }
+
+    @Test
+    fun testHedgesGMagnitudeSmallerThanCohensD() {
+        // Property: |g| < |d| because J < 1 for any finite sample
+        val testCases = listOf(
+            doubleArrayOf(1.0, 2.0, 3.0) to doubleArrayOf(4.0, 5.0, 6.0),
+            doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0) to doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0),
+            doubleArrayOf(1.0, 2.0) to doubleArrayOf(3.0, 4.0),
+        )
+        for ((x, y) in testCases) {
+            val g = abs(hedgesG(x, y, pooled = true))
+            val d = abs(cohensD(x, y, pooled = true))
+            assertTrue(g < d, "|g| ($g) should be < |d| ($d) for n1=${x.size}, n2=${y.size}")
+        }
+    }
+
+    @Test
+    fun testHedgesGEqualsCohensDTimesJ() {
+        // Property: g = d * J, where J = 1 - 3/(4*df - 1)
+        val x = doubleArrayOf(10.0, 12.0, 11.0, 13.0, 14.0, 15.0)
+        val y = doubleArrayOf(8.0, 9.0, 7.0, 10.0)
+        val d = cohensD(x, y, pooled = true)
+        val df = (x.size + y.size - 2).toDouble()
+        val j = 1.0 - 3.0 / (4.0 * df - 1.0)
+        val expectedG = d * j
+        assertEquals(expectedG, hedgesG(x, y, pooled = true), 1e-14, "g = d * J (pooled)")
+
+        val du = cohensD(x, y, pooled = false)
+        val expectedGu = du * j
+        assertEquals(expectedGu, hedgesG(x, y, pooled = false), 1e-14, "g = d * J (unpooled)")
+    }
+
+    @Test
+    fun testHedgesGSignMatchesMeanDifference() {
+        // Property: sign of g matches sign of (mean(x) - mean(y))
+        val pairs = listOf(
+            doubleArrayOf(10.0, 20.0, 30.0) to doubleArrayOf(1.0, 2.0, 3.0),   // positive g
+            doubleArrayOf(1.0, 2.0, 3.0) to doubleArrayOf(10.0, 20.0, 30.0),   // negative g
+        )
+        for ((x, y) in pairs) {
+            val g = hedgesG(x, y)
+            val meanDiff = x.average() - y.average()
+            assertTrue(
+                g * meanDiff >= 0.0,
+                "sign of g ($g) should match sign of mean diff ($meanDiff)"
+            )
+        }
+    }
+
+    @Test
+    fun testHedgesGZeroWhenMeansEqual() {
+        // Property: g = 0 whenever means are equal
+        val x1 = doubleArrayOf(0.0, 10.0) // mean = 5
+        val y1 = doubleArrayOf(4.0, 6.0)  // mean = 5
+        assertEquals(0.0, hedgesG(x1, y1, pooled = true), tol, "g = 0 for equal means (pooled)")
+        assertEquals(0.0, hedgesG(x1, y1, pooled = false), tol, "g = 0 for equal means (unpooled)")
+    }
+
+    @Test
+    fun testHedgesGScaleInvariance() {
+        // Property: g(c*x, c*y) = g(x, y) for any positive constant c
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+        val g = hedgesG(x, y, pooled = true)
+        for (c in listOf(0.001, 0.1, 10.0, 1000.0)) {
+            val xScaled = DoubleArray(x.size) { x[it] * c }
+            val yScaled = DoubleArray(y.size) { y[it] * c }
+            assertEquals(g, hedgesG(xScaled, yScaled, pooled = true), 1e-8, "scale invariance for c=$c")
+        }
+    }
+
+    @Test
+    fun testHedgesGTranslationInvariance() {
+        // Property: g(x + c, y + c) = g(x, y) for any constant c
+        val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val y = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
+        val g = hedgesG(x, y, pooled = true)
+        for (c in listOf(-1000.0, -1.0, 0.0, 1.0, 1000.0)) {
+            val xShifted = DoubleArray(x.size) { x[it] + c }
+            val yShifted = DoubleArray(y.size) { y[it] + c }
+            assertEquals(g, hedgesG(xShifted, yShifted, pooled = true), 1e-8, "translation invariance for c=$c")
+        }
+    }
+
+    @Test
+    fun testHedgesGCorrectionFactorValues() {
+        // Verify the correction factor J = 1 - 3/(4*df - 1) for various df values
+        // by comparing g/d ratio
+        for (n in listOf(2, 3, 5, 10, 20)) {
+            val x = DoubleArray(n) { it.toDouble() + 1.0 }
+            val y = DoubleArray(n) { it.toDouble() + (n + 1).toDouble() }
+            val d = cohensD(x, y, pooled = true)
+            val g = hedgesG(x, y, pooled = true)
+            val df = (2 * n - 2).toDouble()
+            val expectedJ = 1.0 - 3.0 / (4.0 * df - 1.0)
+            assertEquals(expectedJ, g / d, 1e-14, "g/d should equal J for n=$n (df=$df)")
+        }
+    }
 }
