@@ -1,11 +1,14 @@
 package org.oremif.kstats.hypothesis
 
 import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+
 
 internal class EffectSizeTest {
 
@@ -390,6 +393,335 @@ internal class EffectSizeTest {
             val xShifted = DoubleArray(x.size) { x[it] + c }
             val yShifted = DoubleArray(y.size) { y[it] + c }
             assertEquals(d, cohensD(xShifted, yShifted, pooled = true), 1e-8, "translation invariance for c=$c")
+        }
+    }
+
+    // ===== Basic correctness: known values =====
+
+    @Test
+    fun testCohensHKnownValues() {
+        // scipy: 2*arcsin(sqrt(p1)) - 2*arcsin(sqrt(p2))
+        // scipy: cohens_h(0.8, 0.2) = 1.28700221758657
+        assertEquals(1.28700221758657, cohensH(0.8, 0.2), tol)
+        // scipy: cohens_h(0.7, 0.3) = 0.823033692134976
+        assertEquals(0.823033692134976, cohensH(0.7, 0.3), tol)
+        // scipy: cohens_h(0.9, 0.1) = 1.85459043600322
+        assertEquals(1.85459043600322, cohensH(0.9, 0.1), tol)
+        // scipy: cohens_h(0.6, 0.4) = 0.402715841580662
+        assertEquals(0.402715841580662, cohensH(0.6, 0.4), tol)
+        // scipy: cohens_h(0.75, 0.5) = 0.523598775598298
+        assertEquals(0.523598775598298, cohensH(0.75, 0.5), tol)
+    }
+
+    @Test
+    fun testCohensHSmallEffect() {
+        // scipy: cohens_h(0.95, 0.85) = 0.34437201838788
+        assertEquals(0.34437201838788, cohensH(0.95, 0.85), tol)
+    }
+
+    @Test
+    fun testCohensHNegativeDirection() {
+        // When p1 < p2, result is negative
+        // scipy: cohens_h(0.2, 0.8) = -1.28700221758657
+        assertEquals(-1.28700221758657, cohensH(0.2, 0.8), tol)
+        // scipy: cohens_h(0.01, 0.99) = -2.74092296894355
+        assertEquals(-2.74092296894355, cohensH(0.01, 0.99), tol)
+    }
+
+    @Test
+    fun testCohensHEqualProportions() {
+        // Equal proportions should give exactly 0
+        assertEquals(0.0, cohensH(0.5, 0.5), 0.0)
+        assertEquals(0.0, cohensH(0.0, 0.0), 0.0)
+        assertEquals(0.0, cohensH(1.0, 1.0), 0.0)
+        assertEquals(0.0, cohensH(0.25, 0.25), 0.0)
+    }
+
+    @Test
+    fun testCohensHExtremeProportions() {
+        // Near-extreme proportions
+        // scipy: cohens_h(0.001, 0.999) = -3.01508045583951
+        assertEquals(-3.01508045583951, cohensH(0.001, 0.999), tol)
+        // scipy: cohens_h(0.0001, 0.9999) = -3.10159198689313
+        assertEquals(-3.10159198689313, cohensH(0.0001, 0.9999), tol)
+        // scipy: cohens_h(0.99999, 0.00001) = 3.12894352186719
+        assertEquals(3.12894352186719, cohensH(0.99999, 0.00001), tol)
+    }
+
+    // ===== Edge cases: boundary inputs =====
+
+    @Test
+    fun testCohensHAtBoundaryZero() {
+        // p1 = 0 or p2 = 0
+        // scipy: cohens_h(0.5, 0.0) = 1.5707963267949 (pi/2)
+        assertEquals(PI / 2.0, cohensH(0.5, 0.0), tol)
+        // scipy: cohens_h(0.0, 0.5) = -1.5707963267949 (-pi/2)
+        assertEquals(-PI / 2.0, cohensH(0.0, 0.5), tol)
+    }
+
+    @Test
+    fun testCohensHAtBoundaryOne() {
+        // p1 = 1 or p2 = 1
+        // scipy: cohens_h(0.5, 1.0) = -1.5707963267949 (-pi/2)
+        assertEquals(-PI / 2.0, cohensH(0.5, 1.0), tol)
+        // scipy: cohens_h(1.0, 0.5) = 1.5707963267949 (pi/2)
+        assertEquals(PI / 2.0, cohensH(1.0, 0.5), tol)
+    }
+
+    @Test
+    fun testCohensHMaximumMagnitude() {
+        // Maximum h = pi when p1=1, p2=0
+        // scipy: cohens_h(1.0, 0.0) = 3.14159265358979
+        assertEquals(PI, cohensH(1.0, 0.0), tol)
+        // Minimum h = -pi when p1=0, p2=1
+        // scipy: cohens_h(0.0, 1.0) = -3.14159265358979
+        assertEquals(-PI, cohensH(0.0, 1.0), tol)
+    }
+
+    @Test
+    fun testCohensHNearlyEqualProportions() {
+        // Very close proportions should produce a very small h
+        // scipy: cohens_h(0.5, 0.50000001) = -1.99999998784506e-08
+        val h = cohensH(0.5, 0.50000001)
+        assertTrue(abs(h) < 1e-7, "Nearly equal proportions should give |h| close to 0, got $h")
+        assertTrue(h < 0.0, "p1 < p2 should give negative h")
+    }
+
+    // ===== Degenerate input: invalid parameters =====
+
+    @Test
+    fun testCohensHInvalidP1Negative() {
+        assertFailsWith<InvalidParameterException> {
+            cohensH(-0.1, 0.5)
+        }
+    }
+
+    @Test
+    fun testCohensHInvalidP1AboveOne() {
+        assertFailsWith<InvalidParameterException> {
+            cohensH(1.1, 0.5)
+        }
+    }
+
+    @Test
+    fun testCohensHInvalidP2Negative() {
+        assertFailsWith<InvalidParameterException> {
+            cohensH(0.5, -0.1)
+        }
+    }
+
+    @Test
+    fun testCohensHInvalidP2AboveOne() {
+        assertFailsWith<InvalidParameterException> {
+            cohensH(0.5, 1.1)
+        }
+    }
+
+    @Test
+    fun testCohensHBothInvalid() {
+        assertFailsWith<InvalidParameterException> {
+            cohensH(-0.5, 1.5)
+        }
+    }
+
+    @Test
+    fun testCohensHInvalidLargeValues() {
+        assertFailsWith<InvalidParameterException> {
+            cohensH(100.0, 0.5)
+        }
+        assertFailsWith<InvalidParameterException> {
+            cohensH(0.5, 100.0)
+        }
+    }
+
+    @Test
+    fun testCohensHInvalidNegativeInfinity() {
+        assertFailsWith<InvalidParameterException> {
+            cohensH(Double.NEGATIVE_INFINITY, 0.5)
+        }
+    }
+
+    @Test
+    fun testCohensHInvalidPositiveInfinity() {
+        assertFailsWith<InvalidParameterException> {
+            cohensH(Double.POSITIVE_INFINITY, 0.5)
+        }
+        assertFailsWith<InvalidParameterException> {
+            cohensH(0.5, Double.POSITIVE_INFINITY)
+        }
+    }
+
+    // ===== Extreme parameters: numerical stability =====
+
+    @Test
+    fun testCohensHVerySmallProportions() {
+        // Very small p values near 0
+        // scipy: cohens_h(1e-10, 0.5) ~ -1.57079626354934
+        val h = cohensH(1e-10, 0.5)
+        assertTrue(h.isFinite(), "h should be finite for very small p1")
+        assertEquals(-PI / 2.0, h, 1e-4, "h(~0, 0.5) should be close to -pi/2")
+    }
+
+    @Test
+    fun testCohensHVeryLargeProportions() {
+        // Very large p values near 1
+        // scipy: cohens_h(1-1e-15, 0.5) ~ pi/2
+        val h = cohensH(1.0 - 1e-15, 0.5)
+        assertTrue(h.isFinite(), "h should be finite for p1 near 1")
+        assertEquals(PI / 2.0, h, 1e-4, "h(~1, 0.5) should be close to pi/2")
+    }
+
+    @Test
+    fun testCohensHBothVerySmall() {
+        // Both proportions very small
+        val h = cohensH(1e-10, 1e-10)
+        assertTrue(h.isFinite(), "h should be finite for both proportions near 0")
+        assertEquals(0.0, h, 1e-5, "h should be near 0 when p1 ~ p2 ~ 0")
+    }
+
+    @Test
+    fun testCohensHBothNearOne() {
+        // Both proportions near 1
+        val h = cohensH(1.0 - 1e-10, 1.0 - 1e-10)
+        assertTrue(h.isFinite(), "h should be finite for both proportions near 1")
+        assertEquals(0.0, h, 1e-5, "h should be near 0 when p1 ~ p2 ~ 1")
+    }
+
+    // ===== Non-finite input: NaN propagation =====
+
+    @Test
+    fun testCohensHNaNPropagationP1() {
+        // NaN passes validation (NaN < 0.0 is false, NaN > 1.0 is false per IEEE 754)
+        val h = cohensH(Double.NaN, 0.5)
+        assertTrue(h.isNaN(), "NaN p1 should propagate to result")
+    }
+
+    @Test
+    fun testCohensHNaNPropagationP2() {
+        val h = cohensH(0.5, Double.NaN)
+        assertTrue(h.isNaN(), "NaN p2 should propagate to result")
+    }
+
+    @Test
+    fun testCohensHNaNPropagationBoth() {
+        val h = cohensH(Double.NaN, Double.NaN)
+        assertTrue(h.isNaN(), "NaN in both should propagate to result")
+    }
+
+    // ===== Property-based: mathematical invariants =====
+
+    @Test
+    fun testCohensHAntisymmetry() {
+        // h(p1, p2) = -h(p2, p1)
+        val pairs = listOf(
+            0.1 to 0.9,
+            0.2 to 0.8,
+            0.3 to 0.7,
+            0.4 to 0.6,
+            0.5 to 0.75,
+            0.05 to 0.95,
+            0.0 to 1.0,
+            0.01 to 0.5,
+        )
+        for ((p1, p2) in pairs) {
+            assertEquals(
+                -cohensH(p2, p1),
+                cohensH(p1, p2),
+                1e-14,
+                "h($p1, $p2) should equal -h($p2, $p1)"
+            )
+        }
+    }
+
+    @Test
+    fun testCohensHSelfDifferenceIsZero() {
+        // h(p, p) = 0 for all valid p
+        for (p in listOf(0.0, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0)) {
+            assertEquals(0.0, cohensH(p, p), 1e-14, "h($p, $p) should be 0")
+        }
+    }
+
+    @Test
+    fun testCohensHRangeIsBoundedByPi() {
+        // |h| <= pi for all valid p1, p2
+        val proportions = listOf(0.0, 0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99, 1.0)
+        for (p1 in proportions) {
+            for (p2 in proportions) {
+                val h = cohensH(p1, p2)
+                assertTrue(
+                    abs(h) <= PI + 1e-14,
+                    "|h($p1, $p2)| = ${abs(h)} should be <= pi"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testCohensHMonotonicInP1() {
+        // For fixed p2, h increases with p1
+        val p2 = 0.3
+        val p1Values = listOf(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+        val hValues = p1Values.map { cohensH(it, p2) }
+        for (i in 0 until hValues.size - 1) {
+            assertTrue(
+                hValues[i] <= hValues[i + 1] + 1e-14,
+                "h should be non-decreasing in p1: h(${p1Values[i]}, $p2) = ${hValues[i]} should be <= h(${p1Values[i + 1]}, $p2) = ${hValues[i + 1]}"
+            )
+        }
+    }
+
+    @Test
+    fun testCohensHMonotonicallyDecreasingInP2() {
+        // For fixed p1, h decreases with p2
+        val p1 = 0.7
+        val p2Values = listOf(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+        val hValues = p2Values.map { cohensH(p1, it) }
+        for (i in 0 until hValues.size - 1) {
+            assertTrue(
+                hValues[i] >= hValues[i + 1] - 1e-14,
+                "h should be non-increasing in p2: h($p1, ${p2Values[i]}) = ${hValues[i]} should be >= h($p1, ${p2Values[i + 1]}) = ${hValues[i + 1]}"
+            )
+        }
+    }
+
+    @Test
+    fun testCohensHSignConvention() {
+        // h > 0 when p1 > p2, h < 0 when p1 < p2
+        val cases = listOf(
+            0.8 to 0.2,
+            0.6 to 0.4,
+            0.9 to 0.1,
+            0.51 to 0.49,
+        )
+        for ((p1, p2) in cases) {
+            assertTrue(cohensH(p1, p2) > 0.0, "h($p1, $p2) should be positive when p1 > p2")
+            assertTrue(cohensH(p2, p1) < 0.0, "h($p2, $p1) should be negative when p1 < p2")
+        }
+    }
+
+    // ===== Golden values =====
+
+    @Test
+    fun testCohensHGoldenValues() {
+        // Golden values: 2*arcsin(sqrt(p1)) - 2*arcsin(sqrt(p2)) computed via scipy
+        // Tests a dense grid of p1 values against p2=0.5
+        val p2 = 0.5
+        val p1Values = doubleArrayOf(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+        val expected = doubleArrayOf(
+            -1.5707963267949,   // scipy: cohens_h(0.0, 0.5)
+            -0.927295218001612, // scipy: cohens_h(0.1, 0.5)
+            -0.643501108793285, // scipy: cohens_h(0.2, 0.5)
+            -0.411516846067488, // scipy: cohens_h(0.3, 0.5)
+            -0.201357920790331, // scipy: cohens_h(0.4, 0.5)
+            0.0,                // scipy: cohens_h(0.5, 0.5)
+            0.201357920790331,  // scipy: cohens_h(0.6, 0.5)
+            0.411516846067488,  // scipy: cohens_h(0.7, 0.5)
+            0.643501108793285,  // scipy: cohens_h(0.8, 0.5)
+            0.927295218001612,  // scipy: cohens_h(0.9, 0.5)
+            1.5707963267949,    // scipy: cohens_h(1.0, 0.5)
+        )
+        for (i in p1Values.indices) {
+            assertEquals(expected[i], cohensH(p1Values[i], p2), tol, "cohensH(${p1Values[i]}, $p2)")
         }
     }
 }
