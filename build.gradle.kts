@@ -1,6 +1,8 @@
+
 plugins {
     id("kstats.dokka")
     alias(libs.plugins.korro)
+    alias(libs.plugins.binary.compatibility.validator)
 }
 
 dependencies {
@@ -16,6 +18,15 @@ val kstatsVersion: String = libs.versions.kstats.get()
 allprojects {
     group = "org.oremif"
     version = kstatsVersion
+}
+
+apiValidation {
+    ignoredProjects.addAll(listOf("benchmark"))
+
+    @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
+    klib {
+        enabled = true
+    }
 }
 
 dokka {
