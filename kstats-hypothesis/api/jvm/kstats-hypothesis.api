@@ -51,6 +51,14 @@ public final class org/oremif/kstats/hypothesis/ChiSquaredTestKt {
 	public static synthetic fun chiSquaredTest$default ([I[DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
 }
 
+public final class org/oremif/kstats/hypothesis/EffectSizeKt {
+	public static final fun cohensD ([D[DZ)D
+	public static synthetic fun cohensD$default ([D[DZILjava/lang/Object;)D
+	public static final fun cohensH (DD)D
+	public static final fun hedgesG ([D[DZ)D
+	public static synthetic fun hedgesG$default ([D[DZILjava/lang/Object;)D
+}
+
 public final class org/oremif/kstats/hypothesis/FisherExactTestKt {
 	public static final fun fisherExactTest ([[ILorg/oremif/kstats/hypothesis/Alternative;)Lorg/oremif/kstats/hypothesis/TestResult;
 	public static synthetic fun fisherExactTest$default ([[ILorg/oremif/kstats/hypothesis/Alternative;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
@@ -100,6 +108,13 @@ public final class org/oremif/kstats/hypothesis/NormalityTestsKt {
 	public static final fun dagostinoPearsonTest ([D)Lorg/oremif/kstats/hypothesis/TestResult;
 	public static final fun jarqueBeraTest ([D)Lorg/oremif/kstats/hypothesis/TestResult;
 	public static final fun shapiroWilkTest ([D)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/ProportionZTestKt {
+	public static final fun proportionZTest (IIDLorg/oremif/kstats/hypothesis/Alternative;D)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun proportionZTest (IIIILorg/oremif/kstats/hypothesis/Alternative;D)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun proportionZTest$default (IIDLorg/oremif/kstats/hypothesis/Alternative;DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun proportionZTest$default (IIIILorg/oremif/kstats/hypothesis/Alternative;DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
 }
 
 public final class org/oremif/kstats/hypothesis/TTestKt {

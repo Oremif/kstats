@@ -9,7 +9,6 @@ plugins {
     id("kstats.dokka")
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.kotlin.multiplatform.library")
-    id("org.jetbrains.kotlinx.binary-compatibility-validator")
 }
 
 val libs = the<VersionCatalogsExtension>().named("libs")

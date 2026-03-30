@@ -43,6 +43,9 @@ jobs:
           add-job-summary: always
           cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
+      - name: Check binary compatibility
+        run: ./gradlew apiCheck --parallel
+
       - name: Run tests
         run: ./gradlew jvmTest linuxX64Test wasmJsNodeTest --continue --parallel
 
