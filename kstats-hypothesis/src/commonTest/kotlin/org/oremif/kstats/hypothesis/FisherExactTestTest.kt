@@ -6,7 +6,7 @@ import kotlin.test.*
 class FisherExactTestTest {
 
     private fun assertP(expected: Double, actual: Double, message: String = "") {
-        assertEquals(expected, actual, 1e-10, "p-value $message")
+        TestAssertions.assertPValue(expected, actual, message = message)
     }
 
     // ===== Basic correctness: classic tables vs scipy =====

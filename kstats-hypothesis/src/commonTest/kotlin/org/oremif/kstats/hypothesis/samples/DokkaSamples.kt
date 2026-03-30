@@ -3,7 +3,6 @@ package org.oremif.kstats.hypothesis.samples
 import org.oremif.kstats.hypothesis.shapiroWilkTest
 import org.oremif.kstats.hypothesis.tTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class DokkaSamples {
 

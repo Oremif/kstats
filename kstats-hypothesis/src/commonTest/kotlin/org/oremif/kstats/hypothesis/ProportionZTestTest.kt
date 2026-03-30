@@ -2,7 +2,6 @@ package org.oremif.kstats.hypothesis
 
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.abs
 import kotlin.test.*
 
 class ProportionZTestTest {
@@ -344,8 +343,10 @@ class ProportionZTestTest {
             proportionZTest(successes = 100, trials = 100, p0 = 0.5),
         )
         for (result in cases) {
-            assertTrue(result.pValue in 0.0..1.0,
-                "p-value should be in [0, 1], got ${result.pValue}")
+            assertTrue(
+                result.pValue in 0.0..1.0,
+                "p-value should be in [0, 1], got ${result.pValue}"
+            )
         }
     }
 
@@ -363,8 +364,10 @@ class ProportionZTestTest {
         assertEquals(1.0, less.pValue + greater.pValue, 1e-14, "less + greater = 1")
 
         // Two-sided = 2 * min(less, greater)
-        assertEquals(two.pValue, 2.0 * minOf(less.pValue, greater.pValue), 1e-14,
-            "two-sided = 2 * min(one-sided)")
+        assertEquals(
+            two.pValue, 2.0 * minOf(less.pValue, greater.pValue), 1e-14,
+            "two-sided = 2 * min(one-sided)"
+        )
     }
 
     @Test
@@ -399,8 +402,10 @@ class ProportionZTestTest {
             proportionZTest(successes = 10, trials = 50, p0 = 0.3),   // p ≈ 0.123, not significant
         )
         for (result in cases) {
-            assertEquals(result.pValue < 0.05, result.isSignificant(),
-                "isSignificant for p=${result.pValue}")
+            assertEquals(
+                result.pValue < 0.05, result.isSignificant(),
+                "isSignificant for p=${result.pValue}"
+            )
         }
     }
 
@@ -449,12 +454,18 @@ class ProportionZTestTest {
 
     @Test
     fun testOneSampleAlternativeInResult() {
-        assertEquals(Alternative.TWO_SIDED,
-            proportionZTest(successes = 5, trials = 10, p0 = 0.5).alternative)
-        assertEquals(Alternative.LESS,
-            proportionZTest(successes = 5, trials = 10, p0 = 0.5, alternative = Alternative.LESS).alternative)
-        assertEquals(Alternative.GREATER,
-            proportionZTest(successes = 5, trials = 10, p0 = 0.5, alternative = Alternative.GREATER).alternative)
+        assertEquals(
+            Alternative.TWO_SIDED,
+            proportionZTest(successes = 5, trials = 10, p0 = 0.5).alternative
+        )
+        assertEquals(
+            Alternative.LESS,
+            proportionZTest(successes = 5, trials = 10, p0 = 0.5, alternative = Alternative.LESS).alternative
+        )
+        assertEquals(
+            Alternative.GREATER,
+            proportionZTest(successes = 5, trials = 10, p0 = 0.5, alternative = Alternative.GREATER).alternative
+        )
     }
 
     // =========================================================================
@@ -580,8 +591,10 @@ class ProportionZTestTest {
             successes1 = 1, trials1 = 1,
             successes2 = 0, trials2 = 1
         )
-        assertTrue(result.statistic.isFinite() || result.statistic.isInfinite(),
-            "statistic should be computable for single trials")
+        assertTrue(
+            result.statistic.isFinite() || result.statistic.isInfinite(),
+            "statistic should be computable for single trials"
+        )
         assertTrue(result.pValue in 0.0..1.0, "p should be in [0, 1]")
     }
 
@@ -762,8 +775,10 @@ class ProportionZTestTest {
             proportionZTest(successes1 = 1, trials1 = 1, successes2 = 0, trials2 = 1),
         )
         for (result in cases) {
-            assertTrue(result.pValue in 0.0..1.0,
-                "p-value should be in [0, 1], got ${result.pValue}")
+            assertTrue(
+                result.pValue in 0.0..1.0,
+                "p-value should be in [0, 1], got ${result.pValue}"
+            )
         }
     }
 
@@ -787,8 +802,10 @@ class ProportionZTestTest {
         assertEquals(1.0, less.pValue + greater.pValue, 1e-14, "less + greater = 1")
 
         // Two-sided = 2 * min(less, greater)
-        assertEquals(two.pValue, 2.0 * minOf(less.pValue, greater.pValue), 1e-14,
-            "two-sided = 2 * min(one-sided)")
+        assertEquals(
+            two.pValue, 2.0 * minOf(less.pValue, greater.pValue), 1e-14,
+            "two-sided = 2 * min(one-sided)"
+        )
     }
 
     @Test
@@ -825,8 +842,10 @@ class ProportionZTestTest {
             proportionZTest(successes1 = 90, trials1 = 100, successes2 = 80, trials2 = 100), // borderline
         )
         for (result in cases) {
-            assertEquals(result.pValue < 0.05, result.isSignificant(),
-                "isSignificant for p=${result.pValue}")
+            assertEquals(
+                result.pValue < 0.05, result.isSignificant(),
+                "isSignificant for p=${result.pValue}"
+            )
         }
     }
 
@@ -841,8 +860,10 @@ class ProportionZTestTest {
         for (result in cases) {
             val diff = result.additionalInfo["proportionDifference"]!!
             val ci = result.confidenceInterval!!
-            assertTrue(diff >= ci.first && diff <= ci.second,
-                "CI should contain observed difference $diff, got [${ci.first}, ${ci.second}]")
+            assertTrue(
+                diff >= ci.first && diff <= ci.second,
+                "CI should contain observed difference $diff, got [${ci.first}, ${ci.second}]"
+            )
         }
     }
 
@@ -874,18 +895,21 @@ class ProportionZTestTest {
 
     @Test
     fun testTwoSampleAlternativeInResult() {
-        assertEquals(Alternative.TWO_SIDED,
+        assertEquals(
+            Alternative.TWO_SIDED,
             proportionZTest(
                 successes1 = 5, trials1 = 10, successes2 = 5, trials2 = 10
             ).alternative
         )
-        assertEquals(Alternative.LESS,
+        assertEquals(
+            Alternative.LESS,
             proportionZTest(
                 successes1 = 5, trials1 = 10, successes2 = 5, trials2 = 10,
                 alternative = Alternative.LESS
             ).alternative
         )
-        assertEquals(Alternative.GREATER,
+        assertEquals(
+            Alternative.GREATER,
             proportionZTest(
                 successes1 = 5, trials1 = 10, successes2 = 5, trials2 = 10,
                 alternative = Alternative.GREATER

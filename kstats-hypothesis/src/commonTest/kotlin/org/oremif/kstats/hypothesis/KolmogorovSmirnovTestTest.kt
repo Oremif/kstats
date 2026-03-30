@@ -141,54 +141,42 @@ class KolmogorovSmirnovTestTest {
 
     @Test
     fun testOneSampleWithNaN() {
-        val sample = doubleArrayOf(1.0, 2.0, Double.NaN, 4.0, 5.0)
-        val result = kolmogorovSmirnovTest(sample, NormalDistribution.STANDARD)
-        assertTrue(result.statistic.isNaN(), "D should be NaN when input contains NaN")
-        assertTrue(result.pValue.isNaN(), "p-value should be NaN when input contains NaN")
+        val result = kolmogorovSmirnovTest(TestData.WITH_NAN, NormalDistribution.STANDARD)
+        TestAssertions.assertNaNResult(result, "when input contains NaN")
         assertTrue(result.additionalInfo["dPlus"]!!.isNaN(), "dPlus should be NaN")
         assertTrue(result.additionalInfo["dMinus"]!!.isNaN(), "dMinus should be NaN")
     }
 
     @Test
     fun testOneSampleWithInfinity() {
-        val sample = doubleArrayOf(1.0, 2.0, Double.POSITIVE_INFINITY, 4.0, 5.0)
-        val result = kolmogorovSmirnovTest(sample, NormalDistribution.STANDARD)
-        assertTrue(result.statistic.isNaN(), "D should be NaN when input contains Infinity")
-        assertTrue(result.pValue.isNaN(), "p-value should be NaN when input contains Infinity")
+        val result = kolmogorovSmirnovTest(TestData.WITH_POS_INF, NormalDistribution.STANDARD)
+        TestAssertions.assertNaNResult(result, "when input contains Infinity")
     }
 
     @Test
     fun testOneSampleWithNegativeInfinity() {
         val sample = doubleArrayOf(1.0, 2.0, Double.NEGATIVE_INFINITY, 4.0, 5.0)
         val result = kolmogorovSmirnovTest(sample, NormalDistribution.STANDARD)
-        assertTrue(result.statistic.isNaN(), "D should be NaN when input contains -Infinity")
-        assertTrue(result.pValue.isNaN(), "p-value should be NaN when input contains -Infinity")
+        TestAssertions.assertNaNResult(result, "when input contains -Infinity")
     }
 
     @Test
     fun testTwoSampleWithNaN() {
-        val s1 = doubleArrayOf(1.0, 2.0, Double.NaN, 4.0, 5.0)
-        val s2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
-        val result = kolmogorovSmirnovTest(s1, s2)
-        assertTrue(result.statistic.isNaN(), "D should be NaN when sample1 contains NaN")
-        assertTrue(result.pValue.isNaN(), "p-value should be NaN when sample1 contains NaN")
+        val result = kolmogorovSmirnovTest(TestData.WITH_NAN, TestData.SEQUENTIAL_6_10)
+        TestAssertions.assertNaNResult(result, "when sample1 contains NaN")
     }
 
     @Test
     fun testTwoSampleSecondWithNaN() {
-        val s1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         val s2 = doubleArrayOf(6.0, Double.NaN, 8.0, 9.0, 10.0)
-        val result = kolmogorovSmirnovTest(s1, s2)
-        assertTrue(result.statistic.isNaN(), "D should be NaN when sample2 contains NaN")
-        assertTrue(result.pValue.isNaN(), "p-value should be NaN when sample2 contains NaN")
+        val result = kolmogorovSmirnovTest(TestData.SEQUENTIAL_1_5, s2)
+        TestAssertions.assertNaNResult(result, "when sample2 contains NaN")
     }
 
     @Test
     fun testTwoSampleWithInfinity() {
         val s1 = doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0)
-        val s2 = doubleArrayOf(4.0, 5.0, 6.0)
-        val result = kolmogorovSmirnovTest(s1, s2)
-        assertTrue(result.statistic.isNaN(), "D should be NaN when sample contains Infinity")
-        assertTrue(result.pValue.isNaN(), "p-value should be NaN when sample contains Infinity")
+        val result = kolmogorovSmirnovTest(s1, TestData.SHORT_3.map { it + 3.0 }.toDoubleArray())
+        TestAssertions.assertNaNResult(result, "when sample contains Infinity")
     }
 }
