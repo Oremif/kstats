@@ -1,8 +1,10 @@
 package org.oremif.kstats.hypothesis
 
 import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.descriptive.variance
+import kotlin.math.asin
 import kotlin.math.sqrt
 
 /**
@@ -54,4 +56,35 @@ public fun cohensD(
     }
 
     return (mean1 - mean2) / sd
+}
+
+/**
+ * Computes Cohen's h effect size for the difference between two proportions.
+ *
+ * Cohen's h measures how far apart two proportions are on a scale that accounts for the
+ * non-linear nature of proportions. It applies an arcsine transformation to each proportion
+ * before computing the difference, which stabilizes comparisons across the full range from
+ * 0 to 1. Values around 0.2, 0.5, and 0.8 are conventionally considered small, medium,
+ * and large effects respectively (Cohen, 1988). The sign indicates direction: positive when
+ * [p1] exceeds [p2]. The result is bounded between -pi and pi.
+ *
+ * ### Example:
+ * ```kotlin
+ * cohensH(p1 = 0.65, p2 = 0.50) // ~0.31 (small-medium effect)
+ * cohensH(p1 = 0.80, p2 = 0.20) // ~1.29 (large effect)
+ * cohensH(p1 = 0.50, p2 = 0.50) // 0.0 (no effect)
+ * ```
+ *
+ * @param p1 the first proportion. Must be in [0, 1].
+ * @param p2 the second proportion. Must be in [0, 1].
+ * @return the Cohen's h effect size, in the range [-pi, pi].
+ */
+public fun cohensH(
+    p1: Double,
+    p2: Double,
+): Double {
+    if (p1 < 0.0 || p1 > 1.0) throw InvalidParameterException("p1 must be in [0, 1], got $p1")
+    if (p2 < 0.0 || p2 > 1.0) throw InvalidParameterException("p2 must be in [0, 1], got $p2")
+
+    return 2.0 * asin(sqrt(p1)) - 2.0 * asin(sqrt(p2))
 }
