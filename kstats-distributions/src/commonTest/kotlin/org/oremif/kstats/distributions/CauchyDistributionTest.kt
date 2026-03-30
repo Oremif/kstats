@@ -2,13 +2,15 @@ package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.PI
-import kotlin.math.exp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class CauchyDistributionTest {
+class CauchyDistributionTest : ContinuousDistributionPropertyTests() {
+    override fun createDistribution() = CauchyDistribution.STANDARD
+    override val testPoints = listOf(-100.0, -10.0, -1.0, 0.0, 1.0, 10.0, 100.0)
+    override val integrationEpsilon = 0.01
 
     // --- Basic correctness (scipy 15-digit refs) ---
 
@@ -150,47 +152,12 @@ class CauchyDistributionTest {
     // --- Property-based ---
 
     @Test
-    fun testCdfQuantileRoundTrip() {
-        val d = CauchyDistribution.STANDARD
-        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
-            assertEquals(p, d.cdf(d.quantile(p)), 1e-10, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val d = CauchyDistribution.STANDARD
-        for (x in listOf(-10.0, -1.0, 0.0, 1.0, 10.0, 100.0)) {
-            assertEquals(1.0, d.sf(x) + d.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val d = CauchyDistribution.STANDARD
-        for (x in listOf(-10.0, -1.0, 0.0, 1.0, 10.0)) {
-            assertEquals(d.pdf(x), exp(d.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-    }
-
-    @Test
     fun testSampleMedian() {
         val d = CauchyDistribution(3.0, 2.0) // median = location = 3
         val rng = kotlin.random.Random(42)
         val samples = d.sample(100_000, rng).sorted()
         val sampleMedian = samples[50000]
         assertEquals(3.0, sampleMedian, 1.0, "sample median ≈ 3")
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val d = CauchyDistribution.STANDARD
-        var prev = 0.0
-        for (x in listOf(-100.0, -10.0, -1.0, 0.0, 1.0, 10.0, 100.0)) {
-            val cdfVal = d.cdf(x)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
     }
 
     @Test
@@ -221,13 +188,4 @@ class CauchyDistributionTest {
         assertEquals(0.5, d3.cdf(1e15), 1e-10)
     }
 
-    @Test
-    fun testPdfIntegration() {
-        val d = CauchyDistribution.STANDARD
-        val eps = 0.01
-        val lower = d.quantile(eps)
-        val upper = d.quantile(1.0 - eps)
-        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
-        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
-    }
 }

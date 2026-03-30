@@ -1,19 +1,20 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.abs
-import kotlin.math.ln
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class ParetoDistributionTest {
+class ParetoDistributionTest : ContinuousDistributionPropertyTests() {
+
+    override fun createDistribution(): ContinuousDistribution = ParetoDistribution(3.0, 2.0)
+    override val testPoints = listOf(2.0, 3.0, 4.0, 5.0, 10.0, 100.0)
+
     private val std = ParetoDistribution.STANDARD
     private val tol = 1e-10
     private val pdfTol = 1e-12
-    private val statTol = 0.05
 
     // --- Basic correctness (scipy reference values) ---
 
@@ -380,93 +381,12 @@ class ParetoDistributionTest {
     // --- Property-based ---
 
     @Test
-    fun testCdfQuantileRoundTrip() {
-        val ps = doubleArrayOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)
-        for (p in ps) {
-            assertEquals(p, std.cdf(std.quantile(p)), tol, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testQuantileCdfRoundTrip() {
-        val xs = doubleArrayOf(1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 100.0)
-        for (x in xs) {
-            assertEquals(x, std.quantile(std.cdf(x)), tol, "quantile(cdf($x)) ≈ $x")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val xs = doubleArrayOf(1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 100.0)
-        for (x in xs) {
-            assertEquals(1.0, std.sf(x) + std.cdf(x), 1e-14, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val xs = doubleArrayOf(1.0, 1.5, 2.0, 3.0, 5.0, 10.0)
-        for (x in xs) {
-            assertEquals(ln(std.pdf(x)), std.logPdf(x), pdfTol, "logPdf($x) ≈ ln(pdf($x))")
-        }
-        val d = ParetoDistribution(3.0, 2.0)
-        for (x in doubleArrayOf(2.0, 2.5, 3.0, 5.0, 10.0)) {
-            assertEquals(ln(d.pdf(x)), d.logPdf(x), pdfTol)
-        }
-    }
-
-    @Test
-    fun testSampleMean() {
-        val d = ParetoDistribution(3.0, 2.0)
-        val samples = d.sample(100_000, Random(42))
-        val sampleMean = samples.average()
-        assertEquals(d.mean, sampleMean, statTol * abs(d.mean).coerceAtLeast(1.0))
-    }
-
-    @Test
-    fun testSampleVariance() {
-        // Use shape=5 for faster convergence (heavier tails converge slowly)
-        val d = ParetoDistribution(5.0, 1.0)
-        val samples = d.sample(100_000, Random(42))
-        val sampleMean = samples.average()
-        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-        assertEquals(d.variance, sampleVar, statTol * d.variance.coerceAtLeast(1.0))
-    }
-
-    @Test
     fun testSampleAboveScale() {
         val d = ParetoDistribution(3.0, 2.0)
         val samples = d.sample(10_000, Random(42))
         for (s in samples) {
             assertTrue(s >= 2.0, "all samples should be ≥ scale")
         }
-    }
-
-    @Test
-    fun testPdfNonNegative() {
-        val xs = doubleArrayOf(0.0, 0.5, 1.0, 1.5, 2.0, 5.0, 10.0, 100.0)
-        for (x in xs) {
-            assertTrue(std.pdf(x) >= 0.0, "pdf($x) should be non-negative")
-        }
-    }
-
-    @Test
-    fun testCdfMonotonic() {
-        val xs = (0..20).map { 1.0 + it * 0.5 }
-        for (i in 1 until xs.size) {
-            assertTrue(std.cdf(xs[i]) >= std.cdf(xs[i - 1]), "cdf should be monotonically non-decreasing")
-        }
-    }
-
-    @Test
-    fun testPdfIntegration() {
-        // Use shape=5 for compact support range (standard Pareto has very long tail)
-        val d = ParetoDistribution(5.0, 1.0)
-        val eps = 1e-6
-        val lower = d.quantile(eps)
-        val upper = d.quantile(1.0 - eps)
-        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
-        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
     }
 
     // --- Validation ---

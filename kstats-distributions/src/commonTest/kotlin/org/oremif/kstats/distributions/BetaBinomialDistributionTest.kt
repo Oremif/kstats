@@ -1,13 +1,15 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class BetaBinomialDistributionTest {
+class BetaBinomialDistributionTest : DiscreteDistributionPropertyTests() {
+
+    override fun createDistribution() = BetaBinomialDistribution(10, 2.0, 5.0)
+    override val testKRange = -1..11
 
     // ==================== Basic correctness (scipy 15-digit refs) ====================
 
@@ -238,85 +240,6 @@ class BetaBinomialDistributionTest {
         assertEquals(5.000000000000000e+01, d.mean, 1e-10)
         assertEquals(1.262500000000000e+03, d.variance, 1e-10)
         assertEquals(4.432451310676071e+00, d.entropy, 1e-8)
-    }
-
-    // ==================== Property-based tests ====================
-
-    @Test
-    fun testExpLogPmfConsistency() {
-        val d = BetaBinomialDistribution(10, 2.0, 5.0)
-        for (k in 0..10) {
-            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-12, "exp(logPmf($k)) ≈ pmf($k)")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val d = BetaBinomialDistribution(10, 2.0, 5.0)
-        for (k in -1..11) {
-            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-10, "sf($k) + cdf($k) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOneSet2() {
-        val d = BetaBinomialDistribution(10, 0.5, 0.5)
-        for (k in -1..11) {
-            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-10, "sf($k) + cdf($k) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val d = BetaBinomialDistribution(10, 2.0, 5.0)
-        var prev = 0.0
-        for (k in 0..10) {
-            val cdfVal = d.cdf(k)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically non-decreasing at k=$k")
-            prev = cdfVal
-        }
-    }
-
-    @Test
-    fun testCdfQuantileRoundTrip() {
-        val d = BetaBinomialDistribution(10, 2.0, 5.0)
-        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
-            val k = d.quantileInt(p)
-            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
-            if (k > 0) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
-        }
-    }
-
-    @Test
-    fun testPmfSumsToOne() {
-        val d1 = BetaBinomialDistribution(10, 2.0, 5.0)
-        assertEquals(1.0, (0..10).sumOf { d1.pmf(it) }, 1e-10)
-
-        val d2 = BetaBinomialDistribution(10, 0.5, 0.5)
-        assertEquals(1.0, (0..10).sumOf { d2.pmf(it) }, 1e-10)
-
-        val d3 = BetaBinomialDistribution(20, 1.0, 1.0)
-        assertEquals(1.0, (0..20).sumOf { d3.pmf(it) }, 1e-10)
-    }
-
-    @Test
-    fun testPmfNonNegative() {
-        val d = BetaBinomialDistribution(10, 2.0, 5.0)
-        for (k in -1..11) {
-            assertTrue(d.pmf(k) >= 0.0, "pmf($k) should be non-negative")
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val d = BetaBinomialDistribution(10, 2.0, 5.0)
-        val rng = kotlin.random.Random(42)
-        val samples = d.sample(100_000, rng)
-        val doubles = samples.map { it.toDouble() }
-        val sampleMean = doubles.average()
-        assertEquals(d.mean, sampleMean, d.mean * 0.05, "sample mean ≈ theoretical mean")
-        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
-        assertEquals(d.variance, sampleVar, d.variance * 0.10, "sample variance ≈ theoretical variance")
     }
 
     // ==================== Validation tests ====================

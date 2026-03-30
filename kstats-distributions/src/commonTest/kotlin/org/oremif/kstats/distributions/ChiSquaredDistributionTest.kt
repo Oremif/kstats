@@ -1,7 +1,6 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.test.Test
@@ -9,7 +8,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class ChiSquaredDistributionTest {
+class ChiSquaredDistributionTest : ContinuousDistributionPropertyTests() {
+
+    override fun createDistribution(): ContinuousDistribution = ChiSquaredDistribution(10.0)
+    override val testPoints = listOf(0.5, 1.0, 2.0, 5.0, 10.0, 20.0)
+    override val pValues = listOf(0.1, 0.25, 0.5, 0.75, 0.9)
+    override val roundTripTol = 1e-8
 
     // --- Basic correctness (scipy 15-digit refs) ---
 
@@ -180,52 +184,6 @@ class ChiSquaredDistributionTest {
     // --- Property-based ---
 
     @Test
-    fun testCdfQuantileRoundTrip() {
-        val d = ChiSquaredDistribution(10.0)
-        for (p in listOf(0.1, 0.25, 0.5, 0.75, 0.9)) {
-            assertEquals(p, d.cdf(d.quantile(p)), 1e-8, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val d = ChiSquaredDistribution(5.0)
-        for (x in listOf(0.0, 1.0, 2.0, 5.0, 10.0, 20.0)) {
-            assertEquals(1.0, d.sf(x) + d.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val d = ChiSquaredDistribution(5.0)
-        for (x in listOf(0.5, 1.0, 2.0, 5.0, 10.0)) {
-            assertEquals(d.pdf(x), exp(d.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val d = ChiSquaredDistribution(10.0) // mean=10
-        val rng = kotlin.random.Random(42)
-        val samples = d.sample(100_000, rng)
-        val sampleMean = samples.average()
-        assertEquals(10.0, sampleMean, 0.5, "sample mean ≈ 10")
-        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val d = ChiSquaredDistribution(5.0)
-        var prev = 0.0
-        for (x in listOf(0.0, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0)) {
-            val cdfVal = d.cdf(x)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
-    }
-
-    @Test
     fun testEntropy() {
         assertEquals(0.783757110473934, ChiSquaredDistribution(1.0).entropy, 1e-10)
         assertEquals(1.693147180559945, ChiSquaredDistribution(2.0).entropy, 1e-10)
@@ -249,13 +207,4 @@ class ChiSquaredDistributionTest {
         assertEquals(0.787965781308072, d2.cdf(0.01), 1e-4)
     }
 
-    @Test
-    fun testPdfIntegration() {
-        val d = ChiSquaredDistribution(5.0)
-        val eps = 1e-6
-        val lower = d.quantile(eps)
-        val upper = d.quantile(1.0 - eps)
-        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
-        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
-    }
 }

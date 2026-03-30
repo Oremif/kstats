@@ -1,14 +1,20 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.ln
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class LevyDistributionTest {
+class LevyDistributionTest : ContinuousDistributionPropertyTests() {
+
+    override fun createDistribution(): ContinuousDistribution = LevyDistribution.STANDARD
+    override val testPoints = listOf(0.5, 1.0, 2.0, 5.0, 10.0, 50.0)
+    override val integrationEpsilon = 0.01
+    override val pValues = listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9)
+    override val roundTripTol = 1e-8
+
     private val std = LevyDistribution.STANDARD
     private val tol = 1e-10
     private val pdfTol = 1e-12
@@ -241,64 +247,13 @@ class LevyDistributionTest {
     // ========================================
 
     @Test
-    fun testCdfQuantileRoundTrip() {
-        val ps = doubleArrayOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9)
-        for (p in ps) {
-            assertEquals(p, std.cdf(std.quantile(p)), 1e-8, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testQuantileCdfRoundTrip() {
-        val xs = doubleArrayOf(0.5, 1.0, 2.0, 5.0, 10.0, 50.0)
-        for (x in xs) {
-            assertEquals(x, std.quantile(std.cdf(x)), 1e-6, "quantile(cdf($x)) ≈ $x")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val xs = doubleArrayOf(0.5, 1.0, 2.0, 5.0, 10.0, 50.0)
-        for (x in xs) {
-            assertEquals(1.0, std.sf(x) + std.cdf(x), 1e-14, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val xs = doubleArrayOf(0.5, 1.0, 2.0, 5.0, 10.0, 50.0)
-        for (x in xs) {
-            assertEquals(ln(std.pdf(x)), std.logPdf(x), pdfTol, "logPdf($x) ≈ ln(pdf($x))")
-        }
-        val d = LevyDistribution(2.0, 3.0)
-        for (x in doubleArrayOf(2.5, 3.0, 4.0, 7.0, 12.0, 52.0)) {
-            assertEquals(ln(d.pdf(x)), d.logPdf(x), pdfTol)
-        }
-    }
-
-    @Test
-    fun testPdfNonNegative() {
-        val xs = doubleArrayOf(-10.0, 0.0, 0.001, 0.5, 1.0, 10.0, 100.0, 1000.0)
-        for (x in xs) {
-            assertTrue(std.pdf(x) >= 0.0, "pdf($x) should be non-negative")
-        }
-    }
-
-    @Test
-    fun testCdfMonotonic() {
-        val xs = listOf(0.01, 0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 50.0, 100.0, 1000.0)
-        for (i in 1 until xs.size) {
-            assertTrue(std.cdf(xs[i]) >= std.cdf(xs[i - 1]), "cdf should be monotonically non-decreasing")
-        }
-    }
-
-    @Test
-    fun testPdfIntegration() {
-        // Lévy has steep rise near mu and heavy tail — use moderate bounds
-        val lower = std.quantile(0.01)
-        val upper = std.quantile(0.99)
-        val integral = trapezoidalIntegral({ std.pdf(it) }, lower, upper)
-        assertEquals(std.cdf(upper) - std.cdf(lower), integral, 1e-2)
+    override fun pdfIntegration() {
+        // Levy has steep rise near mu and heavy tail — wider tolerance than default
+        val d = createDistribution()
+        val lower = d.quantile(integrationEpsilon)
+        val upper = d.quantile(1.0 - integrationEpsilon)
+        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
+        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-2)
     }
 
     @Test

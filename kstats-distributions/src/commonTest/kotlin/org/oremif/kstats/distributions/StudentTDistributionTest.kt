@@ -1,14 +1,16 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class StudentTDistributionTest {
+class StudentTDistributionTest : ContinuousDistributionPropertyTests() {
+    override fun createDistribution() = StudentTDistribution(30.0)
+    override val testPoints = listOf(-10.0, -3.0, -1.0, 0.0, 1.0, 3.0, 10.0)
+    override val roundTripTol = 1e-8
 
     // --- Basic correctness (scipy 15-digit refs) ---
 
@@ -170,54 +172,6 @@ class StudentTDistributionTest {
         assertFailsWith<InvalidParameterException> { t.quantile(1.1) }
     }
 
-    // --- Property-based ---
-
-    @Test
-    fun testCdfQuantileRoundTrip() {
-        val t = StudentTDistribution(10.0)
-        for (p in listOf(0.1, 0.25, 0.5, 0.75, 0.9)) {
-            assertEquals(p, t.cdf(t.quantile(p)), 1e-8, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val t = StudentTDistribution(5.0)
-        for (x in listOf(-3.0, -1.0, 0.0, 1.0, 3.0, 10.0)) {
-            assertEquals(1.0, t.sf(x) + t.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val t = StudentTDistribution(5.0)
-        for (x in listOf(-3.0, -1.0, 0.0, 1.0, 3.0)) {
-            assertEquals(t.pdf(x), exp(t.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val t = StudentTDistribution(30.0) // mean=0, var=30/28≈1.071
-        val rng = kotlin.random.Random(42)
-        val samples = t.sample(100_000, rng)
-        val sampleMean = samples.average()
-        assertEquals(0.0, sampleMean, 0.1, "sample mean ≈ 0")
-        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-        assertEquals(t.variance, sampleVar, maxOf(t.variance * 0.1, 0.05), "sample variance ≈ ${t.variance}")
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val t = StudentTDistribution(10.0)
-        var prev = 0.0
-        for (x in listOf(-10.0, -3.0, -1.0, 0.0, 1.0, 3.0, 10.0)) {
-            val cdfVal = t.cdf(x)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
-    }
-
     @Test
     fun testEntropy() {
         assertEquals(2.531024246969291, StudentTDistribution(1.0).entropy, 1e-10) // ln(4*pi), equals Cauchy
@@ -247,13 +201,4 @@ class StudentTDistributionTest {
         assertTrue(d2.mean.isNaN())
     }
 
-    @Test
-    fun testPdfIntegration() {
-        val d = StudentTDistribution(5.0)
-        val eps = 1e-6
-        val lower = d.quantile(eps)
-        val upper = d.quantile(1.0 - eps)
-        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
-        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
-    }
 }

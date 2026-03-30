@@ -2,14 +2,16 @@ package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.PI
-import kotlin.math.exp
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class NormalDistributionTest {
+class NormalDistributionTest : ContinuousDistributionPropertyTests() {
+    override fun createDistribution() = NormalDistribution(5.0, 2.0)
+    override val testPoints = listOf(-1.0, 1.0, 3.0, 5.0, 7.0, 9.0, 11.0)
+
     private val std = NormalDistribution.STANDARD
     private val tol = 1e-6
 
@@ -39,13 +41,6 @@ class NormalDistributionTest {
     }
 
     @Test
-    fun testCdfQuantileInverse() {
-        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
-            assertEquals(p, std.cdf(std.quantile(p)), tol, "cdf(quantile($p)) should ≈ $p")
-        }
-    }
-
-    @Test
     fun testMoments() {
         assertEquals(0.0, std.mean, tol)
         assertEquals(1.0, std.variance, tol)
@@ -71,24 +66,6 @@ class NormalDistributionTest {
     }
 
     @Test
-    fun testLogPdfConsistency() {
-        for (x in listOf(-3.0, -1.0, 0.0, 1.0, 3.0)) {
-            assertEquals(std.pdf(x), exp(std.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-        val d = NormalDistribution(5.0, 2.0)
-        for (x in listOf(0.0, 3.0, 5.0, 7.0, 10.0)) {
-            assertEquals(d.pdf(x), exp(d.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-    }
-
-    @Test
-    fun testSfConsistency() {
-        for (x in listOf(-3.0, -1.0, 0.0, 1.0, 3.0)) {
-            assertEquals(1.0, std.sf(x) + std.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
     fun testExtremeParameters() {
         // σ=1e6: very flat pdf
         val d1 = NormalDistribution(0.0, 1e6)
@@ -104,38 +81,6 @@ class NormalDistributionTest {
         // Deep tail: sf(8) for standard normal
         // scipy: sf(8) ≈ 6.22096e-16
         assertEquals(6.22096057427174e-16, std.sf(8.0), 1e-25)
-    }
-
-    @Test
-    fun testPdfIntegration() {
-        val d = NormalDistribution.STANDARD
-        val eps = 1e-6
-        val lower = d.quantile(eps)
-        val upper = d.quantile(1.0 - eps)
-        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
-        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
-    }
-
-    @Test
-    fun testSampleStats() {
-        val d = NormalDistribution(5.0, 2.0)
-        val rng = kotlin.random.Random(42)
-        val samples = d.sample(100_000, rng)
-        val sampleMean = samples.average()
-        assertEquals(d.mean, sampleMean, 0.05, "sample mean ≈ ${d.mean}")
-        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val d = NormalDistribution.STANDARD
-        var prev = 0.0
-        for (x in (-4..4).map { it * 0.5 }) {
-            val cdfVal = d.cdf(x)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
     }
 
     // --- Invalid input ---

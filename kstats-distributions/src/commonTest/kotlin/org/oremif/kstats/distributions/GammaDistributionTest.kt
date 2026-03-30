@@ -1,14 +1,17 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
-class GammaDistributionTest {
+class GammaDistributionTest : ContinuousDistributionPropertyTests() {
+
+    override fun createDistribution(): ContinuousDistribution = GammaDistribution(5.0, 0.5)
+    override val testPoints = listOf(0.5, 1.0, 2.0, 3.0, 5.0, 10.0)
+    override val pValues = listOf(0.1, 0.25, 0.5, 0.75, 0.9)
+    override val roundTripTol = 1e-8
 
     // --- Basic correctness (scipy 15-digit refs) ---
 
@@ -149,59 +152,12 @@ class GammaDistributionTest {
     // --- Property-based ---
 
     @Test
-    fun testCdfQuantileRoundTrip() {
-        val g = GammaDistribution(2.0, 1.0)
-        // Note: extreme p values (0.01, 0.99) may not converge well — see DIST-010
-        for (p in listOf(0.1, 0.25, 0.5, 0.75, 0.9)) {
-            assertEquals(p, g.cdf(g.quantile(p)), 1e-8, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val g = GammaDistribution(2.0, 1.0)
-        for (x in listOf(0.0, 0.5, 1.0, 2.0, 5.0, 10.0)) {
-            assertEquals(1.0, g.sf(x) + g.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
     fun testSfUpperTail() {
         val g = GammaDistribution(2.0, 1.0)
         // scipy: stats.gamma(2, scale=1).sf(x)
         assertEquals(0.000499399227387334, g.sf(10.0), 1e-10)
         assertEquals(4.89443712802922e-06, g.sf(15.0), 1e-11)
         assertEquals(4.32842260712097e-08, g.sf(20.0), 1e-13)
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val g = GammaDistribution(2.0, 1.0)
-        for (x in listOf(0.5, 1.0, 2.0, 5.0)) {
-            assertEquals(g.pdf(x), exp(g.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val g = GammaDistribution(5.0, 0.5) // mean=10, var=20
-        val rng = kotlin.random.Random(42)
-        val samples = g.sample(100_000, rng)
-        val sampleMean = samples.average()
-        assertEquals(10.0, sampleMean, 0.5, "sample mean ≈ 10")
-        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-        assertEquals(g.variance, sampleVar, maxOf(g.variance * 0.1, 0.05), "sample variance ≈ ${g.variance}")
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val g = GammaDistribution(2.0, 1.0)
-        var prev = 0.0
-        for (x in listOf(0.0, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0)) {
-            val cdfVal = g.cdf(x)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
     }
 
     @Test
@@ -215,7 +171,8 @@ class GammaDistributionTest {
     }
 
     @Test
-    fun testPdfIntegration() {
+    override fun pdfIntegration() {
+        // Use Gamma(2,1) which has stable quantile at extreme tails
         val d = GammaDistribution(2.0, 1.0)
         val eps = 1e-6
         val lower = d.quantile(eps)

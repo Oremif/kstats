@@ -1,13 +1,16 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.exp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class LogarithmicDistributionTest {
+class LogarithmicDistributionTest : DiscreteDistributionPropertyTests() {
+
+    override fun createDistribution() = LogarithmicDistribution(0.7)
+    override val testKRange = 0..15
+    override val supportMin = 1
 
     // --- PMF / logPMF known values (scipy 15-digit refs) ---
 
@@ -251,74 +254,4 @@ class LogarithmicDistributionTest {
         assertFailsWith<InvalidParameterException> { LogarithmicDistribution(Double.NaN) }
     }
 
-    // --- Property-based ---
-
-    @Test
-    fun testExpLogPmfConsistency() {
-        val d = LogarithmicDistribution(0.7)
-        for (k in 0..15) {
-            assertEquals(d.pmf(k), exp(d.logPmf(k)), 1e-12, "exp(logPmf($k)) ≈ pmf($k)")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val d = LogarithmicDistribution(0.7)
-        for (k in 0..20) {
-            assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-10, "sf($k) + cdf($k) ≈ 1")
-        }
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val d = LogarithmicDistribution(0.7)
-        var prev = 0.0
-        for (k in 1..20) {
-            val cdfVal = d.cdf(k)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing at k=$k")
-            prev = cdfVal
-        }
-    }
-
-    @Test
-    fun testCdfQuantileRoundTrip() {
-        val d = LogarithmicDistribution(0.7)
-        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
-            val k = d.quantileInt(p)
-            assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
-            if (k > 1) assertTrue(d.cdf(k - 1) < p, "cdf(quantileInt($p)-1) < $p")
-        }
-    }
-
-    @Test
-    fun testPmfSumsToApproximatelyOne() {
-        val d = LogarithmicDistribution(0.5)
-        var total = 0.0
-        for (k in 1..100) {
-            total += d.pmf(k)
-        }
-        assertEquals(1.0, total, 1e-10)
-    }
-
-    @Test
-    fun testPmfNonNegative() {
-        val d = LogarithmicDistribution(0.9)
-        for (k in 0..50) {
-            assertTrue(d.pmf(k) >= 0.0, "pmf($k) >= 0")
-        }
-    }
-
-    // --- Sampling ---
-
-    @Test
-    fun testSampleStats() {
-        val d = LogarithmicDistribution(0.7)
-        val rng = kotlin.random.Random(42)
-        val samples = d.sample(100_000, rng)
-        val doubles = samples.map { it.toDouble() }
-        val sampleMean = doubles.average()
-        assertEquals(d.mean, sampleMean, d.mean * 0.05, "sample mean ≈ ${d.mean}")
-        val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
-        assertEquals(d.variance, sampleVar, d.variance * 0.1, "sample variance ≈ ${d.variance}")
-    }
 }

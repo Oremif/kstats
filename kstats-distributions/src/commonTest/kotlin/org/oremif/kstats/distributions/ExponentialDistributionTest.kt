@@ -4,9 +4,11 @@ import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-class ExponentialDistributionTest {
+class ExponentialDistributionTest : ContinuousDistributionPropertyTests() {
+    override fun createDistribution() = ExponentialDistribution(2.0)
+    override val testPoints = listOf(0.0, 0.5, 1.0, 2.0, 5.0)
+
     private val tol = 1e-10
 
     @Test
@@ -48,22 +50,6 @@ class ExponentialDistributionTest {
     }
 
     @Test
-    fun testLogPdfConsistency() {
-        val e = ExponentialDistribution(2.0)
-        for (x in listOf(0.0, 0.5, 1.0, 2.0, 5.0)) {
-            assertEquals(e.pdf(x), exp(e.logPdf(x)), 1e-12, "exp(logPdf($x)) ≈ pdf($x)")
-        }
-    }
-
-    @Test
-    fun testSfConsistency() {
-        val e = ExponentialDistribution(2.0)
-        for (x in listOf(-1.0, 0.0, 0.5, 1.0, 5.0)) {
-            assertEquals(1.0, e.sf(x) + e.cdf(x), 1e-12, "sf($x) + cdf($x) ≈ 1")
-        }
-    }
-
-    @Test
     fun testExtremeParameters() {
         // rate=1e10: fast decay
         val d1 = ExponentialDistribution(1e10)
@@ -81,43 +67,4 @@ class ExponentialDistributionTest {
         assertEquals(exp(-40.0), d3.sf(40.0), 1e-28)
     }
 
-    @Test
-    fun testCdfQuantileRoundTrip() {
-        val d = ExponentialDistribution(2.0)
-        for (p in listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)) {
-            assertEquals(p, d.cdf(d.quantile(p)), 1e-10, "cdf(quantile($p)) ≈ $p")
-        }
-    }
-
-    @Test
-    fun testCdfMonotonicity() {
-        val d = ExponentialDistribution(2.0)
-        var prev = 0.0
-        for (x in (0..10).map { it * 0.5 }) {
-            val cdfVal = d.cdf(x)
-            assertTrue(cdfVal >= prev, "cdf should be monotonically increasing")
-            prev = cdfVal
-        }
-    }
-
-    @Test
-    fun testSampleStats() {
-        val d = ExponentialDistribution(2.0)
-        val rng = kotlin.random.Random(42)
-        val samples = d.sample(100_000, rng)
-        val sampleMean = samples.average()
-        assertEquals(d.mean, sampleMean, 0.05, "sample mean ≈ ${d.mean}")
-        val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
-        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.05), "sample variance ≈ ${d.variance}")
-    }
-
-    @Test
-    fun testPdfIntegration() {
-        val d = ExponentialDistribution(2.0)
-        val eps = 1e-6
-        val lower = d.quantile(eps)
-        val upper = d.quantile(1.0 - eps)
-        val integral = trapezoidalIntegral({ d.pdf(it) }, lower, upper)
-        assertEquals(d.cdf(upper) - d.cdf(lower), integral, 1e-4)
-    }
 }

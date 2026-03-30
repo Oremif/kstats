@@ -1,7 +1,6 @@
 package org.oremif.kstats.distributions
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.random.Random
 import kotlin.test.Test
@@ -9,7 +8,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class NakagamiDistributionTest {
+class NakagamiDistributionTest : ContinuousDistributionPropertyTests() {
+
+    override fun createDistribution(): ContinuousDistribution = NakagamiDistribution(2.0, 1.0)
+    override val testPoints = listOf(0.5, 1.0, 1.5, 2.0, 3.0)
+    override val pValues = listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9)
+    override val roundTripTol = 1e-8
+
     private val tol = 1e-10
     private val pdfTol = 1e-12
     private val momentTol = 1e-10
@@ -410,70 +415,6 @@ class NakagamiDistributionTest {
     // ========================================
 
     @Test
-    fun testCdfQuantileRoundTrip() {
-        val ps = doubleArrayOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9)
-        for (d in listOf(d1, d2, d3, d4)) {
-            for (p in ps) {
-                assertEquals(p, d.cdf(d.quantile(p)), 1e-8, "cdf(quantile($p)) ≈ $p")
-            }
-        }
-    }
-
-    @Test
-    fun testQuantileCdfRoundTrip() {
-        val xs = doubleArrayOf(0.5, 1.0, 1.5, 2.0, 3.0)
-        for (x in xs) {
-            assertEquals(x, d1.quantile(d1.cdf(x)), 1e-6, "quantile(cdf($x)) ≈ $x")
-        }
-    }
-
-    @Test
-    fun testSfPlusCdfEqualsOne() {
-        val xs = doubleArrayOf(0.5, 1.0, 1.5, 2.0, 3.0)
-        for (d in listOf(d1, d2, d3, d4)) {
-            for (x in xs) {
-                assertEquals(1.0, d.sf(x) + d.cdf(x), 1e-14, "sf($x) + cdf($x) ≈ 1")
-            }
-        }
-    }
-
-    @Test
-    fun testLogPdfConsistency() {
-        val xs = doubleArrayOf(0.5, 1.0, 1.5, 2.0, 3.0)
-        for (d in listOf(d1, d2, d3, d4)) {
-            for (x in xs) {
-                val pdfVal = d.pdf(x)
-                if (pdfVal > 0.0) {
-                    assertEquals(ln(pdfVal), d.logPdf(x), pdfTol, "logPdf($x) ≈ ln(pdf($x))")
-                }
-            }
-        }
-    }
-
-    @Test
-    fun testPdfNonNegative() {
-        val xs = doubleArrayOf(-10.0, 0.0, 0.001, 0.5, 1.0, 2.0, 5.0, 10.0)
-        for (d in listOf(d1, d2, d3, d4)) {
-            for (x in xs) {
-                assertTrue(d.pdf(x) >= 0.0, "pdf($x) should be non-negative")
-            }
-        }
-    }
-
-    @Test
-    fun testCdfMonotonic() {
-        val xs = listOf(0.01, 0.1, 0.5, 1.0, 2.0, 3.0, 5.0)
-        for (d in listOf(d1, d2, d3, d4)) {
-            for (i in 1 until xs.size) {
-                assertTrue(
-                    d.cdf(xs[i]) >= d.cdf(xs[i - 1]),
-                    "cdf should be monotonically non-decreasing"
-                )
-            }
-        }
-    }
-
-    @Test
     fun testEntropy() {
         assertEquals(0.875408870846436, NakagamiDistribution(2.0, 3.0).entropy, 1e-10)
         assertEquals(0.725791352644727, NakagamiDistribution(0.5, 1.0).entropy, 1e-10)
@@ -481,25 +422,6 @@ class NakagamiDistributionTest {
         assertEquals(0.249231775907822, NakagamiDistribution(5.0, 2.0).entropy, 1e-10)
         assertEquals(1.746753198387844, NakagamiDistribution(1.0, 10.0).entropy, 1e-10)
         assertEquals(0.370457113107702, NakagamiDistribution(10.0, 5.0).entropy, 1e-10)
-    }
-
-    @Test
-    fun testPdfIntegration() {
-        val lower = d1.quantile(0.001)
-        val upper = d1.quantile(0.999)
-        val integral = trapezoidalIntegral({ d1.pdf(it) }, lower, upper)
-        val expected = d1.cdf(upper) - d1.cdf(lower)
-        assertEquals(expected, integral, 1e-4)
-    }
-
-    @Test
-    fun testSampleMeanVariance() {
-        val n = 100_000
-        val samples = d3.sample(n, Random(42))
-        val sampleMean = samples.average()
-        val sampleVar = samples.map { (it - sampleMean) * (it - sampleMean) }.average()
-        assertEquals(d3.mean, sampleMean, statTol * d3.mean)
-        assertEquals(d3.variance, sampleVar, statTol * d3.variance)
     }
 
     @Test
@@ -550,21 +472,4 @@ class NakagamiDistributionTest {
         assertFailsWith<InvalidParameterException> { d1.quantile(1.1) }
     }
 
-    // ========================================
-    // Helper
-    // ========================================
-
-    private fun trapezoidalIntegral(
-        f: (Double) -> Double,
-        a: Double,
-        b: Double,
-        n: Int = 10_000,
-    ): Double {
-        val h = (b - a) / n
-        var sum = 0.5 * (f(a) + f(b))
-        for (i in 1 until n) {
-            sum += f(a + i * h)
-        }
-        return sum * h
-    }
 }
