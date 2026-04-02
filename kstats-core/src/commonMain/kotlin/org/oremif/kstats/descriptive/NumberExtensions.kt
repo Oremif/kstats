@@ -90,7 +90,7 @@ public fun Iterable<Int>.standardDeviation(kind: PopulationKind = PopulationKind
  * ```
  *
  * @param p the percentile to compute, in [0, 100].
- * @param interpolation how to interpolate between data points. Defaults to [QuantileInterpolation.LINEAR].
+ * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return the p-th percentile of the Int values as a Double.
  */
 @JvmName("percentileOfInt")
@@ -102,8 +102,7 @@ public fun Iterable<Int>.percentile(
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
-    ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
-    DeprecationLevel.WARNING
+    level = DeprecationLevel.WARNING,
 )
 @JvmName("percentileOfIntDeprecated")
 public fun Iterable<Int>.percentile(

@@ -91,8 +91,7 @@ public fun DoubleArray.percentile(
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
-    ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
-    DeprecationLevel.WARNING
+    level = DeprecationLevel.WARNING,
 )
 public fun Iterable<Double>.percentile(
     p: Double,
@@ -100,10 +99,7 @@ public fun Iterable<Double>.percentile(
 ): Double = percentile(p, interpolation.toQuantileMethod())
 
 @Suppress("DEPRECATION")
-@Deprecated(
-    "Use the overload with QuantileMethod instead.",
-    ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
-)
+@Deprecated("Use the overload with QuantileMethod instead.")
 public fun DoubleArray.percentile(
     p: Double,
     interpolation: QuantileInterpolation,
@@ -164,20 +160,14 @@ public fun DoubleArray.quantile(
 }
 
 @Suppress("DEPRECATION")
-@Deprecated(
-    "Use the overload with QuantileMethod instead.",
-    ReplaceWith("quantile(q, interpolation.toQuantileMethod())"),
-)
+@Deprecated("Use the overload with QuantileMethod instead.")
 public fun Iterable<Double>.quantile(
     q: Double,
     interpolation: QuantileInterpolation,
 ): Double = quantile(q, interpolation.toQuantileMethod())
 
 @Suppress("DEPRECATION")
-@Deprecated(
-    "Use the overload with QuantileMethod instead.",
-    ReplaceWith("quantile(q, interpolation.toQuantileMethod())"),
-)
+@Deprecated("Use the overload with QuantileMethod instead.")
 public fun DoubleArray.quantile(
     q: Double,
     interpolation: QuantileInterpolation,
@@ -546,20 +536,14 @@ public fun Sequence<Double>.quartiles(method: QuantileMethod = QuantileMethod.LI
     toList().toDoubleArray().quartiles(method)
 
 @Suppress("DEPRECATION")
-@Deprecated(
-    "Use the overload with QuantileMethod instead.",
-    ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
-)
+@Deprecated("Use the overload with QuantileMethod instead.")
 public fun Sequence<Double>.percentile(
     p: Double,
     interpolation: QuantileInterpolation,
 ): Double = percentile(p, interpolation.toQuantileMethod())
 
 @Suppress("DEPRECATION")
-@Deprecated(
-    "Use the overload with QuantileMethod instead.",
-    ReplaceWith("quantile(q, interpolation.toQuantileMethod())"),
-)
+@Deprecated("Use the overload with QuantileMethod instead.")
 public fun Sequence<Double>.quantile(
     q: Double,
     interpolation: QuantileInterpolation,

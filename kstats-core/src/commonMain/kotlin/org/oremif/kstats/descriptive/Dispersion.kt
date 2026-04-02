@@ -182,6 +182,7 @@ public fun DoubleArray.range(): Double {
  * listOf(1.0, 2.0, 3.0, 4.0, 5.0).interquartileRange() // 2.0
  * ```
  *
+ * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return the interquartile range (Q3 - Q1).
  */
 public fun Iterable<Double>.interquartileRange(method: QuantileMethod = QuantileMethod.LINEAR): Double {
@@ -199,6 +200,7 @@ public fun Iterable<Double>.interquartileRange(method: QuantileMethod = Quantile
  * doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0).interquartileRange() // 2.0
  * ```
  *
+ * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return the interquartile range (Q3 - Q1).
  */
 public fun DoubleArray.interquartileRange(method: QuantileMethod = QuantileMethod.LINEAR): Double {
@@ -785,6 +787,7 @@ public fun Sequence<Double>.range(): Double =
  *
  * The sequence is materialized internally. See [DoubleArray.interquartileRange] for details.
  *
+ * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return the interquartile range (Q3 - Q1).
  */
 public fun Sequence<Double>.interquartileRange(method: QuantileMethod = QuantileMethod.LINEAR): Double =

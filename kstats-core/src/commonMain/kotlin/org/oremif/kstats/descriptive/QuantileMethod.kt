@@ -42,6 +42,10 @@ public enum class QuantileMethod {
      *
      * Same as [INVERTED_CDF] but averages the two bracketing order statistics at
      * discontinuity points. This smooths the step function of HF1 at its jump points.
+     *
+     * Note: at q = 0, this returns the average of x[0] and x[1] (not the minimum),
+     * because q = 0 is itself a discontinuity point. This differs from all other methods,
+     * which return x[0] at q = 0.
      */
     AVERAGED_INVERTED_CDF,
 
