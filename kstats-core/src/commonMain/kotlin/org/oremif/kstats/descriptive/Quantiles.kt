@@ -21,10 +21,19 @@ import kotlin.math.round
     DeprecationLevel.WARNING,
 )
 public enum class QuantileInterpolation {
+    /** Linear interpolation between bracketing data points (maps to [QuantileMethod.LINEAR]). */
     LINEAR,
+
+    /** Lower of the two bracketing data points (maps to [QuantileMethod.LOWER]). */
     LOWER,
+
+    /** Higher of the two bracketing data points (maps to [QuantileMethod.HIGHER]). */
     HIGHER,
+
+    /** Nearest data point, ties toward higher (maps to [QuantileMethod.NEAREST]). */
     NEAREST,
+
+    /** Average of the two bracketing data points (maps to [QuantileMethod.MIDPOINT]). */
     MIDPOINT;
 
     public fun toQuantileMethod(): QuantileMethod = when (this) {
@@ -103,6 +112,7 @@ public fun Iterable<Double>.percentile(
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
     ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
+    DeprecationLevel.WARNING,
 )
 public fun DoubleArray.percentile(
     p: Double,
@@ -167,6 +177,7 @@ public fun DoubleArray.quantile(
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
     ReplaceWith("quantile(q, interpolation.toQuantileMethod())"),
+    DeprecationLevel.WARNING,
 )
 public fun Iterable<Double>.quantile(
     q: Double,
@@ -177,6 +188,7 @@ public fun Iterable<Double>.quantile(
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
     ReplaceWith("quantile(q, interpolation.toQuantileMethod())"),
+    DeprecationLevel.WARNING,
 )
 public fun DoubleArray.quantile(
     q: Double,
@@ -403,7 +415,7 @@ public fun DoubleArray.quartiles(method: QuantileMethod = QuantileMethod.LINEAR)
 // ── quantileSelect / percentileSelect ───────────────────────────────────────
 
 /**
- * Selects the element at the q-th quantile position from this sorted list.
+ * Selects the element at the q-th quantile position from this list.
  *
  * Unlike [quantile], this function works with any [Comparable] type (not just Double) and
  * always returns an actual element from the list rather than an interpolated value. This is
@@ -530,6 +542,7 @@ public fun Sequence<Double>.quartiles(method: QuantileMethod = QuantileMethod.LI
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
     ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
+    DeprecationLevel.WARNING,
 )
 public fun Sequence<Double>.percentile(
     p: Double,
@@ -540,6 +553,7 @@ public fun Sequence<Double>.percentile(
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
     ReplaceWith("quantile(q, interpolation.toQuantileMethod())"),
+    DeprecationLevel.WARNING,
 )
 public fun Sequence<Double>.quantile(
     q: Double,

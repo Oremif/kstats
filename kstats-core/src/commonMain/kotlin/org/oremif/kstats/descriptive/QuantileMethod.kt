@@ -61,8 +61,7 @@ public enum class QuantileMethod {
      * Linear interpolation of the empirical CDF (HF4, R type 4).
      *
      * Uses position h = n*p and linear interpolation between the two bracketing order
-     * statistics. For small samples, this method can produce values below the minimum
-     * for small probabilities.
+     * statistics.
      */
     INTERPOLATED_INVERTED_CDF,
 
