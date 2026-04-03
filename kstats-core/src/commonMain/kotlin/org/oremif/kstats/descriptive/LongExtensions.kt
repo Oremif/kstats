@@ -96,14 +96,26 @@ public fun Iterable<Long>.standardDeviation(kind: PopulationKind = PopulationKin
  * ```
  *
  * @param p the percentile to compute, in [0, 100].
- * @param interpolation how to interpolate between data points. Defaults to [QuantileInterpolation.LINEAR].
+ * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return the p-th percentile of the Long values as a Double.
  */
 @JvmName("percentileOfLong")
 public fun Iterable<Long>.percentile(
     p: Double,
-    interpolation: QuantileInterpolation = QuantileInterpolation.LINEAR
-): Double = toStatArray().percentile(p, interpolation)
+    method: QuantileMethod = QuantileMethod.LINEAR,
+): Double = toStatArray().percentile(p, method)
+
+@Suppress("DEPRECATION")
+@Deprecated(
+    "Use the overload with QuantileMethod instead.",
+    ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
+    DeprecationLevel.WARNING,
+)
+@JvmName("percentileOfLongDeprecated")
+public fun Iterable<Long>.percentile(
+    p: Double,
+    interpolation: QuantileInterpolation,
+): Double = toStatArray().percentile(p, interpolation.toQuantileMethod())
 
 /**
  * Computes a descriptive statistics summary of the Long values.

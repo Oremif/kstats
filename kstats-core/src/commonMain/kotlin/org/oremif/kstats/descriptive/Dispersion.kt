@@ -182,10 +182,11 @@ public fun DoubleArray.range(): Double {
  * listOf(1.0, 2.0, 3.0, 4.0, 5.0).interquartileRange() // 2.0
  * ```
  *
+ * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return the interquartile range (Q3 - Q1).
  */
-public fun Iterable<Double>.interquartileRange(): Double {
-    val q = quartiles()
+public fun Iterable<Double>.interquartileRange(method: QuantileMethod = QuantileMethod.LINEAR): Double {
+    val q = quartiles(method)
     return q.third - q.first
 }
 
@@ -199,10 +200,11 @@ public fun Iterable<Double>.interquartileRange(): Double {
  * doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0).interquartileRange() // 2.0
  * ```
  *
+ * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return the interquartile range (Q3 - Q1).
  */
-public fun DoubleArray.interquartileRange(): Double {
-    val q = quartiles()
+public fun DoubleArray.interquartileRange(method: QuantileMethod = QuantileMethod.LINEAR): Double {
+    val q = quartiles(method)
     return q.third - q.first
 }
 
@@ -785,10 +787,11 @@ public fun Sequence<Double>.range(): Double =
  *
  * The sequence is materialized internally. See [DoubleArray.interquartileRange] for details.
  *
+ * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return the interquartile range (Q3 - Q1).
  */
-public fun Sequence<Double>.interquartileRange(): Double =
-    toList().toDoubleArray().interquartileRange()
+public fun Sequence<Double>.interquartileRange(method: QuantileMethod = QuantileMethod.LINEAR): Double =
+    toList().toDoubleArray().interquartileRange(method)
 
 /**
  * Computes the mean absolute deviation (MAD) of the values in this sequence.

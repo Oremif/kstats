@@ -133,9 +133,12 @@ public final class org/oremif/kstats/descriptive/DispersionKt {
 	public static synthetic fun coefficientOfVariation$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
 	public static synthetic fun coefficientOfVariation$default (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
 	public static synthetic fun coefficientOfVariation$default ([DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
-	public static final fun interquartileRange (Ljava/lang/Iterable;)D
-	public static final fun interquartileRange (Lkotlin/sequences/Sequence;)D
-	public static final fun interquartileRange ([D)D
+	public static final fun interquartileRange (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/QuantileMethod;)D
+	public static final fun interquartileRange (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/QuantileMethod;)D
+	public static final fun interquartileRange ([DLorg/oremif/kstats/descriptive/QuantileMethod;)D
+	public static synthetic fun interquartileRange$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
+	public static synthetic fun interquartileRange$default (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
+	public static synthetic fun interquartileRange$default ([DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
 	public static final fun meanAbsoluteDeviation (Ljava/lang/Iterable;)D
 	public static final fun meanAbsoluteDeviation (Lkotlin/sequences/Sequence;)D
 	public static final fun meanAbsoluteDeviation ([D)D
@@ -222,8 +225,9 @@ public final class org/oremif/kstats/descriptive/IntStatistics {
 	public static final fun describeOfInt (Ljava/lang/Iterable;)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
 	public static final fun meanOfInt (Ljava/lang/Iterable;)D
 	public static final fun medianOfInt (Ljava/lang/Iterable;)D
-	public static final fun percentileOfInt (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
-	public static synthetic fun percentileOfInt$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static final fun percentileOfInt (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;)D
+	public static synthetic fun percentileOfInt$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
+	public static final fun percentileOfIntDeprecated (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
 	public static final fun standardDeviationOfInt (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
 	public static synthetic fun standardDeviationOfInt$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
 	public static final fun varianceOfInt (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
@@ -234,8 +238,9 @@ public final class org/oremif/kstats/descriptive/LongStatistics {
 	public static final fun describeOfLong (Ljava/lang/Iterable;)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
 	public static final fun meanOfLong (Ljava/lang/Iterable;)D
 	public static final fun medianOfLong (Ljava/lang/Iterable;)D
-	public static final fun percentileOfLong (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
-	public static synthetic fun percentileOfLong$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static final fun percentileOfLong (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;)D
+	public static synthetic fun percentileOfLong$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
+	public static final fun percentileOfLongDeprecated (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
 	public static final fun standardDeviationOfLong (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
 	public static synthetic fun standardDeviationOfLong$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
 	public static final fun varianceOfLong (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
@@ -287,26 +292,59 @@ public final class org/oremif/kstats/descriptive/QuantileInterpolation : java/la
 	public static final field MIDPOINT Lorg/oremif/kstats/descriptive/QuantileInterpolation;
 	public static final field NEAREST Lorg/oremif/kstats/descriptive/QuantileInterpolation;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun toQuantileMethod ()Lorg/oremif/kstats/descriptive/QuantileMethod;
 	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/descriptive/QuantileInterpolation;
 	public static fun values ()[Lorg/oremif/kstats/descriptive/QuantileInterpolation;
 }
 
+public final class org/oremif/kstats/descriptive/QuantileMethod : java/lang/Enum {
+	public static final field AVERAGED_INVERTED_CDF Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field CLOSEST_OBSERVATION Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field HAZEN Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field HIGHER Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field INTERPOLATED_INVERTED_CDF Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field INVERTED_CDF Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field LINEAR Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field LOWER Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field MEDIAN_UNBIASED Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field MIDPOINT Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field NEAREST Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field NORMAL_UNBIASED Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static final field WEIBULL Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/descriptive/QuantileMethod;
+	public static fun values ()[Lorg/oremif/kstats/descriptive/QuantileMethod;
+}
+
 public final class org/oremif/kstats/descriptive/QuantilesKt {
 	public static final fun percentile (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static final fun percentile (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;)D
 	public static final fun percentile (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static final fun percentile (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileMethod;)D
 	public static final fun percentile ([DDLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
-	public static synthetic fun percentile$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
-	public static synthetic fun percentile$default (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
-	public static synthetic fun percentile$default ([DDLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
+	public static final fun percentile ([DDLorg/oremif/kstats/descriptive/QuantileMethod;)D
+	public static synthetic fun percentile$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
+	public static synthetic fun percentile$default (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
+	public static synthetic fun percentile$default ([DDLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
+	public static final fun percentileSelect (Ljava/util/List;DLorg/oremif/kstats/descriptive/QuantileMethod;)Ljava/lang/Comparable;
+	public static synthetic fun percentileSelect$default (Ljava/util/List;DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)Ljava/lang/Comparable;
 	public static final fun quantile (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static final fun quantile (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;)D
 	public static final fun quantile (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static final fun quantile (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileMethod;)D
 	public static final fun quantile ([DDLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
-	public static synthetic fun quantile$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
-	public static synthetic fun quantile$default (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
-	public static synthetic fun quantile$default ([DDLorg/oremif/kstats/descriptive/QuantileInterpolation;ILjava/lang/Object;)D
-	public static final fun quartiles (Ljava/lang/Iterable;)Lkotlin/Triple;
-	public static final fun quartiles (Lkotlin/sequences/Sequence;)Lkotlin/Triple;
-	public static final fun quartiles ([D)Lkotlin/Triple;
+	public static final fun quantile ([DDLorg/oremif/kstats/descriptive/QuantileMethod;)D
+	public static synthetic fun quantile$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
+	public static synthetic fun quantile$default (Lkotlin/sequences/Sequence;DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
+	public static synthetic fun quantile$default ([DDLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
+	public static final fun quantileSelect (Ljava/util/List;DLorg/oremif/kstats/descriptive/QuantileMethod;)Ljava/lang/Comparable;
+	public static synthetic fun quantileSelect$default (Ljava/util/List;DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)Ljava/lang/Comparable;
+	public static final fun quartiles (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/QuantileMethod;)Lkotlin/Triple;
+	public static final fun quartiles (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/QuantileMethod;)Lkotlin/Triple;
+	public static final fun quartiles ([DLorg/oremif/kstats/descriptive/QuantileMethod;)Lkotlin/Triple;
+	public static synthetic fun quartiles$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)Lkotlin/Triple;
+	public static synthetic fun quartiles$default (Lkotlin/sequences/Sequence;Lorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)Lkotlin/Triple;
+	public static synthetic fun quartiles$default ([DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)Lkotlin/Triple;
 }
 
 public final class org/oremif/kstats/descriptive/SemiVarianceDirection : java/lang/Enum {
