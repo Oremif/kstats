@@ -117,6 +117,21 @@ public final class org/oremif/kstats/hypothesis/NormalityTestsKt {
 	public static final fun shapiroWilkTest ([D)Lorg/oremif/kstats/hypothesis/TestResult;
 }
 
+public final class org/oremif/kstats/hypothesis/PowerAnalysisKt {
+	public static final fun proportionZTestMinimumEffect (IDDLorg/oremif/kstats/hypothesis/Alternative;Z)D
+	public static synthetic fun proportionZTestMinimumEffect$default (IDDLorg/oremif/kstats/hypothesis/Alternative;ZILjava/lang/Object;)D
+	public static final fun proportionZTestPower (DIDLorg/oremif/kstats/hypothesis/Alternative;Z)D
+	public static synthetic fun proportionZTestPower$default (DIDLorg/oremif/kstats/hypothesis/Alternative;ZILjava/lang/Object;)D
+	public static final fun proportionZTestRequiredN (DDDLorg/oremif/kstats/hypothesis/Alternative;Z)I
+	public static synthetic fun proportionZTestRequiredN$default (DDDLorg/oremif/kstats/hypothesis/Alternative;ZILjava/lang/Object;)I
+	public static final fun tTestMinimumEffect (IDDLorg/oremif/kstats/hypothesis/Alternative;Lorg/oremif/kstats/hypothesis/TTestType;)D
+	public static synthetic fun tTestMinimumEffect$default (IDDLorg/oremif/kstats/hypothesis/Alternative;Lorg/oremif/kstats/hypothesis/TTestType;ILjava/lang/Object;)D
+	public static final fun tTestPower (DIDLorg/oremif/kstats/hypothesis/Alternative;Lorg/oremif/kstats/hypothesis/TTestType;)D
+	public static synthetic fun tTestPower$default (DIDLorg/oremif/kstats/hypothesis/Alternative;Lorg/oremif/kstats/hypothesis/TTestType;ILjava/lang/Object;)D
+	public static final fun tTestRequiredN (DDDLorg/oremif/kstats/hypothesis/Alternative;Lorg/oremif/kstats/hypothesis/TTestType;)I
+	public static synthetic fun tTestRequiredN$default (DDDLorg/oremif/kstats/hypothesis/Alternative;Lorg/oremif/kstats/hypothesis/TTestType;ILjava/lang/Object;)I
+}
+
 public final class org/oremif/kstats/hypothesis/ProportionZTestKt {
 	public static final fun proportionZTest (IIDLorg/oremif/kstats/hypothesis/Alternative;D)Lorg/oremif/kstats/hypothesis/TestResult;
 	public static final fun proportionZTest (IIIILorg/oremif/kstats/hypothesis/Alternative;D)Lorg/oremif/kstats/hypothesis/TestResult;
@@ -146,6 +161,15 @@ public final class org/oremif/kstats/hypothesis/TTestKt {
 	public static final fun tTest ([D[DLorg/oremif/kstats/hypothesis/Alternative;ZD)Lorg/oremif/kstats/hypothesis/TestResult;
 	public static synthetic fun tTest$default ([DDLorg/oremif/kstats/hypothesis/Alternative;DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
 	public static synthetic fun tTest$default ([D[DLorg/oremif/kstats/hypothesis/Alternative;ZDILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/TTestType : java/lang/Enum {
+	public static final field ONE_SAMPLE Lorg/oremif/kstats/hypothesis/TTestType;
+	public static final field PAIRED Lorg/oremif/kstats/hypothesis/TTestType;
+	public static final field TWO_SAMPLE Lorg/oremif/kstats/hypothesis/TTestType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/hypothesis/TTestType;
+	public static fun values ()[Lorg/oremif/kstats/hypothesis/TTestType;
 }
 
 public final class org/oremif/kstats/hypothesis/TestResult {
