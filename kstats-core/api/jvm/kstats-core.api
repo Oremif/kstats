@@ -292,6 +292,7 @@ public final class org/oremif/kstats/descriptive/QuantileInterpolation : java/la
 	public static final field MIDPOINT Lorg/oremif/kstats/descriptive/QuantileInterpolation;
 	public static final field NEAREST Lorg/oremif/kstats/descriptive/QuantileInterpolation;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun toQuantileMethod ()Lorg/oremif/kstats/descriptive/QuantileMethod;
 	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/descriptive/QuantileInterpolation;
 	public static fun values ()[Lorg/oremif/kstats/descriptive/QuantileInterpolation;
 }

@@ -102,7 +102,8 @@ public fun Iterable<Int>.percentile(
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
-    level = DeprecationLevel.WARNING,
+    ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
+    DeprecationLevel.WARNING,
 )
 @JvmName("percentileOfIntDeprecated")
 public fun Iterable<Int>.percentile(

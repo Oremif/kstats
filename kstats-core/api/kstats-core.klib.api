@@ -27,6 +27,7 @@ final enum class org.oremif.kstats.descriptive/QuantileInterpolation : kotlin/En
     final val entries // org.oremif.kstats.descriptive/QuantileInterpolation.entries|#static{}entries[0]
         final fun <get-entries>(): kotlin.enums/EnumEntries<org.oremif.kstats.descriptive/QuantileInterpolation> // org.oremif.kstats.descriptive/QuantileInterpolation.entries.<get-entries>|<get-entries>#static(){}[0]
 
+    final fun toQuantileMethod(): org.oremif.kstats.descriptive/QuantileMethod // org.oremif.kstats.descriptive/QuantileInterpolation.toQuantileMethod|toQuantileMethod(){}[0]
     final fun valueOf(kotlin/String): org.oremif.kstats.descriptive/QuantileInterpolation // org.oremif.kstats.descriptive/QuantileInterpolation.valueOf|valueOf#static(kotlin.String){}[0]
     final fun values(): kotlin/Array<org.oremif.kstats.descriptive/QuantileInterpolation> // org.oremif.kstats.descriptive/QuantileInterpolation.values|values#static(){}[0]
 }

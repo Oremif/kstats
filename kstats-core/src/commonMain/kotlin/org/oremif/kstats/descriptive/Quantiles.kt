@@ -27,7 +27,7 @@ public enum class QuantileInterpolation {
     NEAREST,
     MIDPOINT;
 
-    internal fun toQuantileMethod(): QuantileMethod = when (this) {
+    public fun toQuantileMethod(): QuantileMethod = when (this) {
         LINEAR -> QuantileMethod.LINEAR
         LOWER -> QuantileMethod.LOWER
         HIGHER -> QuantileMethod.HIGHER
@@ -91,7 +91,8 @@ public fun DoubleArray.percentile(
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
-    level = DeprecationLevel.WARNING,
+    ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
+    DeprecationLevel.WARNING,
 )
 public fun Iterable<Double>.percentile(
     p: Double,
@@ -99,7 +100,10 @@ public fun Iterable<Double>.percentile(
 ): Double = percentile(p, interpolation.toQuantileMethod())
 
 @Suppress("DEPRECATION")
-@Deprecated("Use the overload with QuantileMethod instead.")
+@Deprecated(
+    "Use the overload with QuantileMethod instead.",
+    ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
+)
 public fun DoubleArray.percentile(
     p: Double,
     interpolation: QuantileInterpolation,
@@ -160,14 +164,20 @@ public fun DoubleArray.quantile(
 }
 
 @Suppress("DEPRECATION")
-@Deprecated("Use the overload with QuantileMethod instead.")
+@Deprecated(
+    "Use the overload with QuantileMethod instead.",
+    ReplaceWith("quantile(q, interpolation.toQuantileMethod())"),
+)
 public fun Iterable<Double>.quantile(
     q: Double,
     interpolation: QuantileInterpolation,
 ): Double = quantile(q, interpolation.toQuantileMethod())
 
 @Suppress("DEPRECATION")
-@Deprecated("Use the overload with QuantileMethod instead.")
+@Deprecated(
+    "Use the overload with QuantileMethod instead.",
+    ReplaceWith("quantile(q, interpolation.toQuantileMethod())"),
+)
 public fun DoubleArray.quantile(
     q: Double,
     interpolation: QuantileInterpolation,
@@ -181,6 +191,42 @@ public fun DoubleArray.quantile(
 // For discontinuous methods (HF1-3): result = x_(selected index).
 // Reference: Hyndman, R.J. and Fan, Y. (1996) Sample Quantiles in Statistical Packages.
 // The American Statistician, 50, 361-365.
+
+/** Computes the 1-based position h(q, n) for the given Hyndman-Fan method. */
+private fun computePosition(n: Int, q: Double, method: QuantileMethod): Double = when (method) {
+    QuantileMethod.INVERTED_CDF,
+    QuantileMethod.AVERAGED_INVERTED_CDF,
+    QuantileMethod.HAZEN -> n * q + 0.5
+
+    QuantileMethod.CLOSEST_OBSERVATION,
+    QuantileMethod.INTERPOLATED_INVERTED_CDF -> n * q
+
+    QuantileMethod.WEIBULL -> (n + 1) * q
+
+    QuantileMethod.LINEAR,
+    QuantileMethod.LOWER,
+    QuantileMethod.HIGHER,
+    QuantileMethod.NEAREST,
+    QuantileMethod.MIDPOINT -> (n - 1) * q + 1.0
+
+    QuantileMethod.MEDIAN_UNBIASED -> (n + 1.0 / 3.0) * q + 1.0 / 3.0
+    QuantileMethod.NORMAL_UNBIASED -> (n + 0.25) * q + 3.0 / 8.0
+}
+
+/** Computes a 0-based discrete index for non-interpolating methods from the 1-based position [h]. */
+private fun discreteIndex(h: Double, n: Int, method: QuantileMethod): Int = when (method) {
+    // x_(ceil(h - 0.5)), clamped to [1, n]
+    QuantileMethod.INVERTED_CDF,
+    QuantileMethod.AVERAGED_INVERTED_CDF -> ceil(h - 0.5).toInt().coerceIn(1, n) - 1
+    // x_(round(h)), banker's rounding (ties to even), clamped to [1, n]
+    QuantileMethod.CLOSEST_OBSERVATION -> bankersRound(h.coerceIn(1.0, n.toDouble())).coerceIn(1, n) - 1
+    QuantileMethod.LOWER -> floor(h).toInt().coerceIn(1, n) - 1
+    QuantileMethod.HIGHER -> ceil(h).toInt().coerceIn(1, n) - 1
+    // Round half up (not banker's rounding)
+    QuantileMethod.NEAREST -> floor(h + 0.5).toInt().coerceIn(1, n) - 1
+    else -> error("$method is not a discrete selector")
+}
+
 private fun computeQuantile(
     work: DoubleArray,
     q: Double,
@@ -196,37 +242,20 @@ private fun computeQuantile(
     }
     if (q == 1.0) return selectElement(work, n - 1, useIntroSelect)
 
-    // 1-based position h(p, n)
-    val h: Double = when (method) {
-        QuantileMethod.INVERTED_CDF,
-        QuantileMethod.AVERAGED_INVERTED_CDF,
-        QuantileMethod.HAZEN -> n * q + 0.5
-
-        QuantileMethod.CLOSEST_OBSERVATION,
-        QuantileMethod.INTERPOLATED_INVERTED_CDF -> n * q
-
-        QuantileMethod.WEIBULL -> (n + 1) * q
-
-        QuantileMethod.LINEAR,
-        QuantileMethod.LOWER,
-        QuantileMethod.HIGHER,
-        QuantileMethod.NEAREST,
-        QuantileMethod.MIDPOINT -> (n - 1) * q + 1.0
-
-        QuantileMethod.MEDIAN_UNBIASED -> (n + 1.0 / 3.0) * q + 1.0 / 3.0
-        QuantileMethod.NORMAL_UNBIASED -> (n + 0.25) * q + 3.0 / 8.0
-    }
+    val h = computePosition(n, q, method)
 
     return when (method) {
-        QuantileMethod.INVERTED_CDF -> {
-            // x_(ceil(h - 0.5)), clamped to [1, n]
-            val idx = ceil(h - 0.5).toInt().coerceIn(1, n) - 1
-            selectElement(work, idx, useIntroSelect)
+        QuantileMethod.INVERTED_CDF,
+        QuantileMethod.CLOSEST_OBSERVATION,
+        QuantileMethod.LOWER,
+        QuantileMethod.HIGHER,
+        QuantileMethod.NEAREST -> {
+            selectElement(work, discreteIndex(h, n, method), useIntroSelect)
         }
 
         QuantileMethod.AVERAGED_INVERTED_CDF -> {
             // Like HF1, but average at discontinuities (when h - 0.5 is integer)
-            val idx = ceil(h - 0.5).toInt().coerceIn(1, n) - 1
+            val idx = discreteIndex(h, n, method)
             val hMinusHalf = h - 0.5
             val isDiscontinuity = hMinusHalf == floor(hMinusHalf) && idx + 1 < n
             if (isDiscontinuity) {
@@ -238,13 +267,6 @@ private fun computeQuantile(
             }
         }
 
-        QuantileMethod.CLOSEST_OBSERVATION -> {
-            // x_(round(h)), banker's rounding (ties to even), clamped to [1, n]
-            val hClamped = h.coerceIn(1.0, n.toDouble())
-            val idx = bankersRound(hClamped).coerceIn(1, n) - 1
-            selectElement(work, idx, useIntroSelect)
-        }
-
         QuantileMethod.INTERPOLATED_INVERTED_CDF,
         QuantileMethod.HAZEN,
         QuantileMethod.WEIBULL,
@@ -252,22 +274,6 @@ private fun computeQuantile(
         QuantileMethod.MEDIAN_UNBIASED,
         QuantileMethod.NORMAL_UNBIASED -> {
             linearInterpolate(work, h, n, useIntroSelect)
-        }
-
-        QuantileMethod.LOWER -> {
-            val j = floor(h).toInt().coerceIn(1, n) - 1
-            selectElement(work, j, useIntroSelect)
-        }
-
-        QuantileMethod.HIGHER -> {
-            val j = ceil(h).toInt().coerceIn(1, n) - 1
-            selectElement(work, j, useIntroSelect)
-        }
-
-        QuantileMethod.NEAREST -> {
-            // Round half up (not banker's rounding)
-            val j = floor(h + 0.5).toInt().coerceIn(1, n) - 1
-            selectElement(work, j, useIntroSelect)
         }
 
         QuantileMethod.MIDPOINT -> {
@@ -413,6 +419,9 @@ public fun DoubleArray.quartiles(method: QuantileMethod = QuantileMethod.LINEAR)
  * listOf(10, 20, 30, 40, 50).quantileSelect(0.25, QuantileMethod.LOWER) // 20
  * ```
  *
+ * Note: the default method is [QuantileMethod.NEAREST], not [QuantileMethod.LINEAR] (which is
+ * the default for [quantile]), because `quantileSelect` only supports non-interpolating methods.
+ *
  * @param q the quantile to compute, in [0, 1].
  * @param method the non-interpolating quantile method. Defaults to [QuantileMethod.NEAREST].
  * @return the element at the q-th quantile position.
@@ -432,25 +441,7 @@ public fun <T : Comparable<T>> List<T>.quantileSelect(
     if (q == 0.0) return sorted.first()
     if (q == 1.0) return sorted.last()
 
-    val h: Double = when (method) {
-        QuantileMethod.INVERTED_CDF -> n * q + 0.5
-        QuantileMethod.CLOSEST_OBSERVATION -> n * q
-        QuantileMethod.LOWER,
-        QuantileMethod.HIGHER,
-        QuantileMethod.NEAREST -> (n - 1) * q + 1.0
-        else -> error("unreachable")
-    }
-
-    val idx: Int = when (method) {
-        QuantileMethod.INVERTED_CDF -> ceil(h - 0.5).toInt().coerceIn(1, n) - 1
-        QuantileMethod.CLOSEST_OBSERVATION -> bankersRound(h.coerceIn(1.0, n.toDouble())).coerceIn(1, n) - 1
-        QuantileMethod.LOWER -> floor(h).toInt().coerceIn(1, n) - 1
-        QuantileMethod.HIGHER -> ceil(h).toInt().coerceIn(1, n) - 1
-        QuantileMethod.NEAREST -> floor(h + 0.5).toInt().coerceIn(1, n) - 1
-        else -> error("unreachable")
-    }
-
-    return sorted[idx]
+    return sorted[discreteIndex(computePosition(n, q, method), n, method)]
 }
 
 /**
@@ -536,14 +527,20 @@ public fun Sequence<Double>.quartiles(method: QuantileMethod = QuantileMethod.LI
     toList().toDoubleArray().quartiles(method)
 
 @Suppress("DEPRECATION")
-@Deprecated("Use the overload with QuantileMethod instead.")
+@Deprecated(
+    "Use the overload with QuantileMethod instead.",
+    ReplaceWith("percentile(p, interpolation.toQuantileMethod())"),
+)
 public fun Sequence<Double>.percentile(
     p: Double,
     interpolation: QuantileInterpolation,
 ): Double = percentile(p, interpolation.toQuantileMethod())
 
 @Suppress("DEPRECATION")
-@Deprecated("Use the overload with QuantileMethod instead.")
+@Deprecated(
+    "Use the overload with QuantileMethod instead.",
+    ReplaceWith("quantile(q, interpolation.toQuantileMethod())"),
+)
 public fun Sequence<Double>.quantile(
     q: Double,
     interpolation: QuantileInterpolation,
