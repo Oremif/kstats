@@ -7,6 +7,8 @@ import org.oremif.kstats.distributions.BinomialDistribution
 import org.oremif.kstats.distributions.NormalDistribution
 import kotlin.math.sqrt
 
+private val standardNormal = NormalDistribution(0.0, 1.0)
+
 /**
  * Performs an exact binomial test for whether the proportion of successes equals [probability].
  *
@@ -116,8 +118,8 @@ public fun binomialTest(
         }
 
         CIMethod.WILSON -> {
-            // Wilson score interval
-            val z = NormalDistribution(0.0, 1.0).quantile(1.0 - alpha / 2.0)
+            // Wilson score interval — algebraically guaranteed to stay in [0, 1]
+            val z = standardNormal.quantile(1.0 - alpha / 2.0)
             val z2 = z * z
             val denom = 1.0 + z2 / n
             val center = (statistic + z2 / (2.0 * n)) / denom
@@ -127,7 +129,7 @@ public fun binomialTest(
 
         CIMethod.AGRESTI_COULL -> {
             // Agresti-Coull adjusted Wald interval
-            val z = NormalDistribution(0.0, 1.0).quantile(1.0 - alpha / 2.0)
+            val z = standardNormal.quantile(1.0 - alpha / 2.0)
             val z2 = z * z
             val nTilde = n + z2
             val pTilde = (k + z2 / 2.0) / nTilde

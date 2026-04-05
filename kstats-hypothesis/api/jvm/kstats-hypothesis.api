@@ -41,8 +41,17 @@ public final class org/oremif/kstats/hypothesis/BartlettTestKt {
 }
 
 public final class org/oremif/kstats/hypothesis/BinomialTestKt {
-	public static final fun binomialTest (IIDLorg/oremif/kstats/hypothesis/Alternative;D)Lorg/oremif/kstats/hypothesis/TestResult;
-	public static synthetic fun binomialTest$default (IIDLorg/oremif/kstats/hypothesis/Alternative;DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun binomialTest (IIDLorg/oremif/kstats/hypothesis/Alternative;DLorg/oremif/kstats/hypothesis/CIMethod;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun binomialTest$default (IIDLorg/oremif/kstats/hypothesis/Alternative;DLorg/oremif/kstats/hypothesis/CIMethod;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+}
+
+public final class org/oremif/kstats/hypothesis/CIMethod : java/lang/Enum {
+	public static final field AGRESTI_COULL Lorg/oremif/kstats/hypothesis/CIMethod;
+	public static final field CLOPPER_PEARSON Lorg/oremif/kstats/hypothesis/CIMethod;
+	public static final field WILSON Lorg/oremif/kstats/hypothesis/CIMethod;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/hypothesis/CIMethod;
+	public static fun values ()[Lorg/oremif/kstats/hypothesis/CIMethod;
 }
 
 public final class org/oremif/kstats/hypothesis/ChiSquaredTestKt {
