@@ -376,16 +376,24 @@ internal class PowerAnalysisTest {
     // ===== tTestRequiredN: Non-finite input =====
 
     @Test
+    fun testTTestRequiredNNaNEffectSize() {
+        assertFailsWith<InvalidParameterException> {
+            tTestRequiredN(effectSize = Double.NaN)
+        }
+    }
+
+    @Test
+    fun testTTestRequiredNInfinityEffectSize() {
+        // Infinity effectSize: Inf/Inf = NaN -> ceil(NaN).toInt() = 0 -> maxOf(2, 0) = 2
+        val n = tTestRequiredN(effectSize = Double.POSITIVE_INFINITY)
+        assertEquals(2, n)
+    }
+
+    @Test
     fun testTTestRequiredNNaNPower() {
-        // NaN power passes validation (NaN <= 0.0 is false, NaN >= 1.0 is false)
-        // NaN propagates through quantile -> lambda -> nRaw -> ceil(NaN) behavior
-        // This may throw or return unusual values depending on implementation
-        // Just verify it does not throw InvalidParameterException for NaN
-        try {
+        // NaN power passes the range check but throws inside quantile()
+        assertFailsWith<InvalidParameterException> {
             tTestRequiredN(effectSize = 0.5, power = Double.NaN)
-            // If it returns a value, it should be at least 2
-        } catch (_: InvalidParameterException) {
-            // NaN might pass validation — this is acceptable per SPEC
         }
     }
 
@@ -871,6 +879,21 @@ internal class PowerAnalysisTest {
         assertFailsWith<InvalidParameterException> {
             proportionZTestRequiredN(effectSize = 0.5, alpha = 1.0)
         }
+    }
+
+    // ===== proportionZTestRequiredN: Non-finite input =====
+
+    @Test
+    fun testProportionZTestRequiredNNaNEffectSize() {
+        assertFailsWith<InvalidParameterException> {
+            proportionZTestRequiredN(effectSize = Double.NaN)
+        }
+    }
+
+    @Test
+    fun testProportionZTestRequiredNInfinityEffectSize() {
+        val n = proportionZTestRequiredN(effectSize = Double.POSITIVE_INFINITY)
+        assertEquals(2, n)
     }
 
     // ===== proportionZTestRequiredN: Extreme parameters =====

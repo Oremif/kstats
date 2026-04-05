@@ -100,9 +100,9 @@ public fun tTestPower(
  * ### Example:
  * ```kotlin
  * // Sample size per group for a two-sample t-test
- * tTestRequiredN(effectSize = 0.5, power = 0.8)             // 64
+ * tTestRequiredN(effectSize = 0.5, power = 0.8)             // 63
  * tTestRequiredN(effectSize = 0.5, power = 0.8, type = TTestType.ONE_SAMPLE) // 32
- * tTestRequiredN(effectSize = 0.8, power = 0.9, alpha = 0.01) // 38
+ * tTestRequiredN(effectSize = 0.8, power = 0.9, alpha = 0.01) // 47
  * ```
  *
  * @param effectSize the expected Cohen's d effect size. Must be non-zero. The sign is ignored.
@@ -124,6 +124,7 @@ public fun tTestRequiredN(
     alternative: Alternative = Alternative.TWO_SIDED,
     type: TTestType = TTestType.TWO_SAMPLE,
 ): Int {
+    if (effectSize.isNaN()) throw InvalidParameterException("effectSize must not be NaN")
     if (effectSize == 0.0) throw InvalidParameterException("effectSize must be non-zero")
     if (power <= 0.0 || power >= 1.0) throw InvalidParameterException("power must be in (0, 1), got $power")
     if (alpha <= 0.0 || alpha >= 1.0) throw InvalidParameterException("alpha must be in (0, 1), got $alpha")
@@ -147,7 +148,7 @@ public fun tTestRequiredN(
  * ### Example:
  * ```kotlin
  * // Smallest effect detectable with 100 subjects per group
- * tTestMinimumEffect(n = 100, power = 0.8)             // ~0.398
+ * tTestMinimumEffect(n = 100, power = 0.8)             // ~0.396
  * tTestMinimumEffect(n = 100, type = TTestType.ONE_SAMPLE) // ~0.281
  * ```
  *
@@ -259,6 +260,7 @@ public fun proportionZTestRequiredN(
     alternative: Alternative = Alternative.TWO_SIDED,
     twoSample: Boolean = true,
 ): Int {
+    if (effectSize.isNaN()) throw InvalidParameterException("effectSize must not be NaN")
     if (effectSize == 0.0) throw InvalidParameterException("effectSize must be non-zero")
     if (power <= 0.0 || power >= 1.0) throw InvalidParameterException("power must be in (0, 1), got $power")
     if (alpha <= 0.0 || alpha >= 1.0) throw InvalidParameterException("alpha must be in (0, 1), got $alpha")
