@@ -381,23 +381,30 @@ internal class MultipleComparisonTest {
 
     @Test
     fun testHolmNaNPropagation() {
+        // pValues = [0.01, NaN, 0.03], m=3
+        // sorted ascending (NaN last): 0.01(idx=0), 0.03(idx=2), NaN(idx=1)
+        // rank 0: 0.01 * 3 = 0.03, cumMax = 0.03
+        // rank 1: 0.03 * 2 = 0.06, cumMax = 0.06
+        // rank 2: NaN
         val pValues = doubleArrayOf(0.01, Double.NaN, 0.03)
         val result = holmBonferroniCorrection(pValues)
-        // NaN should propagate; non-NaN values corrected with m=3
+        assertEquals(0.03, result[0], tol, "holm non-NaN p[0] corrected with m=3")
         assertTrue(result[1].isNaN(), "NaN should propagate in Holm")
-        // Non-NaN positions should have finite adjusted p-values
-        assertTrue(result[0].isFinite(), "non-NaN should be finite")
-        assertTrue(result[2].isFinite(), "non-NaN should be finite")
+        assertEquals(0.06, result[2], tol, "holm non-NaN p[2] corrected with m=3")
     }
 
     @Test
     fun testBenjaminiHochbergNaNPropagation() {
+        // pValues = [0.01, NaN, 0.03], m=3
+        // sorted descending (NaN first): NaN(idx=1), 0.03(idx=2), 0.01(idx=0)
+        // i=0: NaN → skip
+        // i=1: 0.03 * 3/2 = 0.045, cumMin = 0.045
+        // i=2: 0.01 * 3/1 = 0.03, cumMin = 0.03
         val pValues = doubleArrayOf(0.01, Double.NaN, 0.03)
         val result = benjaminiHochbergCorrection(pValues)
-        // NaN should propagate; non-NaN values corrected with m=3
+        assertEquals(0.03, result[0], tol, "bh non-NaN p[0] corrected with m=3")
         assertTrue(result[1].isNaN(), "NaN should propagate in BH")
-        assertTrue(result[0].isFinite(), "non-NaN should be finite")
-        assertTrue(result[2].isFinite(), "non-NaN should be finite")
+        assertEquals(0.045, result[2], tol, "bh non-NaN p[2] corrected with m=3")
     }
 
     @Test
@@ -429,6 +436,29 @@ internal class MultipleComparisonTest {
         val result = bonferroniCorrection(doubleArrayOf(Double.NaN))
         assertTrue(result[0].isNaN(), "single NaN should propagate")
         assertEquals(1, result.size)
+    }
+
+    // ===== Non-finite input: Infinity rejected =====
+
+    @Test
+    fun testBonferroniRejectsPositiveInfinity() {
+        assertFailsWith<InvalidParameterException> {
+            bonferroniCorrection(doubleArrayOf(0.01, Double.POSITIVE_INFINITY, 0.03))
+        }
+    }
+
+    @Test
+    fun testHolmRejectsNegativeInfinity() {
+        assertFailsWith<InvalidParameterException> {
+            holmBonferroniCorrection(doubleArrayOf(Double.NEGATIVE_INFINITY, 0.05))
+        }
+    }
+
+    @Test
+    fun testBenjaminiHochbergRejectsPositiveInfinity() {
+        assertFailsWith<InvalidParameterException> {
+            benjaminiHochbergCorrection(doubleArrayOf(0.01, Double.POSITIVE_INFINITY))
+        }
     }
 
     // ===== Property: adjusted p-values are >= original p-values =====

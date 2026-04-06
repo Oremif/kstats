@@ -11,7 +11,8 @@ import org.oremif.kstats.core.exceptions.InvalidParameterException
  * correction — it guarantees that the probability of any false positive across all tests
  * stays below the significance level, but may miss true effects when many tests are performed.
  *
- * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged.
+ * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged,
+ * but they still count towards the total number of tests used as the multiplier.
  *
  * ### Example:
  * ```kotlin
@@ -43,7 +44,7 @@ public fun bonferroniCorrection(pValues: DoubleArray): DoubleArray {
  * at a higher rank is never smaller than one at a lower rank.
  *
  * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged
- * and are placed last during ranking.
+ * and are placed last during ranking, but they still count towards the total number of tests.
  *
  * ### Example:
  * ```kotlin
@@ -64,7 +65,7 @@ public fun holmBonferroniCorrection(pValues: DoubleArray): DoubleArray {
 
     // Indices sorted by p-value ascending; NaN goes last
     val sortedIndices = (0 until m).sortedWith(
-        compareBy { if (pValues[it].isNaN()) Double.MAX_VALUE else pValues[it] }
+        compareBy { if (pValues[it].isNaN()) Double.POSITIVE_INFINITY else pValues[it] }
     )
 
     // Step-down: p[rank] * (m - rank), enforce monotonicity via cumulative max
@@ -96,7 +97,8 @@ public fun holmBonferroniCorrection(pValues: DoubleArray): DoubleArray {
  * total tests to rank, enforcing monotonicity so that a p-value at a lower rank is never
  * larger than one at a higher rank.
  *
- * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged.
+ * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged,
+ * but they still count towards the total number of tests.
  *
  * ### Example:
  * ```kotlin

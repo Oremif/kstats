@@ -112,6 +112,12 @@ public final class org/oremif/kstats/hypothesis/LeveneTestKt {
 	public static synthetic fun leveneTest$default ([[DLorg/oremif/kstats/hypothesis/LeveneCenter;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
 }
 
+public final class org/oremif/kstats/hypothesis/MultipleComparisonKt {
+	public static final fun benjaminiHochbergCorrection ([D)[D
+	public static final fun bonferroniCorrection ([D)[D
+	public static final fun holmBonferroniCorrection ([D)[D
+}
+
 public final class org/oremif/kstats/hypothesis/NonParametricKt {
 	public static final fun mannWhitneyUTest ([D[DLorg/oremif/kstats/hypothesis/Alternative;)Lorg/oremif/kstats/hypothesis/TestResult;
 	public static synthetic fun mannWhitneyUTest$default ([D[DLorg/oremif/kstats/hypothesis/Alternative;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
