@@ -29,7 +29,7 @@ die.roll()               // "A" (most likely)
 ## Normalization
 
 - `zScore()` — standardize to mean = 0, standard deviation = 1.
-- `minMaxNormalize()` — scale to [0, 1].
+- `minMaxNormalize()` — scale to `[0, 1]`.
 - `minMaxNormalize(newMin, newMax)` — scale to a custom range.
 
 ## Binning

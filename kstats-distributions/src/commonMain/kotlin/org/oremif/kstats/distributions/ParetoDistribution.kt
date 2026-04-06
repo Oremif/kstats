@@ -23,8 +23,8 @@ import kotlin.random.Random
  * dist.quantile(0.5)  // 1.4142... (√2)
  * ```
  *
- * @param shape the tail index (α). Must be positive. Defaults to `1.0`.
- * @param scale the minimum value / location (xm). Must be positive. Defaults to `1.0`.
+ * @property shape the tail index (α). Must be positive. Defaults to `1.0`.
+ * @property scale the minimum value / location (xm). Must be positive. Defaults to `1.0`.
  */
 public class ParetoDistribution(
     public val shape: Double = 1.0,

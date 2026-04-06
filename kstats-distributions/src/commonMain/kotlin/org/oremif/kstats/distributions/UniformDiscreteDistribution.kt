@@ -33,8 +33,8 @@ import kotlin.random.Random
  * idx.pmf(50)              // 0.01 (each index equally likely)
  * ```
  *
- * @param min the smallest value in the support (inclusive).
- * @param max the largest value in the support (inclusive). Must be greater than or equal to [min].
+ * @property min the smallest value in the support (inclusive).
+ * @property max the largest value in the support (inclusive). Must be greater than or equal to [min].
  */
 public class UniformDiscreteDistribution(
     public val min: Int,

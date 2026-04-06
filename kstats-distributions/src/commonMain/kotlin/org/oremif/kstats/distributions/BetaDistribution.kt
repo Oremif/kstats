@@ -36,8 +36,8 @@ import kotlin.random.Random
  * uniform.pdf(0.5) // 1.0 (flat density on [0, 1])
  * ```
  *
- * @param alpha the first shape parameter, controlling weight toward 1. Must be positive.
- * @param beta the second shape parameter, controlling weight toward 0. Must be positive.
+ * @property alpha the first shape parameter, controlling weight toward 1. Must be positive.
+ * @property beta the second shape parameter, controlling weight toward 0. Must be positive.
  * @see ContinuousDistribution
  * @see GammaDistribution
  */

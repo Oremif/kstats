@@ -41,9 +41,9 @@ import kotlin.random.Random
  * dist.sample(Random(42))   // a single random draw
  * ```
  *
- * @param population the total number of items in the population. Must be non-negative.
- * @param successes the number of success items in the population. Must be in `[0, population]`.
- * @param draws the number of items drawn without replacement. Must be in `[0, population]`.
+ * @property population the total number of items in the population. Must be non-negative.
+ * @property successes the number of success items in the population. Must be in `[0, population]`.
+ * @property draws the number of items drawn without replacement. Must be in `[0, population]`.
  */
 public class HypergeometricDistribution(
     public val population: Int,

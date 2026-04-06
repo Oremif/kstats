@@ -35,7 +35,7 @@ import kotlin.random.Random
  * dist.quantile(0.95) // 11.07... (95th percentile with 5 df)
  * ```
  *
- * @param degreesOfFreedom the number of degrees of freedom. Must be positive.
+ * @property degreesOfFreedom the number of degrees of freedom. Must be positive.
  * @see ContinuousDistribution
  * @see GammaDistribution
  */

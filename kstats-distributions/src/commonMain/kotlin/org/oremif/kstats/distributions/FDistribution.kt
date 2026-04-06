@@ -37,8 +37,8 @@ import kotlin.random.Random
  * f.sample(Random(42)) // a single random draw from the distribution
  * ```
  *
- * @param dfNumerator the degrees of freedom for the numerator (first) chi-squared variable. Must be positive.
- * @param dfDenominator the degrees of freedom for the denominator (second) chi-squared variable. Must be positive.
+ * @property dfNumerator the degrees of freedom for the numerator (first) chi-squared variable. Must be positive.
+ * @property dfDenominator the degrees of freedom for the denominator (second) chi-squared variable. Must be positive.
  */
 public class FDistribution(
     public val dfNumerator: Double,

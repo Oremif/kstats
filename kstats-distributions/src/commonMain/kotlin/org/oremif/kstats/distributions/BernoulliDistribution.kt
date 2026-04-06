@@ -29,7 +29,7 @@ import kotlin.random.Random
  * coin.sample(Random(42))   // 0 or 1
  * ```
  *
- * @param probability the probability of success (outcome = 1). Must be in `[0, 1]`.
+ * @property probability the probability of success (outcome = 1). Must be in `[0, 1]`.
  */
 public class BernoulliDistribution(
     public val probability: Double

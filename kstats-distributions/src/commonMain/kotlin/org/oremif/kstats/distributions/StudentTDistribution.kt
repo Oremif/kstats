@@ -33,7 +33,7 @@ import kotlin.random.Random
  * dist.quantile(0.975) // 2.228...
  * ```
  *
- * @param degreesOfFreedom the number of degrees of freedom. Must be positive.
+ * @property degreesOfFreedom the number of degrees of freedom. Must be positive.
  * @see ContinuousDistribution
  * @see ChiSquaredDistribution
  * @see NormalDistribution

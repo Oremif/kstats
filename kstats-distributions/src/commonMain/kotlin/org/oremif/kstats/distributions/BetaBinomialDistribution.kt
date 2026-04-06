@@ -36,9 +36,9 @@ import kotlin.random.Random
  * dist.sample(Random(42))   // a single random draw
  * ```
  *
- * @param trials the number of independent trials. Must be non-negative.
- * @param alpha the first shape parameter of the underlying Beta distribution. Must be positive.
- * @param beta the second shape parameter of the underlying Beta distribution. Must be positive.
+ * @property trials the number of independent trials. Must be non-negative.
+ * @property alpha the first shape parameter of the underlying Beta distribution. Must be positive.
+ * @property beta the second shape parameter of the underlying Beta distribution. Must be positive.
  */
 public class BetaBinomialDistribution(
     public val trials: Int,

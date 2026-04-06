@@ -26,8 +26,8 @@ import kotlin.random.Random
  * dist.mean           // 0.5772... (Euler-Mascheroni constant)
  * ```
  *
- * @param mu the location parameter (mode) of the distribution. Defaults to `0.0`.
- * @param beta the scale parameter (spread) of the distribution. Must be positive. Defaults to `1.0`.
+ * @property mu the location parameter (mode) of the distribution. Defaults to `0.0`.
+ * @property beta the scale parameter (spread) of the distribution. Must be positive. Defaults to `1.0`.
  */
 public class GumbelDistribution(
     public val mu: Double = 0.0,

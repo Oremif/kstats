@@ -36,8 +36,8 @@ import kotlin.random.Random
  * dist.variance         // 2.1
  * ```
  *
- * @param trials the number of independent trials. Must be non-negative.
- * @param probability the probability of success on each trial. Must be in `[0, 1]`.
+ * @property trials the number of independent trials. Must be non-negative.
+ * @property probability the probability of success on each trial. Must be in `[0, 1]`.
  */
 public class BinomialDistribution(
     public val trials: Int,

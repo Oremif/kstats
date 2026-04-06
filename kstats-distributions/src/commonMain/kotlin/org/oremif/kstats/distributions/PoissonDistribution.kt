@@ -32,7 +32,7 @@ import kotlin.random.Random
  * dist.variance         // 4.0 (mean and variance are equal)
  * ```
  *
- * @param rate the average number of events per interval (lambda). Must be positive.
+ * @property rate the average number of events per interval (lambda). Must be positive.
  */
 public class PoissonDistribution(
     public val rate: Double

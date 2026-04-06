@@ -33,8 +33,8 @@ import kotlin.random.Random
  * standard.cdf(0.5)        // 0.5
  * ```
  *
- * @param min the lower bound of the distribution's support. Default is `0.0`.
- * @param max the upper bound of the distribution's support. Must be strictly greater than [min].
+ * @property min the lower bound of the distribution's support. Default is `0.0`.
+ * @property max the upper bound of the distribution's support. Must be strictly greater than [min].
  * Default is `1.0`, which gives the standard uniform distribution on `[0, 1]`.
  */
 public class UniformDistribution(

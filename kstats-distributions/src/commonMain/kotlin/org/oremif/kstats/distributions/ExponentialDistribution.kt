@@ -41,7 +41,7 @@ import kotlin.random.Random
  * standard.mean             // 1.0
  * ```
  *
- * @param rate the rate parameter (lambda), representing the average number of events per unit
+ * @property rate the rate parameter (lambda), representing the average number of events per unit
  * time. Must be positive. Default is `1.0`, which gives the standard exponential distribution.
  */
 public class ExponentialDistribution(

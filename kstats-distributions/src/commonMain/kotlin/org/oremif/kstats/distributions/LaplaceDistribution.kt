@@ -26,8 +26,8 @@ import kotlin.random.Random
  * dist.variance       // 2.0
  * ```
  *
- * @param mu the location parameter (center and mode) of the distribution. Defaults to `0.0`.
- * @param scale the scale parameter controlling the spread. Must be positive. Defaults to `1.0`.
+ * @property mu the location parameter (center and mode) of the distribution. Defaults to `0.0`.
+ * @property scale the scale parameter controlling the spread. Must be positive. Defaults to `1.0`.
  *   Larger values produce wider, flatter distributions.
  */
 public class LaplaceDistribution(
