@@ -18,6 +18,18 @@ final enum class org.oremif.kstats.hypothesis/Alternative : kotlin/Enum<org.orem
     final fun values(): kotlin/Array<org.oremif.kstats.hypothesis/Alternative> // org.oremif.kstats.hypothesis/Alternative.values|values#static(){}[0]
 }
 
+final enum class org.oremif.kstats.hypothesis/CIMethod : kotlin/Enum<org.oremif.kstats.hypothesis/CIMethod> { // org.oremif.kstats.hypothesis/CIMethod|null[0]
+    enum entry AGRESTI_COULL // org.oremif.kstats.hypothesis/CIMethod.AGRESTI_COULL|null[0]
+    enum entry CLOPPER_PEARSON // org.oremif.kstats.hypothesis/CIMethod.CLOPPER_PEARSON|null[0]
+    enum entry WILSON // org.oremif.kstats.hypothesis/CIMethod.WILSON|null[0]
+
+    final val entries // org.oremif.kstats.hypothesis/CIMethod.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<org.oremif.kstats.hypothesis/CIMethod> // org.oremif.kstats.hypothesis/CIMethod.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): org.oremif.kstats.hypothesis/CIMethod // org.oremif.kstats.hypothesis/CIMethod.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<org.oremif.kstats.hypothesis/CIMethod> // org.oremif.kstats.hypothesis/CIMethod.values|values#static(){}[0]
+}
+
 final enum class org.oremif.kstats.hypothesis/LeveneCenter : kotlin/Enum<org.oremif.kstats.hypothesis/LeveneCenter> { // org.oremif.kstats.hypothesis/LeveneCenter|null[0]
     enum entry MEAN // org.oremif.kstats.hypothesis/LeveneCenter.MEAN|null[0]
     enum entry MEDIAN // org.oremif.kstats.hypothesis/LeveneCenter.MEDIAN|null[0]
@@ -128,7 +140,7 @@ final class org.oremif.kstats.hypothesis/TestResult { // org.oremif.kstats.hypot
 
 final fun org.oremif.kstats.hypothesis/andersonDarlingTest(kotlin/DoubleArray): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/andersonDarlingTest|andersonDarlingTest(kotlin.DoubleArray){}[0]
 final fun org.oremif.kstats.hypothesis/bartlettTest(kotlin/Array<out kotlin/DoubleArray>...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/bartlettTest|bartlettTest(kotlin.Array<out|kotlin.DoubleArray>...){}[0]
-final fun org.oremif.kstats.hypothesis/binomialTest(kotlin/Int, kotlin/Int, kotlin/Double = ..., org.oremif.kstats.hypothesis/Alternative = ..., kotlin/Double = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/binomialTest|binomialTest(kotlin.Int;kotlin.Int;kotlin.Double;org.oremif.kstats.hypothesis.Alternative;kotlin.Double){}[0]
+final fun org.oremif.kstats.hypothesis/binomialTest(kotlin/Int, kotlin/Int, kotlin/Double = ..., org.oremif.kstats.hypothesis/Alternative = ..., kotlin/Double = ..., org.oremif.kstats.hypothesis/CIMethod = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/binomialTest|binomialTest(kotlin.Int;kotlin.Int;kotlin.Double;org.oremif.kstats.hypothesis.Alternative;kotlin.Double;org.oremif.kstats.hypothesis.CIMethod){}[0]
 final fun org.oremif.kstats.hypothesis/chiSquaredIndependenceTest(kotlin/Array<kotlin/IntArray>): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/chiSquaredIndependenceTest|chiSquaredIndependenceTest(kotlin.Array<kotlin.IntArray>){}[0]
 final fun org.oremif.kstats.hypothesis/chiSquaredTest(kotlin/IntArray, kotlin/DoubleArray? = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/chiSquaredTest|chiSquaredTest(kotlin.IntArray;kotlin.DoubleArray?){}[0]
 final fun org.oremif.kstats.hypothesis/cohensD(kotlin/DoubleArray, kotlin/DoubleArray, kotlin/Boolean = ...): kotlin/Double // org.oremif.kstats.hypothesis/cohensD|cohensD(kotlin.DoubleArray;kotlin.DoubleArray;kotlin.Boolean){}[0]
