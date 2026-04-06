@@ -31,7 +31,7 @@ import kotlin.random.Random
  * dist.sample(Random(42))   // a single random draw
  * ```
  *
- * @param probability the probability parameter p of the distribution. Must be in `(0, 1)`.
+ * @property probability the probability parameter p of the distribution. Must be in `(0, 1)`.
  */
 public class LogarithmicDistribution(
     public val probability: Double

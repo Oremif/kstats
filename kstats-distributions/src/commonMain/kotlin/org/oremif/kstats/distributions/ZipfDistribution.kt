@@ -31,8 +31,8 @@ import kotlin.random.Random
  * dist.sample(Random(42))   // a single random draw
  * ```
  *
- * @param numberOfElements the number of elements (upper bound of support). Must be at least 1.
- * @param exponent the exponent characterizing the distribution. Must be positive.
+ * @property numberOfElements the number of elements (upper bound of support). Must be at least 1.
+ * @property exponent the exponent characterizing the distribution. Must be positive.
  */
 public class ZipfDistribution(
     public val numberOfElements: Int,

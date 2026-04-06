@@ -31,7 +31,7 @@ import kotlin.random.Random
  * dist.sample(Random(42))   // a single random draw
  * ```
  *
- * @param probability the probability of success on each trial. Must be in `(0, 1]`.
+ * @property probability the probability of success on each trial. Must be in `(0, 1]`.
  */
 public class GeometricDistribution(
     public val probability: Double

@@ -99,6 +99,15 @@ public fun Iterable<Int>.percentile(
     method: QuantileMethod = QuantileMethod.LINEAR,
 ): Double = toStatArray().percentile(p, method)
 
+/**
+ * Computes the p-th percentile of the Int values.
+ *
+ * Values are converted to Double internally. The conversion is exact for all Int values.
+ *
+ * @param p the percentile to compute, in [0, 100].
+ * @param interpolation the interpolation mode.
+ * @return the p-th percentile of the Int values as a Double.
+ */
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",

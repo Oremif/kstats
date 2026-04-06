@@ -36,6 +36,11 @@ public enum class QuantileInterpolation {
     /** Average of the two bracketing data points (maps to [QuantileMethod.MIDPOINT]). */
     MIDPOINT;
 
+    /**
+     * Converts this interpolation mode to the equivalent [QuantileMethod].
+     *
+     * @return the [QuantileMethod] that matches this interpolation mode.
+     */
     public fun toQuantileMethod(): QuantileMethod = when (this) {
         LINEAR -> QuantileMethod.LINEAR
         LOWER -> QuantileMethod.LOWER
@@ -97,6 +102,13 @@ public fun DoubleArray.percentile(
     return quantile(p / 100.0, method)
 }
 
+/**
+ * Computes the p-th percentile of the values in this iterable.
+ *
+ * @param p the percentile to compute, in [0, 100].
+ * @param interpolation the interpolation mode.
+ * @return the p-th percentile value.
+ */
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
@@ -108,6 +120,13 @@ public fun Iterable<Double>.percentile(
     interpolation: QuantileInterpolation,
 ): Double = percentile(p, interpolation.toQuantileMethod())
 
+/**
+ * Computes the p-th percentile of the values in this array.
+ *
+ * @param p the percentile to compute, in [0, 100].
+ * @param interpolation the interpolation mode.
+ * @return the p-th percentile value.
+ */
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
@@ -173,6 +192,13 @@ public fun DoubleArray.quantile(
     return computeQuantile(work, q, method, useIntroSelect = true)
 }
 
+/**
+ * Computes the q-th quantile of the values in this iterable.
+ *
+ * @param q the quantile to compute, in [0, 1].
+ * @param interpolation the interpolation mode.
+ * @return the q-th quantile value.
+ */
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
@@ -184,6 +210,13 @@ public fun Iterable<Double>.quantile(
     interpolation: QuantileInterpolation,
 ): Double = quantile(q, interpolation.toQuantileMethod())
 
+/**
+ * Computes the q-th quantile of the values in this array.
+ *
+ * @param q the quantile to compute, in [0, 1].
+ * @param interpolation the interpolation mode.
+ * @return the q-th quantile value.
+ */
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
@@ -538,6 +571,13 @@ public fun Sequence<Double>.quantile(
 public fun Sequence<Double>.quartiles(method: QuantileMethod = QuantileMethod.LINEAR): Triple<Double, Double, Double> =
     toList().toDoubleArray().quartiles(method)
 
+/**
+ * Computes the p-th percentile of the values in this sequence.
+ *
+ * @param p the percentile to compute, in [0, 100].
+ * @param interpolation the interpolation mode.
+ * @return the p-th percentile value.
+ */
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",
@@ -549,6 +589,13 @@ public fun Sequence<Double>.percentile(
     interpolation: QuantileInterpolation,
 ): Double = percentile(p, interpolation.toQuantileMethod())
 
+/**
+ * Computes the q-th quantile of the values in this sequence.
+ *
+ * @param q the quantile to compute, in [0, 1].
+ * @param interpolation the interpolation mode.
+ * @return the q-th quantile value.
+ */
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",

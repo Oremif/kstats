@@ -34,9 +34,9 @@ import kotlin.random.Random
  * sym.skewness             // 0.0
  * ```
  *
- * @param a the lower limit (minimum) of the distribution's support. Must be strictly less than [b].
- * @param b the upper limit (maximum) of the distribution's support. Must be strictly greater than [a].
- * @param c the mode (peak) of the distribution. Must satisfy `a <= c <= b`.
+ * @property a the lower limit (minimum) of the distribution's support. Must be strictly less than [b].
+ * @property b the upper limit (maximum) of the distribution's support. Must be strictly greater than [a].
+ * @property c the mode (peak) of the distribution. Must satisfy `a <= c <= b`.
  */
 public class TriangularDistribution(
     public val a: Double,

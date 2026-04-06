@@ -40,9 +40,9 @@ import kotlin.random.Random
  * z.cdf(1.96)              // 0.975
  * ```
  *
- * @param mu the mean (location parameter) of the distribution. Default is `0.0`, which centers
+ * @property mu the mean (location parameter) of the distribution. Default is `0.0`, which centers
  * the distribution at the origin.
- * @param sigma the standard deviation (scale parameter) of the distribution. Must be positive.
+ * @property sigma the standard deviation (scale parameter) of the distribution. Must be positive.
  * Default is `1.0`, which gives the standard normal distribution.
  */
 public class NormalDistribution(

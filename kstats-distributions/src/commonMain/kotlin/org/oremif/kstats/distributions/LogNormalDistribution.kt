@@ -36,8 +36,8 @@ import kotlin.random.Random
  * ln.sample(Random(42)) // a single random draw from the distribution
  * ```
  *
- * @param mu the mean of the underlying normal distribution (log-scale location). Defaults to 0.0.
- * @param sigma the standard deviation of the underlying normal distribution (log-scale spread). Must be positive. Defaults to 1.0.
+ * @property mu the mean of the underlying normal distribution (log-scale location). Defaults to 0.0.
+ * @property sigma the standard deviation of the underlying normal distribution (log-scale spread). Must be positive. Defaults to 1.0.
  */
 public class LogNormalDistribution(
     public val mu: Double = 0.0,

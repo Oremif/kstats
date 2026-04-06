@@ -44,8 +44,8 @@ import kotlin.random.Random
  * std.cdf(1.0)             // 0.3173
  * ```
  *
- * @param mu the location parameter, defining the left endpoint of the support. Default is `0.0`.
- * @param c the scale parameter, controlling the spread of the distribution. Must be positive.
+ * @property mu the location parameter, defining the left endpoint of the support. Default is `0.0`.
+ * @property c the scale parameter, controlling the spread of the distribution. Must be positive.
  * Default is `1.0`.
  */
 public class LevyDistribution(

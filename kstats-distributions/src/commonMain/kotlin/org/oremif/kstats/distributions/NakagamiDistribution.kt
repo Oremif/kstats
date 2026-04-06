@@ -30,8 +30,8 @@ import kotlin.random.Random
  * val rayleigh = NakagamiDistribution(mu = 1.0, omega = 1.0)
  * ```
  *
- * @param mu the shape parameter (fading parameter). Must be at least 0.5.
- * @param omega the spread parameter (average power, equal to E[X squared]). Must be positive.
+ * @property mu the shape parameter (fading parameter). Must be at least 0.5.
+ * @property omega the spread parameter (average power, equal to E[X squared]). Must be positive.
  * @see ContinuousDistribution
  * @see GammaDistribution
  */

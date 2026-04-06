@@ -40,8 +40,8 @@ import kotlin.random.Random
  * dist.sample(Random(42))   // a single random draw
  * ```
  *
- * @param successes the required number of successes (the "stopping count"). Must be positive.
- * @param probability the probability of success on each trial. Must be in `(0, 1]`.
+ * @property successes the required number of successes (the "stopping count"). Must be positive.
+ * @property probability the probability of success on each trial. Must be in `(0, 1]`.
  */
 public class NegativeBinomialDistribution(
     public val successes: Int,

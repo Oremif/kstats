@@ -34,8 +34,8 @@ import kotlin.random.Random
  * weibull.sample(Random(42)) // a single random draw from the distribution
  * ```
  *
- * @param shape the shape parameter (often denoted k), controlling the failure rate behavior. Must be positive.
- * @param scale the scale parameter (often denoted lambda), stretching the distribution along the x-axis. Must be positive. Defaults to 1.0.
+ * @property shape the shape parameter (often denoted k), controlling the failure rate behavior. Must be positive.
+ * @property scale the scale parameter (often denoted lambda), stretching the distribution along the x-axis. Must be positive. Defaults to 1.0.
  */
 public class WeibullDistribution(
     public val shape: Double,

@@ -9,9 +9,9 @@ import kotlin.math.sqrt
 /**
  * Specifies the design of the t-test for power analysis calculations.
  *
- * The test type determines how sample size [n] is interpreted and how the noncentrality
- * parameter is computed. For [TWO_SAMPLE], [n] is the per-group sample size and the
- * noncentrality scales by the square root of n/2. For [ONE_SAMPLE] and [PAIRED], [n]
+ * The test type determines how sample size `[n]` is interpreted and how the noncentrality
+ * parameter is computed. For [TWO_SAMPLE], `[n]` is the per-group sample size and the
+ * noncentrality scales by the square root of n/2. For [ONE_SAMPLE] and [PAIRED], `[n]`
  * is the total sample size (or number of pairs) and the noncentrality scales by the
  * square root of n.
  */
@@ -19,21 +19,21 @@ public enum class TTestType {
     /**
      * A one-sample t-test comparing a single sample mean to a hypothesized value.
      *
-     * The parameter [n] represents the total sample size.
+     * The parameter `[n]` represents the total sample size.
      */
     ONE_SAMPLE,
 
     /**
      * A two-sample (independent) t-test comparing the means of two independent groups.
      *
-     * The parameter [n] represents the per-group sample size, assuming equal-sized groups.
+     * The parameter `[n]` represents the per-group sample size, assuming equal-sized groups.
      */
     TWO_SAMPLE,
 
     /**
      * A paired t-test comparing matched observations (e.g. before/after measurements).
      *
-     * The parameter [n] represents the number of pairs. Uses the same noncentrality
+     * The parameter `[n]` represents the number of pairs. Uses the same noncentrality
      * factor as [ONE_SAMPLE].
      */
     PAIRED

@@ -105,6 +105,16 @@ public fun Iterable<Long>.percentile(
     method: QuantileMethod = QuantileMethod.LINEAR,
 ): Double = toStatArray().percentile(p, method)
 
+/**
+ * Computes the p-th percentile of the Long values.
+ *
+ * Values are converted to Double internally. Long values whose absolute value exceeds
+ * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ *
+ * @param p the percentile to compute, in [0, 100].
+ * @param interpolation the interpolation mode.
+ * @return the p-th percentile of the Long values as a Double.
+ */
 @Suppress("DEPRECATION")
 @Deprecated(
     "Use the overload with QuantileMethod instead.",

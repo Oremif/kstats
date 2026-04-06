@@ -39,8 +39,8 @@ import kotlin.random.Random
  * cauchy.sample(Random(42)) // a single random draw
  * ```
  *
- * @param location the center of the distribution, where the density peaks. Defaults to 0.0.
- * @param scale the half-width at half-maximum, controlling the spread of the distribution. Must be positive. Defaults to 1.0.
+ * @property location the center of the distribution, where the density peaks. Defaults to 0.0.
+ * @property scale the half-width at half-maximum, controlling the spread of the distribution. Must be positive. Defaults to 1.0.
  */
 public class CauchyDistribution(
     public val location: Double = 0.0,

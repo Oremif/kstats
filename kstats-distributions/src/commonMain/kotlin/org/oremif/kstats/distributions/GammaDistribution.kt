@@ -35,8 +35,8 @@ import kotlin.random.Random
  * expo.mean // 2.0
  * ```
  *
- * @param shape the shape parameter (sometimes called k or alpha). Must be positive.
- * @param rate the rate parameter (inverse of scale). Defaults to 1.0, meaning the scale is 1. Must be positive.
+ * @property shape the shape parameter (sometimes called k or alpha). Must be positive.
+ * @property rate the rate parameter (inverse of scale). Defaults to 1.0, meaning the scale is 1. Must be positive.
  * @see ContinuousDistribution
  * @see ChiSquaredDistribution
  */

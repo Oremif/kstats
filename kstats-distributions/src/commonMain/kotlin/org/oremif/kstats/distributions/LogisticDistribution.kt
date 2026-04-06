@@ -20,8 +20,8 @@ import kotlin.random.Random
  * dist.quantile(0.75) // 1.0986... (log-odds)
  * ```
  *
- * @param mu the location (center) of the distribution. Defaults to `0.0`.
- * @param scale the scale (spread) of the distribution. Must be positive. Defaults to `1.0`.
+ * @property mu the location (center) of the distribution. Defaults to `0.0`.
+ * @property scale the scale (spread) of the distribution. Must be positive. Defaults to `1.0`.
  */
 public class LogisticDistribution(
     public val mu: Double = 0.0,
