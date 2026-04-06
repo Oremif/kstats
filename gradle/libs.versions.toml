@@ -1,5 +1,5 @@
 [versions]
-kstats = "0.3.0"
+kstats = "0.4.0"
 
 agp = "9.1.0"
 kotlin = "2.3.20"
