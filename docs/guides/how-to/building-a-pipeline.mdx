@@ -29,7 +29,7 @@ data class GroupComparison(
     val testName: String,
     val pValue: Double,
     val isSignificant: Boolean,
-    val confidenceInterval: Pair<Double, Double>?
+    val confidenceInterval: ConfidenceInterval?
 )
 
 data class AnalysisReport(

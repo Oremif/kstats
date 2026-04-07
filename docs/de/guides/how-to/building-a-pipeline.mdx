@@ -6,6 +6,11 @@ description: "kstats-Aufrufe in wiederverwendbare Funktionen für reproduzierbar
 [//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.PipelineSamples-->)
 [//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.PipelineSamples-->)
 
+<Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/building-a-pipeline.ipynb">
+  Probieren Sie diesen Leitfaden als Kotlin Notebook mit Kandy-Visualisierungen aus — führen Sie die Zellen aus, um Diagramme zu sehen und die Daten interaktiv zu erkunden.
+</Card>
+
+
 Wenn die Analyse über einzelne Aufrufe hinauswächst, sorgen typisierte Pipeline-Funktionen, die kstats-Aufrufe kapseln, für einen wiederholbaren Workflow und strukturierte Ergebnisse.
 
 ## Ergebnistypen
@@ -24,7 +29,7 @@ data class GroupComparison(
     val testName: String,
     val pValue: Double,
     val isSignificant: Boolean,
-    val confidenceInterval: Pair<Double, Double>?
+    val confidenceInterval: ConfidenceInterval?
 )
 
 data class AnalysisReport(
