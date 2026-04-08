@@ -136,3 +136,23 @@ public fun Iterable<Int>.percentile(
  */
 @JvmName("describeOfInt")
 public fun Iterable<Int>.describe(): DescriptiveStatistics = toStatArray().describe()
+
+/**
+ * Computes process capability indices (Cp, Cpk, Pp, Ppk) for the Int values.
+ *
+ * Values are converted to Double internally. The conversion is exact for all Int values.
+ *
+ * ### Example:
+ * ```kotlin
+ * val result = listOf(10, 11, 9, 10, 12).processCapability(lsl = 5.0, usl = 15.0)
+ * result.cp // 1.43...
+ * ```
+ *
+ * @param lsl the lower specification limit. Must be less than [usl].
+ * @param usl the upper specification limit. Must be greater than [lsl].
+ * @return a [ProcessCapabilityResult] containing Cp, Cpk, Pp, and Ppk.
+ * @throws DegenerateDataException if all values are identical (standard deviation is zero).
+ */
+@JvmName("processCapabilityOfInt")
+public fun Iterable<Int>.processCapability(lsl: Double, usl: Double): ProcessCapabilityResult =
+    toStatArray().processCapability(lsl, usl)

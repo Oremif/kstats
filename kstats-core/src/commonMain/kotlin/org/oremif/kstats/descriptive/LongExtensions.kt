@@ -144,3 +144,24 @@ public fun Iterable<Long>.percentile(
  */
 @JvmName("describeOfLong")
 public fun Iterable<Long>.describe(): DescriptiveStatistics = toStatArray().describe()
+
+/**
+ * Computes process capability indices (Cp, Cpk, Pp, Ppk) for the Long values.
+ *
+ * Values are converted to Double internally. Long values whose absolute value exceeds
+ * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ *
+ * ### Example:
+ * ```kotlin
+ * val result = listOf(10L, 11L, 9L, 10L, 12L).processCapability(lsl = 5.0, usl = 15.0)
+ * result.cp // 1.43...
+ * ```
+ *
+ * @param lsl the lower specification limit. Must be less than [usl].
+ * @param usl the upper specification limit. Must be greater than [lsl].
+ * @return a [ProcessCapabilityResult] containing Cp, Cpk, Pp, and Ppk.
+ * @throws DegenerateDataException if all values are identical (standard deviation is zero).
+ */
+@JvmName("processCapabilityOfLong")
+public fun Iterable<Long>.processCapability(lsl: Double, usl: Double): ProcessCapabilityResult =
+    toStatArray().processCapability(lsl, usl)
