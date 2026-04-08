@@ -16,83 +16,82 @@ internal class ProcessCapabilityTest {
 
     @Test
     fun testProcessCapabilityKnownValues() {
-        // numpy: data=[2,4,4,4,5,5,7,9], lsl=1, usl=10
-        // sample_sigma=2.1380899352994, pop_sigma=2.0
+        // numpy: d=np.array([2,4,4,4,5,5,7,9]); lsl=1; usl=10
         val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
         val result = data.processCapability(lsl = 1.0, usl = 10.0)
 
-        // numpy: cp = 0.701560760020114
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=1))
         assertEquals(0.701560760020114, result.cp, tol, "cp")
-        // numpy: cpk = 0.623609564462324
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=1)), (np.mean(d)-lsl)/(3*np.std(d,ddof=1)))
         assertEquals(0.623609564462324, result.cpk, tol, "cpk")
-        // numpy: pp = 0.75
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=0))
         assertEquals(0.75, result.pp, tol, "pp")
-        // numpy: ppk = 0.666666666666667
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=0)), (np.mean(d)-lsl)/(3*np.std(d,ddof=0)))
         assertEquals(0.666666666666667, result.ppk, tol, "ppk")
     }
 
     @Test
     fun testProcessCapabilityCenteredProcess() {
-        // numpy: data=[50.0,50.5,49.5,50.2,49.8,50.1,49.9,50.3,49.7,50.0], lsl=48, usl=52
+        // numpy: d=np.array([50.0,50.5,49.5,50.2,49.8,50.1,49.9,50.3,49.7,50.0]); lsl=48; usl=52
         val data = doubleArrayOf(50.0, 50.5, 49.5, 50.2, 49.8, 50.1, 49.9, 50.3, 49.7, 50.0)
         val result = data.processCapability(lsl = 48.0, usl = 52.0)
 
-        // numpy: cp = 2.26455406828919
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=1))
         assertEquals(2.26455406828919, result.cp, tol, "cp")
-        // numpy: cpk = 2.26455406828918
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=1)), (np.mean(d)-lsl)/(3*np.std(d,ddof=1)))
         assertEquals(2.26455406828918, result.cpk, tol, "cpk")
-        // numpy: pp = 2.38704958013144
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=0))
         assertEquals(2.38704958013144, result.pp, tol, "pp")
-        // numpy: ppk = 2.38704958013144
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=0)), (np.mean(d)-lsl)/(3*np.std(d,ddof=0)))
         assertEquals(2.38704958013144, result.ppk, tol, "ppk")
     }
 
     @Test
     fun testProcessCapabilityOffCenter() {
-        // numpy: data=[7.0,7.5,8.0,7.2,7.8,8.1,7.6,7.3,7.9,8.2], lsl=5, usl=10
+        // numpy: d=np.array([7.0,7.5,8.0,7.2,7.8,8.1,7.6,7.3,7.9,8.2]); lsl=5; usl=10
         val data = doubleArrayOf(7.0, 7.5, 8.0, 7.2, 7.8, 8.1, 7.6, 7.3, 7.9, 8.2)
         val result = data.processCapability(lsl = 5.0, usl = 10.0)
 
-        // numpy: cp = 2.05221594782225
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=1))
         assertEquals(2.05221594782225, result.cp, tol, "cp")
-        // numpy: cpk = 1.92087412716162
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=1)), (np.mean(d)-lsl)/(3*np.std(d,ddof=1)))
         assertEquals(1.92087412716162, result.cpk, tol, "cpk")
-        // numpy: pp = 2.16322554854652
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=0))
         assertEquals(2.16322554854652, result.pp, tol, "pp")
-        // numpy: ppk = 2.02477911343954
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=0)), (np.mean(d)-lsl)/(3*np.std(d,ddof=0)))
         assertEquals(2.02477911343954, result.ppk, tol, "ppk")
     }
 
     @Test
     fun testProcessCapabilityNegativeValues() {
-        // numpy: data=[-5,-3,-4,-2,-6], lsl=-10, usl=0
+        // numpy: d=np.array([-5,-3,-4,-2,-6]); lsl=-10; usl=0
         val data = doubleArrayOf(-5.0, -3.0, -4.0, -2.0, -6.0)
         val result = data.processCapability(lsl = -10.0, usl = 0.0)
 
-        // numpy: cp = 1.05409255338946
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=1))
         assertEquals(1.05409255338946, result.cp, tol, "cp")
-        // numpy: cpk = 0.843274042711568
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=1)), (np.mean(d)-lsl)/(3*np.std(d,ddof=1)))
         assertEquals(0.843274042711568, result.cpk, tol, "cpk")
-        // numpy: pp = 1.17851130197758
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=0))
         assertEquals(1.17851130197758, result.pp, tol, "pp")
-        // numpy: ppk = 0.942809041582063
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=0)), (np.mean(d)-lsl)/(3*np.std(d,ddof=0)))
         assertEquals(0.942809041582063, result.ppk, tol, "ppk")
     }
 
     @Test
     fun testProcessCapabilityMeanAtLsl() {
-        // numpy: data=[0.0,1.0,-1.0,0.5,-0.5], lsl=0, usl=10
+        // numpy: d=np.array([0.0,1.0,-1.0,0.5,-0.5]); lsl=0; usl=10
         // mean = 0 which equals lsl => cpk and ppk should be 0
         val data = doubleArrayOf(0.0, 1.0, -1.0, 0.5, -0.5)
         val result = data.processCapability(lsl = 0.0, usl = 10.0)
 
-        // numpy: cp = 2.10818510677892
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=1))
         assertEquals(2.10818510677892, result.cp, tol, "cp")
-        // numpy: cpk = 0.0 (mean - lsl = 0)
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=1)), (np.mean(d)-lsl)/(3*np.std(d,ddof=1)))
         assertEquals(0.0, result.cpk, tol, "cpk")
-        // numpy: pp = 2.35702260395516
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=0))
         assertEquals(2.35702260395516, result.pp, tol, "pp")
-        // numpy: ppk = 0.0
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=0)), (np.mean(d)-lsl)/(3*np.std(d,ddof=0)))
         assertEquals(0.0, result.ppk, tol, "ppk")
     }
 
@@ -100,34 +99,34 @@ internal class ProcessCapabilityTest {
 
     @Test
     fun testTwoElements() {
-        // numpy: data=[3,5], lsl=0, usl=10
+        // numpy: d=np.array([3,5]); lsl=0; usl=10
         val data = doubleArrayOf(3.0, 5.0)
         val result = data.processCapability(lsl = 0.0, usl = 10.0)
 
-        // numpy: cp = 1.17851130197758
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=1))
         assertEquals(1.17851130197758, result.cp, tol, "cp")
-        // numpy: cpk = 0.942809041582063
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=1)), (np.mean(d)-lsl)/(3*np.std(d,ddof=1)))
         assertEquals(0.942809041582063, result.cpk, tol, "cpk")
-        // numpy: pp = 1.66666666666667
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=0))
         assertEquals(1.66666666666667, result.pp, tol, "pp")
-        // numpy: ppk = 1.33333333333333
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=0)), (np.mean(d)-lsl)/(3*np.std(d,ddof=0)))
         assertEquals(1.33333333333333, result.ppk, tol, "ppk")
     }
 
     @Test
     fun testMeanExactlyAtMidpoint() {
         // When mean = (lsl + usl) / 2, Cp should equal Cpk and Pp should equal Ppk
-        // numpy: data=[4.0,5.0,6.0,4.5,5.5,5.0], lsl=0, usl=10, mean=5.0=(0+10)/2
+        // numpy: d=np.array([4.0,5.0,6.0,4.5,5.5,5.0]); lsl=0; usl=10
         val data = doubleArrayOf(4.0, 5.0, 6.0, 4.5, 5.5, 5.0)
         val result = data.processCapability(lsl = 0.0, usl = 10.0)
 
-        // numpy: cp = 2.35702260395516
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=1))
         assertEquals(2.35702260395516, result.cp, tol, "cp")
-        // numpy: cpk = 2.35702260395516
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=1)), (np.mean(d)-lsl)/(3*np.std(d,ddof=1)))
         assertEquals(2.35702260395516, result.cpk, tol, "cpk")
-        // numpy: pp = 2.58198889747161
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=0))
         assertEquals(2.58198889747161, result.pp, tol, "pp")
-        // numpy: ppk = 2.58198889747161
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=0)), (np.mean(d)-lsl)/(3*np.std(d,ddof=0)))
         assertEquals(2.58198889747161, result.ppk, tol, "ppk")
     }
 
@@ -174,17 +173,17 @@ internal class ProcessCapabilityTest {
     @Test
     fun testLargeOffsetData() {
         // Tests Welford algorithm numerical stability with large-offset data
-        // numpy: data=[1e15+1, 1e15+2, 1e15+3, 1e15+4, 1e15+5], lsl=1e15, usl=1e15+6
+        // numpy: d=np.array([1e15+1,1e15+2,1e15+3,1e15+4,1e15+5]); lsl=1e15; usl=1e15+6
         val data = doubleArrayOf(1e15 + 1.0, 1e15 + 2.0, 1e15 + 3.0, 1e15 + 4.0, 1e15 + 5.0)
         val result = data.processCapability(lsl = 1e15, usl = 1e15 + 6.0)
 
-        // numpy: cp = 0.632455532033676
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=1))
         assertEquals(0.632455532033676, result.cp, tol, "cp")
-        // numpy: cpk = 0.632455532033676
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=1)), (np.mean(d)-lsl)/(3*np.std(d,ddof=1)))
         assertEquals(0.632455532033676, result.cpk, tol, "cpk")
-        // numpy: pp = 0.707106781186547
+        // numpy: (usl-lsl)/(6*np.std(d,ddof=0))
         assertEquals(0.707106781186547, result.pp, tol, "pp")
-        // numpy: ppk = 0.707106781186547
+        // numpy: min((usl-np.mean(d))/(3*np.std(d,ddof=0)), (np.mean(d)-lsl)/(3*np.std(d,ddof=0)))
         assertEquals(0.707106781186547, result.ppk, tol, "ppk")
     }
 

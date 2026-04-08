@@ -151,6 +151,7 @@ public fun Iterable<Int>.describe(): DescriptiveStatistics = toStatArray().descr
  * @param lsl the lower specification limit. Must be less than [usl].
  * @param usl the upper specification limit. Must be greater than [lsl].
  * @return a [ProcessCapabilityResult] containing Cp, Cpk, Pp, and Ppk.
+ * @throws DegenerateDataException if all values are identical (standard deviation is zero).
  */
 @JvmName("processCapabilityOfInt")
 public fun Iterable<Int>.processCapability(lsl: Double, usl: Double): ProcessCapabilityResult =

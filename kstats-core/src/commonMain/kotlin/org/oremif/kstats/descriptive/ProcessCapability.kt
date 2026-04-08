@@ -30,7 +30,7 @@ public data class ProcessCapabilityResult(
     val cp: Double,
     val cpk: Double,
     val pp: Double,
-    val ppk: Double,
+    val ppk: Double
 )
 
 /**

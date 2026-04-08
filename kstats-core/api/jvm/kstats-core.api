@@ -228,6 +228,7 @@ public final class org/oremif/kstats/descriptive/IntStatistics {
 	public static final fun percentileOfInt (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;)D
 	public static synthetic fun percentileOfInt$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
 	public static final fun percentileOfIntDeprecated (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static final fun processCapabilityOfInt (Ljava/lang/Iterable;DD)Lorg/oremif/kstats/descriptive/ProcessCapabilityResult;
 	public static final fun standardDeviationOfInt (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
 	public static synthetic fun standardDeviationOfInt$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
 	public static final fun varianceOfInt (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
@@ -241,6 +242,7 @@ public final class org/oremif/kstats/descriptive/LongStatistics {
 	public static final fun percentileOfLong (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;)D
 	public static synthetic fun percentileOfLong$default (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)D
 	public static final fun percentileOfLongDeprecated (Ljava/lang/Iterable;DLorg/oremif/kstats/descriptive/QuantileInterpolation;)D
+	public static final fun processCapabilityOfLong (Ljava/lang/Iterable;DD)Lorg/oremif/kstats/descriptive/ProcessCapabilityResult;
 	public static final fun standardDeviationOfLong (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
 	public static synthetic fun standardDeviationOfLong$default (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
 	public static final fun varianceOfLong (Ljava/lang/Iterable;Lorg/oremif/kstats/descriptive/PopulationKind;)D
@@ -283,6 +285,29 @@ public final class org/oremif/kstats/descriptive/PopulationKind : java/lang/Enum
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lorg/oremif/kstats/descriptive/PopulationKind;
 	public static fun values ()[Lorg/oremif/kstats/descriptive/PopulationKind;
+}
+
+public final class org/oremif/kstats/descriptive/ProcessCapabilityKt {
+	public static final fun processCapability (Ljava/lang/Iterable;DD)Lorg/oremif/kstats/descriptive/ProcessCapabilityResult;
+	public static final fun processCapability (Lkotlin/sequences/Sequence;DD)Lorg/oremif/kstats/descriptive/ProcessCapabilityResult;
+	public static final fun processCapability ([DDD)Lorg/oremif/kstats/descriptive/ProcessCapabilityResult;
+}
+
+public final class org/oremif/kstats/descriptive/ProcessCapabilityResult {
+	public fun <init> (DDDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun copy (DDDD)Lorg/oremif/kstats/descriptive/ProcessCapabilityResult;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/descriptive/ProcessCapabilityResult;DDDDILjava/lang/Object;)Lorg/oremif/kstats/descriptive/ProcessCapabilityResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCp ()D
+	public final fun getCpk ()D
+	public final fun getPp ()D
+	public final fun getPpk ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/oremif/kstats/descriptive/QuantileInterpolation : java/lang/Enum {
