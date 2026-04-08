@@ -90,6 +90,124 @@ class MathUtilsTest {
         assertEquals(0.6875, regularizedBeta(0.5, 2.0, 3.0), ITERATIVE_TOLERANCE)
     }
 
+    @Test
+    fun testRegularizedBetaLargeParametersRegression() {
+        // Regression: regularizedBeta with a ~ b ~ 145K previously threw ConvergenceException
+        // because the fixed 200-iteration limit was insufficient. The fix adds dynamic iteration
+        // limits via betaMaxIterations(a, b) = max(200, floor(10 * sqrt(max(a, b)))).
+        // scipy: special.betainc(145274.0, 145311.0, 0.4999) = 0.484375989852313
+        val result = regularizedBeta(0.4999, 145274.0, 145311.0)
+        assertTrue(result.isFinite(), "regularizedBeta should not throw for a=145274, b=145311")
+        assertEquals(0.484375989852313, result, 1e-6, "betainc(145274, 145311, 0.4999)")
+
+        // scipy: special.betainc(145274.0, 145311.0, 0.5) = 0.527361185858317
+        val result2 = regularizedBeta(0.5, 145274.0, 145311.0)
+        assertTrue(result2.isFinite(), "regularizedBeta(0.5, 145274, 145311) should be finite")
+        assertEquals(0.527361185858317, result2, 1e-6, "betainc(145274, 145311, 0.5)")
+    }
+
+    @Test
+    fun testRegularizedBetaLargeParametersKnownValues() {
+        // scipy: special.betainc(1000, 1000, 0.5) = 0.499999999999999
+        assertEquals(0.5, regularizedBeta(0.5, 1000.0, 1000.0), 1e-6)
+        // scipy: special.betainc(1000, 1000, 0.49) = 0.185552659431512
+        assertEquals(0.185552659431512, regularizedBeta(0.49, 1000.0, 1000.0), 1e-6)
+        // scipy: special.betainc(1000, 1000, 0.51) = 0.814447340568488
+        assertEquals(0.814447340568488, regularizedBeta(0.51, 1000.0, 1000.0), 1e-6)
+        // scipy: special.betainc(10000, 10000, 0.5) = 0.5
+        assertEquals(0.5, regularizedBeta(0.5, 10000.0, 10000.0), 1e-6)
+        // scipy: special.betainc(10000, 10000, 0.499) = 0.388649952142536
+        assertEquals(0.388649952142536, regularizedBeta(0.499, 10000.0, 10000.0), 1e-6)
+    }
+
+    @Test
+    fun testRegularizedBetaVeryLargeParameters() {
+        // Numerical stability with very large shape parameters
+        // scipy: special.betainc(50000, 50000, 0.5) = 0.5
+        assertEquals(0.5, regularizedBeta(0.5, 50000.0, 50000.0), 1e-6)
+        // scipy: special.betainc(50000, 50000, 0.4999) = 0.474785548275951
+        assertEquals(0.474785548275951, regularizedBeta(0.4999, 50000.0, 50000.0), 1e-6)
+        // scipy: special.betainc(100000, 100000, 0.5) = 0.5
+        assertEquals(0.5, regularizedBeta(0.5, 100000.0, 100000.0), 1e-6)
+        // scipy: special.betainc(100000, 100000, 0.4999) = 0.464365081352024
+        assertEquals(0.464365081352024, regularizedBeta(0.4999, 100000.0, 100000.0), 1e-6)
+        // scipy: special.betainc(200000, 200000, 0.5) = 0.5
+        assertEquals(0.5, regularizedBeta(0.5, 200000.0, 200000.0), 1e-6)
+        // scipy: special.betainc(200000, 200000, 0.4999) = 0.44967162506792
+        assertEquals(0.44967162506792, regularizedBeta(0.4999, 200000.0, 200000.0), 1e-6)
+    }
+
+    @Test
+    fun testRegularizedBetaLargeParamsSymmetryProperty() {
+        // Property: I_x(a, b) + I_{1-x}(b, a) = 1 for all valid x, a, b
+        val cases = listOf(
+            Triple(0.4999, 145274.0, 145311.0),
+            Triple(0.499, 10000.0, 10000.0),
+            Triple(0.4999, 50000.0, 50000.0),
+            Triple(0.5, 1000.0, 1000.0),
+        )
+        for ((x, a, b) in cases) {
+            val left = regularizedBeta(x, a, b)
+            val right = regularizedBeta(1.0 - x, b, a)
+            assertEquals(
+                1.0, left + right, 1e-6,
+                "I_$x($a,$b) + I_${1.0 - x}($b,$a) should equal 1"
+            )
+        }
+    }
+
+    @Test
+    fun testRegularizedBetaLargeParamsMonotonicity() {
+        // Property: regularizedBeta(x, a, b) is monotonically increasing in x
+        val a = 10000.0
+        val b = 10000.0
+        val xs = listOf(0.48, 0.49, 0.495, 0.499, 0.5, 0.501, 0.505, 0.51, 0.52)
+        var prev = regularizedBeta(xs[0], a, b)
+        for (i in 1 until xs.size) {
+            val curr = regularizedBeta(xs[i], a, b)
+            assertTrue(
+                curr >= prev,
+                "regularizedBeta should be monotonic: I_${xs[i]}($a,$b) = $curr >= I_${xs[i - 1]}($a,$b) = $prev"
+            )
+            prev = curr
+        }
+    }
+
+    @Test
+    fun testRegularizedBetaLargeParamsRange() {
+        // Property: result must be in [0, 1] for any valid inputs including large params
+        val cases = listOf(
+            Triple(0.4999, 145274.0, 145311.0),
+            Triple(0.5, 145274.0, 145311.0),
+            Triple(0.5, 100000.0, 100000.0),
+            Triple(0.4999, 200000.0, 200000.0),
+        )
+        for ((x, a, b) in cases) {
+            val result = regularizedBeta(x, a, b)
+            assertTrue(result in 0.0..1.0, "regularizedBeta($x, $a, $b) = $result should be in [0, 1]")
+        }
+    }
+
+    @Test
+    fun testRegularizedBetaNaNPropagation() {
+        assertTrue(regularizedBeta(Double.NaN, 2.0, 3.0).isNaN(), "NaN x")
+        assertTrue(regularizedBeta(0.5, Double.NaN, 3.0).isNaN(), "NaN a")
+        assertTrue(regularizedBeta(0.5, 2.0, Double.NaN).isNaN(), "NaN b")
+    }
+
+    @Test
+    fun testRegularizedBetaInvalidParameters() {
+        assertFailsWith<InvalidParameterException> {
+            regularizedBeta(0.5, -1.0, 3.0)
+        }
+        assertFailsWith<InvalidParameterException> {
+            regularizedBeta(0.5, 2.0, 0.0)
+        }
+        assertFailsWith<InvalidParameterException> {
+            regularizedBeta(0.5, 0.0, 3.0)
+        }
+    }
+
     // ── Regularized gamma ───────────────────────────────────────────────
 
     @Test
