@@ -130,7 +130,7 @@ font-size: 13.0px;
 
   </style>
   <g id="pGn9VSh">
-    <path fill-rule="evenodd" fill="rgb(0,0,0)" fill-opacity="1.0" d="M0.0 0.0 L0.0 400.0 L900.0 400.0 L900.0 0.0 Z">
+    <path fill-rule="evenodd" fill="rgb(13,13,14)" fill-opacity="1.0" d="M0.0 0.0 L0.0 400.0 L900.0 400.0 L900.0 0.0 Z">
     </path>
     <g transform="translate(21.0 22.0 ) ">
       <g>
@@ -394,7 +394,7 @@ font-size: 13.0px;
       </text>
     </g>
     <g transform="translate(789.965146914507 122.25 ) ">
-      <rect x="0.0" y="0.0" height="124.5" width="107.03485308549293" stroke="rgb(255,255,255)" stroke-opacity="1.0" stroke-width="0.0" fill="rgb(0,0,0)" fill-opacity="1.0">
+      <rect x="0.0" y="0.0" height="124.5" width="107.03485308549293" stroke="rgb(255,255,255)" stroke-opacity="1.0" stroke-width="0.0" fill="rgb(13,13,14)" fill-opacity="1.0">
       </rect>
       <g transform="translate(5.0 5.0 ) ">
         <g transform="translate(0.0 12.0 ) ">

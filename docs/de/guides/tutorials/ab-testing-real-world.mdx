@@ -476,11 +476,17 @@ Vor der Durchführung von Hypothesentests visualisieren wir die Daten, um ihre S
 <Tabs>
 <Tab title="CTR">
 
+**Streifendiagramm mit Mittelwert ± SE** — jeder Punkt ist ein Tag; der Behandlungsmittelwert liegt deutlich höher, aber einzelne Tage variieren stark.
+
 <img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-ctr-strip-mean_light.svg" alt="CTR-Streifendiagramm mit Mittelwert und Standardfehler" />
 <img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-ctr-strip-mean_dark.svg" alt="CTR-Streifendiagramm mit Mittelwert und Standardfehler" />
 
+**Boxplot** — der Behandlungsmedian liegt oberhalb des Kontrollbereichs, mit mehreren Ausreißertagen mit hoher CTR.
+
 <img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-ctr-boxplot_light.svg" alt="CTR-Boxplot nach Gruppe" />
 <img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-ctr-boxplot_dark.svg" alt="CTR-Boxplot nach Gruppe" />
+
+**Zeitreihe** — die Behandlung (rot) übertrifft die Kontrolle (blau) durchgehend Tag für Tag, was ein gepaiertes Testdesign unterstützt.
 
 <img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-ctr-timeseries_light.svg" alt="CTR-Zeitreihe nach Gruppe" />
 <img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-ctr-timeseries_dark.svg" alt="CTR-Zeitreihe nach Gruppe" />
@@ -488,11 +494,17 @@ Vor der Durchführung von Hypothesentests visualisieren wir die Daten, um ihre S
 </Tab>
 <Tab title="Kaufrate">
 
+**Streifendiagramm mit Mittelwert ± SE** — gleiches Muster wie bei CTR: höherer Behandlungsmittelwert mit mehr täglicher Streuung.
+
 <img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-purchase-rate-strip-mean_light.svg" alt="Kaufraten-Streifendiagramm mit Mittelwert und Standardfehler" />
 <img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-purchase-rate-strip-mean_dark.svg" alt="Kaufraten-Streifendiagramm mit Mittelwert und Standardfehler" />
 
+**Boxplot** — der Interquartilbereich der Behandlung liegt über der Kontrollgruppe, mit zwei Ausreißertagen mit hoher Kaufrate.
+
 <img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-purchase-rate-boxplot_light.svg" alt="Kaufraten-Boxplot nach Gruppe" />
 <img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-purchase-rate-boxplot_dark.svg" alt="Kaufraten-Boxplot nach Gruppe" />
+
+**Zeitreihe** — die Behandlungs-Kaufrate liegt an den meisten Tagen über der Kontrolle, wobei der Abstand kleiner ist als bei der CTR.
 
 <img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-purchase-rate-timeseries_light.svg" alt="Kaufraten-Zeitreihe nach Gruppe" />
 <img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-purchase-rate-timeseries_dark.svg" alt="Kaufraten-Zeitreihe nach Gruppe" />
@@ -678,8 +690,12 @@ Pearson  r = 0.748, p = 1.55e-11
 Spearman ρ = 0.517, p = 3.22e-05
 ```
 
+**Streudiagramm** — jeder Punkt ist ein Kampagnentag; der positive Trend bestätigt, dass Tage mit höherer CTR auch mehr Käufe pro Impression verzeichnen.
+
 <img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-ctr-vs-purchase-scatter_light.svg" alt="CTR vs. Kaufrate Streudiagramm" />
 <img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-ctr-vs-purchase-scatter_dark.svg" alt="CTR vs. Kaufrate Streudiagramm" />
+
+**Korrelations-Heatmap** — Pearson r über alle Raten- und Expositionsmetriken. CTR und Kaufrate (r = 0,75) sind das stärkste Paar.
 
 <img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-correlation-heatmap_light.svg" alt="Korrelationsmatrix-Heatmap" />
 <img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-correlation-heatmap_dark.svg" alt="Korrelationsmatrix-Heatmap" />
