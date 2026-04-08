@@ -87,6 +87,25 @@ final class org.oremif.kstats.hypothesis/AnovaResult { // org.oremif.kstats.hypo
     final fun toString(): kotlin/String // org.oremif.kstats.hypothesis/AnovaResult.toString|toString(){}[0]
 }
 
+final class org.oremif.kstats.hypothesis/GrubbsIterativeResult { // org.oremif.kstats.hypothesis/GrubbsIterativeResult|null[0]
+    constructor <init>(kotlin.collections/List<kotlin/Int>, kotlin/DoubleArray, kotlin.collections/List<org.oremif.kstats.hypothesis/TestResult>) // org.oremif.kstats.hypothesis/GrubbsIterativeResult.<init>|<init>(kotlin.collections.List<kotlin.Int>;kotlin.DoubleArray;kotlin.collections.List<org.oremif.kstats.hypothesis.TestResult>){}[0]
+
+    final val cleanedData // org.oremif.kstats.hypothesis/GrubbsIterativeResult.cleanedData|{}cleanedData[0]
+        final fun <get-cleanedData>(): kotlin/DoubleArray // org.oremif.kstats.hypothesis/GrubbsIterativeResult.cleanedData.<get-cleanedData>|<get-cleanedData>(){}[0]
+    final val iterations // org.oremif.kstats.hypothesis/GrubbsIterativeResult.iterations|{}iterations[0]
+        final fun <get-iterations>(): kotlin.collections/List<org.oremif.kstats.hypothesis/TestResult> // org.oremif.kstats.hypothesis/GrubbsIterativeResult.iterations.<get-iterations>|<get-iterations>(){}[0]
+    final val outlierIndices // org.oremif.kstats.hypothesis/GrubbsIterativeResult.outlierIndices|{}outlierIndices[0]
+        final fun <get-outlierIndices>(): kotlin.collections/List<kotlin/Int> // org.oremif.kstats.hypothesis/GrubbsIterativeResult.outlierIndices.<get-outlierIndices>|<get-outlierIndices>(){}[0]
+
+    final fun component1(): kotlin.collections/List<kotlin/Int> // org.oremif.kstats.hypothesis/GrubbsIterativeResult.component1|component1(){}[0]
+    final fun component2(): kotlin/DoubleArray // org.oremif.kstats.hypothesis/GrubbsIterativeResult.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/List<org.oremif.kstats.hypothesis/TestResult> // org.oremif.kstats.hypothesis/GrubbsIterativeResult.component3|component3(){}[0]
+    final fun copy(kotlin.collections/List<kotlin/Int> = ..., kotlin/DoubleArray = ..., kotlin.collections/List<org.oremif.kstats.hypothesis/TestResult> = ...): org.oremif.kstats.hypothesis/GrubbsIterativeResult // org.oremif.kstats.hypothesis/GrubbsIterativeResult.copy|copy(kotlin.collections.List<kotlin.Int>;kotlin.DoubleArray;kotlin.collections.List<org.oremif.kstats.hypothesis.TestResult>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.hypothesis/GrubbsIterativeResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.hypothesis/GrubbsIterativeResult.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.hypothesis/GrubbsIterativeResult.toString|toString(){}[0]
+}
+
 final class org.oremif.kstats.hypothesis/RiskEstimate { // org.oremif.kstats.hypothesis/RiskEstimate|null[0]
     constructor <init>(kotlin/Double, org.oremif.kstats.core/ConfidenceInterval, kotlin/Double) // org.oremif.kstats.hypothesis/RiskEstimate.<init>|<init>(kotlin.Double;org.oremif.kstats.core.ConfidenceInterval;kotlin.Double){}[0]
 
@@ -153,6 +172,8 @@ final fun org.oremif.kstats.hypothesis/flignerKilleenTest(kotlin/Array<out kotli
 final fun org.oremif.kstats.hypothesis/friedmanTest(kotlin/Array<out kotlin/DoubleArray>...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/friedmanTest|friedmanTest(kotlin.Array<out|kotlin.DoubleArray>...){}[0]
 final fun org.oremif.kstats.hypothesis/gIndependenceTest(kotlin/Array<kotlin/IntArray>): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/gIndependenceTest|gIndependenceTest(kotlin.Array<kotlin.IntArray>){}[0]
 final fun org.oremif.kstats.hypothesis/gTest(kotlin/IntArray, kotlin/DoubleArray? = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/gTest|gTest(kotlin.IntArray;kotlin.DoubleArray?){}[0]
+final fun org.oremif.kstats.hypothesis/grubbsTest(kotlin/DoubleArray, org.oremif.kstats.hypothesis/Alternative = ...): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/grubbsTest|grubbsTest(kotlin.DoubleArray;org.oremif.kstats.hypothesis.Alternative){}[0]
+final fun org.oremif.kstats.hypothesis/grubbsTestIterative(kotlin/DoubleArray, kotlin/Double = ..., org.oremif.kstats.hypothesis/Alternative = ...): org.oremif.kstats.hypothesis/GrubbsIterativeResult // org.oremif.kstats.hypothesis/grubbsTestIterative|grubbsTestIterative(kotlin.DoubleArray;kotlin.Double;org.oremif.kstats.hypothesis.Alternative){}[0]
 final fun org.oremif.kstats.hypothesis/hedgesG(kotlin/DoubleArray, kotlin/DoubleArray, kotlin/Boolean = ...): kotlin/Double // org.oremif.kstats.hypothesis/hedgesG|hedgesG(kotlin.DoubleArray;kotlin.DoubleArray;kotlin.Boolean){}[0]
 final fun org.oremif.kstats.hypothesis/holmBonferroniCorrection(kotlin/DoubleArray): kotlin/DoubleArray // org.oremif.kstats.hypothesis/holmBonferroniCorrection|holmBonferroniCorrection(kotlin.DoubleArray){}[0]
 final fun org.oremif.kstats.hypothesis/jarqueBeraTest(kotlin/DoubleArray): org.oremif.kstats.hypothesis/TestResult // org.oremif.kstats.hypothesis/jarqueBeraTest|jarqueBeraTest(kotlin.DoubleArray){}[0]

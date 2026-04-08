@@ -94,6 +94,28 @@ public final class org/oremif/kstats/hypothesis/GTestKt {
 	public static synthetic fun gTest$default ([I[DILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
 }
 
+public final class org/oremif/kstats/hypothesis/GrubbsIterativeResult {
+	public fun <init> (Ljava/util/List;[DLjava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()[D
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;[DLjava/util/List;)Lorg/oremif/kstats/hypothesis/GrubbsIterativeResult;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/hypothesis/GrubbsIterativeResult;Ljava/util/List;[DLjava/util/List;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/GrubbsIterativeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCleanedData ()[D
+	public final fun getIterations ()Ljava/util/List;
+	public final fun getOutlierIndices ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/oremif/kstats/hypothesis/GrubbsTestKt {
+	public static final fun grubbsTest ([DLorg/oremif/kstats/hypothesis/Alternative;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static synthetic fun grubbsTest$default ([DLorg/oremif/kstats/hypothesis/Alternative;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/TestResult;
+	public static final fun grubbsTestIterative ([DDLorg/oremif/kstats/hypothesis/Alternative;)Lorg/oremif/kstats/hypothesis/GrubbsIterativeResult;
+	public static synthetic fun grubbsTestIterative$default ([DDLorg/oremif/kstats/hypothesis/Alternative;ILjava/lang/Object;)Lorg/oremif/kstats/hypothesis/GrubbsIterativeResult;
+}
+
 public final class org/oremif/kstats/hypothesis/KolmogorovSmirnovTestKt {
 	public static final fun kolmogorovSmirnovTest ([DLorg/oremif/kstats/distributions/ContinuousDistribution;)Lorg/oremif/kstats/hypothesis/TestResult;
 	public static final fun kolmogorovSmirnovTest ([D[D)Lorg/oremif/kstats/hypothesis/TestResult;
