@@ -600,6 +600,17 @@ class DocsSamples {
     }
 
     @Test
+    fun abTestingEffectSize() {
+        val controlDurationSec = abControlDuration
+        val treatmentDurationSec = abTreatmentDuration
+        // SampleStart
+        // Cohen's d: how large is the difference in standard-deviation units?
+        val d = cohensD(controlDurationSec, treatmentDurationSec)
+        d // ~2.9 → large effect (|d| ≥ 0.8)
+        // SampleEnd
+    }
+
+    @Test
     fun abTestingSecondMetric() {
         // SampleStart
         // Number of completed checkout steps per session
@@ -622,6 +633,30 @@ class DocsSamples {
     }
 
     @Test
+    fun abTestingMultipleComparison() {
+        val controlDurationSec = abControlDuration
+        val treatmentDurationSec = abTreatmentDuration
+        val result = tTest(controlDurationSec, treatmentDurationSec)
+        val controlSteps = doubleArrayOf(
+            3.0, 4.0, 3.0, 5.0, 3.0, 4.0, 4.0, 5.0, 3.0, 4.0,
+            4.0, 3.0, 4.0, 3.0, 5.0, 4.0, 4.0, 3.0, 4.0, 5.0
+        )
+        val treatmentSteps = doubleArrayOf(
+            5.0, 5.0, 4.0, 5.0, 5.0, 5.0, 4.0, 5.0, 5.0, 5.0,
+            4.0, 5.0, 5.0, 4.0, 5.0, 5.0, 5.0, 4.0, 5.0, 5.0
+        )
+        val stepsResult = mannWhitneyUTest(controlSteps, treatmentSteps)
+        // SampleStart
+        // Correct for testing two metrics (duration + steps)
+        val rawPValues = doubleArrayOf(result.pValue, stepsResult.pValue)
+        val corrected = holmBonferroniCorrection(rawPValues)
+
+        corrected[0] // adjusted p-value for duration
+        corrected[1] // adjusted p-value for steps
+        // SampleEnd
+    }
+
+    @Test
     fun abTestingPaired() {
         // SampleStart
         val beforeMs = doubleArrayOf(
@@ -638,6 +673,11 @@ class DocsSamples {
         // Non-parametric alternative
         val wilcoxon = wilcoxonSignedRankTest(beforeMs, afterMs)
         wilcoxon.pValue
+
+        // Paired effect size: Cohen's dz = mean(diff) / sd(diff)
+        val differences = DoubleArray(beforeMs.size) { beforeMs[it] - afterMs[it] }
+        val dz = differences.mean() / differences.standardDeviation()
+        dz // ~6.1 → large effect
         // SampleEnd
     }
 

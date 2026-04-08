@@ -1,0 +1,740 @@
+---
+title: "A/B-Testing mit realen Daten"
+description: "Zwei reale A/B-Test-Datensätze mit kstats analysieren: Proportions-z-Test, Bayessche Posteriors, gepaarter t-Test, Effektgrößen, Power-Analyse und Korrektur für multiples Testen."
+---
+
+<Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/ab-testing-statistical-guide.ipynb">
+  Führen Sie dieses Tutorial als Kotlin Notebook mit interaktiven Kandy-Diagrammen aus — alle Codezellen, DataFrame-Ausgaben und Visualisierungen inklusive.
+</Card>
+
+Dieses Tutorial führt Sie End-to-End durch zwei reale A/B-Test-Datensätze:
+
+- **E-Commerce-Landingpage** ([Kaggle](https://www.kaggle.com/datasets/zhangluyuan/ab-testing)) — ~294K Nutzer, zufällig der alten oder neuen Checkout-Seite zugewiesen, binäres Ergebnis (konvertiert / nicht)
+- **Marketingkampagne** ([Kaggle](https://www.kaggle.com/datasets/amirmotefaker/ab-testing-dataset)) — tägliche Kampagnenmetriken (Ausgaben, Klicks, Impressionen, Käufe) für Kontroll- vs. Testkampagne
+
+**Aufbau:**
+- **Akt 1** — Binäre Metrik: Konversionsrate (Proportions-z-Test, Chi-Quadrat, Bayessche Analyse)
+- **Akt 2** — Ratenmetriken: CTR, Kaufrate (gepaarter t-Test, Wilcoxon, Effektgrößen, Korrelation)
+
+<Note>
+Dieses Tutorial verwendet [Kotlin DataFrame](https://kotlin.github.io/dataframe/) zum Laden der Daten und [Kandy](https://kotlin.github.io/kandy/) zur Visualisierung. Dies sind Kotlin-Notebook-Abhängigkeiten — die statistischen kstats-Funktionen funktionieren in jeder Kotlin-Umgebung.
+</Note>
+
+## Kurzreferenz: Welchen Test verwenden?
+
+| Metriktyp | Test | Effektgröße | KI-Methode |
+|-----------|------|-------------|------------|
+| Binär (konvertiert / nicht) | `proportionZTest()` | Cohens h (`cohensH()`) | Wilson (`binomialTest(ciMethod = CIMethod.WILSON)`) |
+| Stetig, normalverteilt (unabhängig) | `tTest()` | Cohens d (`cohensD()`) / Hedges' g (`hedgesG()`) | Aus Testergebnis |
+| Stetig, normalverteilt (gepaart) | `pairedTTest()` | Gepaarter dz (manuell: Mittelwert/SD der Differenzen) | Aus Testergebnis |
+| Stetig, nicht-normal | `mannWhitneyUTest()` / `wilcoxonSignedRankTest()` | Rank-biserial r / Cliffs Delta | Bootstrap |
+| Kontingenztafel | `chiSquaredIndependenceTest()` | — | — |
+| Multiple Metriken | `bonferroniCorrection()`, `holmBonferroniCorrection()`, `benjaminiHochbergCorrection()` | | |
+
+---
+
+## Akt 1: Binäre Metrik — Konversionsrate
+
+### 1. Daten laden und bereinigen
+
+**Datensatz**: ~294K Nutzer, zufällig der Kontrollgruppe (alte Seite) oder Behandlungsgruppe (neue Seite) zugewiesen, binäres Ergebnis (konvertiert / nicht).
+
+```kotlin
+val df = DataFrame.readCsv("data/landing-page-ab-test.csv")
+df.head()
+```
+
+| user_id | timestamp | group | landing_page | converted |
+|---------|-----------|-------|-------------|-----------|
+| 851104 | 2017-01-21 22:11:48 | control | old_page | 0 |
+| 804228 | 2017-01-12 08:01:45 | control | old_page | 0 |
+| 661590 | 2017-01-11 16:55:06 | treatment | new_page | 0 |
+| 853541 | 2017-01-08 18:28:03 | treatment | new_page | 0 |
+| 864975 | 2017-01-21 01:52:26 | control | old_page | 1 |
+
+Der Datensatz hat **294.478 Zeilen** und **5 Spalten** mit einer Gesamtkonversionsrate von ~12%.
+
+```kotlin
+// Check for duplicate user_ids
+val duplicateUsers = df.groupBy("user_id").count().filter { "count"<Int>() > 1 }
+println("Duplicate user_ids: ${duplicateUsers.rowsCount()}")
+
+// Check for mismatched rows (treatment + old_page or control + new_page)
+val mismatched = df.filter {
+    ("group"<String>() == "treatment" && "landing_page"<String>() == "old_page") ||
+    ("group"<String>() == "control" && "landing_page"<String>() == "new_page")
+}
+println("Mismatched rows: ${mismatched.rowsCount()}")
+```
+
+```text
+Duplicate user_ids: 3894
+Mismatched rows: 3893
+```
+
+```kotlin
+// Remove mismatched rows, then deduplicate by user_id (keep first)
+val clean = df
+    .filter {
+        !("group"<String>() == "treatment" && "landing_page"<String>() == "old_page") &&
+        !("group"<String>() == "control" && "landing_page"<String>() == "new_page")
+    }
+    .distinctBy("user_id")
+
+println("After cleaning: ${clean.rowsCount()} rows (removed ${df.rowsCount() - clean.rowsCount()})")
+```
+
+```text
+After cleaning: 290584 rows (removed 3894)
+```
+
+```kotlin
+val controlGroup = clean.filter { "group"<String>() == "control" }
+val treatmentGroup = clean.filter { "group"<String>() == "treatment" }
+
+val controlConverted = controlGroup.filter { "converted"<Int>() == 1 }.rowsCount()
+val controlTotal = controlGroup.rowsCount()
+val treatmentConverted = treatmentGroup.filter { "converted"<Int>() == 1 }.rowsCount()
+val treatmentTotal = treatmentGroup.rowsCount()
+
+val controlRate = controlConverted.toDouble() / controlTotal
+val treatmentRate = treatmentConverted.toDouble() / treatmentTotal
+```
+
+```text
+Control:   17489 / 145274 = 0.1204 (12.04%)
+Treatment: 17264 / 145310 = 0.1188 (11.88%)
+Δ = -0.0016 (-0.16 pp)
+```
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-binary-conversion-rates_light.svg" alt="Konversionsraten nach Gruppe" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-binary-conversion-rates_dark.svg" alt="Konversionsraten nach Gruppe" />
+
+### 2. SRM-Prüfung — Sample Ratio Mismatch
+
+Vor jedem Hypothesentest muss überprüft werden, ob die Randomisierung korrekt funktioniert hat. Weicht das Aufteilungsverhältnis stärker als zufällig erwartet von 50/50 ab, ist das Experiment kompromittiert — alle nachfolgenden Ergebnisse sind nicht vertrauenswürdig.
+
+<Tooltip tip="Eine diagnostische Prüfung, die verifiziert, ob das beobachtete Aufteilungsverhältnis dem beabsichtigten entspricht. Ein signifikanter SRM deutet auf einen Fehler in der Randomisierung oder Datenpipeline hin.">Sample Ratio Mismatch (SRM)</Tooltip> wird mit einem Ein-Stichproben-Proportions-z-Test geprüft: Ist die beobachtete Aufteilung mit einem 50/50-Verhältnis vereinbar?
+
+```kotlin
+val srmTest = proportionZTest(
+    successes = controlTotal,
+    trials = controlTotal + treatmentTotal,
+    p0 = 0.5
+)
+
+println("SRM Check (proportion z-test)")
+println("  Control:   $controlTotal users")
+println("  Treatment: $treatmentTotal users")
+println("  Ratio:     ${(controlTotal.toDouble() / (controlTotal + treatmentTotal)).fmt(4)}")
+println("  p-value:   ${srmTest.pValue.fmt(4)}")
+println("  SRM detected: ${srmTest.isSignificant()}")
+```
+
+```text
+SRM Check (proportion z-test)
+  Control:   145274 users
+  Treatment: 145310 users
+  Ratio:     0.4999
+  p-value:   0.9468
+  SRM detected: false
+```
+
+p >> 0,05 — kein SRM erkannt. Die 50/50-Aufteilung ist intakt und die Randomisierung erscheint korrekt.
+
+### 3. Power-Analyse — Planung vor dem Experiment
+
+Die <Tooltip tip="Eine Berechnung vor der Datenerhebung, um die minimale Stichprobengröße zu bestimmen, die benötigt wird, um einen bedeutsamen Effekt mit einer gegebenen Wahrscheinlichkeit zu erkennen">Power-Analyse</Tooltip> sollte **vor** der Datenerhebung stattfinden, um die benötigte Stichprobengröße zu bestimmen. Wir fragen: „Wie viele Nutzer brauchen wir, um einen 1-Prozentpunkt-Anstieg von einer 12%-Baseline mit 80% Power bei α = 0,05 zu erkennen?"
+
+```kotlin
+// Effect size for a 1 pp lift: 12% → 13%
+val h = cohensH(p1 = 0.13, p2 = 0.12)
+println("Cohen's h for 12% → 13%: ${h.fmt(4)}")
+
+val requiredN = proportionZTestRequiredN(effectSize = h, power = 0.8)
+println("Required per group: $requiredN users")
+println("Total: ${requiredN * 2} users")
+```
+
+```text
+Cohen's h for 12% → 13%: 0.0302
+Required per group: 17164 users
+Total: 34328 users
+```
+
+```kotlin
+// With ~145K per group, what power do we actually have?
+val actualPower = proportionZTestPower(effectSize = h, n = 145_000)
+println("Power with N=145K per group: ${(actualPower * 100).fmt(1)}%")
+
+val mde = proportionZTestMinimumEffect(n = 145_000, power = 0.8)
+println("MDE (Cohen's h): ${mde.fmt(4)}")
+```
+
+```text
+Power with N=145K per group: 100.0%
+MDE (Cohen's h): 0.0104
+```
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-binary-power-sample-size_light.svg" alt="Benötigte Stichprobengröße vs. Power" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-binary-power-sample-size_dark.svg" alt="Benötigte Stichprobengröße vs. Power" />
+
+Mit ~145K Nutzern pro Gruppe ist das Experiment für einen 1-pp-Anstieg massiv überpowert — die Power beträgt effektiv 100%. Der <Tooltip tip="Minimum Detectable Effect — die kleinste Effektgröße, die das Experiment bei gegebener Power und Signifikanzniveau zuverlässig erkennen kann">MDE</Tooltip> beträgt Cohens h = 0,0104, d.h. das Experiment kann extrem kleine Unterschiede erkennen.
+
+### 4. Haupttest — Zwei-Stichproben-Proportions-z-Test
+
+Die Kernfrage: **Unterscheidet sich die Konversionsrate zwischen Kontroll- und Behandlungsgruppe?**
+
+```kotlin
+val conversionTest = proportionZTest(
+    successes1 = treatmentConverted, trials1 = treatmentTotal,
+    successes2 = controlConverted,   trials2 = controlTotal
+)
+val ci = conversionTest.confidenceInterval!!
+
+println("Two-Sample Proportion z-Test")
+println("  z-statistic: ${conversionTest.statistic.fmt(4)}")
+println("  p-value:     ${conversionTest.pValue.fmt(4)}")
+println("  95% CI for Δ(p): [${ci.lower.fmt(4)}, ${ci.upper.fmt(4)}]")
+println("  Significant at α=0.05: ${conversionTest.isSignificant()}")
+```
+
+```text
+Two-Sample Proportion z-Test
+  z-statistic: -1.3109
+  p-value:     0.1899
+  95% CI for Δ(p): [-0.0039, 0.0008]
+  Significant at α=0.05: false
+```
+
+p > 0,05 — wir **können die Nullhypothese nicht ablehnen**. Die neue Seite verändert die Konversionsrate nicht signifikant. Das 95%-<Tooltip tip="Ein Wertebereich, der mit einem angegebenen Konfidenzniveau den wahren Populationsparameter enthalten soll">Konfidenzintervall</Tooltip> für die Differenz enthält Null, was mit keinem Effekt übereinstimmt.
+
+#### Einseitiger Test
+
+Das Unternehmen interessiert nur, ob die neue Seite **besser** ist. Ein einseitiger Test hat mehr Power, aber p ≈ 0,905 deutet stark darauf hin, dass die Behandlung tatsächlich *schlechter* ist (oder bestenfalls gleich).
+
+```kotlin
+val oneSided = proportionZTest(
+    successes1 = treatmentConverted, trials1 = treatmentTotal,
+    successes2 = controlConverted,   trials2 = controlTotal,
+    alternative = Alternative.GREATER
+)
+println("One-sided (treatment > control) p = ${oneSided.pValue.fmt(4)}")
+println("Significant: ${oneSided.isSignificant()}")
+```
+
+```text
+One-sided (treatment > control) p = 0.9051
+Significant: false
+```
+
+### 5. Effektgröße — Cohens h
+
+Ein <Tooltip tip="Wahrscheinlichkeit, die Daten zu beobachten, wenn die Nullhypothese wahr ist">p-Wert</Tooltip> beantwortet „gibt es einen Unterschied?". Die <Tooltip tip="Ein standardisiertes Maß für die Größe eines Unterschieds, unabhängig von der Stichprobengröße">Effektgröße</Tooltip> beantwortet „**wie groß** ist der Unterschied?"
+
+Mit N=290K können selbst winzige Unterschiede „signifikant" werden. Cohens h stellt den Unterschied auf einer standardisierten Skala dar, unabhängig von der Stichprobengröße.
+
+| Cohens h | Interpretation |
+|----------|----------------|
+| &lt; 0,2 | Vernachlässigbar |
+| 0,2 | Klein |
+| 0,5 | Mittel |
+| 0,8+ | Groß |
+
+```kotlin
+val effectH = cohensH(p1 = treatmentRate, p2 = controlRate)
+println("Cohen's h = ${effectH.fmt(4)}")
+println("Interpretation: negligible (|h| < 0.2)")
+```
+
+```text
+Cohen's h = -0.0049
+Interpretation: negligible (|h| < 0.2)
+```
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-binary-cohen-h-effect-size_light.svg" alt="Cohens h nach Konversionssteigerung" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-binary-cohen-h-effect-size_dark.svg" alt="Cohens h nach Konversionssteigerung" />
+
+Das Diagramm zeigt Cohens h für verschiedene Konversionssteigerungen von einer 12%-Baseline. Die rote Linie markiert die Schwelle für einen „kleinen Effekt" (h = 0,2). Ein 1-pp-Anstieg registriert kaum; man braucht mindestens 3-5 pp, um einen kleinen Effekt zu erreichen.
+
+### 6. Konfidenzintervalle — Wilson-Score
+
+Das Wald-KI aus dem z-Test kann sich nahe 0 oder 1 schlecht verhalten. Das **Wilson-Score-Intervall** wird für Konversionsraten-Schätzungen pro Gruppe empfohlen.
+
+```kotlin
+val controlCI = binomialTest(
+    successes = controlConverted,
+    trials = controlTotal,
+    ciMethod = CIMethod.WILSON
+)
+val treatmentCI = binomialTest(
+    successes = treatmentConverted,
+    trials = treatmentTotal,
+    ciMethod = CIMethod.WILSON
+)
+
+println("Control   Wilson 95% CI: [${controlCI.confidenceInterval!!.lower.fmt(4)}, ${controlCI.confidenceInterval!!.upper.fmt(4)}]")
+println("Treatment Wilson 95% CI: [${treatmentCI.confidenceInterval!!.lower.fmt(4)}, ${treatmentCI.confidenceInterval!!.upper.fmt(4)}]")
+```
+
+```text
+Control   Wilson 95% CI: [0.1187, 0.1221]
+Treatment Wilson 95% CI: [0.1172, 0.1205]
+```
+
+Die Intervalle überlappen sich erheblich, was mit keinem bedeutsamen Unterschied übereinstimmt.
+
+### 7. Robustheitscheck — Chi-Quadrat-Test
+
+Dieselbe Hypothese kann mit einer 2×2-Kontingenztafel getestet werden. Bei großem N entspricht die Chi-Quadrat-Statistik z² — ein nützlicher Plausibilitätscheck.
+
+```kotlin
+val table = arrayOf(
+    intArrayOf(controlConverted, controlTotal - controlConverted),
+    intArrayOf(treatmentConverted, treatmentTotal - treatmentConverted)
+)
+val chiResult = chiSquaredIndependenceTest(table)
+
+println("Chi-squared: χ²=${chiResult.statistic.fmt(4)}, p=${chiResult.pValue.fmt(4)}, df=${chiResult.degreesOfFreedom}")
+println("Significant: ${chiResult.isSignificant()}")
+println("Consistency check: z²=${(conversionTest.statistic * conversionTest.statistic).fmt(4)}, χ²=${chiResult.statistic.fmt(4)}")
+```
+
+```text
+Chi-squared: χ²=1.7185, p=0.1899, df=1.0
+Significant: false
+Consistency check: z²=1.7185, χ²=1.7185
+```
+
+Beide Tests stimmen überein: kein signifikanter Unterschied. z² ≈ χ² bestätigt die interne Konsistenz.
+
+### 8. Bayesscher A/B-Test
+
+Der frequentistische Ansatz gibt eine binäre Antwort: ablehnen oder nicht ablehnen. Der Bayessche Ansatz beantwortet eine intuitivere Frage: **Wie hoch ist die Wahrscheinlichkeit, dass die Behandlung besser ist?**
+
+Wir verwenden das Beta-Binomial-Konjugat-Modell:
+- **Prior**: Beta(1, 1) — uninformativ (gleichverteilt auf \[0, 1\])
+- **Posterior**: Beta(1 + Erfolge, 1 + Misserfolge) — aktualisierte Überzeugung nach Datenbeobachtung
+- **Entscheidung**: Vergleich der Posterior-Verteilungen via Monte-Carlo-Sampling
+
+```kotlin
+val posteriorControl = BetaDistribution(
+    alpha = 1.0 + controlConverted,
+    beta = 1.0 + (controlTotal - controlConverted)
+)
+val posteriorTreatment = BetaDistribution(
+    alpha = 1.0 + treatmentConverted,
+    beta = 1.0 + (treatmentTotal - treatmentConverted)
+)
+
+println("Posterior Control:   Beta(${1 + controlConverted}, ${1 + controlTotal - controlConverted}), mean=${posteriorControl.mean.fmt(6)}")
+println("Posterior Treatment: Beta(${1 + treatmentConverted}, ${1 + treatmentTotal - treatmentConverted}), mean=${posteriorTreatment.mean.fmt(6)}")
+```
+
+```text
+Posterior Control:   Beta(17490, 127786), mean=0.120392
+Posterior Treatment: Beta(17265, 128047), mean=0.118813
+```
+
+```kotlin
+// Monte Carlo: P(treatment > control)
+val rng = Random(42)
+val nSamples = 100_000
+val samplesControl = posteriorControl.sample(nSamples, rng)
+val samplesTreatment = posteriorTreatment.sample(nSamples, rng)
+
+val pTreatmentBetter = (0 until nSamples).count {
+    samplesTreatment[it] > samplesControl[it]
+} / nSamples.toDouble()
+
+println("P(treatment > control) = ${pTreatmentBetter.fmt(4)} (${(pTreatmentBetter * 100).fmt(1)}%)")
+println("P(control > treatment) = ${(1.0 - pTreatmentBetter).fmt(4)} (${((1.0 - pTreatmentBetter) * 100).fmt(1)}%)")
+```
+
+```text
+P(treatment > control) = 0.0949 (9.5%)
+P(control > treatment) = 0.9051 (90.5%)
+```
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-binary-bayesian-posterior_light.svg" alt="Bayessche Posterior-Verteilungen für Kontroll- und Behandlungsgruppe" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-binary-bayesian-posterior_dark.svg" alt="Bayessche Posterior-Verteilungen für Kontroll- und Behandlungsgruppe" />
+
+```kotlin
+// 95% Credible intervals
+println("Control   95% CI: [${posteriorControl.quantile(0.025).fmt(5)}, ${posteriorControl.quantile(0.975).fmt(5)}]")
+println("Treatment 95% CI: [${posteriorTreatment.quantile(0.025).fmt(5)}, ${posteriorTreatment.quantile(0.975).fmt(5)}]")
+
+val diffs = DoubleArray(nSamples) { samplesTreatment[it] - samplesControl[it] }
+diffs.sort()
+val diffLow = diffs[(nSamples * 0.025).toInt()]
+val diffHigh = diffs[(nSamples * 0.975).toInt()]
+println("Difference 95% CI: [${diffLow.fmt(5)}, ${diffHigh.fmt(5)}]")
+println("Contains zero: ${diffLow <= 0.0 && diffHigh >= 0.0}")
+```
+
+```text
+Control   95% CI: [0.11872, 0.12207]
+Treatment 95% CI: [0.11715, 0.12048]
+Difference 95% CI: [-0.00395, 0.00078]
+Contains zero: true
+```
+
+Der Bayessche Ansatz erzählt dieselbe Geschichte: P(Behandlung > Kontrolle) beträgt nur ~9,5%. Die meisten Unternehmen verlangen P(B > A) > 95%, um eine Änderung auszurollen.
+
+**Frequentistisch vs. Bayessch:**
+- **Frequentistisch**: „Wir können H₀ nicht ablehnen" — binäre Entscheidung, p-Wert hängt von der Stichprobengröße ab
+- **Bayessch**: „Es gibt eine ~9,5%ige Chance, dass die neue Seite besser ist" — direkte Wahrscheinlichkeitsaussage, intuitiver für Stakeholder
+
+Beide stimmen überein: Es gibt keine überzeugenden Belege, die neue Seite einzuführen.
+
+<Tip>
+Wir haben einen uniformen Beta(1,1)-Prior verwendet. Mit N=145K Beobachtungen hat der Prior praktisch keinen Einfluss auf den Posterior. Für kleinere Experimente (N &lt; 1000) sollten Sie einen informativen Prior basierend auf historischen Konversionsraten in Betracht ziehen.
+</Tip>
+
+---
+
+## Akt 2: Stetige Metriken — Marketingkampagne
+
+Wir wechseln nun zu **stetigen Metriken**, für die andere statistische Werkzeuge benötigt werden.
+
+**Datensatz**: [Marketing Campaign A/B Testing](https://www.kaggle.com/datasets/amirmotefaker/ab-testing-dataset) — tägliche Kampagnenmetriken für Kontroll- vs. Testkampagne über 30 Tage.
+
+```kotlin
+val dfControlRaw = DataFrame.readCsv("data/campaign-control.csv", delimiter = ';')
+val dfTestRaw = DataFrame.readCsv("data/campaign-test.csv", delimiter = ';')
+
+// Both CSVs share the same 30 dates. Drop nulls independently, then keep only matched dates.
+val dfControlClean = dfControlRaw.dropNulls()
+val dfTestClean = dfTestRaw.dropNulls()
+
+val ctrlDates = dfControlClean["Date"].toList().map { it.toString() }.toSet()
+val testDates = dfTestClean["Date"].toList().map { it.toString() }.toSet()
+val pairedDates = ctrlDates.intersect(testDates)
+
+val dfControlPaired = dfControlClean
+    .filter { "Date"<Any>().toString() in pairedDates }
+    .sortBy("Date")
+val dfTestPaired = dfTestClean
+    .filter { "Date"<Any>().toString() in pairedDates }
+    .sortBy("Date")
+```
+
+```text
+Matched days: 29 (dropped 1 day with missing data)
+Control: 29 rows × 10 columns
+Test:    29 rows × 10 columns
+```
+
+| Kampagne | Datum | Ausgaben [USD] | Impressionen | Reichweite | Klicks | Suchen | Inhaltsansichten | Warenkorb | Käufe |
+|----------|-------|----------------|-------------|-----------|--------|--------|-----------------|-----------|-------|
+| Control | 1082019 | 2280 | 82702 | 56930 | 7016 | 2290 | 2159 | 1819 | 618 |
+| Control | 2082019 | 1757 | 121040 | 102513 | 8110 | 2033 | 1841 | 1219 | 511 |
+| Control | 3082019 | 2343 | 131711 | 110862 | 6508 | 1737 | 1549 | 1134 | 372 |
+
+### 9. Ratenmetriken berechnen
+
+```kotlin
+val controlClicks = dfControlPaired["# of Website Clicks"].toList()
+    .map { (it as Number).toDouble() }.toDoubleArray()
+val treatmentClicks = dfTestPaired["# of Website Clicks"].toList()
+    .map { (it as Number).toDouble() }.toDoubleArray()
+val controlImpressions = dfControlPaired["# of Impressions"].toList()
+    .map { (it as Number).toDouble() }.toDoubleArray()
+val treatmentImpressions = dfTestPaired["# of Impressions"].toList()
+    .map { (it as Number).toDouble() }.toDoubleArray()
+val controlPurchase = dfControlPaired["# of Purchase"].toList()
+    .map { (it as Number).toDouble() }.toDoubleArray()
+val treatmentPurchase = dfTestPaired["# of Purchase"].toList()
+    .map { (it as Number).toDouble() }.toDoubleArray()
+
+// Rate metrics: normalize by daily impressions
+val controlCTR = controlClicks.zip(controlImpressions).map { (c, i) -> c / i }.toDoubleArray()
+val treatmentCTR = treatmentClicks.zip(treatmentImpressions).map { (c, i) -> c / i }.toDoubleArray()
+val controlPurchaseRate = controlPurchase.zip(controlImpressions).map { (p, i) -> p / i }.toDoubleArray()
+val treatmentPurchaseRate = treatmentPurchase.zip(treatmentImpressions).map { (p, i) -> p / i }.toDoubleArray()
+```
+
+```text
+Exposure comparison:
+  Impressions — Control: 3177233, Treatment: 2123249 (-33.2%)
+  Spend       — Control: 66818, Treatment: 74595 (11.6%)
+
+CTR (Control):           mean=5.10%, sd=2.05%
+CTR (Treatment):         mean=10.42%, sd=6.82%
+Purchase Rate (Control): mean=0.500%, sd=0.217%
+Purchase Rate (Treatment): mean=0.848%, sd=0.530%
+```
+
+**Warum Raten statt Rohwerte?** Die beiden Gruppen haben sehr unterschiedliche Exposition: die Behandlungsgruppe erhielt ~30% weniger Impressionen, aber ~12% mehr Budget. Der Vergleich roher Tageswerte würde den Kampagneneffekt mit dem Expositionsunterschied vermischen. Stattdessen normalisieren wir nach täglichen Impressionen: **CTR** (Klicks / Impressionen) und **Kaufrate** (Käufe / Impressionen).
+
+**Warum gepaarte Tests?** Da Kontroll- und Testbeobachtungen nach Datum gematcht sind, entfernt ein gepaarter t-Test die tagesbedingte Variabilität und erhöht die Power im Vergleich zu einem Test für unabhängige Stichproben.
+
+### 10. EDA — Gepaarte Differenzen
+
+Vor der Durchführung von Hypothesentests visualisieren wir die Daten, um ihre Struktur zu verstehen und potenzielle Probleme zu erkennen.
+
+<Tabs>
+<Tab title="CTR">
+
+**Streifendiagramm mit Mittelwert ± SE** — jeder Punkt ist ein Tag; der Behandlungsmittelwert liegt deutlich höher, aber einzelne Tage variieren stark.
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-ctr-strip-mean_light.svg" alt="CTR-Streifendiagramm mit Mittelwert und Standardfehler" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-ctr-strip-mean_dark.svg" alt="CTR-Streifendiagramm mit Mittelwert und Standardfehler" />
+
+**Boxplot** — der Behandlungsmedian liegt oberhalb des Kontrollbereichs, mit mehreren Ausreißertagen mit hoher CTR.
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-ctr-boxplot_light.svg" alt="CTR-Boxplot nach Gruppe" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-ctr-boxplot_dark.svg" alt="CTR-Boxplot nach Gruppe" />
+
+**Zeitreihe** — die Behandlung (rot) übertrifft die Kontrolle (blau) durchgehend Tag für Tag, was ein gepaiertes Testdesign unterstützt.
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-ctr-timeseries_light.svg" alt="CTR-Zeitreihe nach Gruppe" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-ctr-timeseries_dark.svg" alt="CTR-Zeitreihe nach Gruppe" />
+
+</Tab>
+<Tab title="Kaufrate">
+
+**Streifendiagramm mit Mittelwert ± SE** — gleiches Muster wie bei CTR: höherer Behandlungsmittelwert mit mehr täglicher Streuung.
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-purchase-rate-strip-mean_light.svg" alt="Kaufraten-Streifendiagramm mit Mittelwert und Standardfehler" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-purchase-rate-strip-mean_dark.svg" alt="Kaufraten-Streifendiagramm mit Mittelwert und Standardfehler" />
+
+**Boxplot** — der Interquartilbereich der Behandlung liegt über der Kontrollgruppe, mit zwei Ausreißertagen mit hoher Kaufrate.
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-purchase-rate-boxplot_light.svg" alt="Kaufraten-Boxplot nach Gruppe" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-purchase-rate-boxplot_dark.svg" alt="Kaufraten-Boxplot nach Gruppe" />
+
+**Zeitreihe** — die Behandlungs-Kaufrate liegt an den meisten Tagen über der Kontrolle, wobei der Abstand kleiner ist als bei der CTR.
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-purchase-rate-timeseries_light.svg" alt="Kaufraten-Zeitreihe nach Gruppe" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-purchase-rate-timeseries_dark.svg" alt="Kaufraten-Zeitreihe nach Gruppe" />
+
+</Tab>
+</Tabs>
+
+Die Behandlungsgruppe zeigt an den meisten Tagen höhere CTR und Kaufrate bei deutlich mehr Varianz. Die Streifen- und Boxplots bestätigen eine klare Aufwärtsverschiebung in der Behandlungsgruppe.
+
+### 11. Annahmenprüfung
+
+Für gepaarte Tests prüfen wir die **Differenzen** (Behandlung minus Kontrolle pro Tag):
+
+1. **Normalität der Differenzen** (Shapiro-Wilk) — Sind die gepaarten Differenzen approximativ normalverteilt?
+2. **Varianzhomogenität** (Levene) — Der Vollständigkeit halber berichtet, obwohl gepaarte Tests dies nicht erfordern.
+
+```kotlin
+val ctrDiff = treatmentCTR.zip(controlCTR).map { (t, c) -> t - c }.toDoubleArray()
+val ctrDiffNorm = shapiroWilkTest(ctrDiff)
+
+println("CTR differences (treatment - control):")
+println("  mean Δ = ${(ctrDiff.describe().mean * 100).fmt(2)} pp")
+println("  Shapiro-Wilk: p=${ctrDiffNorm.pValue.fmt(4)}")
+```
+
+```text
+CTR differences (treatment - control):
+  mean Δ = 5.32 pp
+  Shapiro-Wilk: p=0.0012 ✗ non-normal
+  Per-group — Control: p=0.2448, Treatment: p=0.0007
+```
+
+```kotlin
+val purchRateDiff = treatmentPurchaseRate.zip(controlPurchaseRate)
+    .map { (t, c) -> t - c }.toDoubleArray()
+val purchRateDiffNorm = shapiroWilkTest(purchRateDiff)
+
+println("Purchase Rate differences (treatment - control):")
+println("  mean Δ = ${(purchRateDiff.describe().mean * 100).fmt(3)} pp")
+println("  Shapiro-Wilk: p=${purchRateDiffNorm.pValue.fmt(4)}")
+```
+
+```text
+Purchase Rate differences (treatment - control):
+  mean Δ = 0.348 pp
+  Shapiro-Wilk: p=0.0309 ✗ non-normal
+  Per-group — Control: p=0.2822, Treatment: p=0.0053
+```
+
+**Entscheidungsbaum für gepaarte Daten:**
+- Shapiro-Wilk auf **Differenzen** besteht (p > 0,05) → **gepaarter t-Test** als Primärtest
+- Shapiro-Wilk schlägt fehl → der gepaarte t-Test ist oft robust gegenüber leichter Nicht-Normalität, aber bei N ≈ 29 sollten Ergebnisse vorsichtig interpretiert werden. Der **Wilcoxon-Vorzeichen-Rang-Test** dient als Sensitivitätsprüfung
+- Keine Prüfung gleicher Varianzen nötig — gepaarte Tests arbeiten mit Differenzen, nicht separaten Gruppen
+
+Wir berichten sowohl parametrische (gepaarter t-Test) als auch nicht-parametrische (Wilcoxon-Vorzeichen-Rang) Tests.
+
+### 12. Hypothesentests — Gepaarter t-Test und Wilcoxon-Vorzeichen-Rang
+
+```kotlin
+val ctrT = pairedTTest(treatmentCTR, controlCTR)
+val ctrW = wilcoxonSignedRankTest(treatmentCTR, controlCTR)
+
+println("CTR — Paired t: t=${ctrT.statistic.fmt(3)}, p=${ctrT.pValue.fmt(4)}")
+println("  CI=[${(ctrT.confidenceInterval!!.lower * 100).fmt(2)}%, ${(ctrT.confidenceInterval!!.upper * 100).fmt(2)}%]")
+println("  Significant: ${ctrT.isSignificant()}")
+println()
+println("CTR — Wilcoxon signed-rank: W=${ctrW.statistic.fmt(1)}, p=${ctrW.pValue.fmt(4)}")
+println("  Significant: ${ctrW.isSignificant()}")
+```
+
+```text
+CTR — Paired t: t=4.016, p=0.0004
+  CI=[2.61%, 8.04%]
+  Significant: true
+
+CTR — Wilcoxon signed-rank: W=388.0, p=0.0002
+  Significant: true
+```
+
+```kotlin
+val purchRateT = pairedTTest(treatmentPurchaseRate, controlPurchaseRate)
+val purchRateW = wilcoxonSignedRankTest(treatmentPurchaseRate, controlPurchaseRate)
+
+println("Purchase Rate — Paired t: t=${purchRateT.statistic.fmt(3)}, p=${purchRateT.pValue.fmt(4)}")
+println("  CI=[${(purchRateT.confidenceInterval!!.lower * 100).fmt(3)}%, ${(purchRateT.confidenceInterval!!.upper * 100).fmt(3)}%]")
+println("  Significant: ${purchRateT.isSignificant()}")
+println()
+println("Purchase Rate — Wilcoxon signed-rank: W=${purchRateW.statistic.fmt(1)}, p=${purchRateW.pValue.fmt(4)}")
+println("  Significant: ${purchRateW.isSignificant()}")
+```
+
+```text
+Purchase Rate — Paired t: t=3.167, p=0.0037
+  CI=[0.123%, 0.574%]
+  Significant: true
+
+Purchase Rate — Wilcoxon signed-rank: W=358.0, p=0.0025
+  Significant: true
+```
+
+Sowohl parametrische als auch nicht-parametrische Tests stimmen bei beiden Metriken überein: Die Behandlungskampagne hat signifikant höhere CTR und Kaufrate. Diese Übereinstimmung stärkt unser Vertrauen trotz der nicht-normalen Differenzen.
+
+### 13. Effektgröße — Gepaarter Cohens dz
+
+| dz | Interpretation |
+|----|----------------|
+| &lt; 0,2 | Vernachlässigbar |
+| 0,2 | Klein |
+| 0,5 | Mittel |
+| 0,8+ | Groß |
+
+Für gepaarte Designs ist Cohens dz = Mittelwert(Differenzen) / SD(Differenzen) die geeignete Effektgröße. Sie erfasst, wie groß die Innerhalb-Paar-Differenzen relativ zu ihrer Variabilität sind.
+
+```kotlin
+val ctrDiffs = DoubleArray(treatmentCTR.size) { treatmentCTR[it] - controlCTR[it] }
+val purchDiffs = DoubleArray(treatmentPurchaseRate.size) {
+    treatmentPurchaseRate[it] - controlPurchaseRate[it]
+}
+
+val ctrDz = ctrDiffs.mean() / sqrt(ctrDiffs.variance())
+val purchDz = purchDiffs.mean() / sqrt(purchDiffs.variance())
+
+println("CTR           — paired dz = ${ctrDz.fmt(3)} (${interpretD(ctrDz)})")
+println("Purchase Rate — paired dz = ${purchDz.fmt(3)} (${interpretD(purchDz)})")
+```
+
+```text
+CTR           — paired dz = 0.746 (medium)
+Purchase Rate — paired dz = 0.588 (medium)
+```
+
+Im Gegensatz zu ungepaarten Cohens d (das die gepoolte Zwischen-Gruppen-SD verwendet) spiegelt dz direkt wider, wie konsistent eine Bedingung die andere über gematchte Paare hinweg übertrifft.
+
+### 14. Korrektur für multiples Testen
+
+Wir haben zwei Metriken getestet: CTR und Kaufrate. Das Testen multipler Hypothesen erhöht die Chance auf falsch positive Ergebnisse (Fehler 1. Art). Drei Korrekturmethoden:
+
+| Methode | Kontrolliert | Konservativität |
+|---------|-------------|-----------------|
+| **Bonferroni** | <Tooltip tip="Family-Wise Error Rate — die Wahrscheinlichkeit, mindestens ein falsch positives Ergebnis unter allen Tests zu erhalten">FWER</Tooltip> (Wahrscheinlichkeit *irgendeines* falsch positiven Ergebnisses) | Am konservativsten |
+| **Holm-Bonferroni** | FWER | Weniger konservativ, gleichmäßig leistungsfähiger |
+| **Benjamini-Hochberg** | <Tooltip tip="False Discovery Rate — der erwartete Anteil falsch positiver Ergebnisse unter allen abgelehnten Hypothesen">FDR</Tooltip> (erwarteter *Anteil* falsch positiver Ergebnisse) | Am wenigsten konservativ |
+
+Verwenden Sie **FWER** (Bonferroni/Holm) wenn jedes falsch positive Ergebnis kostspielig ist (z.B. regulatorisch). Verwenden Sie **FDR** (BH) beim Screening vieler Metriken, wenn einige falsch positive Ergebnisse tolerierbar sind.
+
+```kotlin
+val rawPValues = doubleArrayOf(ctrT.pValue, purchRateT.pValue)
+
+val bonf = bonferroniCorrection(rawPValues)
+val holm = holmBonferroniCorrection(rawPValues)
+val bh   = benjaminiHochbergCorrection(rawPValues)
+```
+
+```text
+Metric      Raw p       Bonferroni    Holm          BH
+------------------------------------------------------------
+CTR         0.0004      0.0008        0.0008        0.0008
+Purch.Rate  0.0037      0.0074        0.0037        0.0037
+```
+
+Alle p-Werte bleiben nach Korrektur mit jeder Methode signifikant.
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-raw-vs-adjusted-pvalues_light.svg" alt="Vergleich roher vs. korrigierter p-Werte" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-raw-vs-adjusted-pvalues_dark.svg" alt="Vergleich roher vs. korrigierter p-Werte" />
+
+### 15. Metrik-Korrelation — CTR vs. Kaufrate
+
+Sind unsere beiden Testmetriken korreliert? Bonferroni kontrolliert FWER unabhängig von der Abhängigkeitsstruktur, aber bei positiv korrelierten Metriken wird die Korrektur konservativer als nötig.
+
+```kotlin
+val allCTR = controlCTR + treatmentCTR
+val allPurchaseRate = controlPurchaseRate + treatmentPurchaseRate
+
+val corrP = pearsonCorrelation(allCTR, allPurchaseRate)
+val corrS = spearmanCorrelation(allCTR, allPurchaseRate)
+
+println("Pearson  r = ${corrP.coefficient.fmt(3)}, p = ${"%.2e".format(corrP.pValue)}")
+println("Spearman ρ = ${corrS.coefficient.fmt(3)}, p = ${"%.2e".format(corrS.pValue)}")
+```
+
+```text
+Pearson  r = 0.748, p = 1.55e-11
+Spearman ρ = 0.517, p = 3.22e-05
+```
+
+**Streudiagramm** — jeder Punkt ist ein Kampagnentag; der positive Trend bestätigt, dass Tage mit höherer CTR auch mehr Käufe pro Impression verzeichnen.
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-ctr-vs-purchase-scatter_light.svg" alt="CTR vs. Kaufrate Streudiagramm" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-ctr-vs-purchase-scatter_dark.svg" alt="CTR vs. Kaufrate Streudiagramm" />
+
+**Korrelations-Heatmap** — Pearson r über alle Raten- und Expositionsmetriken. CTR und Kaufrate (r = 0,75) sind das stärkste Paar.
+
+<img className="block dark:hidden" src="/images/samples/ab-test/ab-continuous-correlation-heatmap_light.svg" alt="Korrelationsmatrix-Heatmap" />
+<img className="hidden dark:block" src="/images/samples/ab-test/ab-continuous-correlation-heatmap_dark.svg" alt="Korrelationsmatrix-Heatmap" />
+
+CTR und Kaufrate sind stark korreliert (r = 0,75). Das bedeutet, die Bonferroni/Holm-Korrekturen sind konservativer als nötig — die wahre FWER liegt unter dem nominalen Alpha.
+
+---
+
+## Zusammenfassung
+
+| Metrik | Test | p-Wert | Effektgröße | Entscheidung |
+|--------|------|--------|-------------|-------------|
+| Konversionsrate | Proportions-z-Test | ~0,19 | Cohens h ≈ -0,005 (vernachlässigbar) | Kein Unterschied (Power >99% für 1-pp-Anstieg) |
+| Konversionsrate | Chi-Quadrat | ~0,19 | — | Bestätigt z-Test |
+| Konversionsrate | Bayessch P(B>A) | — | — | ~9,5% Wahrscheinlichkeit, dass Behandlung besser |
+| CTR (Klicks/Impr.) | Gepaarter t-Test | ~0,0004 (Holm: 0,0008) | Gepaarter dz ≈ 0,75 (mittel-groß) | Signifikant — Behandlung hat höhere CTR |
+| Kaufrate (Käufe/Impr.) | Gepaarter t-Test | ~0,0037 (Holm: 0,0037) | Gepaarter dz ≈ 0,59 (mittel) | Signifikant — Behandlung hat höhere Kaufrate |
+
+<Warning>
+**Methodenhinweis zu Akt 2**: Die Marketingkampagnen-Gruppen hatten sehr unterschiedliche Expositionsniveaus (Behandlung erhielt ~30% weniger Impressionen, aber ~12% mehr Budget). Alle Akt-2-Analysen verwenden **Ratenmetriken** (pro Impression) und **gepaarte Tests**, nach Datum gematcht.
+</Warning>
+
+**Vorbehalt zur Power in Akt 2**: Mit nur ~29 gematchten Paaren hat die Studie moderate Power (~55% für einen mittleren Effekt dz ≈ 0,4). Die signifikanten Ergebnisse entsprechen mittleren bis großen Effekten (dz ≈ 0,59-0,75). Dennoch spiegeln die breiten Konfidenzintervalle die kleine Stichprobe wider.
+
+**Geschäftsschlussfolgerung**: Die neue Landingpage verbessert die Konversionsrate nicht — das Experiment war gut gepowert (>99% für einen 1-pp-Anstieg) und sowohl frequentistische als auch Bayessche Analysen stimmen überein. Für die Marketingkampagne sind sowohl CTR als auch Kaufrate in der Behandlungsgruppe nach Holm-Korrektur signifikant höher. Bei nur 29 gematchten Tagen sind die Effektgrößenschätzungen jedoch ungenau; ein längeres Experiment würde die Konfidenzintervalle einengen.
+
+## Siehe auch
+
+<CardGroup cols={2}>
+  <Card title="A/B-Testing-Anleitung" icon="flask" href="/guides/how-to/ab-testing">
+    Kompakte Schritt-für-Schritt-Anleitung für A/B-Tests mit kstats und synthetischen Daten.
+  </Card>
+  <Card title="Annahmen testen" icon="check" href="/guides/how-to/testing-assumptions">
+    Normalität, Varianzhomogenität und Verteilungsanpassung vor parametrischen Methoden prüfen.
+  </Card>
+  <Card title="Hypothesentests-Modul" icon="scale-balanced" href="/hypothesis/overview">
+    Vollständige Referenz aller in kstats verfügbaren Hypothesentests.
+  </Card>
+  <Card title="Korrelationsmodul" icon="chart-line" href="/correlation/overview">
+    Pearson-, Spearman- und Kendall-Korrelation mit Signifikanztests.
+  </Card>
+</CardGroup>

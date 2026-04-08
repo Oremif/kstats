@@ -1,6 +1,6 @@
 ---
-title: "A/B Testing"
-description: "Run a complete A/B test workflow: summarize groups, check assumptions, choose the right test, and analyze multiple metrics."
+title: "A/B Testing — Compare Variants with Statistical Tests"
+description: "Run a complete A/B test workflow in Kotlin: summarize groups, check assumptions, choose the right test, measure effect size, and correct for multiple comparisons with kstats."
 ---
 
 [//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
@@ -128,6 +128,20 @@ result.isSignificant()
 </Tab>
 </Tabs>
 
+### Effect size — Cohen's d
+
+A <Tooltip tip="Standardized measure of the magnitude of a difference, independent of sample size">p-value</Tooltip> tells you *whether* a difference exists; effect size tells you *how large* it is. Cohen's d expresses the difference in standard-deviation units: |d| < 0.2 negligible, 0.2 small, 0.5 medium, 0.8+ large.
+
+[//]: # (<!---FUN abTestingEffectSize-->)
+
+```kotlin
+// Cohen's d: how large is the difference in standard-deviation units?
+val d = cohensD(controlDurationSec, treatmentDurationSec)
+d // ~2.9 → large effect (|d| ≥ 0.8)
+```
+
+[//]: # (<!---END-->)
+
 ### One-sided tests
 
 When you expect the treatment to reduce session duration:
@@ -168,6 +182,23 @@ shapiroWilkTest(controlSteps).pValue
 val stepsResult = mannWhitneyUTest(controlSteps, treatmentSteps)
 stepsResult.pValue
 stepsResult.isSignificant()
+```
+
+[//]: # (<!---END-->)
+
+### Multiple comparison correction
+
+Testing two metrics (duration and steps) inflates the false-positive rate. <Tooltip tip="Sequentially rejective method that controls the family-wise error rate while being more powerful than Bonferroni">Holm-Bonferroni</Tooltip> correction adjusts p-values to account for this.
+
+[//]: # (<!---FUN abTestingMultipleComparison-->)
+
+```kotlin
+// Correct for testing two metrics (duration + steps)
+val rawPValues = doubleArrayOf(result.pValue, stepsResult.pValue)
+val corrected = holmBonferroniCorrection(rawPValues)
+
+corrected[0] // adjusted p-value for duration
+corrected[1] // adjusted p-value for steps
 ```
 
 [//]: # (<!---END-->)
@@ -213,6 +244,11 @@ paired.confidenceInterval
 // Non-parametric alternative
 val wilcoxon = wilcoxonSignedRankTest(beforeMs, afterMs)
 wilcoxon.pValue
+
+// Paired effect size: Cohen's dz = mean(diff) / sd(diff)
+val differences = DoubleArray(beforeMs.size) { beforeMs[it] - afterMs[it] }
+val dz = differences.mean() / differences.standardDeviation()
+dz // ~6.1 → large effect
 ```
 
 [//]: # (<!---END-->)

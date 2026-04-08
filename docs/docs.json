@@ -126,6 +126,12 @@
                       "guides/how-to/exploratory-analysis",
                       "guides/how-to/building-a-pipeline"
                     ]
+                  },
+                  {
+                    "group": "Tutorials",
+                    "pages": [
+                      "guides/tutorials/ab-testing-real-world"
+                    ]
                   }
                 ]
               },
@@ -178,6 +184,12 @@
                       "de/guides/how-to/quality-control",
                       "de/guides/how-to/exploratory-analysis",
                       "de/guides/how-to/building-a-pipeline"
+                    ]
+                  },
+                  {
+                    "group": "Tutorials",
+                    "pages": [
+                      "de/guides/tutorials/ab-testing-real-world"
                     ]
                   }
                 ]
