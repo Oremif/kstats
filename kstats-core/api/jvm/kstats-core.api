@@ -87,6 +87,27 @@ public final class org/oremif/kstats/descriptive/CentralTendencyKt {
 	public static final fun weightedMean ([D[D)D
 }
 
+public final class org/oremif/kstats/descriptive/ControlChartKt {
+	public static final fun spcConstants (I)Lorg/oremif/kstats/descriptive/SpcConstants;
+	public static final fun xBarRChart (Ljava/util/List;)Lorg/oremif/kstats/descriptive/XBarRChartResult;
+	public static final fun xBarSChart (Ljava/util/List;)Lorg/oremif/kstats/descriptive/XBarSChartResult;
+}
+
+public final class org/oremif/kstats/descriptive/ControlChartLimits {
+	public fun <init> (DDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun copy (DDD)Lorg/oremif/kstats/descriptive/ControlChartLimits;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/descriptive/ControlChartLimits;DDDILjava/lang/Object;)Lorg/oremif/kstats/descriptive/ControlChartLimits;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCenterLine ()D
+	public final fun getLcl ()D
+	public final fun getUcl ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/oremif/kstats/descriptive/DescriptiveStatistics {
 	public fun <init> (JDDDDDDDDDDDDDD)V
 	public final fun component1 ()J
@@ -395,8 +416,65 @@ public final class org/oremif/kstats/descriptive/ShapeKt {
 	public static synthetic fun skewness$default ([DLorg/oremif/kstats/descriptive/PopulationKind;ILjava/lang/Object;)D
 }
 
+public final class org/oremif/kstats/descriptive/SpcConstants {
+	public fun <init> (DDDDDDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()D
+	public final fun component6 ()D
+	public final fun component7 ()D
+	public final fun copy (DDDDDDD)Lorg/oremif/kstats/descriptive/SpcConstants;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/descriptive/SpcConstants;DDDDDDDILjava/lang/Object;)Lorg/oremif/kstats/descriptive/SpcConstants;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getA2 ()D
+	public final fun getA3 ()D
+	public final fun getB3 ()D
+	public final fun getB4 ()D
+	public final fun getC4 ()D
+	public final fun getD3 ()D
+	public final fun getD4 ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/oremif/kstats/descriptive/SummaryStatisticsKt {
 	public static final fun describe (Ljava/lang/Iterable;)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
 	public static final fun describe ([D)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
+}
+
+public final class org/oremif/kstats/descriptive/XBarRChartResult {
+	public fun <init> (DDDLorg/oremif/kstats/descriptive/ControlChartLimits;)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()Lorg/oremif/kstats/descriptive/ControlChartLimits;
+	public final fun copy (DDDLorg/oremif/kstats/descriptive/ControlChartLimits;)Lorg/oremif/kstats/descriptive/XBarRChartResult;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/descriptive/XBarRChartResult;DDDLorg/oremif/kstats/descriptive/ControlChartLimits;ILjava/lang/Object;)Lorg/oremif/kstats/descriptive/XBarRChartResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCenterLine ()D
+	public final fun getLcl ()D
+	public final fun getRChart ()Lorg/oremif/kstats/descriptive/ControlChartLimits;
+	public final fun getUcl ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/oremif/kstats/descriptive/XBarSChartResult {
+	public fun <init> (DDDLorg/oremif/kstats/descriptive/ControlChartLimits;)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()Lorg/oremif/kstats/descriptive/ControlChartLimits;
+	public final fun copy (DDDLorg/oremif/kstats/descriptive/ControlChartLimits;)Lorg/oremif/kstats/descriptive/XBarSChartResult;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/descriptive/XBarSChartResult;DDDLorg/oremif/kstats/descriptive/ControlChartLimits;ILjava/lang/Object;)Lorg/oremif/kstats/descriptive/XBarSChartResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCenterLine ()D
+	public final fun getLcl ()D
+	public final fun getSChart ()Lorg/oremif/kstats/descriptive/ControlChartLimits;
+	public final fun getUcl ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
