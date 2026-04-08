@@ -814,4 +814,57 @@ class BinomialTestTest {
         // upper is clamped to 1.0 since raw value would exceed 1
         assertEquals(1.0, ci.upper, 1e-10, "AC 9999/10000 upper (clamped)")
     }
+
+    // ===== Regression: very large trials (regularizedBeta convergence) =====
+
+    @Test
+    fun testVeryLargeTrialsRegression() {
+        // Regression: binomialTest with ~290K trials previously threw ConvergenceException
+        // in regularizedBeta because the fixed 200-iteration limit was insufficient.
+        // The fix adds dynamic iteration limits via betaMaxIterations(a, b).
+        // scipy: binomtest(145274, 290585, 0.5)
+        // statistic = 0.499936335323571, pvalue = 0.946754474820775
+        val result = binomialTest(successes = 145274, trials = 290585, probability = 0.5)
+        assertEquals(0.499936335323571, result.statistic, 1e-10, "statistic for 145274/290585")
+        assertP(0.946754474820775, result.pValue, tol = 1e-4, message = "145274/290585 two-sided")
+        assertFalse(result.isSignificant(), "145274/290585 should not be significant at 5%")
+    }
+
+    @Test
+    fun testVeryLargeTrialsAlternatives() {
+        // scipy: binomtest(145274, 290585, 0.5, alternative='less') pvalue = 0.473377237410387
+        val less = binomialTest(
+            successes = 145274, trials = 290585, probability = 0.5,
+            alternative = Alternative.LESS
+        )
+        assertP(0.473377237410387, less.pValue, tol = 1e-4, message = "145274/290585 less")
+
+        // scipy: binomtest(145274, 290585, 0.5, alternative='greater') pvalue = 0.528099421105053
+        val greater = binomialTest(
+            successes = 145274, trials = 290585, probability = 0.5,
+            alternative = Alternative.GREATER
+        )
+        assertP(0.528099421105053, greater.pValue, tol = 1e-4, message = "145274/290585 greater")
+
+        // Same statistic regardless of alternative
+        assertEquals(less.statistic, greater.statistic, 1e-14, "statistic unchanged by alternative")
+    }
+
+    @Test
+    fun testVeryLargeTrialsClopperPearsonCI() {
+        // scipy: binomtest(145274, 290585, 0.5).proportion_ci(0.95, method='exact')
+        // CI: (0.498116674717248, 0.501755997199567)
+        val result = binomialTest(successes = 145274, trials = 290585, probability = 0.5)
+        assertCI(
+            0.498116674717248, 0.501755997199567,
+            result.confidenceInterval, tol = 1e-4, message = "CP CI 145274/290585"
+        )
+    }
+
+    @Test
+    fun testVeryLargeTrialsPValueRange() {
+        // Property: p-value must be in [0, 1] for very large trials
+        val result = binomialTest(successes = 145274, trials = 290585, probability = 0.5)
+        assertTrue(result.pValue in 0.0..1.0, "p-value should be in [0, 1], got ${result.pValue}")
+    }
 }

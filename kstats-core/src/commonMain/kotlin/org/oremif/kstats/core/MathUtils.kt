@@ -131,8 +131,11 @@ public fun beta(a: Double, b: Double): Double = exp(lnBeta(a, b))
 
 // ── Regularized incomplete beta function I_x(a, b) ─────────────────────────
 
-private const val BETA_MAX_ITERATIONS = 200
+private const val BETA_BASE_MAX_ITERATIONS = 200
 private const val BETA_EPSILON = 1e-14
+
+private fun betaMaxIterations(a: Double, b: Double): Int =
+    maxOf(BETA_BASE_MAX_ITERATIONS, (10.0 * sqrt(maxOf(a, b))).toInt())
 
 /**
  * Computes the regularized incomplete beta function I(x; a, b) at point [x].
@@ -152,7 +155,7 @@ private const val BETA_EPSILON = 1e-14
  * @param a the first shape parameter. Must be positive.
  * @param b the second shape parameter. Must be positive.
  * @return the regularized incomplete beta function value at [x], in the range [0, 1].
- * @throws org.oremif.kstats.core.exceptions.ConvergenceException if the continued fraction does not converge within 200 iterations.
+ * @throws org.oremif.kstats.core.exceptions.ConvergenceException if the continued fraction does not converge within the iteration limit.
  */
 public fun regularizedBeta(x: Double, a: Double, b: Double): Double {
     if (x.isNaN() || a.isNaN() || b.isNaN()) return Double.NaN
@@ -175,8 +178,9 @@ public fun regularizedBeta(x: Double, a: Double, b: Double): Double {
     d = 1.0 / d
     var result = d
 
+    val maxIter = betaMaxIterations(a, b)
     var converged = false
-    for (m in 1..BETA_MAX_ITERATIONS) {
+    for (m in 1..maxIter) {
         // even step
         val mDouble = m.toDouble()
         var numerator = mDouble * (b - mDouble) * x / ((a + 2.0 * mDouble - 1.0) * (a + 2.0 * mDouble))
@@ -205,8 +209,8 @@ public fun regularizedBeta(x: Double, a: Double, b: Double): Double {
         }
     }
 
-    checkConvergence(converged, BETA_MAX_ITERATIONS, prefactor * result) {
-        "regularizedBeta did not converge for x=$x, a=$a, b=$b after $BETA_MAX_ITERATIONS iterations"
+    checkConvergence(converged, maxIter, prefactor * result) {
+        "regularizedBeta did not converge for x=$x, a=$a, b=$b after $maxIter iterations"
     }
 
     return prefactor * result
