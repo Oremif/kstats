@@ -826,7 +826,7 @@ class BinomialTestTest {
         // statistic = 0.499936335323571, pvalue = 0.946754474820775
         val result = binomialTest(successes = 145274, trials = 290585, probability = 0.5)
         assertEquals(0.499936335323571, result.statistic, 1e-10, "statistic for 145274/290585")
-        assertP(0.946754474820775, result.pValue, tol = 1e-4, message = "145274/290585 two-sided")
+        assertP(0.946754474820775, result.pValue, tol = 1e-6, message = "145274/290585 two-sided")
         assertFalse(result.isSignificant(), "145274/290585 should not be significant at 5%")
     }
 
@@ -837,14 +837,14 @@ class BinomialTestTest {
             successes = 145274, trials = 290585, probability = 0.5,
             alternative = Alternative.LESS
         )
-        assertP(0.473377237410387, less.pValue, tol = 1e-4, message = "145274/290585 less")
+        assertP(0.473377237410387, less.pValue, tol = 1e-6, message = "145274/290585 less")
 
         // scipy: binomtest(145274, 290585, 0.5, alternative='greater') pvalue = 0.528099421105053
         val greater = binomialTest(
             successes = 145274, trials = 290585, probability = 0.5,
             alternative = Alternative.GREATER
         )
-        assertP(0.528099421105053, greater.pValue, tol = 1e-4, message = "145274/290585 greater")
+        assertP(0.528099421105053, greater.pValue, tol = 1e-6, message = "145274/290585 greater")
 
         // Same statistic regardless of alternative
         assertEquals(less.statistic, greater.statistic, 1e-14, "statistic unchanged by alternative")
@@ -857,7 +857,7 @@ class BinomialTestTest {
         val result = binomialTest(successes = 145274, trials = 290585, probability = 0.5)
         assertCI(
             0.498116674717248, 0.501755997199567,
-            result.confidenceInterval, tol = 1e-4, message = "CP CI 145274/290585"
+            result.confidenceInterval, tol = 1e-6, message = "CP CI 145274/290585"
         )
     }
 

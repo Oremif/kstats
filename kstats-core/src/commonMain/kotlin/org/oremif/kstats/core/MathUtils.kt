@@ -134,6 +134,7 @@ public fun beta(a: Double, b: Double): Double = exp(lnBeta(a, b))
 private const val BETA_BASE_MAX_ITERATIONS = 200
 private const val BETA_EPSILON = 1e-14
 
+/** Dynamic iteration limit for regularized beta — scales with sqrt(max(a, b)) for large shape parameters. */
 private fun betaMaxIterations(a: Double, b: Double): Int =
     maxOf(BETA_BASE_MAX_ITERATIONS, (10.0 * sqrt(maxOf(a, b))).toInt())
 
