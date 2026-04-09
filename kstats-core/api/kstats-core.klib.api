@@ -142,6 +142,25 @@ final class org.oremif.kstats.core/ConfidenceInterval { // org.oremif.kstats.cor
     final fun toString(): kotlin/String // org.oremif.kstats.core/ConfidenceInterval.toString|toString(){}[0]
 }
 
+final class org.oremif.kstats.descriptive/ControlChartLimits { // org.oremif.kstats.descriptive/ControlChartLimits|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double) // org.oremif.kstats.descriptive/ControlChartLimits.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+
+    final val centerLine // org.oremif.kstats.descriptive/ControlChartLimits.centerLine|{}centerLine[0]
+        final fun <get-centerLine>(): kotlin/Double // org.oremif.kstats.descriptive/ControlChartLimits.centerLine.<get-centerLine>|<get-centerLine>(){}[0]
+    final val lcl // org.oremif.kstats.descriptive/ControlChartLimits.lcl|{}lcl[0]
+        final fun <get-lcl>(): kotlin/Double // org.oremif.kstats.descriptive/ControlChartLimits.lcl.<get-lcl>|<get-lcl>(){}[0]
+    final val ucl // org.oremif.kstats.descriptive/ControlChartLimits.ucl|{}ucl[0]
+        final fun <get-ucl>(): kotlin/Double // org.oremif.kstats.descriptive/ControlChartLimits.ucl.<get-ucl>|<get-ucl>(){}[0]
+
+    final fun component1(): kotlin/Double // org.oremif.kstats.descriptive/ControlChartLimits.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // org.oremif.kstats.descriptive/ControlChartLimits.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // org.oremif.kstats.descriptive/ControlChartLimits.component3|component3(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ...): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/ControlChartLimits.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.descriptive/ControlChartLimits.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.descriptive/ControlChartLimits.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.descriptive/ControlChartLimits.toString|toString(){}[0]
+}
+
 final class org.oremif.kstats.descriptive/DescriptiveStatistics { // org.oremif.kstats.descriptive/DescriptiveStatistics|null[0]
     constructor <init>(kotlin/Long, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double) // org.oremif.kstats.descriptive/DescriptiveStatistics.<init>|<init>(kotlin.Long;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
 
@@ -241,6 +260,85 @@ final class org.oremif.kstats.descriptive/ProcessCapabilityResult { // org.oremi
     final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.descriptive/ProcessCapabilityResult.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.oremif.kstats.descriptive/ProcessCapabilityResult.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.oremif.kstats.descriptive/ProcessCapabilityResult.toString|toString(){}[0]
+}
+
+final class org.oremif.kstats.descriptive/SpcConstants { // org.oremif.kstats.descriptive/SpcConstants|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double) // org.oremif.kstats.descriptive/SpcConstants.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+
+    final val a2 // org.oremif.kstats.descriptive/SpcConstants.a2|{}a2[0]
+        final fun <get-a2>(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.a2.<get-a2>|<get-a2>(){}[0]
+    final val a3 // org.oremif.kstats.descriptive/SpcConstants.a3|{}a3[0]
+        final fun <get-a3>(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.a3.<get-a3>|<get-a3>(){}[0]
+    final val b3 // org.oremif.kstats.descriptive/SpcConstants.b3|{}b3[0]
+        final fun <get-b3>(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.b3.<get-b3>|<get-b3>(){}[0]
+    final val b4 // org.oremif.kstats.descriptive/SpcConstants.b4|{}b4[0]
+        final fun <get-b4>(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.b4.<get-b4>|<get-b4>(){}[0]
+    final val c4 // org.oremif.kstats.descriptive/SpcConstants.c4|{}c4[0]
+        final fun <get-c4>(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.c4.<get-c4>|<get-c4>(){}[0]
+    final val d3 // org.oremif.kstats.descriptive/SpcConstants.d3|{}d3[0]
+        final fun <get-d3>(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.d3.<get-d3>|<get-d3>(){}[0]
+    final val d4 // org.oremif.kstats.descriptive/SpcConstants.d4|{}d4[0]
+        final fun <get-d4>(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.d4.<get-d4>|<get-d4>(){}[0]
+
+    final fun component1(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.component3|component3(){}[0]
+    final fun component4(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.component4|component4(){}[0]
+    final fun component5(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.component5|component5(){}[0]
+    final fun component6(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.component6|component6(){}[0]
+    final fun component7(): kotlin/Double // org.oremif.kstats.descriptive/SpcConstants.component7|component7(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ...): org.oremif.kstats.descriptive/SpcConstants // org.oremif.kstats.descriptive/SpcConstants.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.descriptive/SpcConstants.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.descriptive/SpcConstants.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.descriptive/SpcConstants.toString|toString(){}[0]
+}
+
+final class org.oremif.kstats.descriptive/XBarRChartResult { // org.oremif.kstats.descriptive/XBarRChartResult|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double, org.oremif.kstats.descriptive/ControlChartLimits) // org.oremif.kstats.descriptive/XBarRChartResult.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double;org.oremif.kstats.descriptive.ControlChartLimits){}[0]
+
+    final val centerLine // org.oremif.kstats.descriptive/XBarRChartResult.centerLine|{}centerLine[0]
+        final fun <get-centerLine>(): kotlin/Double // org.oremif.kstats.descriptive/XBarRChartResult.centerLine.<get-centerLine>|<get-centerLine>(){}[0]
+    final val lcl // org.oremif.kstats.descriptive/XBarRChartResult.lcl|{}lcl[0]
+        final fun <get-lcl>(): kotlin/Double // org.oremif.kstats.descriptive/XBarRChartResult.lcl.<get-lcl>|<get-lcl>(){}[0]
+    final val rChart // org.oremif.kstats.descriptive/XBarRChartResult.rChart|{}rChart[0]
+        final fun <get-rChart>(): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/XBarRChartResult.rChart.<get-rChart>|<get-rChart>(){}[0]
+    final val ucl // org.oremif.kstats.descriptive/XBarRChartResult.ucl|{}ucl[0]
+        final fun <get-ucl>(): kotlin/Double // org.oremif.kstats.descriptive/XBarRChartResult.ucl.<get-ucl>|<get-ucl>(){}[0]
+    final val xBarChart // org.oremif.kstats.descriptive/XBarRChartResult.xBarChart|{}xBarChart[0]
+        final fun <get-xBarChart>(): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/XBarRChartResult.xBarChart.<get-xBarChart>|<get-xBarChart>(){}[0]
+
+    final fun component1(): kotlin/Double // org.oremif.kstats.descriptive/XBarRChartResult.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // org.oremif.kstats.descriptive/XBarRChartResult.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // org.oremif.kstats.descriptive/XBarRChartResult.component3|component3(){}[0]
+    final fun component4(): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/XBarRChartResult.component4|component4(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., org.oremif.kstats.descriptive/ControlChartLimits = ...): org.oremif.kstats.descriptive/XBarRChartResult // org.oremif.kstats.descriptive/XBarRChartResult.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double;org.oremif.kstats.descriptive.ControlChartLimits){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.descriptive/XBarRChartResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.descriptive/XBarRChartResult.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.descriptive/XBarRChartResult.toString|toString(){}[0]
+}
+
+final class org.oremif.kstats.descriptive/XBarSChartResult { // org.oremif.kstats.descriptive/XBarSChartResult|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double, org.oremif.kstats.descriptive/ControlChartLimits) // org.oremif.kstats.descriptive/XBarSChartResult.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double;org.oremif.kstats.descriptive.ControlChartLimits){}[0]
+
+    final val centerLine // org.oremif.kstats.descriptive/XBarSChartResult.centerLine|{}centerLine[0]
+        final fun <get-centerLine>(): kotlin/Double // org.oremif.kstats.descriptive/XBarSChartResult.centerLine.<get-centerLine>|<get-centerLine>(){}[0]
+    final val lcl // org.oremif.kstats.descriptive/XBarSChartResult.lcl|{}lcl[0]
+        final fun <get-lcl>(): kotlin/Double // org.oremif.kstats.descriptive/XBarSChartResult.lcl.<get-lcl>|<get-lcl>(){}[0]
+    final val sChart // org.oremif.kstats.descriptive/XBarSChartResult.sChart|{}sChart[0]
+        final fun <get-sChart>(): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/XBarSChartResult.sChart.<get-sChart>|<get-sChart>(){}[0]
+    final val ucl // org.oremif.kstats.descriptive/XBarSChartResult.ucl|{}ucl[0]
+        final fun <get-ucl>(): kotlin/Double // org.oremif.kstats.descriptive/XBarSChartResult.ucl.<get-ucl>|<get-ucl>(){}[0]
+    final val xBarChart // org.oremif.kstats.descriptive/XBarSChartResult.xBarChart|{}xBarChart[0]
+        final fun <get-xBarChart>(): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/XBarSChartResult.xBarChart.<get-xBarChart>|<get-xBarChart>(){}[0]
+
+    final fun component1(): kotlin/Double // org.oremif.kstats.descriptive/XBarSChartResult.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // org.oremif.kstats.descriptive/XBarSChartResult.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // org.oremif.kstats.descriptive/XBarSChartResult.component3|component3(){}[0]
+    final fun component4(): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/XBarSChartResult.component4|component4(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., org.oremif.kstats.descriptive/ControlChartLimits = ...): org.oremif.kstats.descriptive/XBarSChartResult // org.oremif.kstats.descriptive/XBarSChartResult.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double;org.oremif.kstats.descriptive.ControlChartLimits){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.descriptive/XBarSChartResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.descriptive/XBarSChartResult.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.descriptive/XBarSChartResult.toString|toString(){}[0]
 }
 
 open class org.oremif.kstats.core.exceptions/KStatsException : kotlin/RuntimeException { // org.oremif.kstats.core.exceptions/KStatsException|null[0]
@@ -375,3 +473,6 @@ final fun org.oremif.kstats.core/regularizedGammaP(kotlin/Double, kotlin/Double)
 final fun org.oremif.kstats.core/regularizedGammaQ(kotlin/Double, kotlin/Double): kotlin/Double // org.oremif.kstats.core/regularizedGammaQ|regularizedGammaQ(kotlin.Double;kotlin.Double){}[0]
 final fun org.oremif.kstats.core/secureRandom(): kotlin.random/Random // org.oremif.kstats.core/secureRandom|secureRandom(){}[0]
 final fun org.oremif.kstats.core/trigamma(kotlin/Double): kotlin/Double // org.oremif.kstats.core/trigamma|trigamma(kotlin.Double){}[0]
+final fun org.oremif.kstats.descriptive/spcConstants(kotlin/Int): org.oremif.kstats.descriptive/SpcConstants // org.oremif.kstats.descriptive/spcConstants|spcConstants(kotlin.Int){}[0]
+final fun org.oremif.kstats.descriptive/xBarRChart(kotlin.collections/List<kotlin/DoubleArray>): org.oremif.kstats.descriptive/XBarRChartResult // org.oremif.kstats.descriptive/xBarRChart|xBarRChart(kotlin.collections.List<kotlin.DoubleArray>){}[0]
+final fun org.oremif.kstats.descriptive/xBarSChart(kotlin.collections/List<kotlin/DoubleArray>): org.oremif.kstats.descriptive/XBarSChartResult // org.oremif.kstats.descriptive/xBarSChart|xBarSChart(kotlin.collections.List<kotlin.DoubleArray>){}[0]
