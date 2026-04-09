@@ -304,6 +304,8 @@ final class org.oremif.kstats.descriptive/XBarRChartResult { // org.oremif.kstat
         final fun <get-rChart>(): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/XBarRChartResult.rChart.<get-rChart>|<get-rChart>(){}[0]
     final val ucl // org.oremif.kstats.descriptive/XBarRChartResult.ucl|{}ucl[0]
         final fun <get-ucl>(): kotlin/Double // org.oremif.kstats.descriptive/XBarRChartResult.ucl.<get-ucl>|<get-ucl>(){}[0]
+    final val xBarChart // org.oremif.kstats.descriptive/XBarRChartResult.xBarChart|{}xBarChart[0]
+        final fun <get-xBarChart>(): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/XBarRChartResult.xBarChart.<get-xBarChart>|<get-xBarChart>(){}[0]
 
     final fun component1(): kotlin/Double // org.oremif.kstats.descriptive/XBarRChartResult.component1|component1(){}[0]
     final fun component2(): kotlin/Double // org.oremif.kstats.descriptive/XBarRChartResult.component2|component2(){}[0]
@@ -326,6 +328,8 @@ final class org.oremif.kstats.descriptive/XBarSChartResult { // org.oremif.kstat
         final fun <get-sChart>(): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/XBarSChartResult.sChart.<get-sChart>|<get-sChart>(){}[0]
     final val ucl // org.oremif.kstats.descriptive/XBarSChartResult.ucl|{}ucl[0]
         final fun <get-ucl>(): kotlin/Double // org.oremif.kstats.descriptive/XBarSChartResult.ucl.<get-ucl>|<get-ucl>(){}[0]
+    final val xBarChart // org.oremif.kstats.descriptive/XBarSChartResult.xBarChart|{}xBarChart[0]
+        final fun <get-xBarChart>(): org.oremif.kstats.descriptive/ControlChartLimits // org.oremif.kstats.descriptive/XBarSChartResult.xBarChart.<get-xBarChart>|<get-xBarChart>(){}[0]
 
     final fun component1(): kotlin/Double // org.oremif.kstats.descriptive/XBarSChartResult.component1|component1(){}[0]
     final fun component2(): kotlin/Double // org.oremif.kstats.descriptive/XBarSChartResult.component2|component2(){}[0]

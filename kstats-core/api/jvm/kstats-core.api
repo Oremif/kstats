@@ -457,6 +457,7 @@ public final class org/oremif/kstats/descriptive/XBarRChartResult {
 	public final fun getLcl ()D
 	public final fun getRChart ()Lorg/oremif/kstats/descriptive/ControlChartLimits;
 	public final fun getUcl ()D
+	public final fun getXBarChart ()Lorg/oremif/kstats/descriptive/ControlChartLimits;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -474,6 +475,7 @@ public final class org/oremif/kstats/descriptive/XBarSChartResult {
 	public final fun getLcl ()D
 	public final fun getSChart ()Lorg/oremif/kstats/descriptive/ControlChartLimits;
 	public final fun getUcl ()D
+	public final fun getXBarChart ()Lorg/oremif/kstats/descriptive/ControlChartLimits;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

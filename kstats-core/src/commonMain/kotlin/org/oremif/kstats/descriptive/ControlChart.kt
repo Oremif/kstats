@@ -140,7 +140,10 @@ public data class XBarRChartResult(
     val ucl: Double,
     val lcl: Double,
     val rChart: ControlChartLimits,
-)
+) {
+    /** The x-bar chart limits as a [ControlChartLimits] instance for uniform handling. */
+    public val xBarChart: ControlChartLimits get() = ControlChartLimits(centerLine, ucl, lcl)
+}
 
 /**
  * Results of an x-bar and S (standard deviation) control chart analysis.
@@ -163,7 +166,10 @@ public data class XBarSChartResult(
     val ucl: Double,
     val lcl: Double,
     val sChart: ControlChartLimits,
-)
+) {
+    /** The x-bar chart limits as a [ControlChartLimits] instance for uniform handling. */
+    public val xBarChart: ControlChartLimits get() = ControlChartLimits(centerLine, ucl, lcl)
+}
 
 // ── Chart computation ──────────────────────────────────────────────────────────
 
