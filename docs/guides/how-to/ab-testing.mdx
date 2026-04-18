@@ -3,8 +3,8 @@ title: "A/B Testing — Compare Variants with Statistical Tests"
 description: "Run a complete A/B test workflow in Kotlin: summarize groups, check assumptions, choose the right test, measure effect size, and correct for multiple comparisons with kstats."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.correlation.samples.DocsSamples--*/}
 
 <Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/ab-testing.ipynb">
   Try this guide as a Kotlin Notebook with Kandy visualizations — run the cells to see charts and explore the data interactively.
@@ -15,7 +15,7 @@ This guide walks through an A/B test comparing two checkout flow variants in a m
 
 ## Experiment Data
 
-[//]: # (<!---FUN abTestingData-->)
+{/*---FUN abTestingData--*/}
 
 ```kotlin
 // Variant A (control): original checkout flow
@@ -31,11 +31,11 @@ val treatmentDurationSec = doubleArrayOf(
 )
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Step 1: Summarize Both Groups
 
-[//]: # (<!---FUN abTestingSummarize-->)
+{/*---FUN abTestingSummarize--*/}
 
 ```kotlin
 val controlSummary = controlDurationSec.describe()
@@ -47,13 +47,13 @@ controlSummary.standardDeviation   // control spread
 treatmentSummary.standardDeviation // treatment spread
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Step 2: Check Assumptions
 
 ### Normality
 
-[//]: # (<!---FUN abTestingNormality-->)
+{/*---FUN abTestingNormality--*/}
 
 ```kotlin
 val controlNormality = shapiroWilkTest(controlDurationSec)
@@ -63,25 +63,25 @@ controlNormality.pValue
 treatmentNormality.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Variance homogeneity
 
-[//]: # (<!---FUN abTestingVariance-->)
+{/*---FUN abTestingVariance--*/}
 
 ```kotlin
 val variances = leveneTest(controlDurationSec, treatmentDurationSec)
 variances.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Step 3: Choose and Run the Test
 
 <Tabs>
 <Tab title="Parametric (normal data)">
 
-[//]: # (<!---FUN abTestingTTest-->)
+{/*---FUN abTestingTTest--*/}
 
 ```kotlin
 // Welch's t-test (default: equalVariances = false)
@@ -93,11 +93,11 @@ result.confidenceInterval // 95% CI for the difference in means
 result.isSignificant()    // true if p < 0.05
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 If the Levene test confirmed equal variances:
 
-[//]: # (<!---FUN abTestingTTestEqual-->)
+{/*---FUN abTestingTTestEqual--*/}
 
 ```kotlin
 val equalVar = tTest(
@@ -108,12 +108,12 @@ val equalVar = tTest(
 equalVar.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 </Tab>
 <Tab title="Non-parametric (non-normal data)">
 
-[//]: # (<!---FUN abTestingMannWhitney-->)
+{/*---FUN abTestingMannWhitney--*/}
 
 ```kotlin
 val result = mannWhitneyUTest(controlDurationSec, treatmentDurationSec)
@@ -123,7 +123,7 @@ result.pValue
 result.isSignificant()
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 </Tab>
 </Tabs>
@@ -132,7 +132,7 @@ result.isSignificant()
 
 A <Tooltip tip="Standardized measure of the magnitude of a difference, independent of sample size">p-value</Tooltip> tells you *whether* a difference exists; effect size tells you *how large* it is. Cohen's d expresses the difference in standard-deviation units: |d| < 0.2 negligible, 0.2 small, 0.5 medium, 0.8+ large.
 
-[//]: # (<!---FUN abTestingEffectSize-->)
+{/*---FUN abTestingEffectSize--*/}
 
 ```kotlin
 // Cohen's d: how large is the difference in standard-deviation units?
@@ -140,13 +140,13 @@ val d = cohensD(controlDurationSec, treatmentDurationSec)
 d // ~2.9 → large effect (|d| ≥ 0.8)
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### One-sided tests
 
 When you expect the treatment to reduce session duration:
 
-[//]: # (<!---FUN abTestingOneSided-->)
+{/*---FUN abTestingOneSided--*/}
 
 ```kotlin
 val oneSided = tTest(
@@ -157,13 +157,13 @@ val oneSided = tTest(
 oneSided.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Step 4: Test a Second Metric
 
 Apply the same workflow to the secondary metric.
 
-[//]: # (<!---FUN abTestingSecondMetric-->)
+{/*---FUN abTestingSecondMetric--*/}
 
 ```kotlin
 // Number of completed checkout steps per session
@@ -184,13 +184,13 @@ stepsResult.pValue
 stepsResult.isSignificant()
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Multiple comparison correction
 
 Testing two metrics (duration and steps) inflates the false-positive rate. <Tooltip tip="Sequentially rejective method that controls the family-wise error rate while being more powerful than Bonferroni">Holm-Bonferroni</Tooltip> correction adjusts p-values to account for this.
 
-[//]: # (<!---FUN abTestingMultipleComparison-->)
+{/*---FUN abTestingMultipleComparison--*/}
 
 ```kotlin
 // Correct for testing two metrics (duration + steps)
@@ -201,13 +201,13 @@ corrected[0] // adjusted p-value for duration
 corrected[1] // adjusted p-value for steps
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Step 5: Correlation Between Metrics
 
 Check whether the two metrics move together within each group.
 
-[//]: # (<!---FUN abTestingCorrelation-->)
+{/*---FUN abTestingCorrelation--*/}
 
 ```kotlin
 // Within the treatment group: do faster sessions correlate with more completed steps?
@@ -217,7 +217,7 @@ correlation.coefficient // negative means shorter sessions correlate with more s
 correlation.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 Spearman correlation is preferred here because one metric (steps) is ordinal.
@@ -227,7 +227,7 @@ Spearman correlation is preferred here because one metric (steps) is ordinal.
 
 When the same users are measured before and after a change, use paired tests.
 
-[//]: # (<!---FUN abTestingPaired-->)
+{/*---FUN abTestingPaired--*/}
 
 ```kotlin
 val beforeMs = doubleArrayOf(
@@ -251,4 +251,4 @@ val dz = differences.mean() / differences.standardDeviation()
 dz // ~6.1 → large effect
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}

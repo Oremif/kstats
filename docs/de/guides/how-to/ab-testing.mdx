@@ -3,8 +3,8 @@ title: "A/B Testing — Varianten mit statistischen Tests vergleichen"
 description: "Führen Sie einen vollständigen A/B-Test-Workflow in Kotlin durch: Gruppen zusammenfassen, Annahmen prüfen, Effektgröße messen und für multiples Testen korrigieren mit kstats."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.correlation.samples.DocsSamples--*/}
 
 <Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/ab-testing.ipynb">
   Probieren Sie diesen Leitfaden als Kotlin Notebook mit Kandy-Visualisierungen aus — führen Sie die Zellen aus, um Diagramme zu sehen und die Daten interaktiv zu erkunden.
@@ -15,7 +15,7 @@ Dieser Leitfaden führt Sie durch einen A/B-Test, der zwei Varianten eines Check
 
 ## Experimentdaten
 
-[//]: # (<!---FUN abTestingData-->)
+{/*---FUN abTestingData--*/}
 
 ```kotlin
 // Variant A (control): original checkout flow
@@ -31,11 +31,11 @@ val treatmentDurationSec = doubleArrayOf(
 )
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Schritt 1: Beide Gruppen zusammenfassen
 
-[//]: # (<!---FUN abTestingSummarize-->)
+{/*---FUN abTestingSummarize--*/}
 
 ```kotlin
 val controlSummary = controlDurationSec.describe()
@@ -47,13 +47,13 @@ controlSummary.standardDeviation   // control spread
 treatmentSummary.standardDeviation // treatment spread
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Schritt 2: Annahmen prüfen
 
 ### Normalität
 
-[//]: # (<!---FUN abTestingNormality-->)
+{/*---FUN abTestingNormality--*/}
 
 ```kotlin
 val controlNormality = shapiroWilkTest(controlDurationSec)
@@ -63,25 +63,25 @@ controlNormality.pValue
 treatmentNormality.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Varianzhomogenität
 
-[//]: # (<!---FUN abTestingVariance-->)
+{/*---FUN abTestingVariance--*/}
 
 ```kotlin
 val variances = leveneTest(controlDurationSec, treatmentDurationSec)
 variances.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Schritt 3: Test auswählen und durchführen
 
 <Tabs>
 <Tab title="Parametrisch (normalverteilte Daten)">
 
-[//]: # (<!---FUN abTestingTTest-->)
+{/*---FUN abTestingTTest--*/}
 
 ```kotlin
 // Welch's t-test (default: equalVariances = false)
@@ -93,11 +93,11 @@ result.confidenceInterval // 95% CI for the difference in means
 result.isSignificant()    // true if p < 0.05
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Wenn der Levene-Test gleiche Varianzen bestätigt hat:
 
-[//]: # (<!---FUN abTestingTTestEqual-->)
+{/*---FUN abTestingTTestEqual--*/}
 
 ```kotlin
 val equalVar = tTest(
@@ -108,12 +108,12 @@ val equalVar = tTest(
 equalVar.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 </Tab>
 <Tab title="Nicht-parametrisch (nicht-normalverteilte Daten)">
 
-[//]: # (<!---FUN abTestingMannWhitney-->)
+{/*---FUN abTestingMannWhitney--*/}
 
 ```kotlin
 val result = mannWhitneyUTest(controlDurationSec, treatmentDurationSec)
@@ -123,7 +123,7 @@ result.pValue
 result.isSignificant()
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 </Tab>
 </Tabs>
@@ -132,7 +132,7 @@ result.isSignificant()
 
 Ein <Tooltip tip="Standardisiertes Maß für die Größe eines Unterschieds, unabhängig von der Stichprobengröße">p-Wert</Tooltip> sagt Ihnen, *ob* ein Unterschied existiert; die Effektgröße sagt Ihnen, *wie groß* er ist. Cohens d drückt den Unterschied in Standardabweichungseinheiten aus: |d| < 0,2 vernachlässigbar, 0,2 klein, 0,5 mittel, 0,8+ groß.
 
-[//]: # (<!---FUN abTestingEffectSize-->)
+{/*---FUN abTestingEffectSize--*/}
 
 ```kotlin
 // Cohen's d: how large is the difference in standard-deviation units?
@@ -140,13 +140,13 @@ val d = cohensD(controlDurationSec, treatmentDurationSec)
 d // ~2.9 → large effect (|d| ≥ 0.8)
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Einseitige Tests
 
 Wenn Sie erwarten, dass die Behandlung die Sitzungsdauer verkürzt:
 
-[//]: # (<!---FUN abTestingOneSided-->)
+{/*---FUN abTestingOneSided--*/}
 
 ```kotlin
 val oneSided = tTest(
@@ -157,13 +157,13 @@ val oneSided = tTest(
 oneSided.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Schritt 4: Zweite Metrik testen
 
 Wenden Sie denselben Workflow auf die sekundäre Metrik an.
 
-[//]: # (<!---FUN abTestingSecondMetric-->)
+{/*---FUN abTestingSecondMetric--*/}
 
 ```kotlin
 // Number of completed checkout steps per session
@@ -184,13 +184,13 @@ stepsResult.pValue
 stepsResult.isSignificant()
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Korrektur für multiples Testen
 
 Das Testen von zwei Metriken (Dauer und Schritte) erhöht die Falsch-Positiv-Rate. Die <Tooltip tip="Sequentiell ablehnende Methode, die die familienweise Fehlerrate kontrolliert und dabei leistungsfähiger als Bonferroni ist">Holm-Bonferroni</Tooltip>-Korrektur passt die p-Werte entsprechend an.
 
-[//]: # (<!---FUN abTestingMultipleComparison-->)
+{/*---FUN abTestingMultipleComparison--*/}
 
 ```kotlin
 // Correct for testing two metrics (duration + steps)
@@ -201,13 +201,13 @@ corrected[0] // adjusted p-value for duration
 corrected[1] // adjusted p-value for steps
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Schritt 5: Korrelation zwischen Metriken
 
 Prüfen Sie, ob die beiden Metriken innerhalb jeder Gruppe zusammenhängen.
 
-[//]: # (<!---FUN abTestingCorrelation-->)
+{/*---FUN abTestingCorrelation--*/}
 
 ```kotlin
 // Within the treatment group: do faster sessions correlate with more completed steps?
@@ -217,7 +217,7 @@ correlation.coefficient // negative means shorter sessions correlate with more s
 correlation.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 Spearman-Korrelation wird hier bevorzugt, da eine der Metriken (Schritte) ordinal ist.
@@ -227,7 +227,7 @@ Spearman-Korrelation wird hier bevorzugt, da eine der Metriken (Schritte) ordina
 
 Wenn dieselben Nutzer vor und nach einer Änderung gemessen werden, verwenden Sie gepaarte Tests.
 
-[//]: # (<!---FUN abTestingPaired-->)
+{/*---FUN abTestingPaired--*/}
 
 ```kotlin
 val beforeMs = doubleArrayOf(
@@ -251,4 +251,4 @@ val dz = differences.mean() / differences.standardDeviation()
 dz // ~6.1 → large effect
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}

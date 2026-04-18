@@ -3,10 +3,10 @@ title: "Qualitätskontrolle"
 description: "Anomalien erkennen, Kontrollgrenzen festlegen und Prozessstabilität mit statistischen Methoden überwachen."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.sampling.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.correlation.samples.DocsSamples--*/}
 
 <Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/quality-control.ipynb">
   Probieren Sie diesen Leitfaden als Kotlin Notebook mit Kandy-Visualisierungen aus — führen Sie die Zellen aus, um Diagramme zu sehen und die Daten interaktiv zu erkunden.
@@ -17,7 +17,7 @@ Diese Anleitung verwendet Temperatursensor-Messwerte einer Fertigungslinie, um A
 
 ## Prozessdaten
 
-[//]: # (<!---FUN qcProcessData-->)
+{/*---FUN qcProcessData--*/}
 
 ```kotlin
 // Temperature readings (°C) from sensor on production line
@@ -29,13 +29,13 @@ val sensorReadings = doubleArrayOf(
 // Two potential outliers: 162.5 and 141.3
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Anomalieerkennung
 
 ### Basisstatistiken
 
-[//]: # (<!---FUN qcBaselineStats-->)
+{/*---FUN qcBaselineStats--*/}
 
 ```kotlin
 val summary = sensorReadings.describe()
@@ -47,13 +47,13 @@ summary.max // check for unusually high values
 summary.interquartileRange
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Z-Score-Methode
 
 Messwerte kennzeichnen, die mehr als 3 Standardabweichungen vom Mittelwert entfernt liegen.
 
-[//]: # (<!---FUN qcZScore-->)
+{/*---FUN qcZScore--*/}
 
 ```kotlin
 val zScores = sensorReadings.zScore()
@@ -62,13 +62,13 @@ val anomalyIndices = zScores.indices.filter { kotlin.math.abs(zScores[it]) > 3.0
 val anomalies = anomalyIndices.map { sensorReadings[it] }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Perzentilbasierte Erkennung
 
 Messwerte kennzeichnen, die außerhalb des 1. und 99. Perzentils liegen.
 
-[//]: # (<!---FUN qcPercentileDetection-->)
+{/*---FUN qcPercentileDetection--*/}
 
 ```kotlin
 val lowerBound = sensorReadings.quantile(0.01)
@@ -77,13 +77,13 @@ val upperBound = sensorReadings.quantile(0.99)
 val outliers = sensorReadings.filter { it < lowerBound || it > upperBound }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Kontrollgrenzen
 
 Mittelwert ± 3σ-Grenzen berechnen.
 
-[//]: # (<!---FUN qcControlLimits-->)
+{/*---FUN qcControlLimits--*/}
 
 ```kotlin
 val centerLine = sensorReadings.mean()
@@ -95,13 +95,13 @@ val lowerControlLimit = centerLine - 3 * sigma
 val outOfControl = sensorReadings.filter { it > upperControlLimit || it < lowerControlLimit }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Chargenstabilität
 
 Messwerte aus zwei Produktionschargen vergleichen, um zu prüfen, ob sich der Prozess verschoben hat.
 
-[//]: # (<!---FUN qcBatchStability-->)
+{/*---FUN qcBatchStability--*/}
 
 ```kotlin
 val morningBatch = doubleArrayOf(
@@ -124,11 +124,11 @@ batchComparison.pValue
 batchComparison.isSignificant() // false means no significant shift
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Mehrere Chargen
 
-[//]: # (<!---FUN qcMultipleBatches-->)
+{/*---FUN qcMultipleBatches--*/}
 
 ```kotlin
 val batch1 = doubleArrayOf(155.2, 154.8, 156.1, 155.5, 154.3)
@@ -140,13 +140,13 @@ anova.fStatistic
 anova.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Verteilungsanpassung
 
 Prüfen, ob die Messwerte der erwarteten Verteilung folgen.
 
-[//]: # (<!---FUN qcDistributionFit-->)
+{/*---FUN qcDistributionFit--*/}
 
 ```kotlin
 // Exclude known outliers for fitting
@@ -161,7 +161,7 @@ val ks = kolmogorovSmirnovTest(cleanReadings, fitted)
 ks.pValue // high p-value supports the normal process model
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 Nach der Anpassung einer Prozessverteilung können mit `quantile()` Schwellenwerte gesetzt werden:
@@ -172,7 +172,7 @@ Nach der Anpassung einer Prozessverteilung können mit `quantile()` Schwellenwer
 
 Bei der Überwachung mehrerer Sensoren sollten die Korrelationen zwischen ihnen geprüft werden.
 
-[//]: # (<!---FUN qcMultiParameter-->)
+{/*---FUN qcMultiParameter--*/}
 
 ```kotlin
 val temperatureSensor = doubleArrayOf(
@@ -196,7 +196,7 @@ val matrix = correlationMatrix(temperatureSensor, pressureSensor, flowRateSensor
 // matrix[1][2] = pressure-flow correlation
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 Starke Korrelationen zwischen Sensormesswerten können auf gemeinsame Ursachen hinweisen, wenn ein Parameter außer Kontrolle gerät.

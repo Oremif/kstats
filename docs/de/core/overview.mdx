@@ -3,8 +3,8 @@ title: "Deskriptive Statistik"
 description: "Zusammenfassende Statistiken, Lagemaße, Streuungsmaße, Quantile, Formkennzahlen, Häufigkeitsanalyse und Streaming-Berechnungen in kstats-core."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.sampling.samples.DocsSamples--*/}
 
 `kstats-core` stellt deskriptive Statistiken als Erweiterungsfunktionen auf `DoubleArray` und `Iterable<Double>` bereit. Zusätzlich sind `Int`- und `Long`-Überladungen für die gängigsten Operationen verfügbar.
 
@@ -12,7 +12,7 @@ description: "Zusammenfassende Statistiken, Lagemaße, Streuungsmaße, Quantile,
 
 `describe()` ist der schnellste Weg, ein vollständiges Bild einer Stichprobe zu erhalten. Die Methode gibt ein `DescriptiveStatistics`-Objekt zurück, das Anzahl, Lagemaße, Streuung, Quartile, Formkennzahlen und Standardfehler kombiniert.
 
-[//]: # (<!---FUN coreSummarySnapshot-->)
+{/*---FUN coreSummarySnapshot--*/}
 
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
@@ -32,7 +32,7 @@ stats.range              // 7.0
 stats.standardError      // 0.7559
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 `variance()` und `standardDeviation()` verwenden standardmäßig die **Stichprobenformel** (Division durch $n - 1$). Übergeben Sie `PopulationKind.POPULATION`, um die Populationsformel (Division durch $n$) zu verwenden.
@@ -42,7 +42,7 @@ stats.standardError      // 0.7559
 
 Verschiedene Begriffe von „Mitte" passen zu verschiedenen Datenformen. `mean()` ist das arithmetische Mittel, `median()` ist der Positionsmittelwert, `mode()` gibt die häufigsten Werte zurück, und die getrimmten sowie gewichteten Varianten behandeln Ausreißer und Gewichtungen.
 
-[//]: # (<!---FUN coreCentralTendency-->)
+{/*---FUN coreCentralTendency--*/}
 
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
@@ -62,7 +62,7 @@ val weights = doubleArrayOf(3.0, 1.0, 1.0)
 values.weightedMean(weights)   // 1.6
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 - **Geometrisches Mittel** — geeignet für Wachstumsraten und Verhältnisse. Erfordert ausschließlich positive Werte.
 - **Harmonisches Mittel** — geeignet für Raten und Geschwindigkeitsdurchschnitte. Erfordert ausschließlich positive Werte.
@@ -93,7 +93,7 @@ Das getrimmte Mittel entfernt $\lfloor p \cdot n \rfloor$ Beobachtungen von jede
 
 Streuungsmaße beschreiben, wie weit die Werte vom Zentrum abweichen.
 
-[//]: # (<!---FUN coreDispersion-->)
+{/*---FUN coreDispersion--*/}
 
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
@@ -111,7 +111,7 @@ data.semiVariance(5.0, SemiVarianceDirection.DOWNSIDE) // 1.7143
 data.semiVariance(5.0, SemiVarianceDirection.UPSIDE)   // 2.8571
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 `semiVariance` misst die Variabilität auf einer Seite eines Schwellenwerts. `DOWNSIDE` erfasst das Risiko unterhalb des Schwellenwerts; `UPSIDE` erfasst die Variabilität oberhalb davon.
@@ -137,7 +137,7 @@ $$
 
 Quantile teilen die Daten an bestimmten Wahrscheinlichkeitsschwellen. `percentile()` erwartet einen Wert auf der Skala 0–100; `quantile()` erwartet einen Wert auf der Skala 0–1.
 
-[//]: # (<!---FUN coreQuantiles-->)
+{/*---FUN coreQuantiles--*/}
 
 ```kotlin
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
@@ -150,7 +150,7 @@ val (q1, median, q3) = data.quartiles()
 // q1 = 3.25, median = 5.5, q3 = 7.75
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 `quantile()` unterstützt einen `QuantileInterpolation`-Parameter mit den Optionen: `LINEAR` (Standard), `LOWER`, `HIGHER`, `NEAREST` und `MIDPOINT`. Diese steuern, wie der Wert interpoliert wird, wenn das Quantil zwischen zwei Datenpunkten liegt.
@@ -170,7 +170,7 @@ wobei $h = p(n - 1) + 1$.
 
 Formkennzahlen beschreiben Asymmetrie und Randschwere über Mittelwert und Varianz hinaus.
 
-[//]: # (<!---FUN coreShape-->)
+{/*---FUN coreShape--*/}
 
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
@@ -187,7 +187,7 @@ data.kStatistic(1)          // 5.0 (equals mean)
 data.kStatistic(2)          // 4.5714 (equals sample variance)
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Eine Schiefe nahe null deutet auf Symmetrie hin. Positive Schiefe weist auf einen längeren rechten Rand hin; negative auf einen längeren linken Rand. Exzess-Kurtosis nahe null ähnelt einer Normalverteilung; positive Werte deuten auf schwerere Ränder hin.
 
@@ -211,7 +211,7 @@ Das $r$-te zentrale Moment ist $\mu_r = \frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})
 
 Die Klasse `Frequency` zählt Vorkommen, Anteile und kumulative Häufigkeiten für beliebige `Comparable`-Typen. `frequencyTable()` gruppiert numerische Daten in gleich breite Klassen.
 
-[//]: # (<!---FUN coreFrequency-->)
+{/*---FUN coreFrequency--*/}
 
 ```kotlin
 val freq = listOf("a", "a", "b", "b", "b", "c").toFrequency()
@@ -222,9 +222,9 @@ freq.cumulativeCount("b")  // 5 (a=2 + b=3)
 freq.mode                  // {b}
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
-[//]: # (<!---FUN coreFrequencyTable-->)
+{/*---FUN coreFrequencyTable--*/}
 
 ```kotlin
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
@@ -234,7 +234,7 @@ bins[0].count              // number of values in the first bin
 bins[0].relativeFrequency  // proportion of total
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 `Frequency` funktioniert mit jedem `Comparable`-Typ — Strings, Enums, Ganzzahlen oder eigene Klassen. Für numerische Klasseneinteilung verwenden Sie `frequencyTable()` mit einer Klassenanzahl oder einer Klassenbreite.
@@ -244,7 +244,7 @@ bins[0].relativeFrequency  // proportion of total
 
 `OnlineStatistics` berechnet Mittelwert, Varianz, Schiefe und Kurtosis inkrementell, ohne die gesamte Stichprobe zu speichern. Werte können einzeln oder als Stapel hinzugefügt werden.
 
-[//]: # (<!---FUN coreStreaming-->)
+{/*---FUN coreStreaming--*/}
 
 ```kotlin
 val online = OnlineStatistics()
@@ -265,7 +265,7 @@ online.count               // 9
 online.mean                // 4.7778
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Verwenden Sie `OnlineStatistics`, wenn Daten inkrementell eintreffen (Streaming, ereignisgesteuerte Systeme) oder wenn das Speichern der gesamten Stichprobe im Arbeitsspeicher nicht praktikabel ist.
 

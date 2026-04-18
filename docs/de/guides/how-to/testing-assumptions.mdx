@@ -3,7 +3,7 @@ title: "Annahmen überprüfen"
 description: "Überprüfen Sie Normalität, Varianzhomogenität und Verteilungsanpassung, bevor Sie parametrische Methoden anwenden."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples--*/}
 
 <Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/testing-assumptions.ipynb">
   Probieren Sie diesen Leitfaden als Kotlin Notebook mit Kandy-Visualisierungen aus — führen Sie die Zellen aus, um Diagramme zu sehen und die Daten interaktiv zu erkunden.
@@ -25,7 +25,7 @@ Parametrische Methoden (t-Tests, ANOVA, Pearson-Korrelation) setzen bestimmte Ei
 
 ### Alle vier auf denselben Datensatz anwenden
 
-[//]: # (<!---FUN testingNormality-->)
+{/*---FUN testingNormality--*/}
 
 ```kotlin
 val sensorReadings = doubleArrayOf(
@@ -45,7 +45,7 @@ dagostino.pValue  // D'Agostino-Pearson
 jarqueBera.pValue // Jarque-Bera
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 Wenn die Tests unterschiedliche Ergebnisse liefern, bevorzugen Sie Shapiro-Wilk für kleine bis mittlere Stichproben und Anderson-Darling, wenn das Verhalten in den Rändern relevant ist.
@@ -53,7 +53,7 @@ Wenn die Tests unterschiedliche Ergebnisse liefern, bevorzugen Sie Shapiro-Wilk 
 
 ### Mit deskriptiver Statistik kombinieren
 
-[//]: # (<!---FUN testingNormalityDescriptive-->)
+{/*---FUN testingNormalityDescriptive--*/}
 
 ```kotlin
 val summary = sensorReadings.describe()
@@ -61,7 +61,7 @@ summary.skewness // close to 0 for symmetric data
 summary.kurtosis // close to 0 (excess) for Normal-like tails
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Varianzhomogenität
 
@@ -75,7 +75,7 @@ Beim Vergleich von Gruppen (t-Test, ANOVA) wird häufig Varianzgleichheit voraus
 
 ### Varianzen vor der ANOVA prüfen
 
-[//]: # (<!---FUN testingVarianceHomogeneity-->)
+{/*---FUN testingVarianceHomogeneity--*/}
 
 ```kotlin
 val batchA = doubleArrayOf(48.2, 47.8, 49.1, 48.5, 47.9, 48.7, 48.3, 49.0, 48.1, 48.6)
@@ -91,13 +91,13 @@ bartlett.pValue // Bartlett
 fligner.pValue  // Fligner-Killeen
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Ein hoher p-Wert bei allen drei Tests spricht dafür, mit der ANOVA oder einem t-Test mit gleichen Varianzen fortzufahren.
 
 ### Dann ANOVA durchführen
 
-[//]: # (<!---FUN testingVarianceThenAnova-->)
+{/*---FUN testingVarianceThenAnova--*/}
 
 ```kotlin
 val anova = oneWayAnova(batchA, batchB, batchC)
@@ -105,7 +105,7 @@ anova.fStatistic
 anova.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Anpassungsgüte
 
@@ -113,7 +113,7 @@ anova.pValue
 
 Vergleichen Sie beobachtete Daten mit einer theoretischen Verteilung.
 
-[//]: # (<!---FUN testingKsOneSample-->)
+{/*---FUN testingKsOneSample--*/}
 
 ```kotlin
 val temperatureReadings = doubleArrayOf(
@@ -132,13 +132,13 @@ ks.statistic // smaller means better fit
 ks.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Chi-Quadrat-Anpassungstest
 
 Prüfen Sie, ob beobachtete Kategoriehäufigkeiten den erwarteten Proportionen entsprechen.
 
-[//]: # (<!---FUN testingChiSquared-->)
+{/*---FUN testingChiSquared--*/}
 
 ```kotlin
 // Defect counts across 5 product categories
@@ -154,13 +154,13 @@ val specific = chiSquaredTest(observedDefects, expectedCounts)
 specific.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Zwei-Stichproben-KS-Test
 
 Vergleichen Sie zwei Stichproben, ohne eine bestimmte Verteilung vorauszusetzen.
 
-[//]: # (<!---FUN testingKsTwoSample-->)
+{/*---FUN testingKsTwoSample--*/}
 
 ```kotlin
 val morningReadings = doubleArrayOf(
@@ -174,4 +174,4 @@ val twoSampleKs = kolmogorovSmirnovTest(morningReadings, nightReadings)
 twoSampleKs.pValue // low p-value suggests different underlying distributions
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}

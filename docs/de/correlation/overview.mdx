@@ -3,7 +3,7 @@ title: "Korrelation & Regression"
 description: "Pearson-, Spearman-, Kendall-Tau-, partielle Korrelation, punktbiseriale Korrelation, Matrizen, Kovarianz und einfache lineare Regression in kstats-correlation."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.correlation.samples.DocsSamples--*/}
 
 `kstats-correlation` deckt zwei verwandte Aufgaben ab: die Stärke des Zusammenhangs zwischen Variablen messen und eine lineare Beziehung modellieren. Das Modul ist in zwei Abschnitte unterteilt, die diese Unterscheidung widerspiegeln.
 
@@ -13,7 +13,7 @@ description: "Pearson-, Spearman-, Kendall-Tau-, partielle Korrelation, punktbis
 
 Misst die Stärke und Richtung des **linearen** Zusammenhangs zwischen zwei numerischen Variablen. Der Koeffizient reicht von -1 (perfekt negativ) bis +1 (perfekt positiv).
 
-[//]: # (<!---FUN corrPearson-->)
+{/*---FUN corrPearson--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -25,7 +25,7 @@ r.pValue                 // 0.0001
 r.n                      // 5
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Verwenden Sie Pearson, wenn beide Variablen stetig sind und die Beziehung annähernd linear ist. Empfindlich gegenüber Ausreißern.
 
@@ -33,7 +33,7 @@ Verwenden Sie Pearson, wenn beide Variablen stetig sind und die Beziehung annäh
 
 Wendet die Pearson-Korrelation auf die **Ränge** der Daten an. Misst monotone Zusammenhänge — ob die Variablen dazu tendieren, gemeinsam zu steigen, unabhängig von der Linearität.
 
-[//]: # (<!---FUN corrSpearman-->)
+{/*---FUN corrSpearman--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
@@ -44,7 +44,7 @@ r.coefficient            // 1.0 — perfect monotonic relationship
 r.pValue                 // 0.0
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Verwenden Sie Spearman, wenn die Beziehung monoton, aber nicht zwingend linear ist, oder wenn die Daten Ausreißer enthalten.
 
@@ -52,7 +52,7 @@ Verwenden Sie Spearman, wenn die Beziehung monoton, aber nicht zwingend linear i
 
 Zählt konkordante und diskordante Paare zur Messung der ordinalen Assoziation. Robuster als Spearman bei kleinen Stichproben und vielen Bindungen.
 
-[//]: # (<!---FUN corrKendall-->)
+{/*---FUN corrKendall--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -63,7 +63,7 @@ tau.coefficient          // 0.6
 tau.pValue               // p-value for tau
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 Die Kendall-Tau-Implementierung läuft in $O(n \log n)$ Zeit mithilfe eines Merge-Sort-basierten Algorithmus und ist damit auch für große Datensätze effizient.
@@ -73,7 +73,7 @@ Die Kendall-Tau-Implementierung läuft in $O(n \log n)$ Zeit mithilfe eines Merg
 
 Misst den Zusammenhang zwischen einer **binären** Variable (kodiert als 0/1 Ganzzahlen) und einer **stetigen** Variable. Entspricht der Pearson-Korrelation, wenn eine Variable dichotom ist.
 
-[//]: # (<!---FUN corrPointBiserial-->)
+{/*---FUN corrPointBiserial--*/}
 
 ```kotlin
 val binary     = intArrayOf(0, 0, 0, 1, 1, 1, 1)
@@ -84,7 +84,7 @@ r.coefficient            // positive — group 1 has higher values
 r.pValue                 // p-value
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Geeignet, wenn eine Variable von Natur aus binär ist: Behandlung/Kontrolle, bestanden/nicht bestanden, männlich/weiblich.
 
@@ -92,7 +92,7 @@ Geeignet, wenn eine Variable von Natur aus binär ist: Behandlung/Kontrolle, bes
 
 Misst den Zusammenhang zwischen zwei Variablen **nach Kontrolle** einer dritten Variable. Entfernt den Effekt der Störvariablen.
 
-[//]: # (<!---FUN corrPartial-->)
+{/*---FUN corrPartial--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -104,7 +104,7 @@ r.coefficient            // correlation between x and y, controlling for z
 r.pValue                 // p-value
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Verwenden Sie sie, wenn eine dritte Variable den scheinbaren Zusammenhang zwischen den ersten beiden erklären könnte.
 
@@ -112,7 +112,7 @@ Verwenden Sie sie, wenn eine dritte Variable den scheinbaren Zusammenhang zwisch
 
 Für die Analyse mehrerer Variablen können paarweise Matrizen erstellt werden. Jede Zelle $(i, j)$ enthält die Korrelation (oder Kovarianz) zwischen den Variablen $i$ und $j$.
 
-[//]: # (<!---FUN corrMatrices-->)
+{/*---FUN corrMatrices--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -128,7 +128,7 @@ cov[0][0]                // variance of x = 2.5
 cov[0][1]                // covariance of x and y
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Wahl der Korrelationsmethode
 
@@ -168,7 +168,7 @@ $$
 
 Passt die Gerade $\hat{y} = \beta_0 + \beta_1 x$ mittels gewöhnlicher kleinster Quadrate an die Daten an. Das Ergebnis umfasst Steigung, Achsenabschnitt, Bestimmtheitsmaß ($R^2$), Standardfehler, Residuen und eine Vorhersagefunktion.
 
-[//]: # (<!---FUN corrRegression-->)
+{/*---FUN corrRegression--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -188,7 +188,7 @@ model.predict(6.0)           // 11.99
 model.predict(doubleArrayOf(6.0, 7.0, 8.0)) // batch prediction
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Accordion title="Mathematische Details">
 $$

@@ -3,7 +3,7 @@ title: "Sampling & Transformation"
 description: "Rangbildung, z-Score-Normalisierung, Min-Max-Skalierung, Binning, Häufigkeitstabellen, Bootstrap, Zufallsstichproben und gewichteter Würfel in kstats-sampling."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.sampling.samples.DocsSamples--*/}
 
 `kstats-sampling` stellt Vorverarbeitungs- und Resampling-Werkzeuge bereit, die am Rand eines Analyse-Workflows stehen. Das Modul deckt zwei Bereiche ab: die Transformation numerischer Daten und das Ziehen von Zufallsstichproben.
 
@@ -13,7 +13,7 @@ description: "Rangbildung, z-Score-Normalisierung, Min-Max-Skalierung, Binning, 
 
 `rank()` ersetzt numerische Werte durch ihre geordneten Positionen. Die Behandlung von Bindungen wird über den Parameter `TieMethod` gesteuert.
 
-[//]: # (<!---FUN sampRanking-->)
+{/*---FUN sampRanking--*/}
 
 ```kotlin
 val data = doubleArrayOf(3.0, 1.0, 4.0, 1.0, 5.0)
@@ -27,7 +27,7 @@ data.rank(TieMethod.ORDINAL)       // [3.0, 1.0, 4.0, 2.0, 5.0]
 data.percentileRank()              // ranks scaled to 0-100
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 `TieMethod`-Optionen:
@@ -42,7 +42,7 @@ data.percentileRank()              // ranks scaled to 0-100
 
 Zwei gängige Skalierungsverfahren: z-Score-Standardisierung (Mittelwert 0, Standardabweichung 1) und Min-Max-Skalierung.
 
-[//]: # (<!---FUN sampNormalization-->)
+{/*---FUN sampNormalization--*/}
 
 ```kotlin
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -53,7 +53,7 @@ data.minMaxNormalize()             // [0.0, 0.25, 0.5, 0.75, 1.0]
 data.minMaxNormalize(0.0, 100.0)   // [0.0, 25.0, 50.0, 75.0, 100.0]
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 `zScore()` ist geeignet, wenn die nachfolgende Methode standardisierte Eingaben voraussetzt. `minMaxNormalize()` skaliert standardmäßig auf [0, 1] oder auf einen benutzerdefinierten Bereich.
 
@@ -71,7 +71,7 @@ $$
 
 `bin()` gruppiert Werte in gleich breite Intervalle und gibt die Elemente jedes Bins zurück. `frequencyTable()` liefert Intervallgrenzen, Häufigkeiten, relative Häufigkeiten und kumulative Häufigkeiten.
 
-[//]: # (<!---FUN sampBinning-->)
+{/*---FUN sampBinning--*/}
 
 ```kotlin
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
@@ -93,7 +93,7 @@ freq[0].relativeFrequency          // proportion of total
 freq[0].cumulativeFrequency        // running total of relative frequencies
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 `bin()` gibt die tatsächlichen Elemente zurück, die in jedes Intervall fallen — nützlich für die Weiterverarbeitung. `frequencyTable()` liefert zusammenfassende Statistiken pro Bin — nützlich für histogrammartige Berichte.
 
@@ -107,7 +107,7 @@ Sowohl `bin()` als auch `frequencyTable()` akzeptieren entweder eine **Bin-Anzah
 
 `randomSample()` zieht ohne Zurücklegen. `bootstrapSample()` zieht mit Zurücklegen — dasselbe Element kann mehrfach vorkommen.
 
-[//]: # (<!---FUN sampRandomBootstrap-->)
+{/*---FUN sampRandomBootstrap--*/}
 
 ```kotlin
 val items = listOf("A", "B", "C", "D", "E")
@@ -116,7 +116,7 @@ items.randomSample(3, Random(42))     // 3 distinct items
 items.bootstrapSample(6, Random(42))  // 6 items, may have repeats
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 `randomSample()` zieht **ohne Zurücklegen** — jedes Element kommt höchstens einmal vor. Die Stichprobengröße darf die Größe der Sammlung nicht überschreiten.
@@ -128,7 +128,7 @@ items.bootstrapSample(6, Random(42))  // 6 items, may have repeats
 
 `WeightedCoin` simuliert einen verzerrten Münzwurf. `WeightedDice` simuliert eine gewichtete Zufallsauswahl aus einer Menge von Ergebnissen.
 
-[//]: # (<!---FUN sampWeightedRandom-->)
+{/*---FUN sampWeightedRandom--*/}
 
 ```kotlin
 val coin = WeightedCoin(probability = 0.7)
@@ -138,7 +138,7 @@ val dice = WeightedDice(mapOf("A" to 3.0, "B" to 1.0))
 dice.roll()                        // "A" with 75% probability, "B" with 25%
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Die Gewichte müssen sich nicht zu 1 summieren — sie werden intern normalisiert. `WeightedDice` funktioniert mit jedem Typ als Ergebnis.
 

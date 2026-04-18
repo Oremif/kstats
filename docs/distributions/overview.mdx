@@ -3,13 +3,13 @@ title: "Probability Distributions"
 description: "18 continuous and 10 discrete probability distributions with a shared API for density, CDF, quantiles, and sampling in kstats-distributions."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.distributions.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.distributions.samples.DocsSamples--*/}
 
 `kstats-distributions` provides a unified API for continuous and discrete probability models. Every distribution supports the same workflow: construct with parameters, inspect statistical properties, evaluate probabilities, compute quantiles, and draw random samples.
 
 ## Working with a Distribution
 
-[//]: # (<!---FUN distWorkingWithDistribution-->)
+{/*---FUN distWorkingWithDistribution--*/}
 
 ```kotlin
 val normal = NormalDistribution(mu = 0.0, sigma = 1.0)
@@ -35,7 +35,7 @@ normal.sample(Random(42))           // single random draw
 normal.sample(5, Random(42))        // 5 random draws
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Shared API
 
@@ -67,7 +67,7 @@ Constructors validate parameters eagerly. Invalid values (negative standard devi
 
         **Parameters:** `mu` — mean, `sigma` — standard deviation (must be positive)
 
-[//]: # (<!---FUN distNormal-->)
+{/*---FUN distNormal--*/}
 
 ```kotlin
 val d = NormalDistribution(mu = 100.0, sigma = 15.0)
@@ -76,7 +76,7 @@ d.cdf(115.0) // 0.8413
 d.quantile(0.975) // 129.3994
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use when data is approximately symmetric and unbounded.
       </Accordion>
@@ -86,7 +86,7 @@ d.quantile(0.975) // 129.3994
 
         **Parameters:** `df` — degrees of freedom (must be positive)
 
-[//]: # (<!---FUN distStudentT-->)
+{/*---FUN distStudentT--*/}
 
 ```kotlin
 val d = StudentTDistribution(degreesOfFreedom = 10.0)
@@ -95,7 +95,7 @@ d.cdf(2.228) // ≈ 0.975
 d.quantile(0.975) // 2.2281
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for confidence intervals and t-tests when the sample size is small.
       </Accordion>
@@ -105,7 +105,7 @@ d.quantile(0.975) // 2.2281
 
         **Parameters:** `location` — center, `scale` — spread parameter (must be positive)
 
-[//]: # (<!---FUN distLogistic-->)
+{/*---FUN distLogistic--*/}
 
 ```kotlin
 val d = LogisticDistribution(mu = 0.0, scale = 1.0)
@@ -114,7 +114,7 @@ d.cdf(0.0)   // 0.5
 d.pdf(0.0)   // 0.25
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use when a closed-form CDF is needed or data has slightly heavier tails than normal.
       </Accordion>
@@ -124,7 +124,7 @@ d.pdf(0.0)   // 0.25
 
         **Parameters:** `location` — center (median), `scale` — half-width at half-maximum (must be positive)
 
-[//]: # (<!---FUN distCauchy-->)
+{/*---FUN distCauchy--*/}
 
 ```kotlin
 val d = CauchyDistribution(location = 0.0, scale = 1.0)
@@ -133,7 +133,7 @@ d.cdf(0.0)        // 0.5
 d.quantile(0.75)  // 1.0
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for data with extreme outliers where the mean is not a meaningful summary.
       </Accordion>
@@ -143,7 +143,7 @@ d.quantile(0.75)  // 1.0
 
         **Parameters:** `location` — center (mean and median), `scale` — spread parameter (must be positive)
 
-[//]: # (<!---FUN distLaplace-->)
+{/*---FUN distLaplace--*/}
 
 ```kotlin
 val d = LaplaceDistribution(mu = 0.0, scale = 1.0)
@@ -152,7 +152,7 @@ d.variance   // 2.0
 d.pdf(0.0)   // 0.5
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for data with a sharp peak at the center and exponential tails.
       </Accordion>
@@ -166,7 +166,7 @@ d.pdf(0.0)   // 0.5
 
         **Parameters:** `rate` — event rate, the reciprocal of the mean (must be positive)
 
-[//]: # (<!---FUN distExponential-->)
+{/*---FUN distExponential--*/}
 
 ```kotlin
 val d = ExponentialDistribution(rate = 2.0)
@@ -175,7 +175,7 @@ d.cdf(1.0)   // 0.8647
 d.quantile(0.5) // 0.3466
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for waiting times, durations, and inter-arrival times.
       </Accordion>
@@ -185,7 +185,7 @@ d.quantile(0.5) // 0.3466
 
         **Parameters:** `shape` — shape parameter $k$ (must be positive), `scale` — scale parameter $\theta$ (must be positive)
 
-[//]: # (<!---FUN distGamma-->)
+{/*---FUN distGamma--*/}
 
 ```kotlin
 val d = GammaDistribution(shape = 2.0, rate = 0.5)
@@ -194,7 +194,7 @@ d.variance   // 8.0
 d.cdf(4.0)   // 0.5940
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for positive continuous data with right skew, such as aggregate waiting times or rainfall amounts.
       </Accordion>
@@ -204,7 +204,7 @@ d.cdf(4.0)   // 0.5940
 
         **Parameters:** `shape` — shape $k$ (must be positive), `scale` — scale $\lambda$ (must be positive)
 
-[//]: # (<!---FUN distWeibull-->)
+{/*---FUN distWeibull--*/}
 
 ```kotlin
 val d = WeibullDistribution(shape = 1.5, scale = 1.0)
@@ -212,7 +212,7 @@ d.mean       // 0.9027
 d.cdf(1.0)   // 0.6321
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for time-to-failure data, wind speed modeling, and survival analysis.
       </Accordion>
@@ -222,7 +222,7 @@ d.cdf(1.0)   // 0.6321
 
         **Parameters:** `mu` — mean of the log, `sigma` — standard deviation of the log (must be positive)
 
-[//]: # (<!---FUN distLogNormal-->)
+{/*---FUN distLogNormal--*/}
 
 ```kotlin
 val d = LogNormalDistribution(mu = 0.0, sigma = 1.0)
@@ -231,7 +231,7 @@ d.quantile(0.5) // 1.0
 d.cdf(1.0)      // 0.5
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for multiplicative processes: stock prices, biological measurements, file sizes.
       </Accordion>
@@ -241,7 +241,7 @@ d.cdf(1.0)      // 0.5
 
         **Parameters:** `shape` — shape $m \ge 0.5$, `spread` — spread $\Omega$ (must be positive)
 
-[//]: # (<!---FUN distNakagami-->)
+{/*---FUN distNakagami--*/}
 
 ```kotlin
 val d = NakagamiDistribution(mu = 1.0, omega = 1.0)
@@ -249,7 +249,7 @@ d.mean       // 0.8862
 d.variance   // 0.2146
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for signal envelope modeling in fading channels.
       </Accordion>
@@ -259,7 +259,7 @@ d.variance   // 0.2146
 
         **Parameters:** `location` — shift parameter, `scale` — scale parameter (must be positive)
 
-[//]: # (<!---FUN distLevy-->)
+{/*---FUN distLevy--*/}
 
 ```kotlin
 val d = LevyDistribution(mu = 0.0, c = 1.0)
@@ -267,7 +267,7 @@ d.cdf(1.0)   // 0.3173
 d.sf(1.0)    // 0.6827
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for extreme-value modeling with very heavy right tails.
       </Accordion>
@@ -281,7 +281,7 @@ d.sf(1.0)    // 0.6827
 
         **Parameters:** `alpha` — shape $\alpha$ (must be positive), `beta` — shape $\beta$ (must be positive)
 
-[//]: # (<!---FUN distBeta-->)
+{/*---FUN distBeta--*/}
 
 ```kotlin
 val d = BetaDistribution(alpha = 2.0, beta = 5.0)
@@ -290,7 +290,7 @@ d.cdf(0.3)   // 0.5798
 d.pdf(0.2)   // 2.4576
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for proportions, probabilities, and bounded data on [0, 1].
       </Accordion>
@@ -300,7 +300,7 @@ d.pdf(0.2)   // 2.4576
 
         **Parameters:** `a` — lower bound, `b` — upper bound (must satisfy `a < b`)
 
-[//]: # (<!---FUN distUniform-->)
+{/*---FUN distUniform--*/}
 
 ```kotlin
 val d = UniformDistribution(min = 0.0, max = 10.0)
@@ -309,7 +309,7 @@ d.variance   // 8.3333
 d.cdf(3.0)   // 0.3
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use when all values in a range are equally likely.
       </Accordion>
@@ -319,7 +319,7 @@ d.cdf(3.0)   // 0.3
 
         **Parameters:** `a` — minimum, `b` — maximum, `c` — mode (must satisfy `a ≤ c ≤ b`)
 
-[//]: # (<!---FUN distTriangular-->)
+{/*---FUN distTriangular--*/}
 
 ```kotlin
 val d = TriangularDistribution(a = 0.0, b = 10.0, c = 3.0)
@@ -327,7 +327,7 @@ d.mean       // 4.3333
 d.cdf(3.0)   // 0.3
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for rough estimates when only the minimum, maximum, and most likely value are known.
       </Accordion>
@@ -341,7 +341,7 @@ d.cdf(3.0)   // 0.3
 
         **Parameters:** `xm` — minimum value (scale, must be positive), `alpha` — shape (tail index, must be positive)
 
-[//]: # (<!---FUN distPareto-->)
+{/*---FUN distPareto--*/}
 
 ```kotlin
 val d = ParetoDistribution(shape = 2.0, scale = 1.0)
@@ -349,7 +349,7 @@ d.mean       // 2.0
 d.cdf(2.0)   // 0.75
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for wealth distributions, city populations, and file sizes.
       </Accordion>
@@ -359,7 +359,7 @@ d.cdf(2.0)   // 0.75
 
         **Parameters:** `location` — mode, `scale` — spread (must be positive)
 
-[//]: # (<!---FUN distGumbel-->)
+{/*---FUN distGumbel--*/}
 
 ```kotlin
 val d = GumbelDistribution(mu = 0.0, beta = 1.0)
@@ -367,7 +367,7 @@ d.mean       // 0.5772
 d.cdf(0.0)   // 0.3679
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for extreme-value analysis: maximum temperatures, flood levels, structural loads.
       </Accordion>
@@ -377,7 +377,7 @@ d.cdf(0.0)   // 0.3679
 
         **Parameters:** `df` — degrees of freedom (must be positive)
 
-[//]: # (<!---FUN distChiSquared-->)
+{/*---FUN distChiSquared--*/}
 
 ```kotlin
 val d = ChiSquaredDistribution(degreesOfFreedom = 5.0)
@@ -386,7 +386,7 @@ d.variance   // 10.0
 d.cdf(11.07) // ≈ 0.95
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use internally by chi-squared tests or for direct variance inference.
       </Accordion>
@@ -396,7 +396,7 @@ d.cdf(11.07) // ≈ 0.95
 
         **Parameters:** `df1` — numerator degrees of freedom (must be positive), `df2` — denominator degrees of freedom (must be positive)
 
-[//]: # (<!---FUN distF-->)
+{/*---FUN distF--*/}
 
 ```kotlin
 val d = FDistribution(dfNumerator = 5.0, dfDenominator = 10.0)
@@ -404,7 +404,7 @@ d.mean       // 1.25
 d.cdf(3.33)  // ≈ 0.95
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use internally by ANOVA and F-tests.
       </Accordion>
@@ -422,7 +422,7 @@ d.cdf(3.33)  // ≈ 0.95
 
         **Parameters:** `lambda` — expected number of events (must be positive)
 
-[//]: # (<!---FUN distPoisson-->)
+{/*---FUN distPoisson--*/}
 
 ```kotlin
 val d = PoissonDistribution(rate = 3.0)
@@ -432,7 +432,7 @@ d.cdf(5)        // 0.9161
 d.quantileInt(0.95) // 6
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for count data: defects per batch, arrivals per hour, events per day.
       </Accordion>
@@ -442,7 +442,7 @@ d.quantileInt(0.95) // 6
 
         **Parameters:** `trials` — number of trials (must be non-negative), `probability` — success probability per trial (must be in [0, 1])
 
-[//]: # (<!---FUN distBinomial-->)
+{/*---FUN distBinomial--*/}
 
 ```kotlin
 val d = BinomialDistribution(trials = 10, probability = 0.3)
@@ -452,7 +452,7 @@ d.cdf(3)        // 0.6496
 d.quantileInt(0.5) // 3
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for yes/no experiments repeated a known number of times.
       </Accordion>
@@ -462,7 +462,7 @@ d.quantileInt(0.5) // 3
 
         **Parameters:** `r` — number of successes (must be positive), `p` — success probability (must be in (0, 1])
 
-[//]: # (<!---FUN distNegativeBinomial-->)
+{/*---FUN distNegativeBinomial--*/}
 
 ```kotlin
 val d = NegativeBinomialDistribution(successes = 5, probability = 0.5)
@@ -471,7 +471,7 @@ d.variance      // 10.0
 d.pmf(3)        // probability of exactly 3 failures before 5 successes
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for over-dispersed count data or modeling the number of trials until a target is reached.
       </Accordion>
@@ -481,7 +481,7 @@ d.pmf(3)        // probability of exactly 3 failures before 5 successes
 
         **Parameters:** `probability` — success probability per trial (must be in (0, 1])
 
-[//]: # (<!---FUN distGeometric-->)
+{/*---FUN distGeometric--*/}
 
 ```kotlin
 val d = GeometricDistribution(probability = 0.3)
@@ -490,7 +490,7 @@ d.pmf(1)        // 0.3
 d.cdf(3)        // 0.657
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for "how many tries until it works" questions.
       </Accordion>
@@ -504,7 +504,7 @@ d.cdf(3)        // 0.657
 
         **Parameters:** `populationSize` — total population, `successStates` — number of success items, `trials` — number of draws
 
-[//]: # (<!---FUN distHypergeometric-->)
+{/*---FUN distHypergeometric--*/}
 
 ```kotlin
 val d = HypergeometricDistribution(population = 50, successes = 10, draws = 5)
@@ -512,7 +512,7 @@ d.mean          // 1.0
 d.pmf(2)        // probability of exactly 2 successes in 5 draws
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use when sampling without replacement matters: quality control, card games, lottery problems.
       </Accordion>
@@ -522,7 +522,7 @@ d.pmf(2)        // probability of exactly 2 successes in 5 draws
 
         **Parameters:** `trials` — number of trials, `alpha` — Beta shape parameter, `beta` — Beta shape parameter
 
-[//]: # (<!---FUN distBetaBinomial-->)
+{/*---FUN distBetaBinomial--*/}
 
 ```kotlin
 val d = BetaBinomialDistribution(trials = 10, alpha = 2.0, beta = 3.0)
@@ -530,7 +530,7 @@ d.mean          // 4.0
 d.pmf(4)        // probability of exactly 4 successes
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for over-dispersed binomial data where the success probability varies.
       </Accordion>
@@ -544,7 +544,7 @@ d.pmf(4)        // probability of exactly 4 successes
 
         **Parameters:** `probability` — success probability (must be in [0, 1])
 
-[//]: # (<!---FUN distBernoulli-->)
+{/*---FUN distBernoulli--*/}
 
 ```kotlin
 val d = BernoulliDistribution(probability = 0.7)
@@ -553,7 +553,7 @@ d.pmf(1)        // 0.7
 d.pmf(0)        // 0.3
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for coin-flip–like binary outcomes.
       </Accordion>
@@ -563,7 +563,7 @@ d.pmf(0)        // 0.3
 
         **Parameters:** `a` — lower bound, `b` — upper bound (must satisfy `a ≤ b`)
 
-[//]: # (<!---FUN distUniformDiscrete-->)
+{/*---FUN distUniformDiscrete--*/}
 
 ```kotlin
 val d = UniformDiscreteDistribution(min = 1, max = 6)
@@ -572,7 +572,7 @@ d.pmf(3)        // 0.1667
 d.cdf(3)        // 0.5
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for fair dice, uniform random integer selection.
       </Accordion>
@@ -586,7 +586,7 @@ d.cdf(3)        // 0.5
 
         **Parameters:** `n` — number of elements (must be positive), `s` — exponent (must be positive)
 
-[//]: # (<!---FUN distZipf-->)
+{/*---FUN distZipf--*/}
 
 ```kotlin
 val d = ZipfDistribution(numberOfElements = 100, exponent = 1.0)
@@ -594,7 +594,7 @@ d.pmf(1)        // probability of rank 1 (the most common)
 d.pmf(100)      // probability of rank 100 (the least common)
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for word frequencies, city sizes, and website traffic distributions.
       </Accordion>
@@ -604,7 +604,7 @@ d.pmf(100)      // probability of rank 100 (the least common)
 
         **Parameters:** `p` — parameter in (0, 1)
 
-[//]: # (<!---FUN distLogarithmic-->)
+{/*---FUN distLogarithmic--*/}
 
 ```kotlin
 val d = LogarithmicDistribution(probability = 0.5)
@@ -613,7 +613,7 @@ d.pmf(1)        // 0.7213
 d.pmf(2)        // 0.1803
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
         Use for species abundance data and similar long-tailed count distributions.
       </Accordion>
