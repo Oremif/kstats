@@ -3,8 +3,8 @@ title: "Descriptive Statistics"
 description: "Summary statistics, central tendency, dispersion, quantiles, shape measures, frequency analysis, and streaming calculations in kstats-core."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.sampling.samples.DocsSamples--*/}
 
 `kstats-core` provides descriptive statistics as extension functions on `DoubleArray` and `Iterable<Double>`. It also includes `Int` and `Long` overloads for the most common operations.
 
@@ -12,7 +12,7 @@ description: "Summary statistics, central tendency, dispersion, quantiles, shape
 
 `describe()` is the fastest way to get a complete picture of a sample. It returns a `DescriptiveStatistics` object combining count, center, spread, quartiles, shape, and standard error.
 
-[//]: # (<!---FUN coreSummarySnapshot-->)
+{/*---FUN coreSummarySnapshot--*/}
 
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
@@ -32,7 +32,7 @@ stats.range              // 7.0
 stats.standardError      // 0.7559
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 `variance()` and `standardDeviation()` use the **sample** formula (dividing by $n - 1$) by default. Pass `PopulationKind.POPULATION` to use the population formula (dividing by $n$).
@@ -42,7 +42,7 @@ stats.standardError      // 0.7559
 
 Different notions of "center" suit different data shapes. `mean()` is the arithmetic average, `median()` is the positional center, `mode()` returns the most frequent values, and the trimmed and weighted variants handle outliers and importance weights.
 
-[//]: # (<!---FUN coreCentralTendency-->)
+{/*---FUN coreCentralTendency--*/}
 
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
@@ -62,7 +62,7 @@ val weights = doubleArrayOf(3.0, 1.0, 1.0)
 values.weightedMean(weights)   // 1.6
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 - **Geometric mean** — use for growth rates and ratios. Requires all positive values.
 - **Harmonic mean** — use for rates and speed averages. Requires all positive values.
@@ -93,7 +93,7 @@ The trimmed mean drops $\lfloor p \cdot n \rfloor$ observations from each end of
 
 Spread measures describe how far values deviate from the center.
 
-[//]: # (<!---FUN coreDispersion-->)
+{/*---FUN coreDispersion--*/}
 
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
@@ -111,7 +111,7 @@ data.semiVariance(5.0, SemiVarianceDirection.DOWNSIDE) // 1.7143
 data.semiVariance(5.0, SemiVarianceDirection.UPSIDE)   // 2.8571
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 `semiVariance` measures variability on one side of a threshold. `DOWNSIDE` captures risk below the threshold; `UPSIDE` captures variability above it.
@@ -137,7 +137,7 @@ $$
 
 Quantiles split the data at specified probability thresholds. `percentile()` takes a value on the 0–100 scale; `quantile()` takes a value on the 0–1 scale.
 
-[//]: # (<!---FUN coreQuantiles-->)
+{/*---FUN coreQuantiles--*/}
 
 ```kotlin
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
@@ -150,7 +150,7 @@ val (q1, median, q3) = data.quartiles()
 // q1 = 3.25, median = 5.5, q3 = 7.75
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 `quantile()` supports a `QuantileInterpolation` parameter with options: `LINEAR` (default), `LOWER`, `HIGHER`, `NEAREST`, and `MIDPOINT`. These control how the value is interpolated when the quantile falls between two data points.
@@ -170,7 +170,7 @@ where $h = p(n - 1) + 1$.
 
 Shape measures describe asymmetry and tail weight beyond what the mean and variance capture.
 
-[//]: # (<!---FUN coreShape-->)
+{/*---FUN coreShape--*/}
 
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
@@ -187,7 +187,7 @@ data.kStatistic(1)          // 5.0 (equals mean)
 data.kStatistic(2)          // 4.5714 (equals sample variance)
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Skewness near zero suggests symmetry. Positive skewness indicates a longer right tail; negative indicates a longer left tail. Excess kurtosis near zero is similar to a normal distribution; positive values indicate heavier tails.
 
@@ -211,7 +211,7 @@ The $r$-th central moment is $\mu_r = \frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^r
 
 The `Frequency` class counts occurrences, proportions, and cumulative frequencies for any `Comparable` type. `frequencyTable()` groups numeric data into equal-width bins.
 
-[//]: # (<!---FUN coreFrequency-->)
+{/*---FUN coreFrequency--*/}
 
 ```kotlin
 val freq = listOf("a", "a", "b", "b", "b", "c").toFrequency()
@@ -222,9 +222,9 @@ freq.cumulativeCount("b")  // 5 (a=2 + b=3)
 freq.mode                  // {b}
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
-[//]: # (<!---FUN coreFrequencyTable-->)
+{/*---FUN coreFrequencyTable--*/}
 
 ```kotlin
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
@@ -234,7 +234,7 @@ bins[0].count              // number of values in the first bin
 bins[0].relativeFrequency  // proportion of total
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 `Frequency` works with any `Comparable` type — strings, enums, integers, or custom classes. For numeric binning, use `frequencyTable()` with either a bin count or a bin width.
@@ -244,7 +244,7 @@ bins[0].relativeFrequency  // proportion of total
 
 `OnlineStatistics` computes mean, variance, skewness, and kurtosis incrementally without storing the full sample. Values can be added one at a time or in batches.
 
-[//]: # (<!---FUN coreStreaming-->)
+{/*---FUN coreStreaming--*/}
 
 ```kotlin
 val online = OnlineStatistics()
@@ -265,7 +265,7 @@ online.count               // 9
 online.mean                // 4.7778
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Use `OnlineStatistics` when data arrives incrementally (streaming, event-driven systems) or when buffering the full sample in memory is impractical.
 

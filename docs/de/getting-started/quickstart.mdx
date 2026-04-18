@@ -3,15 +3,15 @@ title: "Quickstart"
 description: "Deskriptive Statistiken berechnen, eine Verteilung anpassen, einen Hypothesentest durchführen und Korrelation messen — in fünf Minuten."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.samples.DocsSamples--*/}
 
-[//]: # (<!---IMPORT org.oremif.kstats.distributions.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.distributions.samples.DocsSamples--*/}
 
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples--*/}
 
-[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.correlation.samples.DocsSamples--*/}
 
-[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.sampling.samples.DocsSamples--*/}
 
 Beginnen Sie mit dem durchgängigen Szenario unten, oder springen Sie direkt zu den modulspezifischen Beispielen am Ende der Seite.
 
@@ -19,17 +19,17 @@ Beginnen Sie mit dem durchgängigen Szenario unten, oder springen Sie direkt zu 
 
 ### Stichprobe definieren
 
-[//]: # (<!---FUN quickstartDefine-->)
+{/*---FUN quickstartDefine--*/}
 
 ```kotlin
 val sample = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Zusammenfassen
 
-[//]: # (<!---FUN quickstartSummarize-->)
+{/*---FUN quickstartSummarize--*/}
 
 ```kotlin
 val stats = sample.describe()
@@ -40,13 +40,13 @@ stats.skewness          // 0.6563
 stats.interquartileRange // 1.5
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 `describe()` liefert Anzahl, Lagemaße, Streuungsmaße, Quartile, Formkennzahlen und Standardfehler in einem einzigen Objekt.
 
 ### Normalität prüfen
 
-[//]: # (<!---FUN quickstartNormality-->)
+{/*---FUN quickstartNormality--*/}
 
 ```kotlin
 val normality = shapiroWilkTest(sample)
@@ -55,11 +55,11 @@ normality.pValue             // > 0.05 → no evidence against normality
 normality.isSignificant()    // false
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Verteilung anpassen
 
-[//]: # (<!---FUN quickstartFit-->)
+{/*---FUN quickstartFit--*/}
 
 ```kotlin
 val normal = NormalDistribution(mu = stats.mean, sigma = stats.standardDeviation)
@@ -67,11 +67,11 @@ normal.cdf(6.0)          // probability that X ≤ 6.0
 normal.quantile(0.95)    // value below which 95% of the distribution falls
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Hypothese testen
 
-[//]: # (<!---FUN quickstartHypothesis-->)
+{/*---FUN quickstartHypothesis--*/}
 
 ```kotlin
 val result = tTest(sample, mu = 5.0)
@@ -81,11 +81,11 @@ result.isSignificant()   // false — cannot reject H₀: μ = 5.0
 result.confidenceInterval // (3.21, 6.79)
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Zusammenhang messen
 
-[//]: # (<!---FUN quickstartAssociation-->)
+{/*---FUN quickstartAssociation--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -101,14 +101,14 @@ model.rSquared           // 0.9973
 model.predict(6.0)       // 11.99
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Modulspezifische Beispiele
 
 <Tabs>
   <Tab title="Core">
 
-[//]: # (<!---FUN quickstartTabCore-->)
+{/*---FUN quickstartTabCore--*/}
 
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 5.0, 7.0, 9.0)
@@ -119,11 +119,11 @@ val summary = data.describe()
 summary.skewness          // 0.3942
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
   </Tab>
   <Tab title="Verteilungen">
 
-[//]: # (<!---FUN quickstartTabDistributions-->)
+{/*---FUN quickstartTabDistributions--*/}
 
 ```kotlin
 val normal = NormalDistribution(mu = 0.0, sigma = 1.0)
@@ -136,11 +136,11 @@ poisson.pmf(5)            // 0.1008
 poisson.cdf(5)            // 0.9161
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
   </Tab>
   <Tab title="Hypothesentests">
 
-[//]: # (<!---FUN quickstartTabHypothesis-->)
+{/*---FUN quickstartTabHypothesis--*/}
 
 ```kotlin
 val sample = doubleArrayOf(5.1, 4.9, 5.3, 5.0, 4.8)
@@ -151,11 +151,11 @@ result.isSignificant()    // true or false at α = 0.05
 result.confidenceInterval // one-sided CI
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
   </Tab>
   <Tab title="Korrelation">
 
-[//]: # (<!---FUN quickstartTabCorrelation-->)
+{/*---FUN quickstartTabCorrelation--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -165,11 +165,11 @@ pearsonCorrelation(x, y).coefficient  // 0.9987
 simpleLinearRegression(x, y).slope    // 1.99
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
   </Tab>
   <Tab title="Sampling">
 
-[//]: # (<!---FUN quickstartTabSampling-->)
+{/*---FUN quickstartTabSampling--*/}
 
 ```kotlin
 val data = doubleArrayOf(3.0, 1.0, 4.0, 1.0, 5.0)
@@ -178,7 +178,7 @@ data.zScore()             // [-0.16, -1.47, 0.49, -1.47, 1.14]
 data.minMaxNormalize()    // [0.5, 0.0, 0.75, 0.0, 1.0]
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
   </Tab>
 </Tabs>
 

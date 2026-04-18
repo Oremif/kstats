@@ -3,7 +3,7 @@ title: "Correlation & Regression"
 description: "Pearson, Spearman, Kendall tau, partial correlation, point-biserial, matrices, covariance, and simple linear regression in kstats-correlation."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.correlation.samples.DocsSamples--*/}
 
 `kstats-correlation` covers two related tasks: measuring the strength of association between variables, and modeling a linear relationship. The module is split into two sections reflecting this distinction.
 
@@ -13,7 +13,7 @@ description: "Pearson, Spearman, Kendall tau, partial correlation, point-biseria
 
 Measures the strength and direction of the **linear** association between two numeric variables. The coefficient ranges from -1 (perfect negative) to +1 (perfect positive).
 
-[//]: # (<!---FUN corrPearson-->)
+{/*---FUN corrPearson--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -25,7 +25,7 @@ r.pValue                 // 0.0001
 r.n                      // 5
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Use Pearson when both variables are continuous and the relationship is approximately linear. Sensitive to outliers.
 
@@ -33,7 +33,7 @@ Use Pearson when both variables are continuous and the relationship is approxima
 
 Applies Pearson correlation to the **ranks** of the data. Measures monotonic association — whether the variables tend to increase together, regardless of linearity.
 
-[//]: # (<!---FUN corrSpearman-->)
+{/*---FUN corrSpearman--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
@@ -44,7 +44,7 @@ r.coefficient            // 1.0 — perfect monotonic relationship
 r.pValue                 // 0.0
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Use Spearman when the relationship is monotonic but not necessarily linear, or when the data contains outliers.
 
@@ -52,7 +52,7 @@ Use Spearman when the relationship is monotonic but not necessarily linear, or w
 
 Counts concordant and discordant pairs to measure ordinal association. More robust than Spearman for small samples and heavy ties.
 
-[//]: # (<!---FUN corrKendall-->)
+{/*---FUN corrKendall--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -63,7 +63,7 @@ tau.coefficient          // 0.6
 tau.pValue               // p-value for tau
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 The Kendall tau implementation runs in $O(n \log n)$ time using a merge-sort–based algorithm, making it efficient for large datasets.
@@ -73,7 +73,7 @@ The Kendall tau implementation runs in $O(n \log n)$ time using a merge-sort–b
 
 Measures the association between a **binary** variable (coded as 0/1 integers) and a **continuous** variable. Equivalent to Pearson correlation when one variable is dichotomous.
 
-[//]: # (<!---FUN corrPointBiserial-->)
+{/*---FUN corrPointBiserial--*/}
 
 ```kotlin
 val binary     = intArrayOf(0, 0, 0, 1, 1, 1, 1)
@@ -84,7 +84,7 @@ r.coefficient            // positive — group 1 has higher values
 r.pValue                 // p-value
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Use when one variable is naturally binary: treatment/control, pass/fail, male/female.
 
@@ -92,7 +92,7 @@ Use when one variable is naturally binary: treatment/control, pass/fail, male/fe
 
 Measures the association between two variables **after controlling for** a third variable. Removes the effect of the confounding variable.
 
-[//]: # (<!---FUN corrPartial-->)
+{/*---FUN corrPartial--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -104,7 +104,7 @@ r.coefficient            // correlation between x and y, controlling for z
 r.pValue                 // p-value
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Use when a third variable might explain the apparent relationship between the first two.
 
@@ -112,7 +112,7 @@ Use when a third variable might explain the apparent relationship between the fi
 
 For multi-variable analysis, build pairwise matrices. Each cell $(i, j)$ contains the correlation (or covariance) between variables $i$ and $j$.
 
-[//]: # (<!---FUN corrMatrices-->)
+{/*---FUN corrMatrices--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -128,7 +128,7 @@ cov[0][0]                // variance of x = 2.5
 cov[0][1]                // covariance of x and y
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Choosing a Correlation Method
 
@@ -168,7 +168,7 @@ $$
 
 Fits the line $\hat{y} = \beta_0 + \beta_1 x$ to the data using ordinary least squares. The result includes the slope, intercept, goodness-of-fit ($R^2$), standard errors, residuals, and a prediction function.
 
-[//]: # (<!---FUN corrRegression-->)
+{/*---FUN corrRegression--*/}
 
 ```kotlin
 val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -188,7 +188,7 @@ model.predict(6.0)           // 11.99
 model.predict(doubleArrayOf(6.0, 7.0, 8.0)) // batch prediction
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Accordion title="Math details">
 $$

@@ -3,8 +3,8 @@ title: "Choosing a Distribution"
 description: "Match your data to the right probability distribution using domain-driven examples and verification."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.distributions.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.distributions.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples--*/}
 
 <Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/choosing-a-distribution.ipynb">
   Try this guide as a Kotlin Notebook with Kandy visualizations — run the cells to see charts and explore the data interactively.
@@ -33,7 +33,7 @@ Every distribution encodes assumptions about what values are possible and how li
 <Tabs>
 <Tab title="Response times">
 
-[//]: # (<!---FUN choosingResponseTimes-->)
+{/*---FUN choosingResponseTimes--*/}
 
 ```kotlin
 // API response times — often right-skewed with a long tail
@@ -45,12 +45,12 @@ responseTime.quantile(0.99)    // P99 latency
 responseTime.cdf(200.0)        // probability of responding under 200ms
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 </Tab>
 <Tab title="Time between events">
 
-[//]: # (<!---FUN choosingTimeBetweenEvents-->)
+{/*---FUN choosingTimeBetweenEvents--*/}
 
 ```kotlin
 // Time between server errors — memoryless waiting process
@@ -61,12 +61,12 @@ timeBetweenErrors.sf(10.0)      // probability of waiting longer than 10 units
 timeBetweenErrors.quantile(0.5) // median waiting time
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 </Tab>
 <Tab title="Component lifetime">
 
-[//]: # (<!---FUN choosingComponentLifetime-->)
+{/*---FUN choosingComponentLifetime--*/}
 
 ```kotlin
 // Hardware component lifetime — models wear-out (shape > 1) or burn-in (shape < 1)
@@ -77,7 +77,7 @@ componentLifetime.cdf(3000.0)    // probability of failure before 3000 hours
 componentLifetime.sf(4000.0)     // probability of surviving past 4000 hours
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 </Tab>
 </Tabs>
@@ -87,7 +87,7 @@ componentLifetime.sf(4000.0)     // probability of surviving past 4000 hours
 <Tabs>
 <Tab title="Event counts">
 
-[//]: # (<!---FUN choosingEventCounts-->)
+{/*---FUN choosingEventCounts--*/}
 
 ```kotlin
 // Errors per hour on a production server
@@ -98,12 +98,12 @@ errorsPerHour.cdf(5)            // probability of at most 5 errors
 errorsPerHour.quantileInt(0.99) // error count exceeded only 1% of the time
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 </Tab>
 <Tab title="Fixed trials">
 
-[//]: # (<!---FUN choosingFixedTrials-->)
+{/*---FUN choosingFixedTrials--*/}
 
 ```kotlin
 // Conversions out of 1000 page views with 3.5% conversion rate
@@ -114,12 +114,12 @@ conversions.pmf(40) // probability of exactly 40 conversions
 conversions.sf(50)  // probability of more than 50 conversions
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 </Tab>
 <Tab title="Overdispersed counts">
 
-[//]: # (<!---FUN choosingOverdispersed-->)
+{/*---FUN choosingOverdispersed--*/}
 
 ```kotlin
 // Support tickets until 5th resolution (variance > mean)
@@ -129,14 +129,14 @@ tickets.mean     // expected ticket count
 tickets.variance // larger than mean — overdispersion
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 </Tab>
 </Tabs>
 
 ## Proportions and Rates
 
-[//]: # (<!---FUN choosingProportions-->)
+{/*---FUN choosingProportions--*/}
 
 ```kotlin
 // Click-through rate estimated from 120 clicks in 4000 impressions
@@ -148,11 +148,11 @@ ctr.quantile(0.975) // upper bound
 ctr.cdf(0.035)      // probability that true CTR is below 3.5%
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## General-Purpose Symmetric
 
-[//]: # (<!---FUN choosingSymmetric-->)
+{/*---FUN choosingSymmetric--*/}
 
 ```kotlin
 // User session duration in minutes (roughly symmetric)
@@ -166,13 +166,13 @@ val smallSampleEstimate = StudentTDistribution(degreesOfFreedom = 8.0)
 smallSampleEstimate.quantile(0.975) // critical value for 95% CI
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Verifying the Fit
 
 After choosing a distribution, compare it against observed data using the Kolmogorov-Smirnov test.
 
-[//]: # (<!---FUN choosingVerifyFit-->)
+{/*---FUN choosingVerifyFit--*/}
 
 ```kotlin
 val processingTimesMs = doubleArrayOf(
@@ -191,7 +191,7 @@ ks.statistic // KS statistic — smaller means better fit
 ks.pValue    // high p-value means data does not contradict the distribution
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 A non-significant KS test does not prove the distribution is correct — it means the data does not strongly contradict that choice.

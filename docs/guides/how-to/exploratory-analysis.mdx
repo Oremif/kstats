@@ -3,10 +3,10 @@ title: "Exploratory Data Analysis"
 description: "Walk through a complete EDA workflow on a single dataset using descriptive statistics, distributions, correlations, and comparisons."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.sampling.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.correlation.samples.DocsSamples--*/}
 
 <Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/exploratory-analysis.ipynb">
   Try this guide as a Kotlin Notebook with Kandy visualizations — run the cells to see charts and explore the data interactively.
@@ -17,7 +17,7 @@ This guide analyzes backend service performance metrics collected over 30 days. 
 
 ## Dataset
 
-[//]: # (<!---FUN edaDataset-->)
+{/*---FUN edaDataset--*/}
 
 ```kotlin
 val responseTimeMs = doubleArrayOf(
@@ -45,11 +45,11 @@ val throughputRps = doubleArrayOf(
 )
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Step 1: Summary Statistics
 
-[//]: # (<!---FUN edaSummaryStats-->)
+{/*---FUN edaSummaryStats--*/}
 
 ```kotlin
 val rtSummary = responseTimeMs.describe()
@@ -63,11 +63,11 @@ memSummary.mean; memSummary.standardDeviation; memSummary.min; memSummary.max
 tpSummary.mean; tpSummary.standardDeviation; tpSummary.min; tpSummary.max
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Frequency distribution
 
-[//]: # (<!---FUN edaFrequencyDistribution-->)
+{/*---FUN edaFrequencyDistribution--*/}
 
 ```kotlin
 val rtBins = responseTimeMs.frequencyTable(binCount = 5)
@@ -81,11 +81,11 @@ errBins.forEach { bin ->
 }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Step 2: Distribution Shape
 
-[//]: # (<!---FUN edaDistributionShape-->)
+{/*---FUN edaDistributionShape--*/}
 
 ```kotlin
 responseTimeMs.skewness() // positive = right-skewed
@@ -98,11 +98,11 @@ memoryUsageMb.skewness()
 throughputRps.skewness()
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Normality tests
 
-[//]: # (<!---FUN edaNormalityTests-->)
+{/*---FUN edaNormalityTests--*/}
 
 ```kotlin
 shapiroWilkTest(responseTimeMs).pValue
@@ -111,11 +111,11 @@ shapiroWilkTest(memoryUsageMb).pValue
 shapiroWilkTest(throughputRps).pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Fit a candidate distribution
 
-[//]: # (<!---FUN edaFitDistribution-->)
+{/*---FUN edaFitDistribution--*/}
 
 ```kotlin
 val rtFit = NormalDistribution(
@@ -131,11 +131,11 @@ val memFit = NormalDistribution(
 kolmogorovSmirnovTest(memoryUsageMb, memFit).pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Step 3: Correlations
 
-[//]: # (<!---FUN edaCorrelations-->)
+{/*---FUN edaCorrelations--*/}
 
 ```kotlin
 // Correlation matrix across all four metrics
@@ -152,11 +152,11 @@ rtVsThroughput.coefficient // negative = latency rises when throughput drops
 rtVsThroughput.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Regression
 
-[//]: # (<!---FUN edaRegression-->)
+{/*---FUN edaRegression--*/}
 
 ```kotlin
 // Model: how does error count relate to response time?
@@ -169,13 +169,13 @@ regression.rSquared  // proportion of variance explained
 regression.predict(4.0) // expected latency at 4 errors/hour
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Step 4: Compare Periods
 
 Split the data into two halves and check whether performance changed.
 
-[//]: # (<!---FUN edaComparePeriods-->)
+{/*---FUN edaComparePeriods--*/}
 
 ```kotlin
 val firstHalfRt = responseTimeMs.sliceArray(0 until 15)
@@ -190,11 +190,11 @@ val periodRank = mannWhitneyUTest(firstHalfRt, secondHalfRt)
 periodRank.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Compare throughput between periods:
 
-[//]: # (<!---FUN edaCompareThroughput-->)
+{/*---FUN edaCompareThroughput--*/}
 
 ```kotlin
 val firstHalfTp = throughputRps.sliceArray(0 until 15)
@@ -204,13 +204,13 @@ val tpComparison = tTest(firstHalfTp, secondHalfTp)
 tpComparison.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Step 5: Normalize and Rank
 
 Compare metrics on a common scale.
 
-[//]: # (<!---FUN edaNormalizeRank-->)
+{/*---FUN edaNormalizeRank--*/}
 
 ```kotlin
 // Z-score: values become standard deviations from mean
@@ -226,7 +226,7 @@ val tpScaled = throughputRps.minMaxNormalize()
 val rtRanked = responseTimeMs.rank()
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 Z-score normalization is useful for combining metrics into a composite score:

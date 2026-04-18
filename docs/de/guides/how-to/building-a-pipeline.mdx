@@ -3,8 +3,8 @@ title: "Statistik-Pipeline erstellen"
 description: "kstats-Aufrufe in wiederverwendbare Funktionen für reproduzierbare Analyse-Workflows organisieren."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.PipelineSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.PipelineSamples-->)
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.PipelineSamples--*/}
+{/*---IMPORT org.oremif.kstats.correlation.samples.PipelineSamples--*/}
 
 <Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/building-a-pipeline.ipynb">
   Probieren Sie diesen Leitfaden als Kotlin Notebook mit Kandy-Visualisierungen aus — führen Sie die Zellen aus, um Diagramme zu sehen und die Daten interaktiv zu erkunden.
@@ -15,7 +15,7 @@ Wenn die Analyse über einzelne Aufrufe hinauswächst, sorgen typisierte Pipelin
 
 ## Ergebnistypen
 
-[//]: # (<!---FUN pipelineResultTypes-->)
+{/*---FUN pipelineResultTypes--*/}
 
 ```kotlin
 data class AssumptionCheck(
@@ -40,11 +40,11 @@ data class AnalysisReport(
 )
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Voraussetzungen prüfen
 
-[//]: # (<!---FUN pipelineCheckAssumptions-->)
+{/*---FUN pipelineCheckAssumptions--*/}
 
 ```kotlin
 fun checkAssumptions(
@@ -67,13 +67,13 @@ fun checkAssumptions(
 }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Gruppen vergleichen
 
 Den Test automatisch anhand der Voraussetzungsprüfung auswählen.
 
-[//]: # (<!---FUN pipelineCompareGroups-->)
+{/*---FUN pipelineCompareGroups--*/}
 
 ```kotlin
 fun compareGroups(
@@ -97,11 +97,11 @@ fun compareGroups(
 }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Vollständiger Bericht
 
-[//]: # (<!---FUN pipelineFullReport-->)
+{/*---FUN pipelineFullReport--*/}
 
 ```kotlin
 fun analyze(
@@ -121,11 +121,11 @@ fun analyze(
 }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Verwendung
 
-[//]: # (<!---FUN pipelineUsage-->)
+{/*---FUN pipelineUsage--*/}
 
 ```kotlin
 val pageLoadControl = doubleArrayOf(
@@ -149,13 +149,13 @@ report.comparison.isSignificant
 report.comparison.confidenceInterval
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Die Pipeline erweitern
 
 Korrelationsanalyse zwischen Metriken hinzufügen:
 
-[//]: # (<!---FUN pipelineExtended-->)
+{/*---FUN pipelineExtended--*/}
 
 ```kotlin
 data class ExtendedReport(
@@ -186,7 +186,7 @@ fun analyzeWithCorrelation(
 }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Modulzuständigkeiten
 

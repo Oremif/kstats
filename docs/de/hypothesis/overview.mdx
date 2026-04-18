@@ -3,7 +3,7 @@ title: "Hypothesentests"
 description: "t-Tests, ANOVA, Chi-Quadrat, Fisher-Exakttest, Mann-Whitney, Wilcoxon, Normalitätstests und Varianzhomogenitätstests in kstats-hypothesis."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples--*/}
 
 `kstats-hypothesis` stellt statistische Tests bereit, gegliedert nach der Fragestellung, die sie beantworten. Die meisten Funktionen liefern ein `TestResult` zurück; `oneWayAnova()` gibt ein `AnovaResult` mit der vollständigen ANOVA-Tabelle zurück.
 
@@ -11,7 +11,7 @@ description: "t-Tests, ANOVA, Chi-Quadrat, Fisher-Exakttest, Mann-Whitney, Wilco
 
 Jeder Test erzeugt ein Ergebnis mit einheitlicher Struktur. Die `statistic` ist der berechnete Testwert, der `pValue` gibt die Wahrscheinlichkeit an, unter der Nullhypothese ein mindestens so extremes Ergebnis zu beobachten, und `isSignificant()` vergleicht den p-Wert mit einem Schwellenwert.
 
-[//]: # (<!---FUN hypTestResult-->)
+{/*---FUN hypTestResult--*/}
 
 ```kotlin
 val sample = doubleArrayOf(5.0, 6.0, 7.0, 5.5, 6.5)
@@ -25,7 +25,7 @@ result.isSignificant()   // true (p < 0.05)
 result.confidenceInterval // (5.02, 6.98)
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 `isSignificant()` verwendet standardmäßig $\alpha = 0.05$. Ein anderer Schwellenwert kann explizit übergeben werden: `result.isSignificant(alpha = 0.01)`.
@@ -39,7 +39,7 @@ Setzen Sie `alternative` explizit für einseitige Tests. Der Standardwert ist `A
 
 Der Einstichproben-t-Test vergleicht den Mittelwert einer einzelnen Stichprobe mit einem bekannten oder hypothetischen Wert.
 
-[//]: # (<!---FUN hypOneSample-->)
+{/*---FUN hypOneSample--*/}
 
 ```kotlin
 val sample = doubleArrayOf(5.1, 4.9, 5.3, 5.0, 4.8)
@@ -54,7 +54,7 @@ val one = tTest(sample, mu = 5.0, alternative = Alternative.GREATER)
 one.pValue               // one-sided p-value
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 Verwenden Sie `Alternative.GREATER` oder `Alternative.LESS` für gerichtete Hypothesen, anstatt einen zweiseitigen p-Wert zu halbieren. Das Konfidenzintervall passt sich entsprechend an.
@@ -66,7 +66,7 @@ Verwenden Sie `Alternative.GREATER` oder `Alternative.LESS` für gerichtete Hypo
 
 Vergleicht die Mittelwerte zweier unabhängiger Stichproben. Welchs t-Test (ungleiche Varianzen) ist die Standardeinstellung.
 
-[//]: # (<!---FUN hypTwoSample-->)
+{/*---FUN hypTwoSample--*/}
 
 ```kotlin
 val group1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -78,7 +78,7 @@ result.pValue            // 0.0011
 result.isSignificant()   // true
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Warning>
 `equalVariances` ist standardmäßig `false`, d. h. es wird Welchs t-Test verwendet. Setzen Sie `equalVariances = true` nur, nachdem Sie gleiche Varianzen mit `leveneTest()` oder `bartlettTest()` bestätigt haben.
@@ -88,11 +88,11 @@ result.isSignificant()   // true
 
 Vergleicht zwei zusammenhängende Messungen (vorher/nachher, links/rechts) an denselben Versuchspersonen.
 
-[//]: # (<!---FUN hypPaired-->)
+{/*---FUN hypPaired--*/}
 
 ```kotlin
 val before = doubleArrayOf(200.0, 190.0, 210.0, 180.0, 195.0)
-val after  = doubleArrayOf(190.0, 180.0, 195.0, 170.0, 185.0)
+val after = doubleArrayOf(190.0, 180.0, 195.0, 170.0, 185.0)
 
 val result = pairedTTest(before, after)
 result.statistic         // positive t (before > after)
@@ -100,13 +100,13 @@ result.pValue            // p-value for the difference
 result.isSignificant()   // true if the change is significant
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Mann-Whitney-U-Test
 
 Nichtparametrische Alternative zum Zweistichproben-t-Test. Vergleicht Ränge statt Mittelwerte.
 
-[//]: # (<!---FUN hypMannWhitney-->)
+{/*---FUN hypMannWhitney--*/}
 
 ```kotlin
 val group1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -118,24 +118,24 @@ result.pValue            // < 0.02
 result.isSignificant()   // true
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Wilcoxon-Vorzeichen-Rang-Test
 
 Nichtparametrische Alternative zum gepaarten t-Test. Prüft, ob gepaarte Differenzen symmetrisch um Null verteilt sind.
 
-[//]: # (<!---FUN hypWilcoxon-->)
+{/*---FUN hypWilcoxon--*/}
 
 ```kotlin
 val before = doubleArrayOf(10.0, 12.0, 14.0, 16.0, 18.0)
-val after  = doubleArrayOf(8.0, 9.0, 11.0, 12.0, 13.0)
+val after = doubleArrayOf(8.0, 9.0, 11.0, 12.0, 13.0)
 
 val result = wilcoxonSignedRankTest(before, after)
 result.statistic         // W+ = 15.0
 result.pValue            // p-value with continuity correction
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Unterscheiden sich drei oder mehr Gruppen?
 
@@ -143,7 +143,7 @@ result.pValue            // p-value with continuity correction
 
 Prüft, ob sich die Mittelwerte von drei oder mehr Gruppen unterscheiden. Gibt ein `AnovaResult` mit der vollständigen ANOVA-Tabelle zurück.
 
-[//]: # (<!---FUN hypAnova-->)
+{/*---FUN hypAnova--*/}
 
 ```kotlin
 val g1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -161,7 +161,7 @@ anova.msBetween          // 125.0
 anova.msWithin           // 2.5
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 Die ANOVA setzt Normalverteilung innerhalb jeder Gruppe und gleiche Varianzen über alle Gruppen voraus. Prüfen Sie die Normalverteilung mit `shapiroWilkTest()` und die Varianzhomogenität mit `leveneTest()` oder `bartlettTest()`, bevor Sie eine ANOVA durchführen.
@@ -171,7 +171,7 @@ Die ANOVA setzt Normalverteilung innerhalb jeder Gruppe und gleiche Varianzen ü
 
 Nichtparametrische Alternative zur ANOVA mit Messwiederholung. Vergleicht Ränge über verbundene Gruppen.
 
-[//]: # (<!---FUN hypFriedman-->)
+{/*---FUN hypFriedman--*/}
 
 ```kotlin
 val treatment1 = doubleArrayOf(5.0, 6.0, 7.0, 5.5, 6.5)
@@ -183,13 +183,13 @@ result.statistic         // Friedman chi-squared
 result.pValue            // p-value
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Sind meine Daten normalverteilt?
 
 Vier Normalitätstests stehen zur Verfügung. Jeder gibt ein `TestResult` zurück — ein signifikantes Ergebnis (niedriger p-Wert) deutet auf Abweichungen von der Normalverteilung hin.
 
-[//]: # (<!---FUN hypNormality-->)
+{/*---FUN hypNormality--*/}
 
 ```kotlin
 val sample = doubleArrayOf(
@@ -203,7 +203,7 @@ dagostinoPearsonTest(sample).pValue  // combines skewness and kurtosis tests
 jarqueBeraTest(sample).pValue        // asymptotic test based on skewness and kurtosis
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 Der Shapiro-Wilk-Test ist die gebräuchlichste Wahl und in der Regel der stärkste Test für kleine bis mittlere Stichproben (n &lt; 5000). Der Anderson-Darling-Test ist empfindlicher gegenüber Abweichungen in den Verteilungsrändern. D'Agostino-Pearson und Jarque-Bera sind schneller bei großen Stichproben.
@@ -215,7 +215,7 @@ Der Shapiro-Wilk-Test ist die gebräuchlichste Wahl und in der Regel der stärks
 
 Prüft, ob beobachtete Häufigkeiten den erwarteten Häufigkeiten entsprechen.
 
-[//]: # (<!---FUN hypChiSquared-->)
+{/*---FUN hypChiSquared--*/}
 
 ```kotlin
 val observed = intArrayOf(50, 30, 20)
@@ -227,13 +227,13 @@ result.pValue            // 0.0821
 result.isSignificant()   // false at α = 0.05
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### G-Test
 
 Likelihood-Ratio-Alternative zum Chi-Quadrat-Test. Oft bevorzugt bei kleinen erwarteten Häufigkeiten.
 
-[//]: # (<!---FUN hypGTest-->)
+{/*---FUN hypGTest--*/}
 
 ```kotlin
 val observed = intArrayOf(50, 30, 20)
@@ -244,13 +244,13 @@ result.statistic         // G statistic
 result.pValue            // p-value
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Binomialtest
 
 Prüft, ob der beobachtete Anteil an Erfolgen einer hypothetischen Wahrscheinlichkeit entspricht.
 
-[//]: # (<!---FUN hypBinomial-->)
+{/*---FUN hypBinomial--*/}
 
 ```kotlin
 val result = binomialTest(successes = 60, trials = 100, probability = 0.5)
@@ -258,13 +258,13 @@ result.pValue            // p-value for H₀: p = 0.5
 result.isSignificant()   // true if 60/100 is significantly different from 0.5
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Fisher-Exakttest
 
 Exakter Test für 2x2-Kontingenztafeln. Dem Chi-Quadrat-Test bei kleinen Stichproben vorzuziehen.
 
-[//]: # (<!---FUN hypFisher-->)
+{/*---FUN hypFisher--*/}
 
 ```kotlin
 // 2×2 table: [[10, 30], [20, 40]]
@@ -273,7 +273,7 @@ result.pValue            // exact p-value
 result.isSignificant()   // true or false
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Warning>
 Der Fisher-Exakttest ist für kleine Kontingenztafeln konzipiert. Für größere Tabellen verwenden Sie `chiSquaredTest()` mit einem Chi-Quadrat-Unabhängigkeitstest.
@@ -283,7 +283,7 @@ Der Fisher-Exakttest ist für kleine Kontingenztafeln konzipiert. Für größere
 
 Varianzhomogenität ist eine Voraussetzung der ANOVA und einiger t-Test-Varianten. Drei Tests stehen zur Verfügung:
 
-[//]: # (<!---FUN hypVarianceHomogeneity-->)
+{/*---FUN hypVarianceHomogeneity--*/}
 
 ```kotlin
 val g1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -295,7 +295,7 @@ bartlettTest(g1, g2, g3).pValue       // most powerful when normality holds
 flignerKilleenTest(g1, g2, g3).pValue // rank-based, robust to outliers
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 Der Levene-Test ist die sicherste Standardwahl — er ist robust gegenüber Abweichungen von der Normalverteilung. Verwenden Sie den Bartlett-Test nur, wenn die Daten innerhalb jeder Gruppe annähernd normalverteilt sind (Bartlett ist in diesem Fall leistungsfähiger). Der Fligner-Killeen-Test ist am robustesten gegenüber Ausreißern.
@@ -307,7 +307,7 @@ Der Levene-Test ist die sicherste Standardwahl — er ist robust gegenüber Abwe
 
 Der Zweistichproben-KS-Test prüft, ob zwei Stichproben aus derselben stetigen Verteilung stammen.
 
-[//]: # (<!---FUN hypKolmogorovSmirnov-->)
+{/*---FUN hypKolmogorovSmirnov--*/}
 
 ```kotlin
 val sample1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -318,7 +318,7 @@ result.statistic         // D = max difference between ECDFs
 result.pValue            // p-value
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Die Alternative-Aufzählung
 

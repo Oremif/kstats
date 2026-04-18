@@ -3,7 +3,7 @@ title: "Sampling & Transformation"
 description: "Ranking, z-score normalization, min-max scaling, binning, frequency tables, bootstrap, random sampling, and weighted dice in kstats-sampling."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.sampling.samples.DocsSamples--*/}
 
 `kstats-sampling` provides preprocessing and resampling utilities that sit at the edges of an analysis workflow. The module covers two distinct areas: transforming numeric data and drawing random samples.
 
@@ -13,7 +13,7 @@ description: "Ranking, z-score normalization, min-max scaling, binning, frequenc
 
 `rank()` replaces numeric values with their ordered positions. Tie handling is controlled by the `TieMethod` parameter.
 
-[//]: # (<!---FUN sampRanking-->)
+{/*---FUN sampRanking--*/}
 
 ```kotlin
 val data = doubleArrayOf(3.0, 1.0, 4.0, 1.0, 5.0)
@@ -27,7 +27,7 @@ data.rank(TieMethod.ORDINAL)       // [3.0, 1.0, 4.0, 2.0, 5.0]
 data.percentileRank()              // ranks scaled to 0-100
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 `TieMethod` options:
@@ -42,7 +42,7 @@ data.percentileRank()              // ranks scaled to 0-100
 
 Two standard scaling methods: z-score standardization (mean 0, standard deviation 1) and min-max scaling.
 
-[//]: # (<!---FUN sampNormalization-->)
+{/*---FUN sampNormalization--*/}
 
 ```kotlin
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -53,7 +53,7 @@ data.minMaxNormalize()             // [0.0, 0.25, 0.5, 0.75, 1.0]
 data.minMaxNormalize(0.0, 100.0)   // [0.0, 25.0, 50.0, 75.0, 100.0]
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 `zScore()` is appropriate when the downstream method assumes standardized input. `minMaxNormalize()` scales to [0, 1] by default, or to a custom range.
 
@@ -71,7 +71,7 @@ $$
 
 `bin()` groups values into equal-width intervals and returns the items in each bin. `frequencyTable()` returns interval boundaries, counts, relative frequencies, and cumulative frequencies.
 
-[//]: # (<!---FUN sampBinning-->)
+{/*---FUN sampBinning--*/}
 
 ```kotlin
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
@@ -93,7 +93,7 @@ freq[0].relativeFrequency          // proportion of total
 freq[0].cumulativeFrequency        // running total of relative frequencies
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 `bin()` returns the actual items that fall into each interval — useful for further processing. `frequencyTable()` returns summary statistics per bin — useful for histogram-like reports.
 
@@ -107,7 +107,7 @@ Both `bin()` and `frequencyTable()` accept either a **bin count** (number of bin
 
 `randomSample()` draws without replacement. `bootstrapSample()` draws with replacement — the same element can appear multiple times.
 
-[//]: # (<!---FUN sampRandomBootstrap-->)
+{/*---FUN sampRandomBootstrap--*/}
 
 ```kotlin
 val items = listOf("A", "B", "C", "D", "E")
@@ -116,7 +116,7 @@ items.randomSample(3, Random(42))     // 3 distinct items
 items.bootstrapSample(6, Random(42))  // 6 items, may have repeats
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 `randomSample()` draws **without replacement** — each element appears at most once. The sample size must not exceed the collection size.
@@ -128,7 +128,7 @@ items.bootstrapSample(6, Random(42))  // 6 items, may have repeats
 
 `WeightedCoin` simulates a biased coin flip. `WeightedDice` simulates a weighted random selection from a set of outcomes.
 
-[//]: # (<!---FUN sampWeightedRandom-->)
+{/*---FUN sampWeightedRandom--*/}
 
 ```kotlin
 val coin = WeightedCoin(probability = 0.7)
@@ -138,7 +138,7 @@ val dice = WeightedDice(mapOf("A" to 3.0, "B" to 1.0))
 dice.roll()                        // "A" with 75% probability, "B" with 25%
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 Weights do not need to sum to 1 — they are normalized internally. `WeightedDice` works with any type as the outcome.
 

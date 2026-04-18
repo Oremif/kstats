@@ -3,10 +3,10 @@ title: "Quality Control"
 description: "Detect anomalies, set control limits, and monitor process stability using statistical methods."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.sampling.samples.DocsSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.DocsSamples-->)
+{/*---IMPORT org.oremif.kstats.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.sampling.samples.DocsSamples--*/}
+{/*---IMPORT org.oremif.kstats.correlation.samples.DocsSamples--*/}
 
 <Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/quality-control.ipynb">
   Try this guide as a Kotlin Notebook with Kandy visualizations — run the cells to see charts and explore the data interactively.
@@ -17,7 +17,7 @@ This guide uses temperature sensor readings from a manufacturing line to demonst
 
 ## Process Data
 
-[//]: # (<!---FUN qcProcessData-->)
+{/*---FUN qcProcessData--*/}
 
 ```kotlin
 // Temperature readings (°C) from sensor on production line
@@ -29,13 +29,13 @@ val sensorReadings = doubleArrayOf(
 // Two potential outliers: 162.5 and 141.3
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Anomaly Detection
 
 ### Baseline statistics
 
-[//]: # (<!---FUN qcBaselineStats-->)
+{/*---FUN qcBaselineStats--*/}
 
 ```kotlin
 val summary = sensorReadings.describe()
@@ -47,13 +47,13 @@ summary.max // check for unusually high values
 summary.interquartileRange
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Z-score method
 
 Flag readings more than 3 standard deviations from the mean.
 
-[//]: # (<!---FUN qcZScore-->)
+{/*---FUN qcZScore--*/}
 
 ```kotlin
 val zScores = sensorReadings.zScore()
@@ -62,13 +62,13 @@ val anomalyIndices = zScores.indices.filter { kotlin.math.abs(zScores[it]) > 3.0
 val anomalies = anomalyIndices.map { sensorReadings[it] }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Percentile-based detection
 
 Flag readings outside the 1st and 99th percentiles.
 
-[//]: # (<!---FUN qcPercentileDetection-->)
+{/*---FUN qcPercentileDetection--*/}
 
 ```kotlin
 val lowerBound = sensorReadings.quantile(0.01)
@@ -77,13 +77,13 @@ val upperBound = sensorReadings.quantile(0.99)
 val outliers = sensorReadings.filter { it < lowerBound || it > upperBound }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Control Limits
 
 Compute mean ± 3σ boundaries.
 
-[//]: # (<!---FUN qcControlLimits-->)
+{/*---FUN qcControlLimits--*/}
 
 ```kotlin
 val centerLine = sensorReadings.mean()
@@ -95,13 +95,13 @@ val lowerControlLimit = centerLine - 3 * sigma
 val outOfControl = sensorReadings.filter { it > upperControlLimit || it < lowerControlLimit }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Batch Stability
 
 Compare readings from two production batches to verify the process has not shifted.
 
-[//]: # (<!---FUN qcBatchStability-->)
+{/*---FUN qcBatchStability--*/}
 
 ```kotlin
 val morningBatch = doubleArrayOf(
@@ -124,11 +124,11 @@ batchComparison.pValue
 batchComparison.isSignificant() // false means no significant shift
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ### Multiple batches
 
-[//]: # (<!---FUN qcMultipleBatches-->)
+{/*---FUN qcMultipleBatches--*/}
 
 ```kotlin
 val batch1 = doubleArrayOf(155.2, 154.8, 156.1, 155.5, 154.3)
@@ -140,13 +140,13 @@ anova.fStatistic
 anova.pValue
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Distribution Fit
 
 Verify that readings follow the expected distribution.
 
-[//]: # (<!---FUN qcDistributionFit-->)
+{/*---FUN qcDistributionFit--*/}
 
 ```kotlin
 // Exclude known outliers for fitting
@@ -161,7 +161,7 @@ val ks = kolmogorovSmirnovTest(cleanReadings, fitted)
 ks.pValue // high p-value supports the normal process model
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Tip>
 After fitting a process distribution, use `quantile()` to set thresholds:
@@ -172,7 +172,7 @@ After fitting a process distribution, use `quantile()` to set thresholds:
 
 When monitoring several sensors, check correlations between them.
 
-[//]: # (<!---FUN qcMultiParameter-->)
+{/*---FUN qcMultiParameter--*/}
 
 ```kotlin
 val temperatureSensor = doubleArrayOf(
@@ -196,7 +196,7 @@ val matrix = correlationMatrix(temperatureSensor, pressureSensor, flowRateSensor
 // matrix[1][2] = pressure-flow correlation
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 <Note>
 Strong correlations between sensor readings can indicate shared root causes when one parameter drifts out of control.

@@ -38,14 +38,19 @@ dokka {
 }
 
 korro {
-    docs = fileTree(rootProject.rootDir) {
-        include("README.md")
-        include("kstats-*/Module.md")
-        include("docs/**/*.mdx")
-        include("dokka/modules.md")
+    docs {
+        from(fileTree(rootProject.rootDir) {
+            include("README.md")
+            include("kstats-*/Module.md")
+            include("docs/**/*.mdx")
+            include("dokka/modules.md")
+        })
+        baseDir.set(rootProject.layout.projectDirectory)
     }
 
-    samples = fileTree(project.projectDir) {
-        include("kstats-*/src/commonTest/kotlin/org/oremif/kstats/**/samples/*.kt")
+    samples {
+        from(fileTree(project.projectDir) {
+            include("kstats-*/src/commonTest/kotlin/org/oremif/kstats/**/samples/*.kt")
+        })
     }
 }

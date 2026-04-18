@@ -3,8 +3,8 @@ title: "Building a Statistics Pipeline"
 description: "Organize kstats calls into reusable functions for repeatable analysis workflows."
 ---
 
-[//]: # (<!---IMPORT org.oremif.kstats.hypothesis.samples.PipelineSamples-->)
-[//]: # (<!---IMPORT org.oremif.kstats.correlation.samples.PipelineSamples-->)
+{/*---IMPORT org.oremif.kstats.hypothesis.samples.PipelineSamples--*/}
+{/*---IMPORT org.oremif.kstats.correlation.samples.PipelineSamples--*/}
 
 <Card title="Kotlin Notebook" icon="notebook" href="https://github.com/Oremif/kstats/blob/master/samples/building-a-pipeline.ipynb">
   Try this guide as a Kotlin Notebook with Kandy visualizations — run the cells to see charts and explore the data interactively.
@@ -15,7 +15,7 @@ As analysis grows beyond one-off calls, wrapping kstats functions into typed pip
 
 ## Result Types
 
-[//]: # (<!---FUN pipelineResultTypes-->)
+{/*---FUN pipelineResultTypes--*/}
 
 ```kotlin
 data class AssumptionCheck(
@@ -40,11 +40,11 @@ data class AnalysisReport(
 )
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Check Assumptions
 
-[//]: # (<!---FUN pipelineCheckAssumptions-->)
+{/*---FUN pipelineCheckAssumptions--*/}
 
 ```kotlin
 fun checkAssumptions(
@@ -67,13 +67,13 @@ fun checkAssumptions(
 }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Compare Groups
 
 Select the test automatically based on the assumption check.
 
-[//]: # (<!---FUN pipelineCompareGroups-->)
+{/*---FUN pipelineCompareGroups--*/}
 
 ```kotlin
 fun compareGroups(
@@ -97,11 +97,11 @@ fun compareGroups(
 }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Full Report
 
-[//]: # (<!---FUN pipelineFullReport-->)
+{/*---FUN pipelineFullReport--*/}
 
 ```kotlin
 fun analyze(
@@ -121,11 +121,11 @@ fun analyze(
 }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Usage
 
-[//]: # (<!---FUN pipelineUsage-->)
+{/*---FUN pipelineUsage--*/}
 
 ```kotlin
 val pageLoadControl = doubleArrayOf(
@@ -149,13 +149,13 @@ report.comparison.isSignificant
 report.comparison.confidenceInterval
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Extending the Pipeline
 
 Add correlation analysis between metrics:
 
-[//]: # (<!---FUN pipelineExtended-->)
+{/*---FUN pipelineExtended--*/}
 
 ```kotlin
 data class ExtendedReport(
@@ -186,7 +186,7 @@ fun analyzeWithCorrelation(
 }
 ```
 
-[//]: # (<!---END-->)
+{/*---END--*/}
 
 ## Module Responsibilities
 
