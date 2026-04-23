@@ -2,6 +2,7 @@ package org.oremif.kstats.descriptive
 
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
+import kotlin.math.sqrt
 
 // ── SPC Constants ──────────────────────────────────────────────────────────────
 
@@ -488,6 +489,251 @@ public fun cusum(
     k: Double,
     h: Double,
 ): CusumResult = cusum(observations.toList().toDoubleArray(), target, k, h)
+
+// ── EWMA chart ─────────────────────────────────────────────────────────────────
+
+/**
+ * Results of an EWMA (Exponentially Weighted Moving Average) control chart analysis.
+ *
+ * Holds the per-observation smoothed statistic Zₜ and the time-varying upper and lower
+ * control limits, together with the indices of all observations at which the smoothed
+ * statistic fell outside its control limits.
+ *
+ * @property smoothedValues the sequence of exponentially weighted moving averages Zₜ, one
+ * entry per observation.
+ * @property ucl the sequence of upper control limits UCLₜ, one entry per observation.
+ * The limits widen with t and approach their steady-state value.
+ * @property lcl the sequence of lower control limits LCLₜ, one entry per observation.
+ * @property outOfControl the zero-based indices of observations whose smoothed statistic
+ * Zₜ is strictly above [ucl] or strictly below [lcl]. Empty when the process stays in
+ * control.
+ * @see ewma
+ */
+public data class EwmaResult(
+    val smoothedValues: DoubleArray,
+    val ucl: DoubleArray,
+    val lcl: DoubleArray,
+    val outOfControl: IntArray,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is EwmaResult) return false
+        return smoothedValues.contentEquals(other.smoothedValues) &&
+            ucl.contentEquals(other.ucl) &&
+            lcl.contentEquals(other.lcl) &&
+            outOfControl.contentEquals(other.outOfControl)
+    }
+
+    override fun hashCode(): Int {
+        var result = smoothedValues.contentHashCode()
+        result = 31 * result + ucl.contentHashCode()
+        result = 31 * result + lcl.contentHashCode()
+        result = 31 * result + outOfControl.contentHashCode()
+        return result
+    }
+
+    override fun toString(): String =
+        "EwmaResult(smoothedValues=${smoothedValues.contentToString()}, " +
+            "ucl=${ucl.contentToString()}, lcl=${lcl.contentToString()}, " +
+            "outOfControl=${outOfControl.contentToString()})"
+}
+
+/**
+ * Computes an EWMA (Exponentially Weighted Moving Average) control chart for the given
+ * [observations].
+ *
+ * The EWMA chart, due to Roberts (1959), is designed to detect small, sustained shifts in
+ * the process mean more quickly than a Shewhart chart such as [xBarRChart] or [xBarSChart].
+ * Instead of reacting to each single observation, it tracks an exponentially weighted
+ * moving average that gives recent observations higher weight while retaining some memory
+ * of the past, so that a drift of roughly 0.5σ–1σ is detected within a few observations.
+ * EWMA is typically competitive with [cusum] for detecting small shifts and more robust
+ * for non-normal data.
+ *
+ * The smoothed statistic is computed recursively:
+ *
+ * ```
+ *   Zₜ = λ·xₜ + (1 − λ)·Zₜ₋₁,   Z₀ = μ₀
+ * ```
+ *
+ * with time-varying control limits:
+ *
+ * ```
+ *   σ_{Zₜ} = σ · √(λ/(2 − λ) · (1 − (1 − λ)^(2t)))
+ *   UCLₜ / LCLₜ = μ₀ ± L · σ_{Zₜ}
+ * ```
+ *
+ * The smoothing parameter [lambda] controls the memory of the chart — small values
+ * (λ ≈ 0.05–0.25) give high sensitivity to small shifts but slow response to large shifts,
+ * while larger values (λ ≈ 0.40) behave more like a Shewhart chart. Common choices are
+ * λ = 0.2 with L ≈ 2.7–3.0, which gives an in-control average run length comparable to a
+ * 3σ Shewhart chart while reacting much faster to small shifts.
+ *
+ * NaN values in the data propagate through the computation (IEEE 754 semantics). An
+ * observation of NaN yields a NaN smoothed statistic from that point forward and never
+ * triggers an out-of-control signal (NaN comparisons are always false).
+ *
+ * ### Example:
+ * ```kotlin
+ * val observations = doubleArrayOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
+ * val result = ewma(observations, target = 25.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+ * result.smoothedValues // exponentially weighted moving averages Zₜ
+ * result.ucl            // upper control limits at each point
+ * result.lcl            // lower control limits at each point
+ * result.outOfControl   // indices of points outside control limits
+ * ```
+ *
+ * References: Roberts (1959), "Control Chart Tests Based on Geometric Moving Averages";
+ * Montgomery, "Introduction to Statistical Quality Control" (7th ed.), §9.2.
+ *
+ * @param observations the sequence of individual measurements to monitor. Must contain
+ * at least 1 element.
+ * @param target the reference mean μ₀ to monitor against, also used as the initial value
+ * Z₀ of the smoothed statistic.
+ * @param sigma the in-control process standard deviation σ. Must be strictly positive.
+ * @param lambda the smoothing parameter λ ∈ (0, 1] controlling the weight of new
+ * observations. Typical values are 0.05–0.40; λ = 0.2 is a common default.
+ * @param controlLimitWidth the control limit width L, in units of σ_{Zₜ}. Must be strictly
+ * positive. Typical values are 2.7–3.0.
+ * @return an [EwmaResult] with the full Zₜ series, per-observation control limits, and
+ * the indices of any out-of-control points.
+ * @throws InsufficientDataException if [observations] is empty.
+ * @throws InvalidParameterException if [sigma] is non-positive, [lambda] is outside
+ * (0, 1], or [controlLimitWidth] is non-positive.
+ * @see EwmaResult
+ * @see cusum
+ * @see xBarRChart
+ * @see xBarSChart
+ */
+public fun ewma(
+    observations: DoubleArray,
+    target: Double,
+    sigma: Double,
+    lambda: Double,
+    controlLimitWidth: Double,
+): EwmaResult {
+    if (observations.isEmpty()) throw InsufficientDataException(
+        "EWMA requires at least 1 observation, got 0"
+    )
+    if (sigma <= 0.0) throw InvalidParameterException("sigma must be positive, got $sigma")
+    if (lambda <= 0.0 || lambda > 1.0) throw InvalidParameterException(
+        "lambda must be in (0, 1], got $lambda"
+    )
+    if (controlLimitWidth <= 0.0) throw InvalidParameterException(
+        "controlLimitWidth must be positive, got $controlLimitWidth"
+    )
+
+    // EWMA chart (Roberts 1959, "Control Chart Tests Based on Geometric Moving Averages";
+    // Montgomery "Introduction to Statistical Quality Control" 7th ed., §9.2):
+    //   Zₜ = λ·xₜ + (1 − λ)·Zₜ₋₁,   Z₀ = μ₀
+    //   σ_{Zₜ} = σ · √(λ/(2 − λ) · (1 − (1 − λ)^(2t)))
+    //   UCLₜ / LCLₜ = μ₀ ± L · σ_{Zₜ}
+    val n = observations.size
+    val smoothed = DoubleArray(n)
+    val ucl = DoubleArray(n)
+    val lcl = DoubleArray(n)
+    val outOfControl = mutableListOf<Int>()
+
+    val oneMinusLambda = 1.0 - lambda
+    val steadyStateFactor = lambda / (2.0 - lambda)
+
+    var prev = target
+    var oneMinusLambdaPowT = 1.0 // (1 − λ)^0
+    for (i in 0 until n) {
+        val z = lambda * observations[i] + oneMinusLambda * prev
+        smoothed[i] = z
+        oneMinusLambdaPowT *= oneMinusLambda // (1 − λ)^(i+1) = (1 − λ)^t
+        val r = oneMinusLambdaPowT
+        // (1 − r) · (1 + r) instead of 1 − r·r to avoid catastrophic cancellation when
+        // r ≈ 1 (small λ with small t).
+        val variance = steadyStateFactor * (1.0 - r) * (1.0 + r)
+        val sigmaZt = sigma * sqrt(variance)
+        val width = controlLimitWidth * sigmaZt
+        ucl[i] = target + width
+        lcl[i] = target - width
+        if (z > ucl[i] || z < lcl[i]) {
+            outOfControl.add(i)
+        }
+        prev = z
+    }
+
+    return EwmaResult(
+        smoothedValues = smoothed,
+        ucl = ucl,
+        lcl = lcl,
+        outOfControl = outOfControl.toIntArray(),
+    )
+}
+
+/**
+ * Computes an EWMA control chart for an [Iterable] of observations.
+ *
+ * Convenience overload that collects [observations] into a `DoubleArray` and delegates
+ * to the primary [ewma] function. See [ewma] for the full description of the algorithm,
+ * parameter guidance, and references.
+ *
+ * ### Example:
+ * ```kotlin
+ * val observations: List<Double> = listOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
+ * val result = ewma(observations, target = 25.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+ * result.outOfControl  // indices of points outside control limits
+ * ```
+ *
+ * @param observations the sequence of individual measurements to monitor. Must contain
+ * at least 1 element.
+ * @param target the reference mean μ₀, also used as the initial value Z₀.
+ * @param sigma the in-control process standard deviation σ. Must be strictly positive.
+ * @param lambda the smoothing parameter λ ∈ (0, 1].
+ * @param controlLimitWidth the control limit width L. Must be strictly positive.
+ * @return an [EwmaResult] with the full Zₜ series, control limits, and out-of-control indices.
+ * @throws InsufficientDataException if [observations] is empty.
+ * @throws InvalidParameterException if [sigma] is non-positive, [lambda] is outside
+ * (0, 1], or [controlLimitWidth] is non-positive.
+ * @see ewma
+ * @see EwmaResult
+ */
+public fun ewma(
+    observations: Iterable<Double>,
+    target: Double,
+    sigma: Double,
+    lambda: Double,
+    controlLimitWidth: Double,
+): EwmaResult = ewma(observations.toList().toDoubleArray(), target, sigma, lambda, controlLimitWidth)
+
+/**
+ * Computes an EWMA control chart for a [Sequence] of observations.
+ *
+ * Convenience overload that collects [observations] into a `DoubleArray` and delegates
+ * to the primary [ewma] function. See [ewma] for the full description of the algorithm,
+ * parameter guidance, and references.
+ *
+ * ### Example:
+ * ```kotlin
+ * val observations: Sequence<Double> = sequenceOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
+ * val result = ewma(observations, target = 25.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+ * result.outOfControl  // indices of points outside control limits
+ * ```
+ *
+ * @param observations the sequence of individual measurements to monitor. Must contain
+ * at least 1 element.
+ * @param target the reference mean μ₀, also used as the initial value Z₀.
+ * @param sigma the in-control process standard deviation σ. Must be strictly positive.
+ * @param lambda the smoothing parameter λ ∈ (0, 1].
+ * @param controlLimitWidth the control limit width L. Must be strictly positive.
+ * @return an [EwmaResult] with the full Zₜ series, control limits, and out-of-control indices.
+ * @throws InsufficientDataException if [observations] is empty.
+ * @throws InvalidParameterException if [sigma] is non-positive, [lambda] is outside
+ * (0, 1], or [controlLimitWidth] is non-positive.
+ * @see ewma
+ * @see EwmaResult
+ */
+public fun ewma(
+    observations: Sequence<Double>,
+    target: Double,
+    sigma: Double,
+    lambda: Double,
+    controlLimitWidth: Double,
+): EwmaResult = ewma(observations.toList().toDoubleArray(), target, sigma, lambda, controlLimitWidth)
 
 // ── Validation ─────────────────────────────────────────────────────────────────
 

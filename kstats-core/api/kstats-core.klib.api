@@ -235,6 +235,28 @@ final class org.oremif.kstats.descriptive/DescriptiveStatistics { // org.oremif.
     final fun toString(): kotlin/String // org.oremif.kstats.descriptive/DescriptiveStatistics.toString|toString(){}[0]
 }
 
+final class org.oremif.kstats.descriptive/EwmaResult { // org.oremif.kstats.descriptive/EwmaResult|null[0]
+    constructor <init>(kotlin/DoubleArray, kotlin/DoubleArray, kotlin/DoubleArray, kotlin/IntArray) // org.oremif.kstats.descriptive/EwmaResult.<init>|<init>(kotlin.DoubleArray;kotlin.DoubleArray;kotlin.DoubleArray;kotlin.IntArray){}[0]
+
+    final val lcl // org.oremif.kstats.descriptive/EwmaResult.lcl|{}lcl[0]
+        final fun <get-lcl>(): kotlin/DoubleArray // org.oremif.kstats.descriptive/EwmaResult.lcl.<get-lcl>|<get-lcl>(){}[0]
+    final val outOfControl // org.oremif.kstats.descriptive/EwmaResult.outOfControl|{}outOfControl[0]
+        final fun <get-outOfControl>(): kotlin/IntArray // org.oremif.kstats.descriptive/EwmaResult.outOfControl.<get-outOfControl>|<get-outOfControl>(){}[0]
+    final val smoothedValues // org.oremif.kstats.descriptive/EwmaResult.smoothedValues|{}smoothedValues[0]
+        final fun <get-smoothedValues>(): kotlin/DoubleArray // org.oremif.kstats.descriptive/EwmaResult.smoothedValues.<get-smoothedValues>|<get-smoothedValues>(){}[0]
+    final val ucl // org.oremif.kstats.descriptive/EwmaResult.ucl|{}ucl[0]
+        final fun <get-ucl>(): kotlin/DoubleArray // org.oremif.kstats.descriptive/EwmaResult.ucl.<get-ucl>|<get-ucl>(){}[0]
+
+    final fun component1(): kotlin/DoubleArray // org.oremif.kstats.descriptive/EwmaResult.component1|component1(){}[0]
+    final fun component2(): kotlin/DoubleArray // org.oremif.kstats.descriptive/EwmaResult.component2|component2(){}[0]
+    final fun component3(): kotlin/DoubleArray // org.oremif.kstats.descriptive/EwmaResult.component3|component3(){}[0]
+    final fun component4(): kotlin/IntArray // org.oremif.kstats.descriptive/EwmaResult.component4|component4(){}[0]
+    final fun copy(kotlin/DoubleArray = ..., kotlin/DoubleArray = ..., kotlin/DoubleArray = ..., kotlin/IntArray = ...): org.oremif.kstats.descriptive/EwmaResult // org.oremif.kstats.descriptive/EwmaResult.copy|copy(kotlin.DoubleArray;kotlin.DoubleArray;kotlin.DoubleArray;kotlin.IntArray){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.descriptive/EwmaResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.descriptive/EwmaResult.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.descriptive/EwmaResult.toString|toString(){}[0]
+}
+
 final class org.oremif.kstats.descriptive/OnlineStatistics { // org.oremif.kstats.descriptive/OnlineStatistics|null[0]
     constructor <init>() // org.oremif.kstats.descriptive/OnlineStatistics.<init>|<init>(){}[0]
 
@@ -495,6 +517,9 @@ final fun org.oremif.kstats.core/trigamma(kotlin/Double): kotlin/Double // org.o
 final fun org.oremif.kstats.descriptive/cusum(kotlin.collections/Iterable<kotlin/Double>, kotlin/Double, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/CusumResult // org.oremif.kstats.descriptive/cusum|cusum(kotlin.collections.Iterable<kotlin.Double>;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
 final fun org.oremif.kstats.descriptive/cusum(kotlin.sequences/Sequence<kotlin/Double>, kotlin/Double, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/CusumResult // org.oremif.kstats.descriptive/cusum|cusum(kotlin.sequences.Sequence<kotlin.Double>;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
 final fun org.oremif.kstats.descriptive/cusum(kotlin/DoubleArray, kotlin/Double, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/CusumResult // org.oremif.kstats.descriptive/cusum|cusum(kotlin.DoubleArray;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+final fun org.oremif.kstats.descriptive/ewma(kotlin.collections/Iterable<kotlin/Double>, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/EwmaResult // org.oremif.kstats.descriptive/ewma|ewma(kotlin.collections.Iterable<kotlin.Double>;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+final fun org.oremif.kstats.descriptive/ewma(kotlin.sequences/Sequence<kotlin/Double>, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/EwmaResult // org.oremif.kstats.descriptive/ewma|ewma(kotlin.sequences.Sequence<kotlin.Double>;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+final fun org.oremif.kstats.descriptive/ewma(kotlin/DoubleArray, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/EwmaResult // org.oremif.kstats.descriptive/ewma|ewma(kotlin.DoubleArray;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
 final fun org.oremif.kstats.descriptive/spcConstants(kotlin/Int): org.oremif.kstats.descriptive/SpcConstants // org.oremif.kstats.descriptive/spcConstants|spcConstants(kotlin.Int){}[0]
 final fun org.oremif.kstats.descriptive/xBarRChart(kotlin.collections/List<kotlin/DoubleArray>): org.oremif.kstats.descriptive/XBarRChartResult // org.oremif.kstats.descriptive/xBarRChart|xBarRChart(kotlin.collections.List<kotlin.DoubleArray>){}[0]
 final fun org.oremif.kstats.descriptive/xBarSChart(kotlin.collections/List<kotlin/DoubleArray>): org.oremif.kstats.descriptive/XBarSChartResult // org.oremif.kstats.descriptive/xBarSChart|xBarSChart(kotlin.collections.List<kotlin.DoubleArray>){}[0]
