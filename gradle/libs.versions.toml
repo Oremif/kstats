@@ -1,7 +1,7 @@
 [versions]
 kstats = "0.5.0"
 
-agp = "9.1.1"
+agp = "9.2.0"
 kotlin = "2.3.21"
 android-minSdk = "24"
 android-compileSdk = "36"
