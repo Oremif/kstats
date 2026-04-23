@@ -1561,14 +1561,16 @@ internal class ControlChartTest {
     fun testCusumResultToStringRendersArrayContents() {
         // toString must use contentToString() for DoubleArray fields — the default
         // data-class toString would print `[D@<hash>` which is useless for diagnostics.
+        // Note: all test values have non-zero fractional parts so `Double.toString()`
+        // matches on JVM and JS (on JS `(0.0).toString() == "0"`, not `"0.0"`).
         val result = CusumResult(
-            sPlus = doubleArrayOf(0.0, 0.1, 0.3),
-            sMinus = doubleArrayOf(0.0, 0.0, 0.05),
+            sPlus = doubleArrayOf(0.1, 0.2, 0.3),
+            sMinus = doubleArrayOf(0.05, 0.15, 0.25),
             alarmIndex = -1,
         )
         val s = result.toString()
-        assertTrue(s.contains("sPlus=[0.0, 0.1, 0.3]"), "toString should render sPlus elements, got: $s")
-        assertTrue(s.contains("sMinus=[0.0, 0.0, 0.05]"), "toString should render sMinus elements, got: $s")
+        assertTrue(s.contains("sPlus=[0.1, 0.2, 0.3]"), "toString should render sPlus elements, got: $s")
+        assertTrue(s.contains("sMinus=[0.05, 0.15, 0.25]"), "toString should render sMinus elements, got: $s")
         assertTrue(s.contains("alarmIndex=-1"), "toString should render alarmIndex, got: $s")
         assertTrue(!s.contains("[D@"), "toString must not leak default array identity, got: $s")
     }
@@ -2439,14 +2441,16 @@ internal class ControlChartTest {
     fun testEwmaResultToStringRendersArrayContents() {
         // toString must use contentToString() for DoubleArray/IntArray fields — the default
         // data-class toString would print `[D@<hash>` which is useless for diagnostics.
+        // Note: all double values have non-zero fractional parts so `Double.toString()`
+        // matches on JVM and JS (on JS `(10.0).toString() == "10"`, not `"10.0"`).
         val result = EwmaResult(
-            smoothedValues = doubleArrayOf(10.0, 10.2, 10.4),
+            smoothedValues = doubleArrayOf(10.1, 10.2, 10.4),
             ucl = doubleArrayOf(10.6, 10.77, 10.86),
             lcl = doubleArrayOf(9.4, 9.23, 9.14),
             outOfControl = intArrayOf(2),
         )
         val s = result.toString()
-        assertTrue(s.contains("smoothedValues=[10.0, 10.2, 10.4]"), "toString should render smoothedValues, got: $s")
+        assertTrue(s.contains("smoothedValues=[10.1, 10.2, 10.4]"), "toString should render smoothedValues, got: $s")
         assertTrue(s.contains("ucl=[10.6, 10.77, 10.86]"), "toString should render ucl, got: $s")
         assertTrue(s.contains("lcl=[9.4, 9.23, 9.14]"), "toString should render lcl, got: $s")
         assertTrue(s.contains("outOfControl=[2]"), "toString should render outOfControl, got: $s")
