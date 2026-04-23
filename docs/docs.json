@@ -4,7 +4,7 @@
   "name": "kstats",
   "description": "Kotlin Multiplatform statistics toolkit for descriptive analysis, distributions, hypothesis testing, correlation, and sampling.",
   "variables": {
-    "kstats-version": "0.4.0"
+    "kstats-version": "0.5.0"
   },
   "colors": {
     "primary": "#29323D",
@@ -88,7 +88,7 @@
         "language": "en",
         "versions": [
           {
-            "version": "0.4.0",
+            "version": "0.5.0",
             "tabs": [
               {
                 "tab": "Documentation",
@@ -147,7 +147,7 @@
         "language": "de",
         "versions": [
           {
-            "version": "0.4.0",
+            "version": "0.5.0",
             "tabs": [
               {
                 "tab": "Dokumentation",
