@@ -95,6 +95,9 @@ public final class org/oremif/kstats/descriptive/ControlChartKt {
 	public static final fun ewma (Lkotlin/sequences/Sequence;DDDD)Lorg/oremif/kstats/descriptive/EwmaResult;
 	public static final fun ewma ([DDDDD)Lorg/oremif/kstats/descriptive/EwmaResult;
 	public static final fun spcConstants (I)Lorg/oremif/kstats/descriptive/SpcConstants;
+	public static final fun westernElectricRules (Ljava/lang/Iterable;DD)Lorg/oremif/kstats/descriptive/WesternElectricRulesResult;
+	public static final fun westernElectricRules (Lkotlin/sequences/Sequence;DD)Lorg/oremif/kstats/descriptive/WesternElectricRulesResult;
+	public static final fun westernElectricRules ([DDD)Lorg/oremif/kstats/descriptive/WesternElectricRulesResult;
 	public static final fun xBarRChart (Ljava/util/List;)Lorg/oremif/kstats/descriptive/XBarRChartResult;
 	public static final fun xBarSChart (Ljava/util/List;)Lorg/oremif/kstats/descriptive/XBarSChartResult;
 }
@@ -480,6 +483,23 @@ public final class org/oremif/kstats/descriptive/SpcConstants {
 public final class org/oremif/kstats/descriptive/SummaryStatisticsKt {
 	public static final fun describe (Ljava/lang/Iterable;)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
 	public static final fun describe ([D)Lorg/oremif/kstats/descriptive/DescriptiveStatistics;
+}
+
+public final class org/oremif/kstats/descriptive/WesternElectricRulesResult {
+	public fun <init> ([I[I[I[I)V
+	public final fun component1 ()[I
+	public final fun component2 ()[I
+	public final fun component3 ()[I
+	public final fun component4 ()[I
+	public final fun copy ([I[I[I[I)Lorg/oremif/kstats/descriptive/WesternElectricRulesResult;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/descriptive/WesternElectricRulesResult;[I[I[I[IILjava/lang/Object;)Lorg/oremif/kstats/descriptive/WesternElectricRulesResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRule1 ()[I
+	public final fun getRule2 ()[I
+	public final fun getRule3 ()[I
+	public final fun getRule4 ()[I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/oremif/kstats/descriptive/XBarRChartResult {
