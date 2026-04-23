@@ -1206,14 +1206,14 @@ internal class ControlChartTest {
     @Test
     fun testCusumEmptyIterable() {
         assertFailsWith<InsufficientDataException> {
-            cusum(emptyList<Double>(), target = 0.0, k = 0.5, h = 5.0)
+            cusum(emptyList(), target = 0.0, k = 0.5, h = 5.0)
         }
     }
 
     @Test
     fun testCusumEmptySequence() {
         assertFailsWith<InsufficientDataException> {
-            cusum(emptySequence<Double>(), target = 0.0, k = 0.5, h = 5.0)
+            cusum(emptySequence(), target = 0.0, k = 0.5, h = 5.0)
         }
     }
 
@@ -1849,14 +1849,14 @@ internal class ControlChartTest {
     @Test
     fun testEwmaEmptyIterable() {
         assertFailsWith<InsufficientDataException> {
-            ewma(emptyList<Double>(), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+            ewma(emptyList(), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
         }
     }
 
     @Test
     fun testEwmaEmptySequence() {
         assertFailsWith<InsufficientDataException> {
-            ewma(emptySequence<Double>(), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+            ewma(emptySequence(), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
         }
     }
 
@@ -2293,7 +2293,7 @@ internal class ControlChartTest {
         assertTrue(
             result.outOfControl.contentEquals(expected.toIntArray()),
             "outOfControl should be exactly {i : z[i] ∉ [lcl[i], ucl[i]]}, " +
-                "expected ${expected} got ${result.outOfControl.toList()}"
+                "expected $expected got ${result.outOfControl.toList()}"
         )
     }
 
@@ -2796,14 +2796,14 @@ internal class ControlChartTest {
     @Test
     fun testWesternElectricRulesEmptyIterable() {
         assertFailsWith<InsufficientDataException> {
-            westernElectricRules(emptyList<Double>(), center = 0.0, sigma = 1.0)
+            westernElectricRules(emptyList(), center = 0.0, sigma = 1.0)
         }
     }
 
     @Test
     fun testWesternElectricRulesEmptySequence() {
         assertFailsWith<InsufficientDataException> {
-            westernElectricRules(emptySequence<Double>(), center = 0.0, sigma = 1.0)
+            westernElectricRules(emptySequence(), center = 0.0, sigma = 1.0)
         }
     }
 
@@ -3081,7 +3081,7 @@ internal class ControlChartTest {
         // enough consecutive 3σ violations, rule 2 must fire at some point too.
         val obs = doubleArrayOf(3.5, 3.5, 3.5, 3.5, 3.5)
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
-        assertTrue(r.rule1.size == 5, "All 5 are beyond 3σ")
+        assertEquals(r.rule1.size, 5, "All 5 are beyond 3σ")
         assertTrue(r.rule2.isNotEmpty(), "Consecutive 3σ alarms must also trigger rule 2")
         assertTrue(r.rule3.isNotEmpty(), "5 consecutive 3σ alarms must also trigger rule 3")
     }

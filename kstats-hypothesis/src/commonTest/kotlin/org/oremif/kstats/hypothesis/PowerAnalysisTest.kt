@@ -1,7 +1,6 @@
 package org.oremif.kstats.hypothesis
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

@@ -56,7 +56,6 @@ public fun mannWhitneyUTest(
     for (i in 0 until n1) r1 += ranks[i]
     val u1 = r1 - n1 * (n1 + 1.0) / 2.0
     val u2 = n1.toDouble() * n2 - u1
-    val u = minOf(u1, u2)
 
     // Normal approximation with tie correction
     val mu = n1.toDouble() * n2 / 2.0

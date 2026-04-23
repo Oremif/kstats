@@ -490,7 +490,6 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleKnownValuesAllAlternatives() {
         // scipy: 60/100 vs 40/100
-        val two = proportionZTest(successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100)
         val less = proportionZTest(
             successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100,
             alternative = Alternative.LESS

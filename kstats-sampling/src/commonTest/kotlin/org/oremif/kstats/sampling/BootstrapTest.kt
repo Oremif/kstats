@@ -728,7 +728,7 @@ class BootstrapTest {
         // Verify bootstrapCI works with a custom statistic (standard deviation)
         val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
         val observedStd = sqrt(
-            data.map { (it - data.average()) * (it - data.average()) }.sum() / (data.size - 1)
+            data.sumOf { (it - data.average()) * (it - data.average()) } / (data.size - 1)
         )
 
         val result = bootstrapCI(
@@ -738,7 +738,7 @@ class BootstrapTest {
             random = Random(42),
             statistic = { arr ->
                 val mean = arr.average()
-                sqrt(arr.map { (it - mean) * (it - mean) }.sum() / (arr.size - 1))
+                sqrt(arr.sumOf { (it - mean) * (it - mean) } / (arr.size - 1))
             },
         )
 
