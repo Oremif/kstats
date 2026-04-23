@@ -42,7 +42,7 @@ data.skewness()           // => 0.3942
 
 ```kotlin
 dependencies {
-    implementation(platform("org.oremif:kstats-bom:0.4.0"))
+    implementation(platform("org.oremif:kstats-bom:0.5.0"))
     implementation("org.oremif:kstats-core")
     // add other modules as needed
 }
@@ -54,14 +54,14 @@ dependencies {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(project.dependencies.platform("org.oremif:kstats-bom:0.4.0"))
+            implementation(project.dependencies.platform("org.oremif:kstats-bom:0.5.0"))
             implementation("org.oremif:kstats-core")
         }
     }
 }
 ```
 
-If you only need one module: `implementation("org.oremif:kstats-core:0.4.0")`.
+If you only need one module: `implementation("org.oremif:kstats-core:0.5.0")`.
 
 ## Modules
 
