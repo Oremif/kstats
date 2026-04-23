@@ -318,7 +318,7 @@ class DistributionTest {
 
     @Test
     fun sampleProducesFiniteValues() {
-        val distributions = listOf<Pair<String, ContinuousDistribution>>(
+        val distributions = listOf(
             "Normal" to NormalDistribution.STANDARD,
             "Exponential" to ExponentialDistribution.STANDARD,
             "Laplace" to LaplaceDistribution.STANDARD,
@@ -338,7 +338,7 @@ class DistributionTest {
 
     @Test
     fun continuousNaNPropagation() {
-        val distributions = listOf<Pair<String, ContinuousDistribution>>(
+        val distributions = listOf(
             "Exponential" to ExponentialDistribution.STANDARD,
             "Normal" to NormalDistribution.STANDARD,
         )

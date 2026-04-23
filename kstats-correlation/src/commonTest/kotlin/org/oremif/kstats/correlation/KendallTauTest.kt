@@ -315,9 +315,9 @@ class KendallTauTest {
 
         // Brute-force calculation
         val n = x.size
-        var con = 0;
-        var disc = 0;
-        var tx = 0;
+        var con = 0
+        var disc = 0
+        var tx = 0
         var ty = 0
         for (i in 0 until n) {
             for (j in i + 1 until n) {

@@ -160,7 +160,7 @@ public fun Iterable<Long>.describe(): DescriptiveStatistics = toStatArray().desc
  * @param lsl the lower specification limit. Must be less than [usl].
  * @param usl the upper specification limit. Must be greater than [lsl].
  * @return a [ProcessCapabilityResult] containing Cp, Cpk, Pp, and Ppk.
- * @throws DegenerateDataException if all values are identical (standard deviation is zero).
+ * @throws org.oremif.kstats.core.exceptions.DegenerateDataException if all values are identical (standard deviation is zero).
  */
 @JvmName("processCapabilityOfLong")
 public fun Iterable<Long>.processCapability(lsl: Double, usl: Double): ProcessCapabilityResult =

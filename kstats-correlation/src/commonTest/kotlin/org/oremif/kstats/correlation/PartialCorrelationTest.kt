@@ -87,7 +87,7 @@ class PartialCorrelationTest {
         // partialCorrelation(x, y, *emptyArray()) should delegate to Pearson
         val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
-        val partial = partialCorrelation(x, y, *emptyArray())
+        val partial = partialCorrelation(x, y)
         val pearson = pearsonCorrelation(x, y)
         assertEquals(pearson.coefficient, partial.coefficient, tol)
         assertEquals(pearson.pValue, partial.pValue, tol)

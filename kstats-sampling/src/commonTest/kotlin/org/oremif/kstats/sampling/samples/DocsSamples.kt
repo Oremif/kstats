@@ -1,8 +1,6 @@
 package org.oremif.kstats.sampling.samples
 
 import org.oremif.kstats.sampling.*
-import org.oremif.kstats.descriptive.Frequency
-import org.oremif.kstats.descriptive.toFrequency
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -174,8 +172,8 @@ class DocsSamples {
 
     @Test
     fun edaFrequencyDistribution() {
-        val responseTimeMs = DocsSamples.responseTimeMs
-        val errorsPerHour = DocsSamples.errorsPerHour
+        val responseTimeMs = responseTimeMs
+        val errorsPerHour = errorsPerHour
         // SampleStart
         val rtBins = responseTimeMs.frequencyTable(binCount = 5)
         rtBins.forEach { bin ->
@@ -191,9 +189,9 @@ class DocsSamples {
 
     @Test
     fun edaNormalizeRank() {
-        val responseTimeMs = DocsSamples.responseTimeMs
-        val memoryUsageMb = DocsSamples.memoryUsageMb
-        val throughputRps = DocsSamples.throughputRps
+        val responseTimeMs = responseTimeMs
+        val memoryUsageMb = memoryUsageMb
+        val throughputRps = throughputRps
         // SampleStart
         // Z-score: values become standard deviations from mean
         val rtNormalized = responseTimeMs.zScore()

@@ -141,7 +141,6 @@ class SemiVarianceTest {
         val n = 1000
         val base = 1e15
         val arr = DoubleArray(n) { base + it.toDouble() }
-        val mean = arr.mean()
         val down = arr.semiVariance(direction = SemiVarianceDirection.DOWNSIDE)
         val up = arr.semiVariance(direction = SemiVarianceDirection.UPSIDE)
         // downside + upside must equal sample variance
