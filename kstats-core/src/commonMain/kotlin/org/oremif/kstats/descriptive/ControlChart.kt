@@ -325,6 +325,10 @@ public data class CusumResult(
         result = 31 * result + alarmIndex
         return result
     }
+
+    override fun toString(): String =
+        "CusumResult(sPlus=${sPlus.contentToString()}, sMinus=${sMinus.contentToString()}, " +
+            "alarmIndex=$alarmIndex)"
 }
 
 /**

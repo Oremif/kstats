@@ -1555,4 +1555,20 @@ internal class ControlChartTest {
         assertEquals(result.sMinus.size, sMinus.size, "sMinus via destructuring")
         assertEquals(result.alarmIndex, alarmIndex, "alarmIndex via destructuring")
     }
+
+    @Test
+    fun testCusumResultToStringRendersArrayContents() {
+        // toString must use contentToString() for DoubleArray fields — the default
+        // data-class toString would print `[D@<hash>` which is useless for diagnostics.
+        val result = CusumResult(
+            sPlus = doubleArrayOf(0.0, 0.1, 0.3),
+            sMinus = doubleArrayOf(0.0, 0.0, 0.05),
+            alarmIndex = -1,
+        )
+        val s = result.toString()
+        assertTrue(s.contains("sPlus=[0.0, 0.1, 0.3]"), "toString should render sPlus elements, got: $s")
+        assertTrue(s.contains("sMinus=[0.0, 0.0, 0.05]"), "toString should render sMinus elements, got: $s")
+        assertTrue(s.contains("alarmIndex=-1"), "toString should render alarmIndex, got: $s")
+        assertTrue(!s.contains("[D@"), "toString must not leak default array identity, got: $s")
+    }
 }
