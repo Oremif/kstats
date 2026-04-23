@@ -88,6 +88,9 @@ public final class org/oremif/kstats/descriptive/CentralTendencyKt {
 }
 
 public final class org/oremif/kstats/descriptive/ControlChartKt {
+	public static final fun cusum (Ljava/lang/Iterable;DDD)Lorg/oremif/kstats/descriptive/CusumResult;
+	public static final fun cusum (Lkotlin/sequences/Sequence;DDD)Lorg/oremif/kstats/descriptive/CusumResult;
+	public static final fun cusum ([DDDD)Lorg/oremif/kstats/descriptive/CusumResult;
 	public static final fun spcConstants (I)Lorg/oremif/kstats/descriptive/SpcConstants;
 	public static final fun xBarRChart (Ljava/util/List;)Lorg/oremif/kstats/descriptive/XBarRChartResult;
 	public static final fun xBarSChart (Ljava/util/List;)Lorg/oremif/kstats/descriptive/XBarSChartResult;
@@ -104,6 +107,21 @@ public final class org/oremif/kstats/descriptive/ControlChartLimits {
 	public final fun getCenterLine ()D
 	public final fun getLcl ()D
 	public final fun getUcl ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/oremif/kstats/descriptive/CusumResult {
+	public fun <init> ([D[DI)V
+	public final fun component1 ()[D
+	public final fun component2 ()[D
+	public final fun component3 ()I
+	public final fun copy ([D[DI)Lorg/oremif/kstats/descriptive/CusumResult;
+	public static synthetic fun copy$default (Lorg/oremif/kstats/descriptive/CusumResult;[D[DIILjava/lang/Object;)Lorg/oremif/kstats/descriptive/CusumResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlarmIndex ()I
+	public final fun getSMinus ()[D
+	public final fun getSPlus ()[D
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

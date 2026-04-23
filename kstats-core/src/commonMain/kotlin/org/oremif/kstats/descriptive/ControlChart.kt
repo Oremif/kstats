@@ -287,6 +287,204 @@ public fun xBarSChart(subgroups: List<DoubleArray>): XBarSChartResult {
     )
 }
 
+// ── CUSUM chart ────────────────────────────────────────────────────────────────
+
+/**
+ * Results of a two-sided tabular CUSUM control chart analysis.
+ *
+ * Holds the per-observation upper (C⁺) and lower (C⁻) cumulative sums produced by the
+ * tabular CUSUM algorithm, together with the index of the first observation at which an
+ * out-of-control signal fired. The upper sum C⁺ accumulates positive deviations above
+ * the target; the lower sum C⁻ accumulates negative deviations below the target. An
+ * alarm is signaled as soon as either sum exceeds the decision interval H.
+ *
+ * @property sPlus the sequence of upper cumulative sums C⁺ᵢ, one entry per observation.
+ * Each value is non-negative; a rising C⁺ indicates a sustained positive shift from target.
+ * @property sMinus the sequence of lower cumulative sums C⁻ᵢ, one entry per observation.
+ * Each value is non-negative; a rising C⁻ indicates a sustained negative shift from target.
+ * @property alarmIndex the zero-based index of the first observation at which C⁺ > H or
+ * C⁻ > H, or `-1` if no alarm was triggered anywhere in the series.
+ * @see cusum
+ */
+public data class CusumResult(
+    val sPlus: DoubleArray,
+    val sMinus: DoubleArray,
+    val alarmIndex: Int,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is CusumResult) return false
+        return alarmIndex == other.alarmIndex &&
+            sPlus.contentEquals(other.sPlus) &&
+            sMinus.contentEquals(other.sMinus)
+    }
+
+    override fun hashCode(): Int {
+        var result = sPlus.contentHashCode()
+        result = 31 * result + sMinus.contentHashCode()
+        result = 31 * result + alarmIndex
+        return result
+    }
+}
+
+/**
+ * Computes a two-sided tabular CUSUM control chart for the given [observations].
+ *
+ * The cumulative sum (CUSUM) chart is designed to detect small, sustained shifts in the
+ * process mean more quickly than a Shewhart chart such as [xBarRChart] or [xBarSChart].
+ * Where a Shewhart chart reacts only to each single observation, CUSUM accumulates
+ * deviations from the reference mean over time, so even a drift of roughly 0.5σ–1σ is
+ * detected within a few observations.
+ *
+ * This implementation uses the standard tabular two-sided formulation:
+ *
+ * ```
+ *   C⁺ᵢ = max(0, C⁺ᵢ₋₁ + (xᵢ − μ₀ − K))
+ *   C⁻ᵢ = max(0, C⁻ᵢ₋₁ + (μ₀ − K − xᵢ))
+ * ```
+ *
+ * with C⁺₀ = C⁻₀ = 0. An out-of-control signal is raised at the first index where
+ * C⁺ᵢ > H or C⁻ᵢ > H.
+ *
+ * The allowance [k] (often denoted K) is typically chosen as half the magnitude of the
+ * shift (in σ units) that one wants to detect — a common default is K ≈ 0.5σ, which
+ * targets a 1σ shift. The decision interval [h] (often denoted H) is typically set to
+ * 4σ or 5σ, giving an in-control average run length comparable to a 3σ Shewhart chart
+ * while reacting much faster to small shifts.
+ *
+ * NaN values in the data propagate through the computation (IEEE 754 semantics).
+ *
+ * ### Example:
+ * ```kotlin
+ * // Process with target 10.0, drifting upward after observation 4.
+ * val observations = doubleArrayOf(10.0, 10.1, 9.9, 10.0, 10.2, 10.5, 10.7, 10.9, 11.1)
+ * val result = cusum(observations, target = 10.0, k = 0.25, h = 4.0)
+ * result.sPlus       // non-negative running upper CUSUM values
+ * result.sMinus      // non-negative running lower CUSUM values
+ * result.alarmIndex  // zero-based index where C⁺ > H first, or -1 if never
+ * ```
+ *
+ * References: Page (1954), "Continuous Inspection Schemes"; Montgomery, "Introduction
+ * to Statistical Quality Control" (7th ed.), §9.1.1.
+ *
+ * @param observations the sequence of individual measurements to monitor. Must contain
+ * at least 1 element.
+ * @param target the reference mean μ₀ to monitor against. Any finite value is allowed.
+ * @param k the allowance (slack) value K, half the magnitude of the shift to detect.
+ * Must be non-negative. Typically chosen as ≈ 0.5σ of the in-control process.
+ * @param h the decision interval H above which the CUSUM signals an out-of-control
+ * condition. Must be strictly positive. Typically chosen as 4σ or 5σ.
+ * @return a [CusumResult] with the full C⁺ and C⁻ series and the index of the first alarm.
+ * @throws InsufficientDataException if [observations] is empty.
+ * @throws InvalidParameterException if [k] is negative or [h] is non-positive.
+ * @see CusumResult
+ * @see xBarRChart
+ * @see xBarSChart
+ */
+public fun cusum(
+    observations: DoubleArray,
+    target: Double,
+    k: Double,
+    h: Double,
+): CusumResult {
+    if (observations.isEmpty()) throw InsufficientDataException(
+        "CUSUM requires at least 1 observation, got 0"
+    )
+    if (k < 0.0) throw InvalidParameterException("allowance k must be non-negative, got $k")
+    if (h <= 0.0) throw InvalidParameterException("decision interval h must be positive, got $h")
+
+    // Tabular two-sided CUSUM (Page 1954; Montgomery "Introduction to Statistical Quality
+    // Control" 7th ed., §9.1.1):
+    //   C⁺ᵢ = max(0, C⁺ᵢ₋₁ + (xᵢ − μ₀ − K))
+    //   C⁻ᵢ = max(0, C⁻ᵢ₋₁ + (μ₀ − K − xᵢ))
+    // Alarm fires when C⁺ᵢ > H or C⁻ᵢ > H.
+    val n = observations.size
+    val sPlus = DoubleArray(n)
+    val sMinus = DoubleArray(n)
+    var prevPlus = 0.0
+    var prevMinus = 0.0
+    var alarmIndex = -1
+
+    for (i in 0 until n) {
+        val x = observations[i]
+        val cPlus = maxOf(0.0, prevPlus + (x - target - k))
+        val cMinus = maxOf(0.0, prevMinus + (target - k - x))
+        sPlus[i] = cPlus
+        sMinus[i] = cMinus
+        if (alarmIndex == -1 && (cPlus > h || cMinus > h)) {
+            alarmIndex = i
+        }
+        prevPlus = cPlus
+        prevMinus = cMinus
+    }
+
+    return CusumResult(sPlus = sPlus, sMinus = sMinus, alarmIndex = alarmIndex)
+}
+
+/**
+ * Computes a two-sided tabular CUSUM control chart for an [Iterable] of observations.
+ *
+ * Convenience overload that collects [observations] into a `DoubleArray` and delegates
+ * to the primary [cusum] function. See [cusum] for the full description of the
+ * algorithm, parameter guidance, and references.
+ *
+ * ### Example:
+ * ```kotlin
+ * val observations: List<Double> = listOf(10.0, 10.1, 9.9, 10.0, 10.2, 10.5, 10.7, 10.9, 11.1)
+ * val result = cusum(observations, target = 10.0, k = 0.25, h = 4.0)
+ * result.alarmIndex  // zero-based index of first alarm, or -1 if never
+ * ```
+ *
+ * @param observations the sequence of individual measurements to monitor. Must contain
+ * at least 1 element.
+ * @param target the reference mean μ₀ to monitor against. Any finite value is allowed.
+ * @param k the allowance (slack) value K. Must be non-negative. Typically ≈ 0.5σ.
+ * @param h the decision interval H. Must be strictly positive. Typically 4σ or 5σ.
+ * @return a [CusumResult] with the full C⁺ and C⁻ series and the index of the first alarm.
+ * @throws InsufficientDataException if [observations] is empty.
+ * @throws InvalidParameterException if [k] is negative or [h] is non-positive.
+ * @see cusum
+ * @see CusumResult
+ */
+public fun cusum(
+    observations: Iterable<Double>,
+    target: Double,
+    k: Double,
+    h: Double,
+): CusumResult = cusum(observations.toList().toDoubleArray(), target, k, h)
+
+/**
+ * Computes a two-sided tabular CUSUM control chart for a [Sequence] of observations.
+ *
+ * Convenience overload that collects [observations] into a `DoubleArray` and delegates
+ * to the primary [cusum] function. See [cusum] for the full description of the
+ * algorithm, parameter guidance, and references.
+ *
+ * ### Example:
+ * ```kotlin
+ * val observations: Sequence<Double> = sequenceOf(10.0, 10.1, 9.9, 10.0, 10.2, 10.5, 10.7, 10.9, 11.1)
+ * val result = cusum(observations, target = 10.0, k = 0.25, h = 4.0)
+ * result.alarmIndex  // zero-based index of first alarm, or -1 if never
+ * ```
+ *
+ * @param observations the sequence of individual measurements to monitor. Must contain
+ * at least 1 element.
+ * @param target the reference mean μ₀ to monitor against. Any finite value is allowed.
+ * @param k the allowance (slack) value K. Must be non-negative. Typically ≈ 0.5σ.
+ * @param h the decision interval H. Must be strictly positive. Typically 4σ or 5σ.
+ * @return a [CusumResult] with the full C⁺ and C⁻ series and the index of the first alarm.
+ * @throws InsufficientDataException if [observations] is empty.
+ * @throws InvalidParameterException if [k] is negative or [h] is non-positive.
+ * @see cusum
+ * @see CusumResult
+ */
+public fun cusum(
+    observations: Sequence<Double>,
+    target: Double,
+    k: Double,
+    h: Double,
+): CusumResult = cusum(observations.toList().toDoubleArray(), target, k, h)
+
 // ── Validation ─────────────────────────────────────────────────────────────────
 
 private fun validateSubgroups(subgroups: List<DoubleArray>) {
