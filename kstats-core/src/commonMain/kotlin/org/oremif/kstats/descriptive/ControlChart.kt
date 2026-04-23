@@ -735,6 +735,263 @@ public fun ewma(
     controlLimitWidth: Double,
 ): EwmaResult = ewma(observations.toList().toDoubleArray(), target, sigma, lambda, controlLimitWidth)
 
+// ── Western Electric Rules ─────────────────────────────────────────────────────
+
+/**
+ * Indices of observations that violate each of the four Western Electric Rules.
+ *
+ * The Western Electric Rules (WER) are a set of heuristics for detecting non-random patterns
+ * on a control chart beyond the basic 3σ limit check. Each rule flags a different kind of
+ * abnormality — a single extreme excursion, clusters of moderate excursions, or a prolonged
+ * shift — so applying them together gives a Shewhart-style chart substantially more power to
+ * detect small, sustained changes in the process mean.
+ *
+ * For each rule, the corresponding array contains the zero-based indices of the observations
+ * at which the rule fires. The index marks the *trigger point* — the observation whose
+ * arrival completes the offending pattern. All arrays are sorted in ascending order and an
+ * observation may appear in more than one array.
+ *
+ * @property rule1 indices of single points beyond ±3σ from the center line.
+ * @property rule2 indices at which 2 of the last 3 consecutive points (including this one)
+ * lie beyond ±2σ on the same side of the center line.
+ * @property rule3 indices at which 4 of the last 5 consecutive points (including this one)
+ * lie beyond ±1σ on the same side of the center line.
+ * @property rule4 indices at which the last 8 consecutive points (including this one) all
+ * lie strictly on the same side of the center line, regardless of magnitude.
+ * @see westernElectricRules
+ */
+public data class WesternElectricRulesResult(
+    val rule1: IntArray,
+    val rule2: IntArray,
+    val rule3: IntArray,
+    val rule4: IntArray,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is WesternElectricRulesResult) return false
+        return rule1.contentEquals(other.rule1) &&
+            rule2.contentEquals(other.rule2) &&
+            rule3.contentEquals(other.rule3) &&
+            rule4.contentEquals(other.rule4)
+    }
+
+    override fun hashCode(): Int {
+        var result = rule1.contentHashCode()
+        result = 31 * result + rule2.contentHashCode()
+        result = 31 * result + rule3.contentHashCode()
+        result = 31 * result + rule4.contentHashCode()
+        return result
+    }
+
+    override fun toString(): String =
+        "WesternElectricRulesResult(rule1=${rule1.contentToString()}, " +
+            "rule2=${rule2.contentToString()}, rule3=${rule3.contentToString()}, " +
+            "rule4=${rule4.contentToString()})"
+}
+
+/**
+ * Applies the Western Electric Rules to the given [observations] to detect non-random
+ * patterns on a control chart.
+ *
+ * The Western Electric Rules (WER), also known as the WECO rules, are a classical set of
+ * four heuristics that extend a Shewhart chart such as [xBarRChart] or [xBarSChart] beyond
+ * the basic 3σ limit check. They detect small, sustained shifts and clusters that a 3σ chart
+ * would miss — a drift of roughly 1σ–2σ is typically caught within a handful of observations.
+ * WER is often used alongside [cusum] and [ewma] charts, which are also tuned for small
+ * shifts.
+ *
+ * The four rules are:
+ *
+ * - **Rule 1** — any single point strictly beyond ±3σ from the center line.
+ * - **Rule 2** — 2 out of 3 consecutive points strictly beyond ±2σ on the same side.
+ * - **Rule 3** — 4 out of 5 consecutive points strictly beyond ±1σ on the same side.
+ * - **Rule 4** — 8 consecutive points strictly on the same side of the center line.
+ *
+ * Each rule is evaluated at every index `i` with enough preceding observations to form the
+ * pattern window (none for rule 1, `i ≥ 2` for rule 2, `i ≥ 4` for rule 3, `i ≥ 7` for rule 4).
+ * The index stored in the result is the *trigger point* — the observation whose arrival
+ * completes the pattern. An observation may fire multiple rules at once, so the returned
+ * arrays can overlap.
+ *
+ * All thresholds use strict inequalities, so a point that lands exactly on a sigma boundary
+ * does not count as a violation. NaN values in the data propagate through the comparisons
+ * (IEEE 754 semantics) — a NaN observation neither counts as "beyond" a limit nor as being on
+ * either side of the center, so it silently disqualifies any window that contains it.
+ *
+ * ### Example:
+ * ```kotlin
+ * val observations = doubleArrayOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
+ * val violations = westernElectricRules(observations, center = 25.0, sigma = 1.0)
+ * violations.rule1 // indices with a point beyond ±3σ
+ * violations.rule2 // indices at which 2 of 3 points are beyond ±2σ on the same side
+ * violations.rule3 // indices at which 4 of 5 points are beyond ±1σ on the same side
+ * violations.rule4 // indices at which 8 consecutive points sit on the same side of the center
+ * ```
+ *
+ * References: Western Electric Company, "Statistical Quality Control Handbook" (1956);
+ * Montgomery, "Introduction to Statistical Quality Control" (7th ed.), §5.4.
+ *
+ * @param observations the sequence of individual measurements to scan. Must contain at
+ * least 1 element.
+ * @param center the center line of the control chart, typically the in-control process mean.
+ * Any finite value is allowed.
+ * @param sigma the in-control process standard deviation σ. Must be strictly positive.
+ * @return a [WesternElectricRulesResult] with the trigger indices for each of the four rules.
+ * @see WesternElectricRulesResult
+ * @see xBarRChart
+ * @see xBarSChart
+ * @see cusum
+ * @see ewma
+ */
+public fun westernElectricRules(
+    observations: DoubleArray,
+    center: Double,
+    sigma: Double,
+): WesternElectricRulesResult {
+    if (observations.isEmpty()) throw InsufficientDataException(
+        "Western Electric Rules require at least 1 observation, got 0"
+    )
+    if (sigma <= 0.0) throw InvalidParameterException("sigma must be positive, got $sigma")
+
+    // Western Electric Rules (Western Electric Statistical Quality Control Handbook, 1956;
+    // Montgomery "Introduction to Statistical Quality Control" 7th ed., §5.4):
+    //   Rule 1: any single point beyond ±3σ from the center line.
+    //   Rule 2: 2 out of 3 consecutive points beyond ±2σ on the same side.
+    //   Rule 3: 4 out of 5 consecutive points beyond ±1σ on the same side.
+    //   Rule 4: 8 consecutive points on the same side of the center line.
+    // All comparisons use strict inequalities, so NaN observations neither count toward a
+    // violation nor break a run-length pattern via the "above/below" test (IEEE 754).
+    val n = observations.size
+    val sigma1Upper = center + sigma
+    val sigma1Lower = center - sigma
+    val sigma2Upper = center + 2.0 * sigma
+    val sigma2Lower = center - 2.0 * sigma
+    val sigma3Upper = center + 3.0 * sigma
+    val sigma3Lower = center - 3.0 * sigma
+
+    val rule1 = mutableListOf<Int>()
+    val rule2 = mutableListOf<Int>()
+    val rule3 = mutableListOf<Int>()
+    val rule4 = mutableListOf<Int>()
+
+    for (i in 0 until n) {
+        val x = observations[i]
+
+        // Rule 1: single point beyond ±3σ.
+        if (x > sigma3Upper || x < sigma3Lower) {
+            rule1.add(i)
+        }
+
+        // Rule 2: 2 of last 3 points beyond ±2σ on same side.
+        if (i >= 2) {
+            var above2 = 0
+            var below2 = 0
+            for (k in i - 2..i) {
+                val v = observations[k]
+                if (v > sigma2Upper) above2++
+                else if (v < sigma2Lower) below2++
+            }
+            if (above2 >= 2 || below2 >= 2) {
+                rule2.add(i)
+            }
+        }
+
+        // Rule 3: 4 of last 5 points beyond ±1σ on same side.
+        if (i >= 4) {
+            var above1 = 0
+            var below1 = 0
+            for (k in i - 4..i) {
+                val v = observations[k]
+                if (v > sigma1Upper) above1++
+                else if (v < sigma1Lower) below1++
+            }
+            if (above1 >= 4 || below1 >= 4) {
+                rule3.add(i)
+            }
+        }
+
+        // Rule 4: 8 consecutive points on the same side of the center line.
+        if (i >= 7) {
+            var allAbove = true
+            var allBelow = true
+            for (k in i - 7..i) {
+                val v = observations[k]
+                if (!(v > center)) allAbove = false
+                if (!(v < center)) allBelow = false
+                if (!allAbove && !allBelow) break
+            }
+            if (allAbove || allBelow) {
+                rule4.add(i)
+            }
+        }
+    }
+
+    return WesternElectricRulesResult(
+        rule1 = rule1.toIntArray(),
+        rule2 = rule2.toIntArray(),
+        rule3 = rule3.toIntArray(),
+        rule4 = rule4.toIntArray(),
+    )
+}
+
+/**
+ * Applies the Western Electric Rules to an [Iterable] of observations to detect non-random
+ * patterns on a control chart.
+ *
+ * See the [DoubleArray] overload of [westernElectricRules] for the full description of the
+ * four rules, their trigger semantics, and the references.
+ *
+ * ### Example:
+ * ```kotlin
+ * val observations: List<Double> = listOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
+ * val violations = westernElectricRules(observations, center = 25.0, sigma = 1.0)
+ * violations.rule3 // indices at which 4 of 5 points are beyond ±1σ on the same side
+ * ```
+ *
+ * @param observations the sequence of individual measurements to scan. Must contain at
+ * least 1 element.
+ * @param center the center line of the control chart, typically the in-control process mean.
+ * @param sigma the in-control process standard deviation σ. Must be strictly positive.
+ * @return a [WesternElectricRulesResult] with the trigger indices for each of the four rules.
+ * @see westernElectricRules
+ * @see WesternElectricRulesResult
+ */
+public fun westernElectricRules(
+    observations: Iterable<Double>,
+    center: Double,
+    sigma: Double,
+): WesternElectricRulesResult =
+    westernElectricRules(observations.toList().toDoubleArray(), center, sigma)
+
+/**
+ * Applies the Western Electric Rules to a [Sequence] of observations to detect non-random
+ * patterns on a control chart.
+ *
+ * See the [DoubleArray] overload of [westernElectricRules] for the full description of the
+ * four rules, their trigger semantics, and the references.
+ *
+ * ### Example:
+ * ```kotlin
+ * val observations: Sequence<Double> = sequenceOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
+ * val violations = westernElectricRules(observations, center = 25.0, sigma = 1.0)
+ * violations.rule3 // indices at which 4 of 5 points are beyond ±1σ on the same side
+ * ```
+ *
+ * @param observations the sequence of individual measurements to scan. Must contain at
+ * least 1 element.
+ * @param center the center line of the control chart, typically the in-control process mean.
+ * @param sigma the in-control process standard deviation σ. Must be strictly positive.
+ * @return a [WesternElectricRulesResult] with the trigger indices for each of the four rules.
+ * @see westernElectricRules
+ * @see WesternElectricRulesResult
+ */
+public fun westernElectricRules(
+    observations: Sequence<Double>,
+    center: Double,
+    sigma: Double,
+): WesternElectricRulesResult =
+    westernElectricRules(observations.toList().toDoubleArray(), center, sigma)
+
 // ── Validation ─────────────────────────────────────────────────────────────────
 
 private fun validateSubgroups(subgroups: List<DoubleArray>) {

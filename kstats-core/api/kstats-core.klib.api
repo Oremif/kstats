@@ -334,6 +334,28 @@ final class org.oremif.kstats.descriptive/SpcConstants { // org.oremif.kstats.de
     final fun toString(): kotlin/String // org.oremif.kstats.descriptive/SpcConstants.toString|toString(){}[0]
 }
 
+final class org.oremif.kstats.descriptive/WesternElectricRulesResult { // org.oremif.kstats.descriptive/WesternElectricRulesResult|null[0]
+    constructor <init>(kotlin/IntArray, kotlin/IntArray, kotlin/IntArray, kotlin/IntArray) // org.oremif.kstats.descriptive/WesternElectricRulesResult.<init>|<init>(kotlin.IntArray;kotlin.IntArray;kotlin.IntArray;kotlin.IntArray){}[0]
+
+    final val rule1 // org.oremif.kstats.descriptive/WesternElectricRulesResult.rule1|{}rule1[0]
+        final fun <get-rule1>(): kotlin/IntArray // org.oremif.kstats.descriptive/WesternElectricRulesResult.rule1.<get-rule1>|<get-rule1>(){}[0]
+    final val rule2 // org.oremif.kstats.descriptive/WesternElectricRulesResult.rule2|{}rule2[0]
+        final fun <get-rule2>(): kotlin/IntArray // org.oremif.kstats.descriptive/WesternElectricRulesResult.rule2.<get-rule2>|<get-rule2>(){}[0]
+    final val rule3 // org.oremif.kstats.descriptive/WesternElectricRulesResult.rule3|{}rule3[0]
+        final fun <get-rule3>(): kotlin/IntArray // org.oremif.kstats.descriptive/WesternElectricRulesResult.rule3.<get-rule3>|<get-rule3>(){}[0]
+    final val rule4 // org.oremif.kstats.descriptive/WesternElectricRulesResult.rule4|{}rule4[0]
+        final fun <get-rule4>(): kotlin/IntArray // org.oremif.kstats.descriptive/WesternElectricRulesResult.rule4.<get-rule4>|<get-rule4>(){}[0]
+
+    final fun component1(): kotlin/IntArray // org.oremif.kstats.descriptive/WesternElectricRulesResult.component1|component1(){}[0]
+    final fun component2(): kotlin/IntArray // org.oremif.kstats.descriptive/WesternElectricRulesResult.component2|component2(){}[0]
+    final fun component3(): kotlin/IntArray // org.oremif.kstats.descriptive/WesternElectricRulesResult.component3|component3(){}[0]
+    final fun component4(): kotlin/IntArray // org.oremif.kstats.descriptive/WesternElectricRulesResult.component4|component4(){}[0]
+    final fun copy(kotlin/IntArray = ..., kotlin/IntArray = ..., kotlin/IntArray = ..., kotlin/IntArray = ...): org.oremif.kstats.descriptive/WesternElectricRulesResult // org.oremif.kstats.descriptive/WesternElectricRulesResult.copy|copy(kotlin.IntArray;kotlin.IntArray;kotlin.IntArray;kotlin.IntArray){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.oremif.kstats.descriptive/WesternElectricRulesResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.oremif.kstats.descriptive/WesternElectricRulesResult.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.oremif.kstats.descriptive/WesternElectricRulesResult.toString|toString(){}[0]
+}
+
 final class org.oremif.kstats.descriptive/XBarRChartResult { // org.oremif.kstats.descriptive/XBarRChartResult|null[0]
     constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double, org.oremif.kstats.descriptive/ControlChartLimits) // org.oremif.kstats.descriptive/XBarRChartResult.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double;org.oremif.kstats.descriptive.ControlChartLimits){}[0]
 
@@ -521,5 +543,8 @@ final fun org.oremif.kstats.descriptive/ewma(kotlin.collections/Iterable<kotlin/
 final fun org.oremif.kstats.descriptive/ewma(kotlin.sequences/Sequence<kotlin/Double>, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/EwmaResult // org.oremif.kstats.descriptive/ewma|ewma(kotlin.sequences.Sequence<kotlin.Double>;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
 final fun org.oremif.kstats.descriptive/ewma(kotlin/DoubleArray, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/EwmaResult // org.oremif.kstats.descriptive/ewma|ewma(kotlin.DoubleArray;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
 final fun org.oremif.kstats.descriptive/spcConstants(kotlin/Int): org.oremif.kstats.descriptive/SpcConstants // org.oremif.kstats.descriptive/spcConstants|spcConstants(kotlin.Int){}[0]
+final fun org.oremif.kstats.descriptive/westernElectricRules(kotlin.collections/Iterable<kotlin/Double>, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/WesternElectricRulesResult // org.oremif.kstats.descriptive/westernElectricRules|westernElectricRules(kotlin.collections.Iterable<kotlin.Double>;kotlin.Double;kotlin.Double){}[0]
+final fun org.oremif.kstats.descriptive/westernElectricRules(kotlin.sequences/Sequence<kotlin/Double>, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/WesternElectricRulesResult // org.oremif.kstats.descriptive/westernElectricRules|westernElectricRules(kotlin.sequences.Sequence<kotlin.Double>;kotlin.Double;kotlin.Double){}[0]
+final fun org.oremif.kstats.descriptive/westernElectricRules(kotlin/DoubleArray, kotlin/Double, kotlin/Double): org.oremif.kstats.descriptive/WesternElectricRulesResult // org.oremif.kstats.descriptive/westernElectricRules|westernElectricRules(kotlin.DoubleArray;kotlin.Double;kotlin.Double){}[0]
 final fun org.oremif.kstats.descriptive/xBarRChart(kotlin.collections/List<kotlin/DoubleArray>): org.oremif.kstats.descriptive/XBarRChartResult // org.oremif.kstats.descriptive/xBarRChart|xBarRChart(kotlin.collections.List<kotlin.DoubleArray>){}[0]
 final fun org.oremif.kstats.descriptive/xBarSChart(kotlin.collections/List<kotlin/DoubleArray>): org.oremif.kstats.descriptive/XBarSChartResult // org.oremif.kstats.descriptive/xBarSChart|xBarSChart(kotlin.collections.List<kotlin.DoubleArray>){}[0]

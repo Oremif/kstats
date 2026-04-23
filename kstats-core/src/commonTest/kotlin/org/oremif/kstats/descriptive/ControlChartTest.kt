@@ -2465,4 +2465,773 @@ internal class ControlChartTest {
         val s = result.toString()
         assertTrue(s.contains("outOfControl=[]"), "toString should render empty outOfControl, got: $s")
     }
+
+    // ===== westernElectricRules: Basic correctness =====
+
+    @Test
+    fun testWesternElectricRulesRule1UpperTrigger() {
+        // Reference: single point beyond +3σ triggers Rule 1.
+        val obs = doubleArrayOf(0.1, 0.2, 0.0, 3.5, 0.1)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.contentEquals(intArrayOf(3)), "rule1 should flag index 3, got ${r.rule1.contentToString()}")
+        assertTrue(r.rule2.isEmpty(), "rule2 should be empty, got ${r.rule2.contentToString()}")
+        assertTrue(r.rule3.isEmpty(), "rule3 should be empty, got ${r.rule3.contentToString()}")
+        assertTrue(r.rule4.isEmpty(), "rule4 should be empty, got ${r.rule4.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesRule1LowerTrigger() {
+        // Reference: single point beyond -3σ triggers Rule 1.
+        val obs = doubleArrayOf(0.1, -3.5, 0.0, 0.2, 0.1)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.contentEquals(intArrayOf(1)), "rule1 should flag index 1, got ${r.rule1.contentToString()}")
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesRule2UpperTrigger() {
+        // Reference: 2 of last 3 points beyond +2σ triggers Rule 2.
+        //   obs = [0.1, 2.5, 0.0, 2.3, 0.1]  (sigma=1, center=0)
+        //   i=3: window {2.5, 0.0, 2.3} → 2 above +2σ → rule2 fires at 3
+        val obs = doubleArrayOf(0.1, 2.5, 0.0, 2.3, 0.1)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.contentEquals(intArrayOf(3)), "rule2 should flag index 3, got ${r.rule2.contentToString()}")
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesRule2TwoConsecutive() {
+        // Reference: [0.1, 2.5, 2.3, 0.0, 0.1]
+        //   i=2: {0.1, 2.5, 2.3} → 2 above → fires
+        //   i=3: {2.5, 2.3, 0.0} → 2 above → fires
+        val obs = doubleArrayOf(0.1, 2.5, 2.3, 0.0, 0.1)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.contentEquals(intArrayOf(2, 3)), "got ${r.rule2.contentToString()}")
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesRule2LowerTrigger() {
+        // Reference: [0.1, -2.5, -2.3, 0.0, 0.1]
+        //   i=2, 3: ≥2 below -2σ → rule2 fires
+        val obs = doubleArrayOf(0.1, -2.5, -2.3, 0.0, 0.1)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.contentEquals(intArrayOf(2, 3)))
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesRule2CrossSide() {
+        // Reference: 1 above and 1 below does NOT trigger Rule 2 — same-side requirement.
+        //   [0.1, 2.5, 0.0, -2.3, 0.1]: no window with 2 same-side points beyond 2σ.
+        val obs = doubleArrayOf(0.1, 2.5, 0.0, -2.3, 0.1)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty(), "Rule 2 requires same side, got ${r.rule2.contentToString()}")
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesRule3UpperTrigger() {
+        // Reference: 4 of last 5 points beyond +1σ triggers Rule 3.
+        //   [0.1, 1.5, 1.3, 0.2, 1.2, 1.4, 0.1] (sigma=1)
+        //   i=5: window 1..5 = {1.5, 1.3, 0.2, 1.2, 1.4} → 4 above → rule3 fires
+        val obs = doubleArrayOf(0.1, 1.5, 1.3, 0.2, 1.2, 1.4, 0.1)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.contentEquals(intArrayOf(5)), "got ${r.rule3.contentToString()}")
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesRule3MinimumTrigger() {
+        // Reference: Rule 3 can trigger at i=4 (first index where window of 5 exists).
+        //   [1.5, 1.3, 0.0, 1.2, 1.4]: 4 of 5 above +1σ → rule3 fires at 4.
+        val obs = doubleArrayOf(1.5, 1.3, 0.0, 1.2, 1.4)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.contentEquals(intArrayOf(4)))
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesRule3Sliding() {
+        // Reference: rule3 with sliding windows.
+        //   [1.5, 0.0, 1.3, 1.2, 1.4, 0.0, 1.1]:
+        //   i=4: win 0..4 {1.5, 0.0, 1.3, 1.2, 1.4} → 4 above → fires
+        //   i=5: win 1..5 {0.0, 1.3, 1.2, 1.4, 0.0} → 3 above → no
+        //   i=6: win 2..6 {1.3, 1.2, 1.4, 0.0, 1.1} → 4 above → fires
+        val obs = doubleArrayOf(1.5, 0.0, 1.3, 1.2, 1.4, 0.0, 1.1)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.contentEquals(intArrayOf(4, 6)), "got ${r.rule3.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesRule4AllAbove() {
+        // Reference: 8 consecutive above center triggers Rule 4 at i=7.
+        val obs = doubleArrayOf(0.5, 0.3, 0.6, 0.4, 0.2, 0.8, 0.7, 0.5)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.contentEquals(intArrayOf(7)), "got ${r.rule4.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesRule4AllBelow() {
+        // Reference: 8 consecutive below center triggers Rule 4 at i=7.
+        val obs = doubleArrayOf(-0.5, -0.3, -0.6, -0.4, -0.2, -0.8, -0.7, -0.5)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.contentEquals(intArrayOf(7)))
+    }
+
+    @Test
+    fun testWesternElectricRulesRule4BrokenByCenterValue() {
+        // Reference: an exact-center value breaks the Rule-4 streak (strict inequality).
+        //   [0.5, 0.3, 0.6, 0.4, 0.0, 0.8, 0.7, 0.5, 0.6]: 0.0 at index 4 → no rule 4.
+        val obs = doubleArrayOf(0.5, 0.3, 0.6, 0.4, 0.0, 0.8, 0.7, 0.5, 0.6)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule4.isEmpty(), "Strict inequality: value at center breaks streak, got ${r.rule4.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesRule4Sliding() {
+        // Reference: 9 consecutive above center → Rule 4 fires at i=7 and i=8.
+        val obs = DoubleArray(9) { 0.1 }
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule4.contentEquals(intArrayOf(7, 8)), "got ${r.rule4.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesRule4DelayedStreak() {
+        // Reference: streak starts at index 3, fires once streak length reaches 8.
+        //   [0.0, 0.0, -0.1, 0.5×8]: at i=10 we have 8 consecutive above-center values.
+        val obs = doubleArrayOf(0.0, 0.0, -0.1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule4.contentEquals(intArrayOf(10)), "got ${r.rule4.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesNonZeroCenterAndSigma() {
+        // Reference: center=10, sigma=2. Thresholds: ±1σ → [8,12], ±2σ → [6,14], ±3σ → [4,16].
+        //   [10, 15, 12.5, 13.5, 12.1, 11.8, 11.9, 11.5, 11.2]:
+        //   i=4: win 0..4 = {10, 15, 12.5, 13.5, 12.1} → 4 above +1σ=12 → rule3
+        //   i=5: win 1..5 = {15, 12.5, 13.5, 12.1, 11.8} → 4 above 12 → rule3
+        //   i=8: obs[1..8] = {15, 12.5, 13.5, 12.1, 11.8, 11.9, 11.5, 11.2} all > 10 → rule4
+        val obs = doubleArrayOf(10.0, 15.0, 12.5, 13.5, 12.1, 11.8, 11.9, 11.5, 11.2)
+        val r = westernElectricRules(obs, center = 10.0, sigma = 2.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.contentEquals(intArrayOf(4, 5)), "got ${r.rule3.contentToString()}")
+        assertTrue(r.rule4.contentEquals(intArrayOf(8)), "got ${r.rule4.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesAllFourRulesFire() {
+        // Reference: comprehensive example where all four rules trigger.
+        //   Observations: 0.1, 0.2, 0.3, 0.1, 3.5, 2.5, 2.3, 1.5, 1.3, 0.0, 1.2, 1.4, 1.1, 1.2, 1.5, 1.3, 1.4, 1.6
+        //   Expected (python reference):
+        //     rule1 = [4]
+        //     rule2 = [5, 6, 7]
+        //     rule3 = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+        //     rule4 = [7, 8, 17]
+        val obs = doubleArrayOf(
+            0.1, 0.2, 0.3, 0.1,
+            3.5,
+            2.5, 2.3,
+            1.5, 1.3, 0.0, 1.2, 1.4,
+            1.1, 1.2, 1.5, 1.3, 1.4, 1.6,
+        )
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.contentEquals(intArrayOf(4)), "rule1: ${r.rule1.contentToString()}")
+        assertTrue(r.rule2.contentEquals(intArrayOf(5, 6, 7)), "rule2: ${r.rule2.contentToString()}")
+        assertTrue(
+            r.rule3.contentEquals(intArrayOf(7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17)),
+            "rule3: ${r.rule3.contentToString()}",
+        )
+        assertTrue(r.rule4.contentEquals(intArrayOf(7, 8, 17)), "rule4: ${r.rule4.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesRule1AlsoCountsTowardRule2() {
+        // A point beyond +3σ is also beyond +2σ, so it contributes to Rule 2 as well.
+        //   [3.5, 3.5, 3.5]: rule1 at 0,1,2; rule2 at 2 (3-of-3 ≥ 2 above +2σ).
+        val obs = doubleArrayOf(3.5, 3.5, 3.5)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.contentEquals(intArrayOf(0, 1, 2)))
+        assertTrue(r.rule2.contentEquals(intArrayOf(2)))
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesMultipleRule1Alarms() {
+        // Reference: three points beyond ±3σ, alternating sides.
+        val obs = doubleArrayOf(3.5, 0.0, -3.5, 0.0, 3.5)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.contentEquals(intArrayOf(0, 2, 4)))
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesRule2WithOppositeExcursionsInWindow() {
+        // Reference: Within a window, 2 above +2σ AND 1 below −2σ should still trigger
+        // (the "same-side" requirement counts per direction — 2 above already qualifies).
+        //   [2.5, -2.3, 2.4]: above=2, below=1 → rule2 fires at i=2.
+        val obs = doubleArrayOf(2.5, -2.3, 2.4)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule2.contentEquals(intArrayOf(2)))
+    }
+
+    // ===== westernElectricRules: Edge cases =====
+
+    @Test
+    fun testWesternElectricRulesSingleObservationBeyond3Sigma() {
+        // Reference: single observation, Rule 1 can still fire (no window requirement).
+        val obs = doubleArrayOf(5.0)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.contentEquals(intArrayOf(0)))
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesSingleObservationInControl() {
+        // Reference: single observation within control → no alarms.
+        val obs = doubleArrayOf(0.5)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesTwoObservations() {
+        // Only rules 1 can apply with 2 observations (rule 2 requires window size 3).
+        val obs = doubleArrayOf(3.5, 0.0)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.contentEquals(intArrayOf(0)))
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesThreeObservationsRule2Minimum() {
+        // Minimum size for Rule 2: window of 3 → rule 2 can fire exactly at i=2.
+        val obs = doubleArrayOf(2.5, 0.0, 2.3)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule2.contentEquals(intArrayOf(2)))
+    }
+
+    @Test
+    fun testWesternElectricRulesSevenObservationsNoRule4() {
+        // Reference: 7 observations all above center cannot fire Rule 4 (needs 8).
+        val obs = DoubleArray(7) { 0.5 }
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule4.isEmpty(), "Rule 4 needs 8 consecutive, got ${r.rule4.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesExactlyAt3SigmaBoundary() {
+        // Strict inequality: x = +3σ exactly does NOT trigger Rule 1.
+        val obs = doubleArrayOf(3.0, 3.0)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty(), "Strict inequality at +3σ boundary: ${r.rule1.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesExactlyAt2SigmaBoundary() {
+        // Strict inequality at +2σ: no Rule 2 trigger.
+        val obs = doubleArrayOf(2.0, 2.0, 2.0)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule2.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesAllAtCenterNoRule4() {
+        // Reference: 8 values exactly at center → strict inequality prevents Rule 4.
+        val obs = DoubleArray(8) { 0.0 }
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule4.isEmpty(), "Strict above/below: values at center should not trigger")
+    }
+
+    @Test
+    fun testWesternElectricRulesRule4BrokenBy7ThenDownstep() {
+        // Reference: 7 above, then below → streak broken, no rule 4.
+        val obs = doubleArrayOf(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, -0.1)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    // ===== westernElectricRules: Degenerate input =====
+
+    @Test
+    fun testWesternElectricRulesEmptyArray() {
+        assertFailsWith<InsufficientDataException> {
+            westernElectricRules(doubleArrayOf(), center = 0.0, sigma = 1.0)
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesEmptyIterable() {
+        assertFailsWith<InsufficientDataException> {
+            westernElectricRules(emptyList<Double>(), center = 0.0, sigma = 1.0)
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesEmptySequence() {
+        assertFailsWith<InsufficientDataException> {
+            westernElectricRules(emptySequence<Double>(), center = 0.0, sigma = 1.0)
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesZeroSigma() {
+        assertFailsWith<InvalidParameterException> {
+            westernElectricRules(doubleArrayOf(1.0, 2.0), center = 0.0, sigma = 0.0)
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesNegativeSigma() {
+        assertFailsWith<InvalidParameterException> {
+            westernElectricRules(doubleArrayOf(1.0, 2.0), center = 0.0, sigma = -1.0)
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesNegativeSigmaIterable() {
+        assertFailsWith<InvalidParameterException> {
+            westernElectricRules(listOf(1.0, 2.0), center = 0.0, sigma = -1.0)
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesNegativeSigmaSequence() {
+        assertFailsWith<InvalidParameterException> {
+            westernElectricRules(sequenceOf(1.0, 2.0), center = 0.0, sigma = -1.0)
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesAllConstantAtCenter() {
+        // Constant data at the center: no excursions, but Rule 4 must not fire because
+        // values are not strictly above or below center.
+        val obs = DoubleArray(20) { 0.0 }
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty(), "Strict: constant-at-center should not trigger rule 4")
+    }
+
+    @Test
+    fun testWesternElectricRulesAllConstantOffCenter() {
+        // Constant data away from center: Rule 4 should fire once the streak reaches 8.
+        val n = 12
+        val obs = DoubleArray(n) { 0.5 }
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.contentEquals(intArrayOf(7, 8, 9, 10, 11)))
+    }
+
+    // ===== westernElectricRules: Extreme parameters =====
+
+    @Test
+    fun testWesternElectricRulesLargeOffsetData() {
+        // Reference: very large center, small sigma. Thresholds well above 0.
+        val obs = doubleArrayOf(1e6 + 3.5, 1e6 + 0.0, 1e6 + 0.0)
+        val r = westernElectricRules(obs, center = 1e6, sigma = 1.0)
+        assertTrue(r.rule1.contentEquals(intArrayOf(0)), "rule1: ${r.rule1.contentToString()}")
+        assertTrue(r.rule2.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesVerySmallSigma() {
+        // Reference: very small sigma → every non-zero point triggers Rule 1.
+        val obs = doubleArrayOf(1.0, -1.0, 0.5)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1e-10)
+        assertTrue(r.rule1.contentEquals(intArrayOf(0, 1, 2)))
+        assertTrue(r.rule2.contentEquals(intArrayOf(2)))
+    }
+
+    @Test
+    fun testWesternElectricRulesVeryLargeSigma() {
+        // Reference: huge sigma → no ±σ alarms, but rule 4 can still fire (center-based).
+        val obs = doubleArrayOf(1.0, -1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1000.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        // Rule 4 starts streak at i=2 (all indices 2..9 are > 0) → fires at i=9.
+        assertTrue(r.rule4.contentEquals(intArrayOf(9)), "got ${r.rule4.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesLongSeries() {
+        // Many observations, no rules should fire (all within ±1σ and alternating sides).
+        val obs = DoubleArray(500) { if (it % 2 == 0) 0.5 else -0.5 }
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    // ===== westernElectricRules: Non-finite input =====
+
+    @Test
+    fun testWesternElectricRulesNaNInObservations() {
+        // Reference: NaN never satisfies strict inequality comparisons → never contributes
+        // to a rule violation. With only NaN interspersed with near-zero values, no
+        // rule should fire.
+        val obs = doubleArrayOf(0.1, Double.NaN, 0.2, Double.NaN, 0.3)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesNaNBreaksRule4Streak() {
+        // Reference: NaN in the middle of a streak breaks it (NaN is neither above nor below).
+        //   [0.5, 0.5, 0.5, 0.5, NaN, 0.5, 0.5, 0.5]: NaN at i=4 breaks the streak.
+        val obs = doubleArrayOf(0.5, 0.5, 0.5, 0.5, Double.NaN, 0.5, 0.5, 0.5)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule4.isEmpty(), "NaN must break rule 4 streak, got ${r.rule4.contentToString()}")
+    }
+
+    @Test
+    fun testWesternElectricRulesPositiveInfinityInObservations() {
+        // Reference: +Infinity > center+3σ → Rule 1 fires at that index.
+        val obs = doubleArrayOf(Double.POSITIVE_INFINITY, 0.0, 0.0)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.contentEquals(intArrayOf(0)))
+    }
+
+    @Test
+    fun testWesternElectricRulesNegativeInfinityInObservations() {
+        // Reference: -Infinity < center-3σ → Rule 1 fires at that index.
+        val obs = doubleArrayOf(Double.NEGATIVE_INFINITY, 0.0, 0.0)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.contentEquals(intArrayOf(0)))
+    }
+
+    @Test
+    fun testWesternElectricRulesNaNCenterDoesNotThrow() {
+        // NaN validation intentionally passes (NaN <= 0.0 is false per IEEE 754).
+        // All comparisons against NaN thresholds are false, so no rules fire.
+        val obs = doubleArrayOf(1.0, 2.0, 3.0)
+        val r = westernElectricRules(obs, center = Double.NaN, sigma = 1.0)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    @Test
+    fun testWesternElectricRulesNaNSigmaDoesNotThrow() {
+        // NaN sigma passes validation (NaN <= 0.0 is false per IEEE 754).
+        // Thresholds become NaN → no rules fire.
+        val obs = doubleArrayOf(1.0, 2.0, 3.0)
+        val r = westernElectricRules(obs, center = 0.0, sigma = Double.NaN)
+        assertTrue(r.rule1.isEmpty())
+        assertTrue(r.rule2.isEmpty())
+        assertTrue(r.rule3.isEmpty())
+        // Rule 4 operates on center (not sigma); with all obs > 0 and finite center=0, it still fires.
+        // But here n=3 < 8, so rule4 is empty anyway.
+        assertTrue(r.rule4.isEmpty())
+    }
+
+    // ===== westernElectricRules: Property-based =====
+
+    @Test
+    fun testWesternElectricRulesTranslationInvariance() {
+        // Shifting both observations and center by the same constant should not change
+        // any of the rule-violation indices.
+        val baseObs = doubleArrayOf(0.5, 0.3, 0.6, 0.4, 0.2, 0.8, 0.7, 0.5)
+        val shift = 100.0
+        val shiftedObs = DoubleArray(baseObs.size) { baseObs[it] + shift }
+        val r1 = westernElectricRules(baseObs, center = 0.0, sigma = 1.0)
+        val r2 = westernElectricRules(shiftedObs, center = shift, sigma = 1.0)
+        assertTrue(r1.rule1.contentEquals(r2.rule1), "rule1 translation invariant")
+        assertTrue(r1.rule2.contentEquals(r2.rule2), "rule2 translation invariant")
+        assertTrue(r1.rule3.contentEquals(r2.rule3), "rule3 translation invariant")
+        assertTrue(r1.rule4.contentEquals(r2.rule4), "rule4 translation invariant")
+    }
+
+    @Test
+    fun testWesternElectricRulesScaleInvariance() {
+        // Scaling observations, center, and sigma by the same positive factor should
+        // produce the same rule violation indices.
+        val baseObs = doubleArrayOf(3.5, 2.5, 1.5, -0.5, 2.3, 1.4, 1.3, 1.2, 3.5)
+        val scale = 10.0
+        val scaledObs = DoubleArray(baseObs.size) { baseObs[it] * scale }
+        val r1 = westernElectricRules(baseObs, center = 0.0, sigma = 1.0)
+        val r2 = westernElectricRules(scaledObs, center = 0.0, sigma = 1.0 * scale)
+        assertTrue(r1.rule1.contentEquals(r2.rule1), "rule1 scale invariant")
+        assertTrue(r1.rule2.contentEquals(r2.rule2), "rule2 scale invariant")
+        assertTrue(r1.rule3.contentEquals(r2.rule3), "rule3 scale invariant")
+        assertTrue(r1.rule4.contentEquals(r2.rule4), "rule4 scale invariant")
+    }
+
+    @Test
+    fun testWesternElectricRulesSymmetryByNegation() {
+        // Negating observations (with center=0) should produce identical rule-index
+        // structure: upper excursions become lower excursions, but the count and index
+        // layout is preserved.
+        val obs = doubleArrayOf(0.5, 2.5, 2.3, 3.5, 0.0, 1.5, 1.3, 1.2, 1.4)
+        val negObs = DoubleArray(obs.size) { -obs[it] }
+        val r1 = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        val r2 = westernElectricRules(negObs, center = 0.0, sigma = 1.0)
+        assertTrue(r1.rule1.contentEquals(r2.rule1), "rule1 mirrored")
+        assertTrue(r1.rule2.contentEquals(r2.rule2), "rule2 mirrored")
+        assertTrue(r1.rule3.contentEquals(r2.rule3), "rule3 mirrored")
+        assertTrue(r1.rule4.contentEquals(r2.rule4), "rule4 mirrored")
+    }
+
+    @Test
+    fun testWesternElectricRulesIndicesAreSortedAscending() {
+        // Each rule array must be in strictly ascending order (indices reported in-order).
+        val obs = doubleArrayOf(
+            3.5, -3.5, 2.5, 2.3, 0.0, 1.5, 1.3, 1.2, 1.4, 1.6, 1.7, 1.8, 1.1,
+        )
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        for (arr in listOf(r.rule1, r.rule2, r.rule3, r.rule4)) {
+            for (i in 1 until arr.size) {
+                assertTrue(arr[i] > arr[i - 1], "indices must be strictly ascending: ${arr.contentToString()}")
+            }
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesIndicesInRange() {
+        // All reported indices must fall in [0, n).
+        val obs = doubleArrayOf(
+            3.5, 2.5, 2.3, 1.5, 1.3, 1.2, 1.4, 1.1, 0.9, 0.8, 0.7, -3.5,
+        )
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        val n = obs.size
+        for (arr in listOf(r.rule1, r.rule2, r.rule3, r.rule4)) {
+            for (idx in arr) {
+                assertTrue(idx in 0 until n, "index $idx out of range [0, $n)")
+            }
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesRule2RequiresWindowOfThree() {
+        // Rule 2 cannot fire at indices 0 or 1 (window of 3 not yet available).
+        val obs = doubleArrayOf(3.5, 3.5, 3.5, 3.5)  // all above +3σ
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        for (idx in r.rule2) {
+            assertTrue(idx >= 2, "Rule 2 index must be ≥ 2, got $idx")
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesRule3RequiresWindowOfFive() {
+        // Rule 3 cannot fire at indices 0..3.
+        val obs = DoubleArray(10) { 1.5 }
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        for (idx in r.rule3) {
+            assertTrue(idx >= 4, "Rule 3 index must be ≥ 4, got $idx")
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesRule4RequiresWindowOfEight() {
+        // Rule 4 cannot fire at indices 0..6.
+        val obs = DoubleArray(15) { 0.5 }
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        for (idx in r.rule4) {
+            assertTrue(idx >= 7, "Rule 4 index must be ≥ 7, got $idx")
+        }
+    }
+
+    @Test
+    fun testWesternElectricRulesRule1SubsetConsistency() {
+        // A Rule 1 violation at index i (|x| > 3σ) implies that point contributes
+        // to the counts in any window containing i for rules 2 and 3. When we have
+        // enough consecutive 3σ violations, rule 2 must fire at some point too.
+        val obs = doubleArrayOf(3.5, 3.5, 3.5, 3.5, 3.5)
+        val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertTrue(r.rule1.size == 5, "All 5 are beyond 3σ")
+        assertTrue(r.rule2.isNotEmpty(), "Consecutive 3σ alarms must also trigger rule 2")
+        assertTrue(r.rule3.isNotEmpty(), "5 consecutive 3σ alarms must also trigger rule 3")
+    }
+
+    // ===== westernElectricRules: Iterable/Sequence overloads =====
+
+    @Test
+    fun testWesternElectricRulesIterableOverload() {
+        // Iterable overload must produce the same result as DoubleArray for identical values.
+        val arr = doubleArrayOf(0.1, 0.2, 0.3, 0.5, 2.5, 2.3, 0.1, 3.5)
+        val iter: List<Double> = arr.toList()
+        val r1 = westernElectricRules(arr, center = 0.0, sigma = 1.0)
+        val r2 = westernElectricRules(iter, center = 0.0, sigma = 1.0)
+        assertEquals(r1, r2, "Iterable overload must match DoubleArray result")
+    }
+
+    @Test
+    fun testWesternElectricRulesSequenceOverload() {
+        // Sequence overload must produce the same result as DoubleArray for identical values.
+        val arr = doubleArrayOf(0.1, 0.2, 0.3, 0.5, 2.5, 2.3, 0.1, 3.5)
+        val seq: Sequence<Double> = arr.toList().asSequence()
+        val r1 = westernElectricRules(arr, center = 0.0, sigma = 1.0)
+        val r2 = westernElectricRules(seq, center = 0.0, sigma = 1.0)
+        assertEquals(r1, r2, "Sequence overload must match DoubleArray result")
+    }
+
+    // ===== WesternElectricRulesResult: data class =====
+
+    @Test
+    fun testWesternElectricRulesResultEquality() {
+        val obs = doubleArrayOf(3.5, 2.5, 2.3, 1.5, 1.3, 1.2, 1.4, 1.1)
+        val r1 = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        val r2 = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        assertEquals(r1, r2, "Same input should produce equal WesternElectricRulesResult")
+        assertEquals(r1.hashCode(), r2.hashCode(), "Equal results should have equal hashCode")
+    }
+
+    @Test
+    fun testWesternElectricRulesResultEqualityDifferentInstances() {
+        // equals uses contentEquals — different IntArray instances with same values are equal.
+        val r1 = WesternElectricRulesResult(
+            rule1 = intArrayOf(0),
+            rule2 = intArrayOf(2, 3),
+            rule3 = intArrayOf(),
+            rule4 = intArrayOf(7),
+        )
+        val r2 = WesternElectricRulesResult(
+            rule1 = intArrayOf(0),
+            rule2 = intArrayOf(2, 3),
+            rule3 = intArrayOf(),
+            rule4 = intArrayOf(7),
+        )
+        assertTrue(r1 !== r2, "Different instances")
+        assertEquals(r1, r2)
+        assertEquals(r1.hashCode(), r2.hashCode())
+    }
+
+    @Test
+    fun testWesternElectricRulesResultInequality() {
+        val base = WesternElectricRulesResult(
+            rule1 = intArrayOf(0),
+            rule2 = intArrayOf(2),
+            rule3 = intArrayOf(4),
+            rule4 = intArrayOf(7),
+        )
+
+        val diffRule1 = WesternElectricRulesResult(
+            rule1 = intArrayOf(1),
+            rule2 = intArrayOf(2),
+            rule3 = intArrayOf(4),
+            rule4 = intArrayOf(7),
+        )
+        assertTrue(base != diffRule1, "Different rule1 => not equal")
+
+        val diffRule2 = WesternElectricRulesResult(
+            rule1 = intArrayOf(0),
+            rule2 = intArrayOf(3),
+            rule3 = intArrayOf(4),
+            rule4 = intArrayOf(7),
+        )
+        assertTrue(base != diffRule2, "Different rule2 => not equal")
+
+        val diffRule3 = WesternElectricRulesResult(
+            rule1 = intArrayOf(0),
+            rule2 = intArrayOf(2),
+            rule3 = intArrayOf(5),
+            rule4 = intArrayOf(7),
+        )
+        assertTrue(base != diffRule3, "Different rule3 => not equal")
+
+        val diffRule4 = WesternElectricRulesResult(
+            rule1 = intArrayOf(0),
+            rule2 = intArrayOf(2),
+            rule3 = intArrayOf(4),
+            rule4 = intArrayOf(8),
+        )
+        assertTrue(base != diffRule4, "Different rule4 => not equal")
+    }
+
+    @Test
+    fun testWesternElectricRulesResultEqualsSelf() {
+        val r = WesternElectricRulesResult(
+            rule1 = intArrayOf(0),
+            rule2 = intArrayOf(),
+            rule3 = intArrayOf(),
+            rule4 = intArrayOf(),
+        )
+        assertEquals(r, r, "equals with self")
+    }
+
+    @Test
+    fun testWesternElectricRulesResultEqualsNonResult() {
+        val r = WesternElectricRulesResult(
+            rule1 = intArrayOf(0),
+            rule2 = intArrayOf(),
+            rule3 = intArrayOf(),
+            rule4 = intArrayOf(),
+        )
+        assertTrue(!r.equals("not a WesternElectricRulesResult"), "equals false for non-Result")
+        assertTrue(!r.equals(null), "equals false for null")
+    }
+
+    @Test
+    fun testWesternElectricRulesResultDestructuring() {
+        // componentN (destructuring) works on the data class.
+        val obs = doubleArrayOf(3.5, 2.5, 2.3)
+        val result = westernElectricRules(obs, center = 0.0, sigma = 1.0)
+        val (rule1, rule2, rule3, rule4) = result
+
+        assertTrue(rule1.contentEquals(result.rule1), "rule1 via destructuring")
+        assertTrue(rule2.contentEquals(result.rule2), "rule2 via destructuring")
+        assertTrue(rule3.contentEquals(result.rule3), "rule3 via destructuring")
+        assertTrue(rule4.contentEquals(result.rule4), "rule4 via destructuring")
+    }
+
+    @Test
+    fun testWesternElectricRulesResultToStringRendersArrayContents() {
+        // toString must use contentToString() for IntArray fields — the default data-class
+        // toString would print `[I@<hash>` which is useless for diagnostics.
+        val r = WesternElectricRulesResult(
+            rule1 = intArrayOf(0, 4),
+            rule2 = intArrayOf(3),
+            rule3 = intArrayOf(),
+            rule4 = intArrayOf(7, 8),
+        )
+        val s = r.toString()
+        assertTrue(s.contains("rule1=[0, 4]"), "toString should render rule1, got: $s")
+        assertTrue(s.contains("rule2=[3]"), "toString should render rule2, got: $s")
+        assertTrue(s.contains("rule3=[]"), "toString should render empty rule3, got: $s")
+        assertTrue(s.contains("rule4=[7, 8]"), "toString should render rule4, got: $s")
+        assertTrue(!s.contains("[I@"), "toString must not leak default int-array identity, got: $s")
+    }
 }
