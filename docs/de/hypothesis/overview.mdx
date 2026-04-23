@@ -320,6 +320,76 @@ result.pValue            // p-value
 
 {/*---END--*/}
 
+## Sind Beobachtungen Ausreißer?
+
+### Grubbs-Test
+
+Der Grubbs-Test (Extreme Studentized Deviate Test) prüft formell, ob die am weitesten vom Mittelwert entfernte Beobachtung ein Ausreißer ist, vorausgesetzt, die übrigen Daten sind näherungsweise normalverteilt. Die Teststatistik lautet
+
+$$
+G = \frac{\max_{i} |x_i - \bar{x}|}{s},
+$$
+
+umgerechnet in eine Student-$t$-Statistik mit $N - 2$ Freiheitsgraden und Bonferroni-korrigiert dafür, dass jede Beobachtung getestet wurde.
+
+{/*---FUN hypGrubbsSingle--*/}
+
+```kotlin
+// Response times (ms) with a suspected outlier
+val latencies = doubleArrayOf(12.0, 14.0, 11.0, 13.0, 15.0, 98.0, 12.0)
+
+val result = grubbsTest(latencies)
+result.statistic                       // G statistic
+result.pValue                          // Bonferroni-corrected p-value
+result.additionalInfo["outlierIndex"]  // index of the suspected outlier
+result.additionalInfo["outlierValue"]  // the suspected outlier's value
+result.isSignificant()                 // true if outlier is significant at α = 0.05
+```
+
+{/*---END--*/}
+
+Verwenden Sie `Alternative.GREATER` oder `Alternative.LESS`, um nur einen Tail zu testen, wenn Sie ausschließlich an einem auffällig großen bzw. kleinen Wert interessiert sind:
+
+{/*---FUN hypGrubbsDirection--*/}
+
+```kotlin
+// Only test for a suspiciously large value (upper tail)
+val data = doubleArrayOf(2.1, 2.5, 2.3, 2.8, 10.0, 2.4, 2.2)
+val upper = grubbsTest(data, alternative = Alternative.GREATER)
+upper.additionalInfo["outlierValue"] // 10.0 — the maximum
+
+// Only test for a suspiciously small value (lower tail)
+val dataLow = doubleArrayOf(2.1, 2.5, 2.3, 2.8, -5.0, 2.4, 2.2)
+val lower = grubbsTest(dataLow, alternative = Alternative.LESS)
+lower.additionalInfo["outlierValue"] // -5.0 — the minimum
+```
+
+{/*---END--*/}
+
+Für mehrere Ausreißer wendet `grubbsTestIterative()` den Test wiederholt an und entfernt jeweils einen signifikanten Ausreißer, bis keiner mehr übrig ist oder die Stichprobe unter drei Beobachtungen fällt.
+
+{/*---FUN hypGrubbsIterative--*/}
+
+```kotlin
+// Remove multiple outliers by repeatedly applying the test
+val data = doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 80.0, 90.0)
+val cleaned = grubbsTestIterative(data, alpha = 0.05)
+
+cleaned.outlierIndices // indices (in the original array) that were removed
+cleaned.cleanedData    // observations after removing all detected outliers
+cleaned.iterations     // TestResult from each round (last one is non-significant)
+```
+
+{/*---END--*/}
+
+<Tip>
+Der Grubbs-Test setzt voraus, dass die Daten bis auf den Ausreißer näherungsweise normalverteilt sind. Validieren Sie mit `shapiroWilkTest()` an den Daten nach Entfernen des Verdächtigen, bevor Sie ein signifikantes Ergebnis berichten.
+</Tip>
+
+<Warning>
+Das iterative Verfahren kann Ausreißer **maskieren**, wenn mehrere Extreme zusammenliegen — jeder Einzeltest wird durch seine Nachbarn verdünnt. Bevorzugen Sie bei großen Clustern einen speziellen Mehrfach-Ausreißer-Test (z. B. verallgemeinertes ESD) oder einen robusten Schätzer.
+</Warning>
+
 ## Die Alternative-Aufzählung
 
 `Alternative` steuert die Richtung des Tests:

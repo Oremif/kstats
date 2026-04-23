@@ -273,6 +273,193 @@ Use `OnlineStatistics` when data arrives incrementally (streaming, event-driven 
 `OnlineStatistics` uses Welford's algorithm with the Terriberry extension for numerically stable single-pass computation of higher-order moments. The algorithm updates running sums of powers of deviations from the current mean, avoiding the catastrophic cancellation that affects naive two-pass formulas on large datasets.
 </Accordion>
 
+## Process Capability
+
+Process capability indices quantify how well a process fits within its <Tooltip tip="The lower (LSL) and upper (USL) spec limits bound the range of acceptable values for the measured characteristic">specification limits</Tooltip>. `processCapability(lsl, usl)` returns four Statistical Process Control (SPC) indices in one call:
+
+- **Cp, Cpk** — potential and actual capability using the sample standard deviation (short-term, within-subgroup spread).
+- **Pp, Ppk** — the same formulas using the population standard deviation (long-term, overall spread).
+
+The `-k` variants penalize a process that is off-center relative to the midpoint of the spec, so `Cpk` is never larger than `Cp`.
+
+{/*---FUN coreProcessCapability--*/}
+
+```kotlin
+// Ten parts measured against a spec window of [48, 52]
+val measurements = doubleArrayOf(
+    50.0, 50.5, 49.5, 50.2, 49.8, 50.1, 49.9, 50.3, 49.7, 50.0
+)
+val capability = measurements.processCapability(lsl = 48.0, usl = 52.0)
+
+capability.cp   // 2.2646 — potential capability (spread vs tolerance)
+capability.cpk  // 2.2646 — actual capability (penalizes off-centering)
+capability.pp   // 2.3870 — overall (population σ) counterpart of Cp
+capability.ppk  // 2.3870 — overall counterpart of Cpk
+```
+
+{/*---END--*/}
+
+<Note>
+Use these indices only on a process that is already in statistical control (stable over time — see [Shewhart Control Charts](#shewhart-control-charts) below). For an unstable process the measured spread is not a fixed property of the process.
+</Note>
+
+Values `≥ 1.33` are usually considered capable; `≥ 1.67` highly capable. When `Cpk ≪ Cp`, re-center the process before trying to reduce variance.
+
+<Accordion title="Math details">
+$$
+\mathrm{Cp} = \frac{\mathrm{USL} - \mathrm{LSL}}{6\sigma_s}, \qquad
+\mathrm{Cpk} = \min\!\left(\frac{\mathrm{USL} - \bar{x}}{3\sigma_s},\ \frac{\bar{x} - \mathrm{LSL}}{3\sigma_s}\right)
+$$
+
+Pp and Ppk use the population standard deviation $\sigma_p$ (divisor $n$) in place of the sample standard deviation $\sigma_s$ (divisor $n-1$). `processCapability` computes both in a single numerically stable Welford pass.
+</Accordion>
+
+## Shewhart Control Charts
+
+Shewhart <Tooltip tip="Time-series plot of subgroup statistics with ±3σ control limits around a center line">control charts</Tooltip> plot subgroup statistics over time with three-sigma control limits. `xBarRChart()` monitors the process mean together with the range within each subgroup; `xBarSChart()` uses the sample standard deviation instead — more efficient for subgroup sizes above 10. Both require equal-sized subgroups of 2–25 observations.
+
+{/*---FUN coreXBarRChart--*/}
+
+```kotlin
+// Five subgroups of four parts; bracket width monitored per batch
+val subgroups = listOf(
+    doubleArrayOf(72.0, 84.0, 79.0, 49.0),
+    doubleArrayOf(56.0, 87.0, 33.0, 42.0),
+    doubleArrayOf(55.0, 73.0, 22.0, 60.0),
+    doubleArrayOf(44.0, 80.0, 54.0, 74.0),
+    doubleArrayOf(97.0, 26.0, 48.0, 58.0),
+)
+val chart = xBarRChart(subgroups)
+
+chart.centerLine     // 59.65 — grand mean (x-double-bar)
+chart.ucl            // 95.6626 — upper control limit for the mean
+chart.lcl            // 23.6374 — lower control limit for the mean
+chart.rChart.centerLine // 49.4 — average range (R-bar)
+chart.rChart.ucl     // 112.7308 — upper limit for within-subgroup range
+chart.rChart.lcl     // 0.0 — lower limit (D₃ = 0 for n ≤ 6)
+```
+
+{/*---END--*/}
+
+Control limits use the standard SPC constants $A_2, A_3, D_3, D_4, B_3, B_4, c_4$ (Montgomery, *Introduction to Statistical Quality Control*, Appendix VI) available for subgroup sizes 2–25 through `spcConstants(n)`.
+
+<Accordion title="Math details">
+For $k$ subgroups of size $n$ with subgroup means $\bar{x}_i$, ranges $R_i$, and standard deviations $s_i$:
+
+$$
+\text{x̄-R:}\quad \mathrm{UCL}/\mathrm{LCL} = \bar{\bar{x}} \pm A_2 \bar{R}, \quad R\text{-chart: } [D_3 \bar{R},\ D_4 \bar{R}]
+$$
+
+$$
+\text{x̄-S:}\quad \mathrm{UCL}/\mathrm{LCL} = \bar{\bar{x}} \pm A_3 \bar{s}, \quad S\text{-chart: } [B_3 \bar{s},\ B_4 \bar{s}]
+$$
+</Accordion>
+
+## CUSUM Chart
+
+A Shewhart chart reacts slowly to drifts of less than 2σ because every point is judged in isolation. `cusum()` accumulates deviations from target over time, so a 0.5σ–1σ drift is detected within a few observations. The two-sided tabular form tracks an upper sum $C^+$ that catches upward shifts and a lower sum $C^-$ for downward shifts. An alarm fires on the first index where either sum exceeds the decision interval $H$.
+
+{/*---FUN coreCusum--*/}
+
+```kotlin
+// Individual measurements from a process with target 10, drifting upward
+val observations = doubleArrayOf(10.2, 10.4, 10.6, 10.9, 11.2, 11.5, 11.8, 12.0)
+val result = cusum(observations, target = 10.0, k = 0.5, h = 3.0)
+
+result.sPlus      // [0.0, 0.0, 0.1, 0.5, 1.2, 2.2, 3.5, 5.0]
+result.sMinus     // all zero — no downward drift
+result.alarmIndex // 6 — first index where C⁺ > H
+```
+
+{/*---END--*/}
+
+<Tip>
+Tune `k` to half the shift size you want to detect, in units of σ — a common default is $K \approx 0.5\sigma$ targeting a 1σ drift. Set `h` to 4σ–5σ to match the in-control run length of a 3σ Shewhart chart while reacting much faster to small shifts.
+</Tip>
+
+<Accordion title="Math details">
+$$
+C^+_i = \max\bigl(0,\; C^+_{i-1} + (x_i - \mu_0 - K)\bigr), \qquad
+C^-_i = \max\bigl(0,\; C^-_{i-1} + (\mu_0 - K - x_i)\bigr)
+$$
+
+starting from $C^\pm_0 = 0$, with an alarm the first time $C^+_i > H$ or $C^-_i > H$.
+</Accordion>
+
+## EWMA Chart
+
+EWMA (Roberts, 1959) is the other classic small-shift detector. Instead of an unbounded cumulative sum, `ewma()` maintains a weighted moving average that gives recent observations more influence while retaining memory of the past. Control limits widen with time until they reach a steady state, so the chart is most sensitive early — useful for catching an initial shift.
+
+{/*---FUN coreEwma--*/}
+
+```kotlin
+// EWMA chart: target = 25, σ = 1, λ = 0.2, L = 3
+val observations = doubleArrayOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
+val result = ewma(
+    observations,
+    target = 25.0,
+    sigma = 1.0,
+    lambda = 0.2,
+    controlLimitWidth = 3.0
+)
+
+result.smoothedValues[0] // 25.0 — Z₀ = λ·x + (1-λ)·target
+result.smoothedValues[7] // 26.2549 — smoothed statistic at t = 7
+result.ucl[0]            // 25.6 — narrow at first, widens with t
+result.ucl[7]            // 25.9858 — approaching steady state
+result.outOfControl      // [7] — Z₇ exceeds UCL₇
+```
+
+{/*---END--*/}
+
+<Tip>
+$\lambda = 0.2$ with $L \approx 2.7$–$3.0$ is a common default. Smaller $\lambda$ emphasizes memory and detects smaller shifts; $\lambda = 1$ collapses EWMA into a Shewhart individuals chart.
+</Tip>
+
+<Accordion title="Math details">
+$$
+Z_t = \lambda x_t + (1 - \lambda) Z_{t-1}, \qquad Z_0 = \mu_0
+$$
+
+$$
+\mathrm{UCL}_t/\mathrm{LCL}_t = \mu_0 \pm L \sigma \sqrt{\frac{\lambda}{2 - \lambda}\,\bigl(1 - (1 - \lambda)^{2t}\bigr)}
+$$
+</Accordion>
+
+## Western Electric Rules
+
+`westernElectricRules()` extends a Shewhart chart beyond the basic ±3σ check with four run-length heuristics that catch trends, clusters, and prolonged one-sided runs.
+
+| Rule | Pattern | Detects |
+|------|---------|---------|
+| **1** | 1 point beyond $\pm 3\sigma$ | extreme single excursion |
+| **2** | 2 of last 3 points beyond $\pm 2\sigma$, same side | strong shift |
+| **3** | 4 of last 5 points beyond $\pm 1\sigma$, same side | moderate shift |
+| **4** | 8 consecutive points on the same side of the center | sustained shift, any magnitude |
+
+Each rule's array contains the *trigger indices* — the observation whose arrival completes the offending pattern.
+
+{/*---FUN coreWesternElectricRules--*/}
+
+```kotlin
+// Process drifting upward in the last four observations
+val observations = doubleArrayOf(
+    0.1, 0.2, -0.3, 0.0, 1.4, 1.2, 2.4, 2.6, 3.5, 2.2
+)
+val violations = westernElectricRules(observations, center = 0.0, sigma = 1.0)
+
+violations.rule1 // indices of points beyond ±3σ
+violations.rule2 // indices where 2 of last 3 points are beyond ±2σ (same side)
+violations.rule3 // indices where 4 of last 5 points are beyond ±1σ (same side)
+violations.rule4 // indices where 8 consecutive points fall on the same side
+```
+
+{/*---END--*/}
+
+<Tip>
+Combine a Shewhart chart (large shifts) with CUSUM or EWMA (small shifts) and Western Electric Rules (patterns) — the three views together catch the widest range of out-of-control conditions.
+</Tip>
+
 ## Error Handling
 
 <Warning>

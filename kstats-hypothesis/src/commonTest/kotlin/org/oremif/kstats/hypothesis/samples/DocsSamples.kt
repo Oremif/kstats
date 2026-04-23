@@ -340,6 +340,49 @@ class DocsSamples {
         // SampleEnd
     }
 
+    @Test
+    fun hypGrubbsSingle() {
+        // SampleStart
+        // Response times (ms) with a suspected outlier
+        val latencies = doubleArrayOf(12.0, 14.0, 11.0, 13.0, 15.0, 98.0, 12.0)
+
+        val result = grubbsTest(latencies)
+        result.statistic                       // G statistic
+        result.pValue                          // Bonferroni-corrected p-value
+        result.additionalInfo["outlierIndex"]  // index of the suspected outlier
+        result.additionalInfo["outlierValue"]  // the suspected outlier's value
+        result.isSignificant()                 // true if outlier is significant at α = 0.05
+        // SampleEnd
+    }
+
+    @Test
+    fun hypGrubbsDirection() {
+        // SampleStart
+        // Only test for a suspiciously large value (upper tail)
+        val data = doubleArrayOf(2.1, 2.5, 2.3, 2.8, 10.0, 2.4, 2.2)
+        val upper = grubbsTest(data, alternative = Alternative.GREATER)
+        upper.additionalInfo["outlierValue"] // 10.0 — the maximum
+
+        // Only test for a suspiciously small value (lower tail)
+        val dataLow = doubleArrayOf(2.1, 2.5, 2.3, 2.8, -5.0, 2.4, 2.2)
+        val lower = grubbsTest(dataLow, alternative = Alternative.LESS)
+        lower.additionalInfo["outlierValue"] // -5.0 — the minimum
+        // SampleEnd
+    }
+
+    @Test
+    fun hypGrubbsIterative() {
+        // SampleStart
+        // Remove multiple outliers by repeatedly applying the test
+        val data = doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 80.0, 90.0)
+        val cleaned = grubbsTestIterative(data, alpha = 0.05)
+
+        cleaned.outlierIndices // indices (in the original array) that were removed
+        cleaned.cleanedData    // observations after removing all detected outliers
+        cleaned.iterations     // TestResult from each round (last one is non-significant)
+        // SampleEnd
+    }
+
     // =====================================================================
     // choosing-a-distribution.mdx
     // =====================================================================
