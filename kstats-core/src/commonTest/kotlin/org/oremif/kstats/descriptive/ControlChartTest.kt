@@ -2,6 +2,7 @@ package org.oremif.kstats.descriptive
 
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
+import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -1570,5 +1571,898 @@ internal class ControlChartTest {
         assertTrue(s.contains("sMinus=[0.0, 0.0, 0.05]"), "toString should render sMinus elements, got: $s")
         assertTrue(s.contains("alarmIndex=-1"), "toString should render alarmIndex, got: $s")
         assertTrue(!s.contains("[D@"), "toString must not leak default array identity, got: $s")
+    }
+
+    // ===== ewma: Basic correctness =====
+
+    @Test
+    fun testEwmaSimpleHandComputable() {
+        // Hand-computable example: target=10, sigma=1, lambda=0.5, L=3
+        // Z_0 = 0.5*10.5 + 0.5*10 = 10.25
+        // Z_1 = 0.5*11.0 + 0.5*10.25 = 10.625
+        // Z_2 = 0.5*11.5 + 0.5*10.625 = 11.0625
+        // Z_3 = 0.5*12.0 + 0.5*11.0625 = 11.53125
+        // Z_4 = 0.5*12.5 + 0.5*11.53125 = 12.015625
+        // Z_5 = 0.5*13.0 + 0.5*12.015625 = 12.5078125
+        // sigma_Z_1 = 1 * sqrt(0.5/1.5 * (1 - 0.25)) = sqrt(1/3 * 0.75) = sqrt(0.25) = 0.5
+        // UCL_1 = 10 + 3*0.5 = 11.5
+        val obs = doubleArrayOf(10.5, 11.0, 11.5, 12.0, 12.5, 13.0)
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.5, controlLimitWidth = 3.0)
+
+        // numpy: Z values
+        assertEquals(10.25, result.smoothedValues[0], tol, "Z_0")
+        assertEquals(10.625, result.smoothedValues[1], tol, "Z_1")
+        assertEquals(11.0625, result.smoothedValues[2], tol, "Z_2")
+        assertEquals(11.53125, result.smoothedValues[3], tol, "Z_3")
+        assertEquals(12.015625, result.smoothedValues[4], tol, "Z_4")
+        assertEquals(12.5078125, result.smoothedValues[5], tol, "Z_5")
+
+        // numpy: UCL/LCL values
+        assertEquals(11.5, result.ucl[0], tol, "UCL_0")
+        assertEquals(8.5, result.lcl[0], tol, "LCL_0")
+        assertEquals(11.6770509831248, result.ucl[1], tol, "UCL_1")
+        assertEquals(8.32294901687516, result.lcl[1], tol, "LCL_1")
+        assertEquals(11.7184658856084, result.ucl[2], tol, "UCL_2")
+        assertEquals(11.7286645857424, result.ucl[3], tol, "UCL_3")
+        assertEquals(11.7312048730581, result.ucl[4], tol, "UCL_4")
+        assertEquals(11.7318393626792, result.ucl[5], tol, "UCL_5")
+
+        // numpy: Z_4=12.015625 > UCL_4=11.7312, Z_5=12.5078 > UCL_5=11.7318 => OOC at 4, 5
+        assertTrue(result.outOfControl.contentEquals(intArrayOf(4, 5)), "OOC indices")
+    }
+
+    @Test
+    fun testEwmaDocstringExample() {
+        // Example from the ewma() docstring
+        // numpy: target=25, sigma=1, lambda=0.2, L=3
+        val obs = doubleArrayOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
+        val result = ewma(obs, target = 25.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        // numpy: Z_0 = 0.2*25 + 0.8*25 = 25; Z_1 = 0.2*24.5 + 0.8*25 = 24.9
+        assertEquals(25.0, result.smoothedValues[0], tol, "Z_0")
+        assertEquals(24.9, result.smoothedValues[1], tol, "Z_1")
+        assertEquals(24.96, result.smoothedValues[2], tol, "Z_2")
+        assertEquals(25.188, result.smoothedValues[3], tol, "Z_3")
+        assertEquals(25.3104, result.smoothedValues[4], tol, "Z_4")
+        assertEquals(25.64832, result.smoothedValues[5], tol, "Z_5")
+        assertEquals(25.818656, result.smoothedValues[6], tol, "Z_6")
+        assertEquals(26.2549248, result.smoothedValues[7], tol, "Z_7")
+
+        // numpy: UCL at steady state with lam=0.2 approaches 25 + 3*sqrt(0.2/1.8) ≈ 25.9999
+        assertEquals(25.6, result.ucl[0], tol, "UCL_0")
+        assertEquals(25.9858257971513, result.ucl[7], tol, "UCL_7")
+
+        // numpy: Z_7=26.255 > UCL_7=25.986 => OOC at 7
+        assertTrue(result.outOfControl.contentEquals(intArrayOf(7)), "OOC indices")
+    }
+
+    @Test
+    fun testEwmaMontgomeryExample() {
+        // Montgomery "Introduction to Statistical Quality Control" (7th ed.), §9.2
+        // Same 30 observations as CUSUM example, target=10, sigma=1, lambda=0.1, L=2.7
+        val obs = doubleArrayOf(
+            9.45, 7.99, 9.29, 11.66, 12.16, 10.18, 8.04, 11.46, 9.20, 10.34,
+            9.03, 11.47, 10.51, 9.40, 10.08, 9.37, 10.62, 10.31, 8.52, 10.84,
+            10.90, 9.33, 12.29, 11.50, 10.60, 11.08, 10.38, 11.62, 11.31, 10.52
+        )
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.1, controlLimitWidth = 2.7)
+
+        // numpy: Z_0 = 0.1*9.45 + 0.9*10 = 9.945
+        assertEquals(9.945, result.smoothedValues[0], tol, "Z_0")
+        // numpy: Z_1 = 0.1*7.99 + 0.9*9.945 = 0.799 + 8.9505 = 9.7495
+        assertEquals(9.7495, result.smoothedValues[1], tol, "Z_1")
+        // numpy: Z_4 = 10.1252755
+        assertEquals(10.1252755, result.smoothedValues[4], tol, "Z_4")
+        // numpy: Z_9 = 10.023159729995
+        assertEquals(10.023159729995, result.smoothedValues[9], tol, "Z_9")
+        // numpy: Z_28 = 10.6468234545764
+        assertEquals(10.6468234545764, result.smoothedValues[28], tol, "Z_28")
+        // numpy: Z_29 = 10.6341411091187
+        assertEquals(10.6341411091187, result.smoothedValues[29], tol, "Z_29")
+
+        // numpy: UCL_0 = 10 + 2.7 * sqrt(0.1/1.9 * (1-0.81)) = 10 + 2.7 * 0.1 = 10.27
+        assertEquals(10.27, result.ucl[0], tol, "UCL_0")
+        // numpy: UCL_29 (approaching steady state) = 10.6188656769026
+        assertEquals(10.6188656769026, result.ucl[29], tol, "UCL_29")
+        assertEquals(9.38113432309742, result.lcl[29], tol, "LCL_29")
+
+        // numpy: Z_28=10.6468 > UCL_28=10.6187, Z_29=10.6341 > UCL_29=10.6189 => OOC at 28, 29
+        assertTrue(
+            result.outOfControl.contentEquals(intArrayOf(28, 29)),
+            "OOC indices should be [28, 29], got ${result.outOfControl.toList()}"
+        )
+    }
+
+    @Test
+    fun testEwmaLambdaOneIsShewhart() {
+        // Special case: lambda=1 reduces to Shewhart individuals chart
+        //   Z_t = x_t, sigma_Zt = sigma constant for all t (since (1-lam)^(2t) = 0)
+        //   UCL = target + L*sigma, LCL = target - L*sigma (both constant)
+        val obs = doubleArrayOf(0.0, 1.0, -1.0, 5.0, -5.0)
+        val result = ewma(obs, target = 0.0, sigma = 1.0, lambda = 1.0, controlLimitWidth = 3.0)
+
+        // numpy: Z = obs, UCL = 3, LCL = -3 for all t
+        for (i in obs.indices) {
+            assertEquals(obs[i], result.smoothedValues[i], tol, "Z[$i] = obs[$i] when lambda=1")
+            assertEquals(3.0, result.ucl[i], tol, "UCL[$i] = 3 when lambda=1")
+            assertEquals(-3.0, result.lcl[i], tol, "LCL[$i] = -3 when lambda=1")
+        }
+        // numpy: obs[3]=5 > UCL=3, obs[4]=-5 < LCL=-3 => OOC at 3, 4
+        assertTrue(result.outOfControl.contentEquals(intArrayOf(3, 4)), "OOC indices")
+    }
+
+    @Test
+    fun testEwmaSingleObservation() {
+        // Single observation with lambda=0.2
+        // Z_0 = 0.2*12 + 0.8*10 = 10.4
+        // sigma_Z_1 = 1 * sqrt(0.2/1.8 * (1 - 0.64)) = sqrt(0.04) = 0.2
+        // UCL = 10 + 3*0.2 = 10.6, LCL = 10 - 0.6 = 9.4
+        val result = ewma(doubleArrayOf(12.0), target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        assertEquals(1, result.smoothedValues.size, "smoothedValues.size")
+        assertEquals(1, result.ucl.size, "ucl.size")
+        assertEquals(1, result.lcl.size, "lcl.size")
+        assertEquals(10.4, result.smoothedValues[0], tol, "Z_0")
+        assertEquals(10.6, result.ucl[0], tol, "UCL_0")
+        assertEquals(9.4, result.lcl[0], tol, "LCL_0")
+        // 10.4 is between 9.4 and 10.6 => no OOC
+        assertEquals(0, result.outOfControl.size, "no OOC for single in-control observation")
+    }
+
+    @Test
+    fun testEwmaSingleObservationOutOfControl() {
+        // With lambda=1, UCL=target+L*sigma immediately fires
+        // Z_0 = 20 > UCL = 10 + 3 = 13
+        val result = ewma(doubleArrayOf(20.0), target = 10.0, sigma = 1.0, lambda = 1.0, controlLimitWidth = 3.0)
+        assertEquals(20.0, result.smoothedValues[0], tol, "Z_0")
+        assertEquals(13.0, result.ucl[0], tol, "UCL_0")
+        assertEquals(7.0, result.lcl[0], tol, "LCL_0")
+        assertTrue(result.outOfControl.contentEquals(intArrayOf(0)), "alarm at i=0")
+    }
+
+    // ===== ewma: Edge cases =====
+
+    @Test
+    fun testEwmaAllObservationsAtTarget() {
+        // All observations equal target => Z_t = target for all t, no OOC
+        val obs = DoubleArray(10) { 10.0 }
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        for (i in obs.indices) {
+            assertEquals(10.0, result.smoothedValues[i], tol, "Z[$i] = target")
+            assertTrue(result.ucl[i] > 10.0, "UCL[$i] > target")
+            assertTrue(result.lcl[i] < 10.0, "LCL[$i] < target")
+        }
+        assertEquals(0, result.outOfControl.size, "no OOC when all obs at target")
+
+        // numpy: steady-state UCL approaches target + L*sigma*sqrt(lambda/(2-lambda))
+        //        = 10 + 3*sqrt(0.2/1.8) ≈ 10.99999 at large t
+        assertEquals(10.6, result.ucl[0], tol, "UCL_0")
+        assertEquals(10.9942186806503, result.ucl[9], tol, "UCL_9 approaches steady state")
+    }
+
+    @Test
+    fun testEwmaLambdaMinuscule() {
+        // Very small lambda (near zero is allowed): strong memory of past
+        // Z values barely move from target
+        // numpy: lambda=0.001, target=100, sigma=1, L=3
+        val obs = doubleArrayOf(100.0, 100.5, 101.0)
+        val result = ewma(obs, target = 100.0, sigma = 1.0, lambda = 0.001, controlLimitWidth = 3.0)
+
+        // numpy: Z_0 = 0.001*100 + 0.999*100 = 100
+        assertEquals(100.0, result.smoothedValues[0], tol, "Z_0 with tiny lambda")
+        // numpy: Z_1 = 0.001*100.5 + 0.999*100 = 100.0005
+        assertEquals(100.0005, result.smoothedValues[1], tol, "Z_1 with tiny lambda")
+        // numpy: Z_2 = 0.001*101 + 0.999*100.0005 = 100.0014995
+        assertEquals(100.0014995, result.smoothedValues[2], tol, "Z_2 with tiny lambda")
+
+        // numpy: sigma_Z_1^2 = 0.001/1.999 * (1 - 0.999^2) = 0.001/1.999 * 0.001999 = 1e-6
+        // so sigma_Z_1 = 0.001, UCL_0 = 100 + 3*0.001 = 100.003
+        assertEquals(100.003, result.ucl[0], tol, "UCL_0 tiny lambda")
+    }
+
+    @Test
+    fun testEwmaLambdaNearOne() {
+        // lambda very close to 1 but not equal: behavior approaches Shewhart
+        // sigma_Z_1^2 = sigma^2 * (1/(2-lam)) * (2lam-lam^2) = lam*sigma^2 (approx)
+        val obs = doubleArrayOf(0.0, 0.0, 0.0, 0.0)
+        val result = ewma(obs, target = 0.0, sigma = 1.0, lambda = 0.99, controlLimitWidth = 3.0)
+
+        // All obs = target => all Z = target
+        for (i in obs.indices) {
+            assertEquals(0.0, result.smoothedValues[i], tol, "Z[$i] = 0")
+        }
+        // UCL_0 = 0 + 3*sqrt(0.99/1.01 * (1 - 0.01^2)) ≈ 2.97
+        assertTrue(result.ucl[0] > 2.95, "UCL_0 close to 3 for lam near 1")
+        assertTrue(result.ucl[0] < 3.0, "UCL_0 < 3 for lam < 1")
+    }
+
+    @Test
+    fun testEwmaControlLimitsIncreaseThenPlateau() {
+        // Control limits |UCL - target| and |target - LCL| widen monotonically toward steady state
+        val obs = DoubleArray(50) { 10.0 } // stays at target to isolate limit progression
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.1, controlLimitWidth = 3.0)
+
+        for (i in 1 until obs.size) {
+            assertTrue(
+                result.ucl[i] >= result.ucl[i - 1],
+                "UCL[$i]=${result.ucl[i]} >= UCL[${i - 1}]=${result.ucl[i - 1]}"
+            )
+            assertTrue(
+                result.lcl[i] <= result.lcl[i - 1],
+                "LCL[$i]=${result.lcl[i]} <= LCL[${i - 1}]=${result.lcl[i - 1]}"
+            )
+        }
+        // numpy: Steady state UCL = 10 + 3 * sqrt(0.1/1.9) = 10.6887...
+        val steadyUcl = 10.0 + 3.0 * sqrt(0.1 / 1.9)
+        assertEquals(steadyUcl, result.ucl[49], 1e-4, "UCL approaches steady state")
+    }
+
+    @Test
+    fun testEwmaTwoSidedAlarm() {
+        // Observations cross both UCL (upward) and LCL (downward) in the same series
+        // numpy: lambda=0.3, target=10, sigma=1, L=3
+        val obs = doubleArrayOf(15.0, 15.0, 15.0, 15.0, 5.0, 5.0, 5.0, 5.0)
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
+
+        // numpy: Z_0=11.5 > 10.9 => OOC, Z_6=8.018 < 8.744 => OOC
+        assertEquals(11.5, result.smoothedValues[0], tol, "Z_0")
+        assertEquals(12.55, result.smoothedValues[1], tol, "Z_1")
+        assertEquals(13.285, result.smoothedValues[2], tol, "Z_2")
+        assertEquals(13.7995, result.smoothedValues[3], tol, "Z_3")
+        assertEquals(11.15965, result.smoothedValues[4], tol, "Z_4")
+        assertEquals(9.311755, result.smoothedValues[5], tol, "Z_5")
+        assertEquals(8.0182285, result.smoothedValues[6], tol, "Z_6")
+        assertEquals(7.11275995, result.smoothedValues[7], tol, "Z_7")
+
+        // numpy: UCL and LCL at index 7
+        assertEquals(11.2581562394202, result.ucl[7], tol, "UCL_7")
+        assertEquals(8.74184376057984, result.lcl[7], tol, "LCL_7")
+
+        // numpy: Indices where Z > UCL or Z < LCL => [0, 1, 2, 3, 6, 7]
+        assertTrue(
+            result.outOfControl.contentEquals(intArrayOf(0, 1, 2, 3, 6, 7)),
+            "two-sided OOC: ${result.outOfControl.toList()}"
+        )
+    }
+
+    @Test
+    fun testEwmaReturnsArraysOfCorrectLength() {
+        for (n in listOf(1, 2, 5, 10, 50, 100)) {
+            val obs = DoubleArray(n) { (it + 1).toDouble() }
+            val result = ewma(obs, target = 5.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+            assertEquals(n, result.smoothedValues.size, "smoothedValues.size for n=$n")
+            assertEquals(n, result.ucl.size, "ucl.size for n=$n")
+            assertEquals(n, result.lcl.size, "lcl.size for n=$n")
+        }
+    }
+
+    // ===== ewma: Degenerate input =====
+
+    @Test
+    fun testEwmaEmptyArray() {
+        assertFailsWith<InsufficientDataException> {
+            ewma(doubleArrayOf(), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        }
+    }
+
+    @Test
+    fun testEwmaEmptyIterable() {
+        assertFailsWith<InsufficientDataException> {
+            ewma(emptyList<Double>(), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        }
+    }
+
+    @Test
+    fun testEwmaEmptySequence() {
+        assertFailsWith<InsufficientDataException> {
+            ewma(emptySequence<Double>(), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        }
+    }
+
+    @Test
+    fun testEwmaSigmaZero() {
+        assertFailsWith<InvalidParameterException> {
+            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 0.0, lambda = 0.2, controlLimitWidth = 3.0)
+        }
+    }
+
+    @Test
+    fun testEwmaSigmaNegative() {
+        assertFailsWith<InvalidParameterException> {
+            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = -0.5, lambda = 0.2, controlLimitWidth = 3.0)
+        }
+    }
+
+    @Test
+    fun testEwmaLambdaZero() {
+        assertFailsWith<InvalidParameterException> {
+            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 0.0, controlLimitWidth = 3.0)
+        }
+    }
+
+    @Test
+    fun testEwmaLambdaNegative() {
+        assertFailsWith<InvalidParameterException> {
+            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = -0.1, controlLimitWidth = 3.0)
+        }
+    }
+
+    @Test
+    fun testEwmaLambdaGreaterThanOne() {
+        assertFailsWith<InvalidParameterException> {
+            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 1.0001, controlLimitWidth = 3.0)
+        }
+    }
+
+    @Test
+    fun testEwmaLambdaExactlyOne() {
+        // lambda=1 is the allowed boundary, should NOT throw
+        val result = ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 1.0, controlLimitWidth = 3.0)
+        assertEquals(3, result.smoothedValues.size, "lambda=1 is allowed")
+    }
+
+    @Test
+    fun testEwmaControlLimitWidthZero() {
+        assertFailsWith<InvalidParameterException> {
+            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 0.0)
+        }
+    }
+
+    @Test
+    fun testEwmaControlLimitWidthNegative() {
+        assertFailsWith<InvalidParameterException> {
+            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = -1.0)
+        }
+    }
+
+    @Test
+    fun testEwmaSigmaNegativeIterable() {
+        assertFailsWith<InvalidParameterException> {
+            ewma(listOf(1.0, 2.0, 3.0), target = 0.0, sigma = -1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        }
+    }
+
+    @Test
+    fun testEwmaLambdaOutOfRangeSequence() {
+        assertFailsWith<InvalidParameterException> {
+            ewma(sequenceOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 1.5, controlLimitWidth = 3.0)
+        }
+    }
+
+    // ===== ewma: Extreme parameters =====
+
+    @Test
+    fun testEwmaLargeOffsetData() {
+        // Large offset tests numerical stability
+        val offset = 1e12
+        val obs = doubleArrayOf(offset + 0.1, offset + 0.2, offset - 0.1)
+        val result = ewma(obs, target = offset, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        // numpy: Z_0 = 0.2*(1e12+0.1) + 0.8*1e12 = 1e12 + 0.02
+        // Finite precision for 1e12 means ~1 ULP is a few microseconds
+        assertTrue(result.smoothedValues[0].isFinite(), "Z_0 finite with large offset")
+        assertEquals(offset + 0.02, result.smoothedValues[0], 1e-3, "Z_0")
+        // numpy: UCL_0 = 1e12 + 0.6
+        assertEquals(offset + 0.6, result.ucl[0], 1e-3, "UCL_0 with large offset")
+    }
+
+    @Test
+    fun testEwmaVeryLargeSigma() {
+        // Very large sigma => proportionally wide control limits
+        val obs = doubleArrayOf(10.0, 15.0, 5.0)
+        val result = ewma(obs, target = 10.0, sigma = 1e6, lambda = 0.2, controlLimitWidth = 3.0)
+
+        // Z values unaffected by sigma
+        assertEquals(10.0, result.smoothedValues[0], tol, "Z_0 unaffected by sigma")
+        assertEquals(11.0, result.smoothedValues[1], tol, "Z_1 unaffected by sigma")
+        assertEquals(9.8, result.smoothedValues[2], tol, "Z_2 unaffected by sigma")
+
+        // Control limits scale linearly with sigma
+        assertEquals(600010.0, result.ucl[0], 1e-3, "UCL_0 scales with sigma")
+        assertEquals(-599990.0, result.lcl[0], 1e-3, "LCL_0 scales with sigma")
+    }
+
+    @Test
+    fun testEwmaVerySmallSigma() {
+        // Very small sigma => narrow control limits, OOC fires on tiny deviation
+        val obs = doubleArrayOf(10.0 + 1e-5)
+        val result = ewma(obs, target = 10.0, sigma = 1e-10, lambda = 0.2, controlLimitWidth = 3.0)
+
+        // Z_0 = 10 + 0.2*1e-5 = 10.000002
+        assertTrue(result.smoothedValues[0].isFinite(), "Z_0 finite with small sigma")
+        // UCL_0 = 10 + 3 * 1e-10 * 0.2 = 10 + 6e-11
+        assertTrue(
+            result.ucl[0] - 10.0 < 1e-9,
+            "UCL very close to target for tiny sigma, got ${result.ucl[0]}"
+        )
+        // deviation far exceeds UCL, so OOC
+        assertTrue(result.outOfControl.isNotEmpty(), "tiny deviation > tiny UCL => OOC")
+    }
+
+    @Test
+    fun testEwmaLongSeries() {
+        // Stress test: 10000 observations with no shift should stay in control
+        // Expected ARL for lambda=0.2, L=3 is > 400, so 10000 will likely show some OOC
+        // from random fluctuations in deterministic data, but not crash.
+        val n = 10000
+        val obs = DoubleArray(n) { 10.0 + 0.01 * kotlin.math.sin(it * 0.01) }
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        assertEquals(n, result.smoothedValues.size, "all Z values computed")
+        for (i in 0 until n) {
+            assertTrue(result.smoothedValues[i].isFinite(), "Z[$i] finite")
+            assertTrue(result.ucl[i].isFinite(), "UCL[$i] finite")
+            assertTrue(result.lcl[i].isFinite(), "LCL[$i] finite")
+        }
+        // Control limits should converge and stabilize at steady state
+        val steadyUcl = 10.0 + 3.0 * sqrt(0.2 / 1.8)
+        assertEquals(steadyUcl, result.ucl[n - 1], 1e-12, "UCL at steady state after 10000 points")
+    }
+
+    @Test
+    fun testEwmaLargeControlLimitWidth() {
+        // Very large L => no OOC ever (for bounded data)
+        val obs = doubleArrayOf(0.0, 100.0, -100.0, 50.0, -50.0)
+        val result = ewma(obs, target = 0.0, sigma = 1.0, lambda = 0.5, controlLimitWidth = 1e6)
+
+        assertEquals(0, result.outOfControl.size, "very wide L => no OOC")
+        for (i in obs.indices) {
+            assertTrue(result.ucl[i].isFinite(), "UCL[$i] finite for large L")
+        }
+    }
+
+    // ===== ewma: Non-finite input =====
+
+    @Test
+    fun testEwmaNaNInObservations() {
+        // NaN propagates through Z recursion (z_{t-1} becomes NaN)
+        val obs = doubleArrayOf(10.0, 10.1, Double.NaN, 10.3, 10.4)
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        // Before NaN: normal computation
+        assertTrue(result.smoothedValues[0].isFinite(), "Z[0] finite before NaN")
+        assertTrue(result.smoothedValues[1].isFinite(), "Z[1] finite before NaN")
+        // NaN at index 2 and propagates thereafter
+        assertTrue(result.smoothedValues[2].isNaN(), "Z[2] NaN")
+        assertTrue(result.smoothedValues[3].isNaN(), "Z[3] NaN propagates")
+        assertTrue(result.smoothedValues[4].isNaN(), "Z[4] NaN propagates")
+        // Control limits unaffected by data NaN (depend only on target, sigma, lambda, L, t)
+        assertTrue(result.ucl[2].isFinite(), "UCL[2] finite despite NaN in data")
+        assertTrue(result.lcl[4].isFinite(), "LCL[4] finite despite NaN in data")
+        // NaN never triggers OOC (NaN > x and NaN < x are both false per IEEE 754)
+        assertTrue(2 !in result.outOfControl, "NaN index not flagged as OOC")
+    }
+
+    @Test
+    fun testEwmaPositiveInfinityInObservations() {
+        // +Infinity in data: Z becomes +Infinity from that point; +Infinity > UCL is true => OOC
+        val obs = doubleArrayOf(10.0, Double.POSITIVE_INFINITY, 10.0)
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        assertEquals(10.0, result.smoothedValues[0], tol, "Z[0] before infinity")
+        assertTrue(result.smoothedValues[1].isInfinite(), "Z[1] infinite")
+        assertTrue(result.smoothedValues[1] > 0, "Z[1] positive infinity")
+        // Z[2] = 0.2*10 + 0.8 * inf = inf (still)
+        assertTrue(result.smoothedValues[2].isInfinite(), "Z[2] propagates infinity")
+        // +infinity > UCL is true, triggers OOC
+        assertTrue(1 in result.outOfControl, "+Infinity at i=1 => OOC")
+    }
+
+    @Test
+    fun testEwmaNegativeInfinityInObservations() {
+        val obs = doubleArrayOf(10.0, Double.NEGATIVE_INFINITY, 10.0)
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        assertTrue(result.smoothedValues[1].isInfinite(), "Z[1] infinite")
+        assertTrue(result.smoothedValues[1] < 0, "Z[1] negative infinity")
+        // -infinity < LCL is true, triggers OOC
+        assertTrue(1 in result.outOfControl, "-Infinity at i=1 => OOC")
+    }
+
+    @Test
+    fun testEwmaNaNTargetDoesNotThrow() {
+        // NaN parameters pass validation (NaN comparisons are false per IEEE 754)
+        val result = ewma(doubleArrayOf(1.0, 2.0, 3.0), target = Double.NaN, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        for (i in 0 until 3) {
+            assertTrue(result.smoothedValues[i].isNaN(), "Z[$i] NaN when target is NaN")
+            assertTrue(result.ucl[i].isNaN(), "UCL[$i] NaN when target is NaN")
+            assertTrue(result.lcl[i].isNaN(), "LCL[$i] NaN when target is NaN")
+        }
+        assertEquals(0, result.outOfControl.size, "NaN never OOC")
+    }
+
+    @Test
+    fun testEwmaNaNSigmaDoesNotThrow() {
+        // NaN sigma: sigma <= 0 is false for NaN, validation passes; limits become NaN
+        val result = ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = Double.NaN, lambda = 0.2, controlLimitWidth = 3.0)
+        for (i in 0 until 3) {
+            assertTrue(result.ucl[i].isNaN(), "UCL[$i] NaN when sigma is NaN")
+            assertTrue(result.lcl[i].isNaN(), "LCL[$i] NaN when sigma is NaN")
+        }
+        // Z unaffected by sigma, finite
+        assertTrue(result.smoothedValues[0].isFinite(), "Z unaffected by sigma")
+    }
+
+    @Test
+    fun testEwmaNaNLambdaDoesNotThrow() {
+        // NaN lambda: lambda <= 0 and lambda > 1 are both false for NaN; results become NaN
+        val result = ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = Double.NaN, controlLimitWidth = 3.0)
+        for (i in 0 until 3) {
+            assertTrue(result.smoothedValues[i].isNaN(), "Z[$i] NaN with NaN lambda")
+        }
+    }
+
+    @Test
+    fun testEwmaNaNControlLimitWidthDoesNotThrow() {
+        // NaN L: L <= 0 is false for NaN; limits become NaN
+        val result = ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = Double.NaN)
+        // Z unaffected by L
+        assertEquals(0.2, result.smoothedValues[0], tol, "Z unaffected by L")
+        for (i in 0 until 3) {
+            assertTrue(result.ucl[i].isNaN(), "UCL[$i] NaN with NaN L")
+            assertTrue(result.lcl[i].isNaN(), "LCL[$i] NaN with NaN L")
+        }
+    }
+
+    // ===== ewma: Property-based =====
+
+    @Test
+    fun testEwmaRecursiveDefinition() {
+        // Property: Z_t = lambda*x_t + (1-lambda)*Z_{t-1}, Z_0 = target (before first observation)
+        val obs = doubleArrayOf(10.1, 10.3, 10.5, 10.8, 11.0, 11.3, 9.5, 9.2, 10.7, 11.5)
+        val target = 10.0
+        val lambda = 0.25
+        val result = ewma(obs, target = target, sigma = 1.0, lambda = lambda, controlLimitWidth = 3.0)
+
+        // Z_0 = lambda*x_0 + (1-lambda)*target
+        val z0 = lambda * obs[0] + (1.0 - lambda) * target
+        assertEquals(z0, result.smoothedValues[0], tol, "Z_0 recursion with Z_{-1}=target")
+
+        for (i in 1 until obs.size) {
+            val expected = lambda * obs[i] + (1.0 - lambda) * result.smoothedValues[i - 1]
+            assertEquals(expected, result.smoothedValues[i], tol, "Z[$i] recursion")
+        }
+    }
+
+    @Test
+    fun testEwmaControlLimitsSymmetricAroundTarget() {
+        // Property: UCL - target == target - LCL for all t
+        val obs = doubleArrayOf(10.5, 11.0, 9.5, 10.3, 10.8)
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
+
+        val target = 10.0
+        for (i in obs.indices) {
+            val upperSpread = result.ucl[i] - target
+            val lowerSpread = target - result.lcl[i]
+            assertEquals(upperSpread, lowerSpread, tol, "symmetry at i=$i")
+        }
+    }
+
+    @Test
+    fun testEwmaUclAlwaysGreaterThanLcl() {
+        // UCL > LCL strictly for all t, sigma > 0, L > 0
+        val obs = doubleArrayOf(10.0, 11.0, 9.5, 10.2, 10.8, 9.1)
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        for (i in obs.indices) {
+            assertTrue(result.ucl[i] > result.lcl[i], "UCL > LCL at i=$i")
+        }
+    }
+
+    @Test
+    fun testEwmaFirstObservationSigmaEqualsLambdaSigma() {
+        // Closed-form identity: sigma_Z_1 = sigma * |lambda|
+        // Because sigma_Z_1^2 = sigma^2 * lam/(2-lam) * (1 - (1-lam)^2)
+        //                     = sigma^2 * lam/(2-lam) * (2lam - lam^2)
+        //                     = sigma^2 * lam/(2-lam) * lam*(2 - lam)
+        //                     = sigma^2 * lam^2
+        // => UCL_0 - target = L * sigma * lambda
+        for (lambda in listOf(0.05, 0.1, 0.2, 0.5, 0.9, 1.0)) {
+            val result = ewma(doubleArrayOf(0.0), target = 0.0, sigma = 1.0, lambda = lambda, controlLimitWidth = 3.0)
+            val expectedUcl = 3.0 * lambda
+            assertEquals(expectedUcl, result.ucl[0], 1e-14, "UCL_0 - target = L*sigma*lambda for lambda=$lambda")
+        }
+    }
+
+    @Test
+    fun testEwmaControlLimitsMonotonicWidening() {
+        // For lambda < 1: |UCL_t - target| strictly increases with t (approaches steady state from below)
+        val obs = DoubleArray(20) { 0.0 }
+        val lambda = 0.15
+        val result = ewma(obs, target = 0.0, sigma = 1.0, lambda = lambda, controlLimitWidth = 3.0)
+
+        for (i in 1 until obs.size) {
+            assertTrue(
+                result.ucl[i] > result.ucl[i - 1],
+                "UCL strictly widens: UCL[$i]=${result.ucl[i]} > UCL[${i - 1}]=${result.ucl[i - 1]}"
+            )
+        }
+    }
+
+    @Test
+    fun testEwmaLambdaOneHasConstantLimits() {
+        // For lambda=1: UCL_t and LCL_t are constant for all t
+        val obs = doubleArrayOf(0.0, 1.0, 2.0, 3.0, 4.0)
+        val result = ewma(obs, target = 0.0, sigma = 2.0, lambda = 1.0, controlLimitWidth = 3.0)
+
+        for (i in 1 until obs.size) {
+            assertEquals(result.ucl[0], result.ucl[i], 0.0, "UCL constant at lambda=1")
+            assertEquals(result.lcl[0], result.lcl[i], 0.0, "LCL constant at lambda=1")
+        }
+    }
+
+    @Test
+    fun testEwmaTranslationInvariance() {
+        // Shifting observations AND target by c shifts Z, UCL, LCL by c; OOC indices unchanged
+        val obs = doubleArrayOf(10.5, 11.0, 9.5, 10.3, 12.0, 8.5)
+        val shift = 1000.0
+        val shiftedObs = DoubleArray(obs.size) { obs[it] + shift }
+
+        val original = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
+        val shifted = ewma(shiftedObs, target = 10.0 + shift, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
+
+        for (i in obs.indices) {
+            assertEquals(original.smoothedValues[i] + shift, shifted.smoothedValues[i], 1e-7, "Z[$i] shifts by c")
+            assertEquals(original.ucl[i] + shift, shifted.ucl[i], 1e-7, "UCL[$i] shifts by c")
+            assertEquals(original.lcl[i] + shift, shifted.lcl[i], 1e-7, "LCL[$i] shifts by c")
+        }
+        assertTrue(
+            original.outOfControl.contentEquals(shifted.outOfControl),
+            "OOC indices unchanged by translation"
+        )
+    }
+
+    @Test
+    fun testEwmaScaleInvariance() {
+        // If we scale (obs - target) by c and sigma by c, result scales similarly
+        // Specifically: centered_Z scales by c; UCL/LCL offsets scale by c
+        val obs = doubleArrayOf(10.5, 11.0, 9.5, 10.3, 12.0, 8.5)
+        val target = 10.0
+        val c = 5.0
+        val scaledObs = DoubleArray(obs.size) { target + c * (obs[it] - target) }
+
+        val original = ewma(obs, target = target, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
+        val scaled = ewma(scaledObs, target = target, sigma = c, lambda = 0.3, controlLimitWidth = 3.0)
+
+        for (i in obs.indices) {
+            val origOffset = original.smoothedValues[i] - target
+            val scaledOffset = scaled.smoothedValues[i] - target
+            assertEquals(c * origOffset, scaledOffset, 1e-10, "Z offset scales by c at i=$i")
+
+            val origUclOffset = original.ucl[i] - target
+            val scaledUclOffset = scaled.ucl[i] - target
+            assertEquals(c * origUclOffset, scaledUclOffset, 1e-10, "UCL offset scales by c at i=$i")
+        }
+        assertTrue(
+            original.outOfControl.contentEquals(scaled.outOfControl),
+            "OOC indices unchanged by scale"
+        )
+    }
+
+    @Test
+    fun testEwmaSymmetryByNegation() {
+        // Negating (obs - target) around target negates (Z - target) and swaps roles of UCL/LCL boundaries
+        val obs = doubleArrayOf(10.5, 11.0, 9.5, 10.3, 12.0, 8.5)
+        val target = 10.0
+        val negObs = DoubleArray(obs.size) { target - (obs[it] - target) }
+
+        val original = ewma(obs, target = target, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val negated = ewma(negObs, target = target, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        for (i in obs.indices) {
+            // Z - target negates
+            assertEquals(
+                (original.smoothedValues[i] - target),
+                -(negated.smoothedValues[i] - target),
+                1e-10,
+                "Z[$i] centered negates"
+            )
+            // UCL/LCL boundaries at same magnitude from target
+            assertEquals(original.ucl[i], negated.ucl[i], tol, "UCL[$i] symmetric")
+            assertEquals(original.lcl[i], negated.lcl[i], tol, "LCL[$i] symmetric")
+        }
+    }
+
+    @Test
+    fun testEwmaOutOfControlIsSortedAscending() {
+        // outOfControl indices are appended in traversal order => sorted ascending
+        val obs = doubleArrayOf(15.0, 15.0, 15.0, 15.0, 5.0, 5.0, 5.0, 5.0)
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
+
+        for (i in 1 until result.outOfControl.size) {
+            assertTrue(
+                result.outOfControl[i] > result.outOfControl[i - 1],
+                "outOfControl[$i]=${result.outOfControl[i]} > outOfControl[${i - 1}]=${result.outOfControl[i - 1]}"
+            )
+        }
+    }
+
+    @Test
+    fun testEwmaOutOfControlMatchesZOutsideLimits() {
+        // Property: i ∈ outOfControl iff z[i] > ucl[i] or z[i] < lcl[i]
+        val obs = doubleArrayOf(10.5, 12.0, 8.0, 11.0, 10.0, 13.0, 7.0, 10.5)
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
+
+        val expected = mutableListOf<Int>()
+        for (i in obs.indices) {
+            val z = result.smoothedValues[i]
+            if (z > result.ucl[i] || z < result.lcl[i]) {
+                expected.add(i)
+            }
+        }
+        assertTrue(
+            result.outOfControl.contentEquals(expected.toIntArray()),
+            "outOfControl should be exactly {i : z[i] ∉ [lcl[i], ucl[i]]}, " +
+                "expected ${expected} got ${result.outOfControl.toList()}"
+        )
+    }
+
+    // ===== ewma: Overload consistency =====
+
+    @Test
+    fun testEwmaIterableOverload() {
+        // Iterable overload should give identical result to DoubleArray overload
+        val array = doubleArrayOf(10.1, 10.3, 10.5, 10.8, 11.0, 11.3)
+        val list: Iterable<Double> = array.toList()
+        val expected = ewma(array, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val actual = ewma(list, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        assertEquals(expected, actual, "Iterable overload should match DoubleArray overload")
+    }
+
+    @Test
+    fun testEwmaSequenceOverload() {
+        // Sequence overload should give identical result to DoubleArray overload
+        val array = doubleArrayOf(10.1, 10.3, 10.5, 10.8, 11.0, 11.3)
+        val seq: Sequence<Double> = array.asSequence()
+        val expected = ewma(array, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val actual = ewma(seq, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        assertEquals(expected, actual, "Sequence overload should match DoubleArray overload")
+    }
+
+    // ===== EwmaResult: data class =====
+
+    @Test
+    fun testEwmaResultEquality() {
+        val obs = doubleArrayOf(10.1, 10.3, 10.5, 10.8, 11.0, 11.3)
+        val r1 = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val r2 = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+
+        assertEquals(r1, r2, "Same input should produce equal EwmaResult")
+        assertEquals(r1.hashCode(), r2.hashCode(), "Equal results should have equal hashCode")
+    }
+
+    @Test
+    fun testEwmaResultEqualityDifferentInstances() {
+        // equals uses contentEquals, so different array instances with same values are equal
+        val r1 = EwmaResult(
+            smoothedValues = doubleArrayOf(10.0, 10.2, 10.4),
+            ucl = doubleArrayOf(10.6, 10.77, 10.86),
+            lcl = doubleArrayOf(9.4, 9.23, 9.14),
+            outOfControl = intArrayOf(),
+        )
+        val r2 = EwmaResult(
+            smoothedValues = doubleArrayOf(10.0, 10.2, 10.4),
+            ucl = doubleArrayOf(10.6, 10.77, 10.86),
+            lcl = doubleArrayOf(9.4, 9.23, 9.14),
+            outOfControl = intArrayOf(),
+        )
+        assertTrue(r1 !== r2, "Different instances")
+        assertEquals(r1, r2, "Different array instances with same content should be equal")
+        assertEquals(r1.hashCode(), r2.hashCode(), "hashCode consistent with equals")
+    }
+
+    @Test
+    fun testEwmaResultInequality() {
+        val r1 = EwmaResult(
+            smoothedValues = doubleArrayOf(10.0, 10.2),
+            ucl = doubleArrayOf(10.6, 10.77),
+            lcl = doubleArrayOf(9.4, 9.23),
+            outOfControl = intArrayOf(),
+        )
+
+        // Different smoothedValues
+        val r2 = EwmaResult(
+            smoothedValues = doubleArrayOf(10.1, 10.2),
+            ucl = doubleArrayOf(10.6, 10.77),
+            lcl = doubleArrayOf(9.4, 9.23),
+            outOfControl = intArrayOf(),
+        )
+        assertTrue(r1 != r2, "Different smoothedValues => not equal")
+
+        // Different ucl
+        val r3 = EwmaResult(
+            smoothedValues = doubleArrayOf(10.0, 10.2),
+            ucl = doubleArrayOf(10.7, 10.77),
+            lcl = doubleArrayOf(9.4, 9.23),
+            outOfControl = intArrayOf(),
+        )
+        assertTrue(r1 != r3, "Different ucl => not equal")
+
+        // Different lcl
+        val r4 = EwmaResult(
+            smoothedValues = doubleArrayOf(10.0, 10.2),
+            ucl = doubleArrayOf(10.6, 10.77),
+            lcl = doubleArrayOf(9.3, 9.23),
+            outOfControl = intArrayOf(),
+        )
+        assertTrue(r1 != r4, "Different lcl => not equal")
+
+        // Different outOfControl
+        val r5 = EwmaResult(
+            smoothedValues = doubleArrayOf(10.0, 10.2),
+            ucl = doubleArrayOf(10.6, 10.77),
+            lcl = doubleArrayOf(9.4, 9.23),
+            outOfControl = intArrayOf(1),
+        )
+        assertTrue(r1 != r5, "Different outOfControl => not equal")
+    }
+
+    @Test
+    fun testEwmaResultEqualsSelf() {
+        val r = EwmaResult(
+            smoothedValues = doubleArrayOf(10.0),
+            ucl = doubleArrayOf(10.6),
+            lcl = doubleArrayOf(9.4),
+            outOfControl = intArrayOf(),
+        )
+        assertEquals(r, r, "equals with self")
+    }
+
+    @Test
+    fun testEwmaResultEqualsNonEwmaResult() {
+        val r = EwmaResult(
+            smoothedValues = doubleArrayOf(10.0),
+            ucl = doubleArrayOf(10.6),
+            lcl = doubleArrayOf(9.4),
+            outOfControl = intArrayOf(),
+        )
+        assertTrue(!r.equals("not an EwmaResult"), "equals returns false for non-EwmaResult")
+        assertTrue(!r.equals(null), "equals returns false for null")
+    }
+
+    @Test
+    fun testEwmaResultDestructuring() {
+        // componentN (destructuring) works on the data class
+        val obs = doubleArrayOf(10.1, 10.3, 10.5)
+        val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val (smoothedValues, ucl, lcl, outOfControl) = result
+
+        assertEquals(result.smoothedValues.size, smoothedValues.size, "smoothedValues via destructuring")
+        assertEquals(result.ucl.size, ucl.size, "ucl via destructuring")
+        assertEquals(result.lcl.size, lcl.size, "lcl via destructuring")
+        assertEquals(result.outOfControl.size, outOfControl.size, "outOfControl via destructuring")
+    }
+
+    @Test
+    fun testEwmaResultToStringRendersArrayContents() {
+        // toString must use contentToString() for DoubleArray/IntArray fields — the default
+        // data-class toString would print `[D@<hash>` which is useless for diagnostics.
+        val result = EwmaResult(
+            smoothedValues = doubleArrayOf(10.0, 10.2, 10.4),
+            ucl = doubleArrayOf(10.6, 10.77, 10.86),
+            lcl = doubleArrayOf(9.4, 9.23, 9.14),
+            outOfControl = intArrayOf(2),
+        )
+        val s = result.toString()
+        assertTrue(s.contains("smoothedValues=[10.0, 10.2, 10.4]"), "toString should render smoothedValues, got: $s")
+        assertTrue(s.contains("ucl=[10.6, 10.77, 10.86]"), "toString should render ucl, got: $s")
+        assertTrue(s.contains("lcl=[9.4, 9.23, 9.14]"), "toString should render lcl, got: $s")
+        assertTrue(s.contains("outOfControl=[2]"), "toString should render outOfControl, got: $s")
+        assertTrue(!s.contains("[D@"), "toString must not leak default array identity, got: $s")
+        assertTrue(!s.contains("[I@"), "toString must not leak default int-array identity, got: $s")
+    }
+
+    @Test
+    fun testEwmaResultToStringEmptyOutOfControl() {
+        val result = EwmaResult(
+            smoothedValues = doubleArrayOf(10.0),
+            ucl = doubleArrayOf(10.6),
+            lcl = doubleArrayOf(9.4),
+            outOfControl = intArrayOf(),
+        )
+        val s = result.toString()
+        assertTrue(s.contains("outOfControl=[]"), "toString should render empty outOfControl, got: $s")
     }
 }
