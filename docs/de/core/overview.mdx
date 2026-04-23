@@ -273,6 +273,193 @@ Verwenden Sie `OnlineStatistics`, wenn Daten inkrementell eintreffen (Streaming,
 `OnlineStatistics` verwendet Welfords Algorithmus mit der Terriberry-Erweiterung für numerisch stabile Einpass-Berechnung höherer Momente. Der Algorithmus aktualisiert laufende Summen von Potenzen der Abweichungen vom aktuellen Mittelwert und vermeidet so die katastrophale Auslöschung, die naive Zweipass-Formeln bei großen Datensätzen betrifft.
 </Accordion>
 
+## Prozessfähigkeit
+
+Prozessfähigkeitsindizes quantifizieren, wie gut ein Prozess innerhalb seiner <Tooltip tip="Die untere (LSL) und obere (USL) Spezifikationsgrenze begrenzen den Bereich akzeptabler Werte für das gemessene Merkmal">Spezifikationsgrenzen</Tooltip> liegt. `processCapability(lsl, usl)` liefert vier SPC-Indizes in einem Aufruf:
+
+- **Cp, Cpk** — potentielle und tatsächliche Fähigkeit mit der Stichproben-Standardabweichung (kurzfristige, innerhalb von Untergruppen auftretende Streuung).
+- **Pp, Ppk** — dieselben Formeln mit der Populations-Standardabweichung (langfristige Gesamtstreuung).
+
+Die `-k`-Varianten bestrafen einen Prozess, der relativ zur Spezifikationsmitte dezentriert ist, sodass `Cpk` nie größer als `Cp` ist.
+
+{/*---FUN coreProcessCapability--*/}
+
+```kotlin
+// Ten parts measured against a spec window of [48, 52]
+val measurements = doubleArrayOf(
+    50.0, 50.5, 49.5, 50.2, 49.8, 50.1, 49.9, 50.3, 49.7, 50.0
+)
+val capability = measurements.processCapability(lsl = 48.0, usl = 52.0)
+
+capability.cp   // 2.2646 — potential capability (spread vs tolerance)
+capability.cpk  // 2.2646 — actual capability (penalizes off-centering)
+capability.pp   // 2.3870 — overall (population σ) counterpart of Cp
+capability.ppk  // 2.3870 — overall counterpart of Cpk
+```
+
+{/*---END--*/}
+
+<Note>
+Verwenden Sie diese Indizes nur für einen bereits statistisch beherrschten Prozess (stabil über die Zeit — siehe [Shewhart-Kontrollkarten](#shewhart-kontrollkarten) unten). Für einen instabilen Prozess ist die gemessene Streuung keine feste Prozesseigenschaft.
+</Note>
+
+Werte `≥ 1.33` gelten üblicherweise als fähig, `≥ 1.67` als hochgradig fähig. Wenn `Cpk ≪ Cp`, sollten Sie den Prozess zuerst neu zentrieren, bevor Sie versuchen, die Varianz zu reduzieren.
+
+<Accordion title="Mathematische Details">
+$$
+\mathrm{Cp} = \frac{\mathrm{USL} - \mathrm{LSL}}{6\sigma_s}, \qquad
+\mathrm{Cpk} = \min\!\left(\frac{\mathrm{USL} - \bar{x}}{3\sigma_s},\ \frac{\bar{x} - \mathrm{LSL}}{3\sigma_s}\right)
+$$
+
+Pp und Ppk verwenden die Populations-Standardabweichung $\sigma_p$ (Divisor $n$) anstelle der Stichproben-Standardabweichung $\sigma_s$ (Divisor $n-1$). `processCapability` berechnet beide in einem einzigen numerisch stabilen Welford-Durchlauf.
+</Accordion>
+
+## Shewhart-Kontrollkarten
+
+Shewhart-<Tooltip tip="Zeitreihen-Plot von Untergruppenstatistiken mit ±3σ-Kontrollgrenzen um eine Mittellinie">Kontrollkarten</Tooltip> zeichnen Untergruppenstatistiken über die Zeit mit Drei-Sigma-Grenzen auf. `xBarRChart()` überwacht den Prozessmittelwert zusammen mit der Spannweite innerhalb jeder Untergruppe; `xBarSChart()` nutzt stattdessen die Stichproben-Standardabweichung — effizienter für Untergruppengrößen über 10. Beide benötigen gleich große Untergruppen mit 2–25 Beobachtungen.
+
+{/*---FUN coreXBarRChart--*/}
+
+```kotlin
+// Five subgroups of four parts; bracket width monitored per batch
+val subgroups = listOf(
+    doubleArrayOf(72.0, 84.0, 79.0, 49.0),
+    doubleArrayOf(56.0, 87.0, 33.0, 42.0),
+    doubleArrayOf(55.0, 73.0, 22.0, 60.0),
+    doubleArrayOf(44.0, 80.0, 54.0, 74.0),
+    doubleArrayOf(97.0, 26.0, 48.0, 58.0),
+)
+val chart = xBarRChart(subgroups)
+
+chart.centerLine     // 59.65 — grand mean (x-double-bar)
+chart.ucl            // 95.6626 — upper control limit for the mean
+chart.lcl            // 23.6374 — lower control limit for the mean
+chart.rChart.centerLine // 49.4 — average range (R-bar)
+chart.rChart.ucl     // 112.7308 — upper limit for within-subgroup range
+chart.rChart.lcl     // 0.0 — lower limit (D₃ = 0 for n ≤ 6)
+```
+
+{/*---END--*/}
+
+Die Kontrollgrenzen basieren auf den Standard-SPC-Konstanten $A_2, A_3, D_3, D_4, B_3, B_4, c_4$ (Montgomery, *Introduction to Statistical Quality Control*, Anhang VI), tabelliert für Untergruppengrößen 2–25 und direkt über `spcConstants(n)` verfügbar.
+
+<Accordion title="Mathematische Details">
+Für $k$ Untergruppen der Größe $n$ mit Untergruppenmittelwerten $\bar{x}_i$, Spannweiten $R_i$ und Standardabweichungen $s_i$:
+
+$$
+\text{x̄-R:}\quad \mathrm{UCL}/\mathrm{LCL} = \bar{\bar{x}} \pm A_2 \bar{R}, \quad R\text{-Karte: } [D_3 \bar{R},\ D_4 \bar{R}]
+$$
+
+$$
+\text{x̄-S:}\quad \mathrm{UCL}/\mathrm{LCL} = \bar{\bar{x}} \pm A_3 \bar{s}, \quad S\text{-Karte: } [B_3 \bar{s},\ B_4 \bar{s}]
+$$
+</Accordion>
+
+## CUSUM-Karte
+
+Eine Shewhart-Karte reagiert langsam auf Drifts unter 2σ, weil jeder Punkt isoliert bewertet wird. `cusum()` akkumuliert Abweichungen vom Zielwert über die Zeit, sodass eine Drift von 0.5σ–1σ innerhalb weniger Beobachtungen erkannt wird. Die zweiseitige tabellarische Form verfolgt eine obere Summe $C^+$ für Aufwärtsverschiebungen und eine untere Summe $C^-$ für Abwärtsverschiebungen. Ein Alarm wird beim ersten Index ausgelöst, an dem eine der Summen das Entscheidungsintervall $H$ überschreitet.
+
+{/*---FUN coreCusum--*/}
+
+```kotlin
+// Individual measurements from a process with target 10, drifting upward
+val observations = doubleArrayOf(10.2, 10.4, 10.6, 10.9, 11.2, 11.5, 11.8, 12.0)
+val result = cusum(observations, target = 10.0, k = 0.5, h = 3.0)
+
+result.sPlus      // [0.0, 0.0, 0.1, 0.5, 1.2, 2.2, 3.5, 5.0]
+result.sMinus     // all zero — no downward drift
+result.alarmIndex // 6 — first index where C⁺ > H
+```
+
+{/*---END--*/}
+
+<Tip>
+Stellen Sie `k` auf die Hälfte der zu erkennenden Verschiebungsgröße in Einheiten von σ ein — gebräuchlicher Standard ist $K \approx 0.5\sigma$, was auf eine 1σ-Drift abzielt. Setzen Sie `h` auf 4σ–5σ, um die mittlere Lauflänge in-Kontrolle einer 3σ-Shewhart-Karte zu erreichen, bei deutlich schnellerer Reaktion auf kleine Verschiebungen.
+</Tip>
+
+<Accordion title="Mathematische Details">
+$$
+C^+_i = \max\bigl(0,\; C^+_{i-1} + (x_i - \mu_0 - K)\bigr), \qquad
+C^-_i = \max\bigl(0,\; C^-_{i-1} + (\mu_0 - K - x_i)\bigr)
+$$
+
+startend mit $C^\pm_0 = 0$, Alarm beim ersten $C^+_i > H$ bzw. $C^-_i > H$.
+</Accordion>
+
+## EWMA-Karte
+
+EWMA (Roberts, 1959) ist das zweite klassische Werkzeug zur Erkennung kleiner Verschiebungen. Statt einer unbeschränkten laufenden Summe führt `ewma()` einen gewichteten gleitenden Mittelwert, der aktuellen Beobachtungen mehr Gewicht gibt, aber ein Gedächtnis der Vergangenheit behält. Die Kontrollgrenzen weiten sich mit der Zeit, bis sie einen stationären Wert erreichen — die Karte ist früh am empfindlichsten, was eine anfängliche Verschiebung zuverlässig erfasst.
+
+{/*---FUN coreEwma--*/}
+
+```kotlin
+// EWMA chart: target = 25, σ = 1, λ = 0.2, L = 3
+val observations = doubleArrayOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
+val result = ewma(
+    observations,
+    target = 25.0,
+    sigma = 1.0,
+    lambda = 0.2,
+    controlLimitWidth = 3.0
+)
+
+result.smoothedValues[0] // 25.0 — Z₀ = λ·x + (1-λ)·target
+result.smoothedValues[7] // 26.2549 — smoothed statistic at t = 7
+result.ucl[0]            // 25.6 — narrow at first, widens with t
+result.ucl[7]            // 25.9858 — approaching steady state
+result.outOfControl      // [7] — Z₇ exceeds UCL₇
+```
+
+{/*---END--*/}
+
+<Tip>
+$\lambda = 0.2$ mit $L \approx 2.7$–$3.0$ ist ein gebräuchlicher Standard. Kleineres $\lambda$ betont das Gedächtnis und erkennt kleinere Verschiebungen; $\lambda = 1$ reduziert EWMA auf eine Shewhart-Einzelwertkarte.
+</Tip>
+
+<Accordion title="Mathematische Details">
+$$
+Z_t = \lambda x_t + (1 - \lambda) Z_{t-1}, \qquad Z_0 = \mu_0
+$$
+
+$$
+\mathrm{UCL}_t/\mathrm{LCL}_t = \mu_0 \pm L \sigma \sqrt{\frac{\lambda}{2 - \lambda}\,\bigl(1 - (1 - \lambda)^{2t}\bigr)}
+$$
+</Accordion>
+
+## Western-Electric-Regeln
+
+`westernElectricRules()` erweitert eine Shewhart-Karte über den einfachen ±3σ-Check hinaus mit vier Lauflängen-Heuristiken, die Trends, Cluster und anhaltende einseitige Läufe erkennen.
+
+| Regel | Muster | Erkennt |
+|-------|--------|---------|
+| **1** | 1 Punkt jenseits $\pm 3\sigma$ | extreme Einzelausschläge |
+| **2** | 2 der letzten 3 Punkte jenseits $\pm 2\sigma$, gleiche Seite | starke Verschiebung |
+| **3** | 4 der letzten 5 Punkte jenseits $\pm 1\sigma$, gleiche Seite | mittlere Verschiebung |
+| **4** | 8 aufeinanderfolgende Punkte auf derselben Seite der Mittellinie | anhaltende Verschiebung beliebiger Größe |
+
+Das Array jeder Regel enthält die *Auslöseindizes* — jene Beobachtung, deren Eintreffen das betreffende Muster vervollständigt.
+
+{/*---FUN coreWesternElectricRules--*/}
+
+```kotlin
+// Process drifting upward in the last four observations
+val observations = doubleArrayOf(
+    0.1, 0.2, -0.3, 0.0, 1.4, 1.2, 2.4, 2.6, 3.5, 2.2
+)
+val violations = westernElectricRules(observations, center = 0.0, sigma = 1.0)
+
+violations.rule1 // indices of points beyond ±3σ
+violations.rule2 // indices where 2 of last 3 points are beyond ±2σ (same side)
+violations.rule3 // indices where 4 of last 5 points are beyond ±1σ (same side)
+violations.rule4 // indices where 8 consecutive points fall on the same side
+```
+
+{/*---END--*/}
+
+<Tip>
+Kombinieren Sie eine Shewhart-Karte (große Verschiebungen) mit CUSUM oder EWMA (kleine Verschiebungen) und den Western-Electric-Regeln (Muster) — die drei Sichtweisen zusammen decken die breiteste Palette außer-Kontrolle-Zustände ab.
+</Tip>
+
 ## Fehlerbehandlung
 
 <Warning>

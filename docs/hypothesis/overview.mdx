@@ -320,6 +320,76 @@ result.pValue            // p-value
 
 {/*---END--*/}
 
+## Are any observations outliers?
+
+### Grubbs' test
+
+Grubbs' test (the extreme studentized deviate test) formally checks whether the observation farthest from the mean is an outlier, assuming the remaining data is approximately normal. The test statistic is
+
+$$
+G = \frac{\max_{i} |x_i - \bar{x}|}{s},
+$$
+
+converted to a Student-$t$ statistic on $N - 2$ degrees of freedom and Bonferroni-corrected for having tested every observation.
+
+{/*---FUN hypGrubbsSingle--*/}
+
+```kotlin
+// Response times (ms) with a suspected outlier
+val latencies = doubleArrayOf(12.0, 14.0, 11.0, 13.0, 15.0, 98.0, 12.0)
+
+val result = grubbsTest(latencies)
+result.statistic                       // G statistic
+result.pValue                          // Bonferroni-corrected p-value
+result.additionalInfo["outlierIndex"]  // index of the suspected outlier
+result.additionalInfo["outlierValue"]  // the suspected outlier's value
+result.isSignificant()                 // true if outlier is significant at α = 0.05
+```
+
+{/*---END--*/}
+
+Use `Alternative.GREATER` or `Alternative.LESS` to test a single tail when you only care about a suspiciously large or small value:
+
+{/*---FUN hypGrubbsDirection--*/}
+
+```kotlin
+// Only test for a suspiciously large value (upper tail)
+val data = doubleArrayOf(2.1, 2.5, 2.3, 2.8, 10.0, 2.4, 2.2)
+val upper = grubbsTest(data, alternative = Alternative.GREATER)
+upper.additionalInfo["outlierValue"] // 10.0 — the maximum
+
+// Only test for a suspiciously small value (lower tail)
+val dataLow = doubleArrayOf(2.1, 2.5, 2.3, 2.8, -5.0, 2.4, 2.2)
+val lower = grubbsTest(dataLow, alternative = Alternative.LESS)
+lower.additionalInfo["outlierValue"] // -5.0 — the minimum
+```
+
+{/*---END--*/}
+
+For multiple outliers, `grubbsTestIterative()` reapplies the test and removes one significant outlier at a time until none remain or the sample shrinks below three observations.
+
+{/*---FUN hypGrubbsIterative--*/}
+
+```kotlin
+// Remove multiple outliers by repeatedly applying the test
+val data = doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 80.0, 90.0)
+val cleaned = grubbsTestIterative(data, alpha = 0.05)
+
+cleaned.outlierIndices // indices (in the original array) that were removed
+cleaned.cleanedData    // observations after removing all detected outliers
+cleaned.iterations     // TestResult from each round (last one is non-significant)
+```
+
+{/*---END--*/}
+
+<Tip>
+Grubbs' test assumes the data is approximately normal apart from the outlier. Validate with `shapiroWilkTest()` on the data with the suspected extreme removed before reporting a significant result.
+</Tip>
+
+<Warning>
+The iterative procedure can **mask** outliers when several extremes cluster together — each test may be diluted by its peers. For large clusters prefer a dedicated multiple-outlier test (e.g. generalized ESD) or a robust estimator.
+</Warning>
+
 ## The Alternative Enum
 
 `Alternative` controls the direction of the test:

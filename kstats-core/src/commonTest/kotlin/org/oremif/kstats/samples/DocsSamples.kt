@@ -3,6 +3,7 @@ package org.oremif.kstats.samples
 import org.oremif.kstats.descriptive.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class DocsSamples {
 
@@ -347,6 +348,162 @@ class DocsSamples {
         memSummary.mean; memSummary.standardDeviation; memSummary.min; memSummary.max
         tpSummary.mean; tpSummary.standardDeviation; tpSummary.min; tpSummary.max
         // SampleEnd
+    }
+
+    @Test
+    fun coreProcessCapability() {
+        // SampleStart
+        // Ten parts measured against a spec window of [48, 52]
+        val measurements = doubleArrayOf(
+            50.0, 50.5, 49.5, 50.2, 49.8, 50.1, 49.9, 50.3, 49.7, 50.0
+        )
+        val capability = measurements.processCapability(lsl = 48.0, usl = 52.0)
+
+        capability.cp   // 2.2646 — potential capability (spread vs tolerance)
+        capability.cpk  // 2.2646 — actual capability (penalizes off-centering)
+        capability.pp   // 2.3870 — overall (population σ) counterpart of Cp
+        capability.ppk  // 2.3870 — overall counterpart of Cpk
+        // SampleEnd
+        assertEquals(2.26455406828919, capability.cp, 1e-4)
+        assertEquals(2.26455406828918, capability.cpk, 1e-4)
+        assertEquals(2.38704958013144, capability.pp, 1e-4)
+        assertEquals(2.38704958013144, capability.ppk, 1e-4)
+    }
+
+    @Test
+    fun coreXBarRChart() {
+        // SampleStart
+        // Five subgroups of four parts; bracket width monitored per batch
+        val subgroups = listOf(
+            doubleArrayOf(72.0, 84.0, 79.0, 49.0),
+            doubleArrayOf(56.0, 87.0, 33.0, 42.0),
+            doubleArrayOf(55.0, 73.0, 22.0, 60.0),
+            doubleArrayOf(44.0, 80.0, 54.0, 74.0),
+            doubleArrayOf(97.0, 26.0, 48.0, 58.0),
+        )
+        val chart = xBarRChart(subgroups)
+
+        chart.centerLine     // 59.65 — grand mean (x-double-bar)
+        chart.ucl            // 95.6626 — upper control limit for the mean
+        chart.lcl            // 23.6374 — lower control limit for the mean
+        chart.rChart.centerLine // 49.4 — average range (R-bar)
+        chart.rChart.ucl     // 112.7308 — upper limit for within-subgroup range
+        chart.rChart.lcl     // 0.0 — lower limit (D₃ = 0 for n ≤ 6)
+        // SampleEnd
+        assertEquals(59.65, chart.centerLine, 1e-4)
+        assertEquals(95.6626, chart.ucl, 1e-4)
+        assertEquals(23.6374, chart.lcl, 1e-4)
+        assertEquals(49.4, chart.rChart.centerLine, 1e-4)
+        assertEquals(112.7308, chart.rChart.ucl, 1e-4)
+        assertEquals(0.0, chart.rChart.lcl, 1e-4)
+    }
+
+    @Test
+    fun coreXBarSChart() {
+        // SampleStart
+        // Same subgroups, S chart uses sample standard deviation instead of range
+        val subgroups = listOf(
+            doubleArrayOf(10.0, 12.0, 11.0, 13.0, 9.0),
+            doubleArrayOf(11.0, 10.0, 12.0, 11.0, 14.0),
+            doubleArrayOf(9.0, 13.0, 10.0, 12.0, 11.0),
+        )
+        val chart = xBarSChart(subgroups)
+
+        chart.centerLine      // 11.2 — grand mean
+        chart.ucl             // upper control limit for the mean (uses A₃)
+        chart.lcl             // lower control limit for the mean
+        chart.sChart.centerLine // S-bar — average subgroup standard deviation
+        chart.sChart.ucl      // upper limit for within-subgroup spread (B₄)
+        chart.sChart.lcl      // lower limit (B₃ = 0 for n ≤ 5)
+        // SampleEnd
+        assertEquals(11.2, chart.centerLine, 1e-4)
+        assertTrue(chart.ucl > chart.centerLine)
+        assertTrue(chart.lcl < chart.centerLine)
+        assertTrue(chart.sChart.centerLine > 0.0)
+        assertTrue(chart.sChart.ucl >= chart.sChart.lcl)
+    }
+
+    @Test
+    fun coreSpcConstants() {
+        // SampleStart
+        val c = spcConstants(subgroupSize = 5)
+        c.a2  // 0.577 — x-bar factor from R-bar
+        c.a3  // 1.427 — x-bar factor from S-bar
+        c.d3  // 0.000 — R-chart lower factor (zero for n ≤ 6)
+        c.d4  // 2.114 — R-chart upper factor
+        c.b3  // 0.000 — S-chart lower factor
+        c.b4  // 2.089 — S-chart upper factor
+        c.c4  // 0.9400 — bias correction for sample σ
+        // SampleEnd
+        assertEquals(0.577, c.a2, 0.0)
+        assertEquals(1.427, c.a3, 0.0)
+        assertEquals(0.0, c.d3, 0.0)
+        assertEquals(2.114, c.d4, 0.0)
+        assertEquals(0.0, c.b3, 0.0)
+        assertEquals(2.089, c.b4, 0.0)
+        assertEquals(0.9400, c.c4, 0.0)
+    }
+
+    @Test
+    fun coreCusum() {
+        // SampleStart
+        // Individual measurements from a process with target 10, drifting upward
+        val observations = doubleArrayOf(10.2, 10.4, 10.6, 10.9, 11.2, 11.5, 11.8, 12.0)
+        val result = cusum(observations, target = 10.0, k = 0.5, h = 3.0)
+
+        result.sPlus      // [0.0, 0.0, 0.1, 0.5, 1.2, 2.2, 3.5, 5.0]
+        result.sMinus     // all zero — no downward drift
+        result.alarmIndex // 6 — first index where C⁺ > H
+        // SampleEnd
+        assertEquals(0.0, result.sPlus[0], 1e-10)
+        assertEquals(3.5, result.sPlus[6], 1e-10)
+        assertEquals(5.0, result.sPlus[7], 1e-10)
+        for (v in result.sMinus) assertEquals(0.0, v, 1e-10)
+        assertEquals(6, result.alarmIndex)
+    }
+
+    @Test
+    fun coreEwma() {
+        // SampleStart
+        // EWMA chart: target = 25, σ = 1, λ = 0.2, L = 3
+        val observations = doubleArrayOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
+        val result = ewma(
+            observations,
+            target = 25.0,
+            sigma = 1.0,
+            lambda = 0.2,
+            controlLimitWidth = 3.0
+        )
+
+        result.smoothedValues[0] // 25.0 — Z₀ = λ·x + (1-λ)·target
+        result.smoothedValues[7] // 26.2549 — smoothed statistic at t = 7
+        result.ucl[0]            // 25.6 — narrow at first, widens with t
+        result.ucl[7]            // 25.9858 — approaching steady state
+        result.outOfControl      // [7] — Z₇ exceeds UCL₇
+        // SampleEnd
+        assertEquals(25.0, result.smoothedValues[0], 1e-10)
+        assertEquals(26.2549248, result.smoothedValues[7], 1e-6)
+        assertEquals(25.6, result.ucl[0], 1e-10)
+        assertEquals(25.9858257971513, result.ucl[7], 1e-6)
+        assertTrue(result.outOfControl.contentEquals(intArrayOf(7)))
+    }
+
+    @Test
+    fun coreWesternElectricRules() {
+        // SampleStart
+        // Process drifting upward in the last four observations
+        val observations = doubleArrayOf(
+            0.1, 0.2, -0.3, 0.0, 1.4, 1.2, 2.4, 2.6, 3.5, 2.2
+        )
+        val violations = westernElectricRules(observations, center = 0.0, sigma = 1.0)
+
+        violations.rule1 // indices of points beyond ±3σ
+        violations.rule2 // indices where 2 of last 3 points are beyond ±2σ (same side)
+        violations.rule3 // indices where 4 of last 5 points are beyond ±1σ (same side)
+        violations.rule4 // indices where 8 consecutive points fall on the same side
+        // SampleEnd
+        assertTrue(violations.rule1.isNotEmpty() || violations.rule2.isNotEmpty() ||
+            violations.rule3.isNotEmpty() || violations.rule4.isNotEmpty())
     }
 
     @Test
