@@ -21,7 +21,7 @@ import kotlin.math.sqrt
  * ```kotlin
  * val actual = doubleArrayOf(3.0, 5.0, 2.5, 7.0)
  * val predicted = doubleArrayOf(2.8, 5.2, 2.1, 6.8)
- * rmse(actual, predicted) // 0.2449...
+ * rmse(actual, predicted) // 0.2646...
  * ```
  *
  * @return the root mean square error between actual and predicted.
@@ -88,7 +88,7 @@ public fun rmse(actual: Sequence<Double>, predicted: Sequence<Double>): Double =
  * ```kotlin
  * val actual = doubleArrayOf(3.0, 5.0, 2.5, 7.0)
  * val predicted = doubleArrayOf(2.8, 5.2, 2.1, 6.8)
- * mae(actual, predicted) // 0.225
+ * mae(actual, predicted) // 0.25
  * ```
  *
  * @return the mean absolute error between actual and predicted.
