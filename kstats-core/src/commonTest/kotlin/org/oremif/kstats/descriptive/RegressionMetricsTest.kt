@@ -13,10 +13,8 @@ class RegressionMetricsTest {
 
     @Test
     fun testRmseKnownValues() {
-        // Verified against NumPy: np.sqrt(np.mean((actual - predicted) ** 2))
         val actual = doubleArrayOf(3.0, 5.0, 2.5, 7.0)
         val predicted = doubleArrayOf(2.8, 5.2, 2.1, 6.8)
-        // numpy: 0.264575131106459
         assertEquals(0.264575131106459, rmse(actual, predicted), 1e-10)
     }
 
@@ -28,7 +26,6 @@ class RegressionMetricsTest {
 
     @Test
     fun testRmseSingleElement() {
-        // numpy: sqrt(mean((5-7)^2)) = 2.0
         assertEquals(2.0, rmse(doubleArrayOf(5.0), doubleArrayOf(7.0)), 1e-10)
     }
 
@@ -36,23 +33,18 @@ class RegressionMetricsTest {
     fun testRmseMixedSignValues() {
         val actual = doubleArrayOf(-5.0, 0.0, 5.0)
         val predicted = doubleArrayOf(-4.5, 0.5, 4.0)
-        // numpy: 0.7071067811865476
         assertEquals(0.7071067811865476, rmse(actual, predicted), 1e-10)
     }
 
     @Test
     fun testRmsePenalizesLargeErrorsMoreThanMae() {
-        // One large outlier should push RMSE up more than MAE, relative to many small,
-        // evenly spread errors of similar average magnitude.
         val actual = doubleArrayOf(1.0, 1.0, 1.0, 1.0, 1.0)
         val predictedSmallSpread = doubleArrayOf(1.1, 0.9, 1.1, 0.9, 1.1)
         val predictedOneOutlier = doubleArrayOf(1.0, 1.0, 1.0, 1.0, 3.0)
 
-        // numpy: rmse=0.10000000000000003, mae=0.10000000000000005
         assertEquals(0.1, rmse(actual, predictedSmallSpread), 1e-10)
         assertEquals(0.1, mae(actual, predictedSmallSpread), 1e-10)
 
-        // numpy: rmse=0.8944271909999159, mae=0.4
         val rmseOutlier = rmse(actual, predictedOneOutlier)
         val maeOutlier = mae(actual, predictedOneOutlier)
         assertEquals(0.8944271909999159, rmseOutlier, 1e-10)
@@ -65,8 +57,6 @@ class RegressionMetricsTest {
 
     @Test
     fun testRmseEqualsMaeWhenAllErrorsHaveEqualMagnitude() {
-        // When every error has identical magnitude, squaring-then-rooting collapses back
-        // to the same value as averaging absolute values.
         val actual = doubleArrayOf(10.0, 20.0, 30.0)
         val predicted = doubleArrayOf(11.0, 21.0, 31.0)
         assertEquals(rmse(actual, predicted), mae(actual, predicted), 1e-10)
@@ -98,10 +88,8 @@ class RegressionMetricsTest {
 
     @Test
     fun testMaeKnownValues() {
-        // Verified against NumPy: np.mean(np.abs(actual - predicted))
         val actual = doubleArrayOf(3.0, 5.0, 2.5, 7.0)
         val predicted = doubleArrayOf(2.8, 5.2, 2.1, 6.8)
-        // numpy: 0.2500000000000001
         assertEquals(0.25, mae(actual, predicted), 1e-10)
     }
 
@@ -120,7 +108,6 @@ class RegressionMetricsTest {
     fun testMaeMixedSignValues() {
         val actual = doubleArrayOf(-5.0, 0.0, 5.0)
         val predicted = doubleArrayOf(-4.5, 0.5, 4.0)
-        // numpy: 0.6666666666666666
         assertEquals(0.6666666666666666, mae(actual, predicted), 1e-10)
     }
 
