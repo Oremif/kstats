@@ -10,7 +10,7 @@ dokka = "2.2.0"
 bcv = "0.18.1"
 
 korro = "0.2.2"
-kotlinxBenchmark = "0.4.17"
+kotlinxBenchmark = "0.4.19"
 
 commonsMath3 = "3.6.1"
 
