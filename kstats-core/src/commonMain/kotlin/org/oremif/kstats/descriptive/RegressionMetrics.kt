@@ -6,7 +6,6 @@ import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-// ── rmse ────────────────────────────────────────────────────────────────────
 /**
  * Computes the Root Mean Square Error (RMSE) between actual and predicted values.
  *
@@ -24,15 +23,16 @@ import kotlin.math.sqrt
  * rmse(actual, predicted) // 0.2646...
  * ```
  *
+ * @param actual the actual observed values.
+ * @param predicted the predicted values corresponding to the actual values.
  * @return the root mean square error between actual and predicted.
- * Version 1: DoubleArray
  */
 public fun rmse(actual: DoubleArray, predicted: DoubleArray): Double {
     if (actual.size != predicted.size)
         throw InvalidParameterException("actual and predicted must have the same size")
     if (actual.isEmpty()) throw InsufficientDataException("Arrays must not be empty")
 
-    val squaredDiffs = DoubleArray(actual.size) {i ->
+    val squaredDiffs = DoubleArray(actual.size) { i ->
         val diff = actual[i] - predicted[i]
         diff * diff
     }
@@ -41,9 +41,11 @@ public fun rmse(actual: DoubleArray, predicted: DoubleArray): Double {
 
 /**
  * Computes the Root Mean Square Error (RMSE) between actual and predicted values.
- * Version 2: Iterable<Double> (for list, sets, etc)
+ *
+ * @param actual the actual observed values.
+ * @param predicted the predicted values corresponding to the actual values.
+ * @return the root mean square error between actual and predicted.
  */
- 
 public fun rmse(actual: Iterable<Double>, predicted: Iterable<Double>): Double {
     val actualIter = actual.iterator()
     val predictedIter = predicted.iterator()
@@ -53,6 +55,9 @@ public fun rmse(actual: Iterable<Double>, predicted: Iterable<Double>): Double {
     while (actualIter.hasNext() && predictedIter.hasNext()) {
         val diff = actualIter.next() - predictedIter.next()
         val squared = diff * diff
+        if (squared.isNaN()) return Double.NaN
+        if (squared.isInfinite()) return Double.POSITIVE_INFINITY
+
         val t = sum + squared
         compensation += if (abs(sum) >= abs(squared)) (sum - t) + squared else (squared - t) + sum
         sum = t
@@ -66,9 +71,11 @@ public fun rmse(actual: Iterable<Double>, predicted: Iterable<Double>): Double {
 
 /**
  * Computes the Root Mean Square Error (RMSE) between actual and predicted values.
- * Version 3: Sequence<Double>
+ *
+ * @param actual the actual observed values.
+ * @param predicted the predicted values corresponding to the actual values.
+ * @return the root mean square error between actual and predicted.
  */
- 
 public fun rmse(actual: Sequence<Double>, predicted: Sequence<Double>): Double =
     rmse(actual.asIterable(), predicted.asIterable())
 
@@ -91,8 +98,9 @@ public fun rmse(actual: Sequence<Double>, predicted: Sequence<Double>): Double =
  * mae(actual, predicted) // 0.25
  * ```
  *
+ * @param actual the actual observed values.
+ * @param predicted the predicted values corresponding to the actual values.
  * @return the mean absolute error between actual and predicted.
- * Version 1: DoubleArray
  */
 public fun mae(actual: DoubleArray, predicted: DoubleArray): Double {
     if (actual.size != predicted.size)
@@ -105,7 +113,10 @@ public fun mae(actual: DoubleArray, predicted: DoubleArray): Double {
 
 /**
  * Computes the Mean Absolute Error (MAE) between actual and predicted values.
- * Version 2: Iterable<Double> (for list, sets, etc)
+ *
+ * @param actual the actual observed values.
+ * @param predicted the predicted values corresponding to the actual values.
+ * @return the mean absolute error between actual and predicted.
  */
 public fun mae(actual: Iterable<Double>, predicted: Iterable<Double>): Double {
     val actualIter = actual.iterator()
@@ -115,6 +126,9 @@ public fun mae(actual: Iterable<Double>, predicted: Iterable<Double>): Double {
     var count = 0
     while (actualIter.hasNext() && predictedIter.hasNext()) {
         val absDiff = abs(actualIter.next() - predictedIter.next())
+        if (absDiff.isNaN()) return Double.NaN
+        if (absDiff.isInfinite()) return Double.POSITIVE_INFINITY
+
         val t = sum + absDiff
         compensation += if (abs(sum) >= abs(absDiff)) (sum - t) + absDiff else (absDiff - t) + sum
         sum = t
@@ -128,7 +142,10 @@ public fun mae(actual: Iterable<Double>, predicted: Iterable<Double>): Double {
 
 /**
  * Computes the Mean Absolute Error (MAE) between actual and predicted values.
- * Version 3: Sequence<Double>
+ *
+ * @param actual the actual observed values.
+ * @param predicted the predicted values corresponding to the actual values.
+ * @return the mean absolute error between actual and predicted.
  */
 public fun mae(actual: Sequence<Double>, predicted: Sequence<Double>): Double =
     mae(actual.asIterable(), predicted.asIterable())

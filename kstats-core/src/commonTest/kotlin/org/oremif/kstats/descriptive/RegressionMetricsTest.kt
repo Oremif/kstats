@@ -84,6 +84,27 @@ class RegressionMetricsTest {
         assertTrue(rmse(actual, predicted).isNaN())
     }
 
+    @Test
+    fun testRmseInfinityPropagation() {
+        val actual = doubleArrayOf(Double.MAX_VALUE)
+        val predicted = doubleArrayOf(-Double.MAX_VALUE)
+        assertEquals(Double.POSITIVE_INFINITY, rmse(actual, predicted))
+    }
+
+    @Test
+    fun testRmseIterableInfinityPropagation() {
+        val actual = listOf(Double.MAX_VALUE)
+        val predicted = listOf(-Double.MAX_VALUE)
+        assertEquals(Double.POSITIVE_INFINITY, rmse(actual, predicted))
+    }
+
+    @Test
+    fun testRmseInfinityMinusInfinityProducesNaN() {
+        val actual = doubleArrayOf(Double.POSITIVE_INFINITY)
+        val predicted = doubleArrayOf(Double.POSITIVE_INFINITY)
+        assertTrue(rmse(actual, predicted).isNaN())
+    }
+
     // ── mae ───────────────────────────────────────────────────────────────
 
     @Test
@@ -129,6 +150,27 @@ class RegressionMetricsTest {
     fun testMaeNaNPropagation() {
         val actual = doubleArrayOf(1.0, Double.NaN, 3.0)
         val predicted = doubleArrayOf(1.0, 2.0, 3.0)
+        assertTrue(mae(actual, predicted).isNaN())
+    }
+
+    @Test
+    fun testMaeInfinityPropagation() {
+        val actual = doubleArrayOf(Double.MAX_VALUE)
+        val predicted = doubleArrayOf(-Double.MAX_VALUE)
+        assertEquals(Double.POSITIVE_INFINITY, mae(actual, predicted))
+    }
+
+    @Test
+    fun testMaeIterableInfinityPropagation() {
+        val actual = listOf(Double.MAX_VALUE)
+        val predicted = listOf(-Double.MAX_VALUE)
+        assertEquals(Double.POSITIVE_INFINITY, mae(actual, predicted))
+    }
+
+    @Test
+    fun testMaeInfinityMinusInfinityProducesNaN() {
+        val actual = doubleArrayOf(Double.POSITIVE_INFINITY)
+        val predicted = doubleArrayOf(Double.POSITIVE_INFINITY)
         assertTrue(mae(actual, predicted).isNaN())
     }
 
