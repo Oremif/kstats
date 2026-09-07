@@ -1,16 +1,17 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.sqrt
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class NakagamiDistributionTest : ContinuousDistributionPropertyTests() {
 
     override fun createDistribution(): ContinuousDistribution = NakagamiDistribution(2.0, 1.0)
+
     override val testPoints = listOf(0.5, 1.0, 1.5, 2.0, 3.0)
     override val pValues = listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9)
     override val roundTripTol = 1e-8
@@ -471,5 +472,4 @@ class NakagamiDistributionTest : ContinuousDistributionPropertyTests() {
         assertFailsWith<InvalidParameterException> { d1.quantile(-0.1) }
         assertFailsWith<InvalidParameterException> { d1.quantile(1.1) }
     }
-
 }

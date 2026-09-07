@@ -1,12 +1,12 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.DegenerateDataException
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.DegenerateDataException
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 internal class ProcessCapabilityTest {
 
@@ -262,10 +262,15 @@ internal class ProcessCapabilityTest {
     fun testInfinityLslUsl() {
         // Infinite tolerance band
         val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
-        val result = data.processCapability(lsl = Double.NEGATIVE_INFINITY, usl = Double.POSITIVE_INFINITY)
+        val result =
+            data.processCapability(lsl = Double.NEGATIVE_INFINITY, usl = Double.POSITIVE_INFINITY)
 
         // tolerance = Inf - (-Inf) = Inf, cp = Inf / (6*sigma) = Inf
-        assertEquals(Double.POSITIVE_INFINITY, result.cp, "cp should be +Inf for infinite tolerance")
+        assertEquals(
+            Double.POSITIVE_INFINITY,
+            result.cp,
+            "cp should be +Inf for infinite tolerance",
+        )
     }
 
     // ===== Property-based tests =====
@@ -273,23 +278,25 @@ internal class ProcessCapabilityTest {
     @Test
     fun testCpkLeqCp() {
         // Cpk <= Cp always (Cpk penalizes off-center processes)
-        val datasets = listOf(
-            doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0),
-            doubleArrayOf(7.0, 7.5, 8.0, 7.2, 7.8, 8.1, 7.6, 7.3, 7.9, 8.2),
-            doubleArrayOf(-5.0, -3.0, -4.0, -2.0, -6.0),
-            doubleArrayOf(3.0, 5.0),
-        )
-        val specs = listOf(
-            Pair(1.0, 10.0),
-            Pair(5.0, 10.0),
-            Pair(-10.0, 0.0),
-            Pair(0.0, 10.0),
-        )
+        val datasets =
+            listOf(
+                doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0),
+                doubleArrayOf(7.0, 7.5, 8.0, 7.2, 7.8, 8.1, 7.6, 7.3, 7.9, 8.2),
+                doubleArrayOf(-5.0, -3.0, -4.0, -2.0, -6.0),
+                doubleArrayOf(3.0, 5.0),
+            )
+        val specs =
+            listOf(
+                Pair(1.0, 10.0),
+                Pair(5.0, 10.0),
+                Pair(-10.0, 0.0),
+                Pair(0.0, 10.0),
+            )
         for (i in datasets.indices) {
             val result = datasets[i].processCapability(lsl = specs[i].first, usl = specs[i].second)
             assertTrue(
                 result.cpk <= result.cp + 1e-14,
-                "Cpk (${result.cpk}) should be <= Cp (${result.cp}) for dataset $i"
+                "Cpk (${result.cpk}) should be <= Cp (${result.cp}) for dataset $i",
             )
         }
     }
@@ -301,7 +308,7 @@ internal class ProcessCapabilityTest {
         val result = data.processCapability(lsl = 5.0, usl = 10.0)
         assertTrue(
             result.ppk <= result.pp + 1e-14,
-            "Ppk (${result.ppk}) should be <= Pp (${result.pp})"
+            "Ppk (${result.ppk}) should be <= Pp (${result.pp})",
         )
     }
 
@@ -336,11 +343,11 @@ internal class ProcessCapabilityTest {
 
         assertTrue(
             result.cp < result.pp,
-            "Cp (${result.cp}) should be < Pp (${result.pp}) because sample sigma > pop sigma"
+            "Cp (${result.cp}) should be < Pp (${result.pp}) because sample sigma > pop sigma",
         )
         assertTrue(
             result.cpk < result.ppk,
-            "Cpk (${result.cpk}) should be < Ppk (${result.ppk}) because sample sigma > pop sigma"
+            "Cpk (${result.cpk}) should be < Ppk (${result.ppk}) because sample sigma > pop sigma",
         )
     }
 
@@ -355,7 +362,12 @@ internal class ProcessCapabilityTest {
         val result2 = data2.processCapability(lsl = 90.0, usl = 120.0)
 
         // Same tolerance (30) and same variance => same Cp
-        assertEquals(result1.cp, result2.cp, 1e-10, "Cp should be the same for shifted data with same tolerance")
+        assertEquals(
+            result1.cp,
+            result2.cp,
+            1e-10,
+            "Cp should be the same for shifted data with same tolerance",
+        )
     }
 
     @Test
@@ -364,10 +376,30 @@ internal class ProcessCapabilityTest {
         val fromArray = data.processCapability(lsl = 1.0, usl = 10.0)
         val fromIterable = data.toList().processCapability(lsl = 1.0, usl = 10.0)
 
-        assertEquals(fromArray.cp, fromIterable.cp, 1e-14, "Iterable cp should match DoubleArray cp")
-        assertEquals(fromArray.cpk, fromIterable.cpk, 1e-14, "Iterable cpk should match DoubleArray cpk")
-        assertEquals(fromArray.pp, fromIterable.pp, 1e-14, "Iterable pp should match DoubleArray pp")
-        assertEquals(fromArray.ppk, fromIterable.ppk, 1e-14, "Iterable ppk should match DoubleArray ppk")
+        assertEquals(
+            fromArray.cp,
+            fromIterable.cp,
+            1e-14,
+            "Iterable cp should match DoubleArray cp",
+        )
+        assertEquals(
+            fromArray.cpk,
+            fromIterable.cpk,
+            1e-14,
+            "Iterable cpk should match DoubleArray cpk",
+        )
+        assertEquals(
+            fromArray.pp,
+            fromIterable.pp,
+            1e-14,
+            "Iterable pp should match DoubleArray pp",
+        )
+        assertEquals(
+            fromArray.ppk,
+            fromIterable.ppk,
+            1e-14,
+            "Iterable ppk should match DoubleArray ppk",
+        )
     }
 
     @Test
@@ -376,10 +408,30 @@ internal class ProcessCapabilityTest {
         val fromArray = data.processCapability(lsl = 1.0, usl = 10.0)
         val fromSequence = data.asSequence().processCapability(lsl = 1.0, usl = 10.0)
 
-        assertEquals(fromArray.cp, fromSequence.cp, 1e-14, "Sequence cp should match DoubleArray cp")
-        assertEquals(fromArray.cpk, fromSequence.cpk, 1e-14, "Sequence cpk should match DoubleArray cpk")
-        assertEquals(fromArray.pp, fromSequence.pp, 1e-14, "Sequence pp should match DoubleArray pp")
-        assertEquals(fromArray.ppk, fromSequence.ppk, 1e-14, "Sequence ppk should match DoubleArray ppk")
+        assertEquals(
+            fromArray.cp,
+            fromSequence.cp,
+            1e-14,
+            "Sequence cp should match DoubleArray cp",
+        )
+        assertEquals(
+            fromArray.cpk,
+            fromSequence.cpk,
+            1e-14,
+            "Sequence cpk should match DoubleArray cpk",
+        )
+        assertEquals(
+            fromArray.pp,
+            fromSequence.pp,
+            1e-14,
+            "Sequence pp should match DoubleArray pp",
+        )
+        assertEquals(
+            fromArray.ppk,
+            fromSequence.ppk,
+            1e-14,
+            "Sequence ppk should match DoubleArray ppk",
+        )
     }
 
     @Test

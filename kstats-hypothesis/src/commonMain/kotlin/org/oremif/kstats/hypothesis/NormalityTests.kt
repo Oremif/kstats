@@ -1,10 +1,10 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.*
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.distributions.ChiSquaredDistribution
 import org.oremif.kstats.distributions.NormalDistribution
-import kotlin.math.*
 
 // Royston AS R94 polynomial coefficients for Shapiro-Wilk test.
 // Source: Royston P. (1995) "Remark AS R94", Applied Statistics 44(4), pp.547-551.
@@ -34,8 +34,7 @@ private val SW_G = doubleArrayOf(-2.273, 0.459)
 /**
  * Evaluates a polynomial with coefficients in ascending power order using Horner's method.
  *
- * Used internally by the Shapiro-Wilk implementation for Royston AS R94 polynomial
- * approximations.
+ * Used internally by the Shapiro-Wilk implementation for Royston AS R94 polynomial approximations.
  */
 private fun swPoly(coeffs: DoubleArray, x: Double): Double {
     var result = coeffs[0]
@@ -52,9 +51,9 @@ private fun swPoly(coeffs: DoubleArray, x: Double): Double {
 /**
  * Computes Shapiro-Wilk coefficients using the Royston AS R94 algorithm.
  *
- * Returns a full antisymmetric coefficient array of size n where `a[i] = -a[n-1-i]`.
- * The extreme coefficients are corrected via polynomial approximations; middle
- * coefficients are normalized expected normal order statistics.
+ * Returns a full antisymmetric coefficient array of size n where `a[i] = -a[n-1-i]`. The extreme
+ * coefficients are corrected via polynomial approximations; middle coefficients are normalized
+ * expected normal order statistics.
  */
 private fun shapiroWilkCoefficients(n: Int): DoubleArray {
     val nn2 = n / 2
@@ -84,10 +83,11 @@ private fun shapiroWilkCoefficients(n: Int): DoubleArray {
     if (n > 5) {
         // Second extreme coefficient correction
         val a2 = -m[1] / ssumm2 + swPoly(SW_C2, rsn)
-        fac = sqrt(
-            (summ2 - 2.0 * m[0] * m[0] - 2.0 * m[1] * m[1]) /
-                (1.0 - 2.0 * a1 * a1 - 2.0 * a2 * a2)
-        )
+        fac =
+            sqrt(
+                (summ2 - 2.0 * m[0] * m[0] - 2.0 * m[1] * m[1]) /
+                    (1.0 - 2.0 * a1 * a1 - 2.0 * a2 * a2)
+            )
         a[n - 2] = a2
         a[1] = -a2
         i1 = 2
@@ -113,8 +113,8 @@ private fun shapiroWilkCoefficients(n: Int): DoubleArray {
 /**
  * Computes the Shapiro-Wilk p-value using the Royston AS R94 approximation.
  *
- * Uses three different transforms depending on the sample size:
- * n=3 (exact via arcsine), 4<=n<=11 (gamma-log transform), n>=12 (log-normal transform).
+ * Uses three different transforms depending on the sample size: n=3 (exact via arcsine), 4<=n<=11
+ * (gamma-log transform), n>=12 (log-normal transform).
  */
 private fun shapiroWilkPValue(w: Double, n: Int): Double {
     val normal = NormalDistribution.STANDARD
@@ -153,10 +153,10 @@ private fun shapiroWilkPValue(w: Double, n: Int): Double {
  * Performs the Shapiro-Wilk test for normality.
  *
  * The null hypothesis is that [sample] was drawn from a normal distribution. The W statistic
- * measures how well the ordered sample values match the expected normal order statistics —
- * values close to 1.0 indicate normality, while values significantly below 1.0 suggest
- * non-normality. Uses Royston's AS R94 algorithm for both the W statistic and p-value
- * approximation. Valid for sample sizes from 3 to 5000.
+ * measures how well the ordered sample values match the expected normal order statistics — values
+ * close to 1.0 indicate normality, while values significantly below 1.0 suggest non-normality. Uses
+ * Royston's AS R94 algorithm for both the W statistic and p-value approximation. Valid for sample
+ * sizes from 3 to 5000.
  *
  * If all values are identical (zero variance), returns W = 1.0 and p-value = 1.0.
  *
@@ -175,7 +175,8 @@ private fun shapiroWilkPValue(w: Double, n: Int): Double {
 public fun shapiroWilkTest(sample: DoubleArray): TestResult {
     val n = sample.size
     if (n < 3) throw InsufficientDataException("Shapiro-Wilk test requires at least 3 elements")
-    if (n > 5000) throw InvalidParameterException("Shapiro-Wilk test requires at most 5000 elements")
+    if (n > 5000)
+        throw InvalidParameterException("Shapiro-Wilk test requires at most 5000 elements")
 
     val sorted = sample.sortedArray()
     val mean = sorted.average()
@@ -190,7 +191,7 @@ public fun shapiroWilkTest(sample: DoubleArray): TestResult {
         return TestResult(
             testName = "Shapiro-Wilk Test",
             statistic = 1.0,
-            pValue = 1.0
+            pValue = 1.0,
         )
     }
 
@@ -208,19 +209,18 @@ public fun shapiroWilkTest(sample: DoubleArray): TestResult {
     return TestResult(
         testName = "Shapiro-Wilk Test",
         statistic = w,
-        pValue = pValue.coerceIn(0.0, 1.0)
+        pValue = pValue.coerceIn(0.0, 1.0),
     )
 }
 
 /**
  * Performs the Anderson-Darling test for normality.
  *
- * The null hypothesis is that [sample] was drawn from a normal distribution. The test
- * measures the discrepancy between the empirical distribution and a fitted normal
- * distribution, giving more weight to the tails than the Kolmogorov-Smirnov test.
- * Standardizes the data using the sample mean and standard deviation before computing
- * the A² statistic. Uses D'Agostino & Stephens' (1986) piecewise approximation for
- * the p-value with a finite-sample correction factor.
+ * The null hypothesis is that [sample] was drawn from a normal distribution. The test measures the
+ * discrepancy between the empirical distribution and a fitted normal distribution, giving more
+ * weight to the tails than the Kolmogorov-Smirnov test. Standardizes the data using the sample mean
+ * and standard deviation before computing the A² statistic. Uses D'Agostino & Stephens' (1986)
+ * piecewise approximation for the p-value with a finite-sample correction factor.
  *
  * If all values are identical (zero variance), returns A² = 0.0 and p-value = 1.0.
  *
@@ -235,8 +235,8 @@ public fun shapiroWilkTest(sample: DoubleArray): TestResult {
  * ```
  *
  * @param sample the observed values. Must have at least 3 elements.
- * @return a [TestResult] containing the A² statistic, p-value, and additional info
- * with "modifiedStatistic" (the finite-sample corrected A²*).
+ * @return a [TestResult] containing the A² statistic, p-value, and additional info with
+ *   "modifiedStatistic" (the finite-sample corrected A²*).
  */
 public fun andersonDarlingTest(sample: DoubleArray): TestResult {
     val n = sample.size
@@ -258,7 +258,7 @@ public fun andersonDarlingTest(sample: DoubleArray): TestResult {
             testName = "Anderson-Darling Test",
             statistic = 0.0,
             pValue = 1.0,
-            additionalInfo = mapOf("modifiedStatistic" to 0.0)
+            additionalInfo = mapOf("modifiedStatistic" to 0.0),
         )
     }
 
@@ -290,7 +290,7 @@ public fun andersonDarlingTest(sample: DoubleArray): TestResult {
         testName = "Anderson-Darling Test",
         statistic = a2,
         pValue = pValue.coerceIn(0.0, 1.0),
-        additionalInfo = mapOf("modifiedStatistic" to a2Star)
+        additionalInfo = mapOf("modifiedStatistic" to a2Star),
     )
 }
 
@@ -309,11 +309,10 @@ private fun andersonDarlingPValue(a2Star: Double): Double {
 /**
  * Performs the D'Agostino-Pearson omnibus normality test.
  *
- * The null hypothesis is that [sample] was drawn from a normal distribution. The test
- * combines D'Agostino's skewness test (1970) and Anscombe & Glynn's kurtosis test (1983)
- * into a single chi-squared statistic K² = Z₁² + Z₂² with 2 degrees of freedom. This is
- * equivalent to scipy's `normaltest()`. Complements [shapiroWilkTest] and
- * [andersonDarlingTest] for assessing normality.
+ * The null hypothesis is that [sample] was drawn from a normal distribution. The test combines
+ * D'Agostino's skewness test (1970) and Anscombe & Glynn's kurtosis test (1983) into a single
+ * chi-squared statistic K² = Z₁² + Z₂² with 2 degrees of freedom. This is equivalent to scipy's
+ * `normaltest()`. Complements [shapiroWilkTest] and [andersonDarlingTest] for assessing normality.
  *
  * If all values are identical (zero variance), returns K² = 0.0 and p-value = 1.0.
  *
@@ -333,14 +332,15 @@ private fun andersonDarlingPValue(a2Star: Double): Double {
  * ```
  *
  * @param sample the observed values. Must have at least 20 elements.
- * @return a [TestResult] containing the K² statistic, p-value, degrees of freedom (2.0),
- * and additional info with "z1", "z2", "skewness", and "kurtosis".
+ * @return a [TestResult] containing the K² statistic, p-value, degrees of freedom (2.0), and
+ *   additional info with "z1", "z2", "skewness", and "kurtosis".
  */
 public fun dagostinoPearsonTest(sample: DoubleArray): TestResult {
     val n = sample.size
-    if (n < 20) throw InsufficientDataException(
-        "D'Agostino-Pearson test requires at least 20 elements, got $n"
-    )
+    if (n < 20)
+        throw InsufficientDataException(
+            "D'Agostino-Pearson test requires at least 20 elements, got $n"
+        )
 
     // Compute population moments (two-pass)
     val mean = sample.average()
@@ -365,12 +365,12 @@ public fun dagostinoPearsonTest(sample: DoubleArray): TestResult {
             statistic = 0.0,
             pValue = 1.0,
             degreesOfFreedom = 2.0,
-            additionalInfo = mapOf("z1" to 0.0, "z2" to 0.0, "skewness" to 0.0, "kurtosis" to 0.0)
+            additionalInfo = mapOf("z1" to 0.0, "z2" to 0.0, "skewness" to 0.0, "kurtosis" to 0.0),
         )
     }
 
-    val b1 = m3 / (m2 * sqrt(m2))   // population skewness
-    val b2 = m4 / (m2 * m2)         // population kurtosis (non-excess)
+    val b1 = m3 / (m2 * sqrt(m2)) // population skewness
+    val b2 = m4 / (m2 * m2) // population kurtosis (non-excess)
 
     val z1 = skewTestZScore(b1, n)
     val z2 = kurtosisTestZScore(b2, n)
@@ -382,7 +382,7 @@ public fun dagostinoPearsonTest(sample: DoubleArray): TestResult {
             statistic = k2,
             pValue = Double.NaN,
             degreesOfFreedom = 2.0,
-            additionalInfo = mapOf("z1" to z1, "z2" to z2, "skewness" to b1, "kurtosis" to b2)
+            additionalInfo = mapOf("z1" to z1, "z2" to z2, "skewness" to b1, "kurtosis" to b2),
         )
     }
     val pValue = ChiSquaredDistribution(2.0).sf(k2)
@@ -392,18 +392,18 @@ public fun dagostinoPearsonTest(sample: DoubleArray): TestResult {
         statistic = k2,
         pValue = pValue.coerceIn(0.0, 1.0),
         degreesOfFreedom = 2.0,
-        additionalInfo = mapOf("z1" to z1, "z2" to z2, "skewness" to b1, "kurtosis" to b2)
+        additionalInfo = mapOf("z1" to z1, "z2" to z2, "skewness" to b1, "kurtosis" to b2),
     )
 }
 
 /**
  * Performs the Jarque-Bera goodness-of-fit test for normality.
  *
- * The null hypothesis is that [sample] was drawn from a normal distribution. The test
- * checks whether the sample has the skewness (zero) and kurtosis (three) expected of a
- * normal distribution. It combines squared skewness and scaled squared excess kurtosis
- * into a single statistic that asymptotically follows a chi-squared distribution with
- * 2 degrees of freedom. Uses population (biased) moment estimates.
+ * The null hypothesis is that [sample] was drawn from a normal distribution. The test checks
+ * whether the sample has the skewness (zero) and kurtosis (three) expected of a normal
+ * distribution. It combines squared skewness and scaled squared excess kurtosis into a single
+ * statistic that asymptotically follows a chi-squared distribution with 2 degrees of freedom. Uses
+ * population (biased) moment estimates.
  *
  * If all values are identical (zero variance), returns JB = 0.0 and p-value = 1.0.
  *
@@ -418,14 +418,13 @@ public fun dagostinoPearsonTest(sample: DoubleArray): TestResult {
  * ```
  *
  * @param sample the observed values. Must have at least 3 elements.
- * @return a [TestResult] containing the JB statistic, p-value, degrees of freedom (2.0),
- * and additional info with "skewness" and "kurtosis".
+ * @return a [TestResult] containing the JB statistic, p-value, degrees of freedom (2.0), and
+ *   additional info with "skewness" and "kurtosis".
  */
 public fun jarqueBeraTest(sample: DoubleArray): TestResult {
     val n = sample.size
-    if (n < 3) throw InsufficientDataException(
-        "Jarque-Bera test requires at least 3 elements, got $n"
-    )
+    if (n < 3)
+        throw InsufficientDataException("Jarque-Bera test requires at least 3 elements, got $n")
 
     // Compute population moments (two-pass)
     val mean = sample.average()
@@ -450,12 +449,12 @@ public fun jarqueBeraTest(sample: DoubleArray): TestResult {
             statistic = 0.0,
             pValue = 1.0,
             degreesOfFreedom = 2.0,
-            additionalInfo = mapOf("skewness" to 0.0, "kurtosis" to 0.0)
+            additionalInfo = mapOf("skewness" to 0.0, "kurtosis" to 0.0),
         )
     }
 
-    val skewness = m3 / (m2 * sqrt(m2))    // population skewness
-    val kurtosis = m4 / (m2 * m2) - 3.0    // population excess kurtosis
+    val skewness = m3 / (m2 * sqrt(m2)) // population skewness
+    val kurtosis = m4 / (m2 * m2) - 3.0 // population excess kurtosis
 
     val jb = (n.toDouble() / 6.0) * (skewness * skewness + kurtosis * kurtosis / 4.0)
 
@@ -465,7 +464,7 @@ public fun jarqueBeraTest(sample: DoubleArray): TestResult {
             statistic = jb,
             pValue = Double.NaN,
             degreesOfFreedom = 2.0,
-            additionalInfo = mapOf("skewness" to skewness, "kurtosis" to kurtosis)
+            additionalInfo = mapOf("skewness" to skewness, "kurtosis" to kurtosis),
         )
     }
 
@@ -476,21 +475,22 @@ public fun jarqueBeraTest(sample: DoubleArray): TestResult {
         statistic = jb,
         pValue = pValue.coerceIn(0.0, 1.0),
         degreesOfFreedom = 2.0,
-        additionalInfo = mapOf("skewness" to skewness, "kurtosis" to kurtosis)
+        additionalInfo = mapOf("skewness" to skewness, "kurtosis" to kurtosis),
     )
 }
 
 /**
  * Computes the skewness z-score using D'Agostino's (1970) transformation.
  *
- * Transforms the sample skewness [b1] into a standard normal deviate Z₁ via
- * a log-sinh transformation that stabilizes the distribution for moderate n.
+ * Transforms the sample skewness [b1] into a standard normal deviate Z₁ via a log-sinh
+ * transformation that stabilizes the distribution for moderate n.
  */
 private fun skewTestZScore(b1: Double, n: Int): Double {
     val an = n.toDouble()
     val y = b1 * sqrt((an + 1.0) * (an + 3.0) / (6.0 * (an - 2.0)))
-    val beta2 = 3.0 * (an * an + 27.0 * an - 70.0) * (an + 1.0) * (an + 3.0) /
-        ((an - 2.0) * (an + 5.0) * (an + 7.0) * (an + 9.0))
+    val beta2 =
+        3.0 * (an * an + 27.0 * an - 70.0) * (an + 1.0) * (an + 3.0) /
+            ((an - 2.0) * (an + 5.0) * (an + 7.0) * (an + 9.0))
     val w2 = -1.0 + sqrt(2.0 * (beta2 - 1.0))
     val delta = 1.0 / sqrt(0.5 * ln(w2))
     val alpha = sqrt(2.0 / (w2 - 1.0))
@@ -500,18 +500,18 @@ private fun skewTestZScore(b1: Double, n: Int): Double {
 /**
  * Computes the kurtosis z-score using Anscombe & Glynn's (1983) transformation.
  *
- * Transforms the sample kurtosis [b2] (non-excess, population) into a standard normal
- * deviate Z₂ via a cube-root transformation.
+ * Transforms the sample kurtosis [b2] (non-excess, population) into a standard normal deviate Z₂
+ * via a cube-root transformation.
  */
 private fun kurtosisTestZScore(b2: Double, n: Int): Double {
     val an = n.toDouble()
     val e = 3.0 * (an - 1.0) / (an + 1.0)
-    val varB2 = 24.0 * an * (an - 2.0) * (an - 3.0) /
-        ((an + 1.0) * (an + 1.0) * (an + 3.0) * (an + 5.0))
+    val varB2 =
+        24.0 * an * (an - 2.0) * (an - 3.0) / ((an + 1.0) * (an + 1.0) * (an + 3.0) * (an + 5.0))
     val x = (b2 - e) / sqrt(varB2)
-    val sqrtBeta1 = 6.0 * (an * an - 5.0 * an + 2.0) /
-        ((an + 7.0) * (an + 9.0)) *
-        sqrt(6.0 * (an + 3.0) * (an + 5.0) / (an * (an - 2.0) * (an - 3.0)))
+    val sqrtBeta1 =
+        6.0 * (an * an - 5.0 * an + 2.0) / ((an + 7.0) * (an + 9.0)) *
+            sqrt(6.0 * (an + 3.0) * (an + 5.0) / (an * (an - 2.0) * (an - 3.0)))
     val a = 6.0 + 8.0 / sqrtBeta1 * (2.0 / sqrtBeta1 + sqrt(1.0 + 4.0 / (sqrtBeta1 * sqrtBeta1)))
     val denom = 1.0 + x * sqrt(2.0 / (a - 4.0))
     val term2 = denom.sign * ((1.0 - 2.0 / a) / abs(denom)).pow(1.0 / 3.0)

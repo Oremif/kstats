@@ -1,12 +1,12 @@
 package org.oremif.kstats.correlation
 
-import org.oremif.kstats.core.exceptions.DegenerateDataException
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.DegenerateDataException
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class RegressionTest {
 
@@ -136,7 +136,7 @@ class RegressionTest {
         assertFailsWith<DegenerateDataException> {
             simpleLinearRegression(
                 doubleArrayOf(5.0, 5.0, 5.0, 5.0),
-                doubleArrayOf(1.0, 2.0, 3.0, 4.0)
+                doubleArrayOf(1.0, 2.0, 3.0, 4.0),
             )
         }
     }

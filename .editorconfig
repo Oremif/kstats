@@ -8,8 +8,11 @@ indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.kt]
+[*.{kt,kts}]
 ij_kotlin_code_style_defaults = KOTLIN_OFFICIAL
+ij_kotlin_indent_size = 4
+ij_continuation_indent_size = 4
+ktfmt_trailing_comma_management_strategy = complete
 
 [*.{yml,yaml,json}]
 indent_size = 2

@@ -5,9 +5,9 @@ import org.oremif.kstats.core.ConfidenceInterval
 /**
  * The result of a statistical hypothesis test.
  *
- * Contains the test statistic, p-value, and optional additional information such as
- * degrees of freedom and a confidence interval. Use [isSignificant] to quickly check
- * whether the result is statistically significant at a given significance level.
+ * Contains the test statistic, p-value, and optional additional information such as degrees of
+ * freedom and a confidence interval. Use [isSignificant] to quickly check whether the result is
+ * statistically significant at a given significance level.
  *
  * ### Example:
  * ```kotlin
@@ -21,16 +21,16 @@ import org.oremif.kstats.core.ConfidenceInterval
  * @property testName the name of the test that was performed (e.g. "One-Sample t-Test").
  * @property statistic the computed test statistic (e.g. t-value, chi-squared value, U statistic).
  * @property pValue the probability of observing a test statistic at least as extreme as the
- * computed value, assuming the null hypothesis is true. Smaller values indicate stronger
- * evidence against the null hypothesis.
- * @property degreesOfFreedom the degrees of freedom for the test distribution, or [Double.NaN]
- * if not applicable. Defaults to [Double.NaN].
- * @property alternative the direction of the alternative hypothesis that was tested.
- * Defaults to [Alternative.TWO_SIDED].
- * @property confidenceInterval the confidence interval for the estimated parameter,
- * or `null` if not computed. Defaults to `null`.
+ *   computed value, assuming the null hypothesis is true. Smaller values indicate stronger evidence
+ *   against the null hypothesis.
+ * @property degreesOfFreedom the degrees of freedom for the test distribution, or [Double.NaN] if
+ *   not applicable. Defaults to [Double.NaN].
+ * @property alternative the direction of the alternative hypothesis that was tested. Defaults to
+ *   [Alternative.TWO_SIDED].
+ * @property confidenceInterval the confidence interval for the estimated parameter, or `null` if
+ *   not computed. Defaults to `null`.
  * @property additionalInfo a map of supplementary statistics (e.g. "mean", "standardError",
- * "oddsRatio") that vary by test type. Defaults to an empty map.
+ *   "oddsRatio") that vary by test type. Defaults to an empty map.
  */
 public data class TestResult(
     val testName: String,
@@ -39,10 +39,11 @@ public data class TestResult(
     val degreesOfFreedom: Double = Double.NaN,
     val alternative: Alternative = Alternative.TWO_SIDED,
     val confidenceInterval: ConfidenceInterval? = null,
-    val additionalInfo: Map<String, Double> = emptyMap()
+    val additionalInfo: Map<String, Double> = emptyMap(),
 ) {
     /**
-     * Returns `true` if the test result is statistically significant at the given significance level.
+     * Returns `true` if the test result is statistically significant at the given significance
+     * level.
      *
      * A result is significant when the p-value is less than [alpha], meaning there is sufficient
      * evidence to reject the null hypothesis.

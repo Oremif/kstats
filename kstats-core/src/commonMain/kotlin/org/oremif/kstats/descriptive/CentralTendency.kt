@@ -15,11 +15,11 @@ import kotlin.math.ln
 /**
  * Computes the arithmetic mean of the values in this iterable.
  *
- * The arithmetic mean is the sum of all values divided by the count. Uses compensated
- * (Neumaier) summation for improved numerical precision.
+ * The arithmetic mean is the sum of all values divided by the count. Uses compensated (Neumaier)
+ * summation for improved numerical precision.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -45,11 +45,11 @@ public fun Iterable<Double>.mean(): Double {
 /**
  * Computes the arithmetic mean of the values in this array.
  *
- * The arithmetic mean is the sum of all values divided by the count. Uses compensated
- * (Neumaier) summation for improved numerical precision with large arrays.
+ * The arithmetic mean is the sum of all values divided by the count. Uses compensated (Neumaier)
+ * summation for improved numerical precision with large arrays.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -66,11 +66,11 @@ public fun DoubleArray.mean(): Double {
 /**
  * Computes the arithmetic mean of the values in this sequence.
  *
- * The arithmetic mean is the sum of all values divided by the count. Uses compensated
- * (Neumaier) summation for improved numerical precision. The sequence is consumed once.
+ * The arithmetic mean is the sum of all values divided by the count. Uses compensated (Neumaier)
+ * summation for improved numerical precision. The sequence is consumed once.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -98,12 +98,12 @@ public fun Sequence<Double>.mean(): Double {
 /**
  * Computes the geometric mean of the values in this iterable.
  *
- * The geometric mean is the nth root of the product of n values. It is useful for data that
- * spans several orders of magnitude or for computing average growth rates. All values must
- * be positive. Computed via logarithms to avoid overflow.
+ * The geometric mean is the nth root of the product of n values. It is useful for data that spans
+ * several orders of magnitude or for computing average growth rates. All values must be positive.
+ * Computed via logarithms to avoid overflow.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -117,7 +117,8 @@ public fun Iterable<Double>.geometricMean(): Double {
     var compensation = 0.0
     var count = 0
     for (element in this) {
-        if (element <= 0.0) throw InvalidParameterException("All elements must be positive for geometric mean")
+        if (element <= 0.0)
+            throw InvalidParameterException("All elements must be positive for geometric mean")
         val lnVal = ln(element)
         val t = sumLn + lnVal
         compensation += if (abs(sumLn) >= abs(lnVal)) (sumLn - t) + lnVal else (lnVal - t) + sumLn
@@ -131,12 +132,12 @@ public fun Iterable<Double>.geometricMean(): Double {
 /**
  * Computes the geometric mean of the values in this array.
  *
- * The geometric mean is the nth root of the product of n values. It is useful for data that
- * spans several orders of magnitude or for computing average growth rates. All values must
- * be positive. Computed via logarithms to avoid overflow.
+ * The geometric mean is the nth root of the product of n values. It is useful for data that spans
+ * several orders of magnitude or for computing average growth rates. All values must be positive.
+ * Computed via logarithms to avoid overflow.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -150,7 +151,8 @@ public fun DoubleArray.geometricMean(): Double {
     var sumLn = 0.0
     var compensation = 0.0
     for (element in this) {
-        if (element <= 0.0) throw InvalidParameterException("All elements must be positive for geometric mean")
+        if (element <= 0.0)
+            throw InvalidParameterException("All elements must be positive for geometric mean")
         val lnVal = ln(element)
         val t = sumLn + lnVal
         compensation += if (abs(sumLn) >= abs(lnVal)) (sumLn - t) + lnVal else (lnVal - t) + sumLn
@@ -164,12 +166,12 @@ public fun DoubleArray.geometricMean(): Double {
 /**
  * Computes the harmonic mean of the values in this iterable.
  *
- * The harmonic mean is the reciprocal of the arithmetic mean of the reciprocals. It is
- * appropriate for averaging rates or ratios (e.g. speeds, P/E ratios). All values must
- * be positive. Uses compensated summation for the reciprocals.
+ * The harmonic mean is the reciprocal of the arithmetic mean of the reciprocals. It is appropriate
+ * for averaging rates or ratios (e.g. speeds, P/E ratios). All values must be positive. Uses
+ * compensated summation for the reciprocals.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -183,10 +185,13 @@ public fun Iterable<Double>.harmonicMean(): Double {
     var compensation = 0.0
     var count = 0
     for (element in this) {
-        if (element <= 0.0) throw InvalidParameterException("All elements must be positive for harmonic mean")
+        if (element <= 0.0)
+            throw InvalidParameterException("All elements must be positive for harmonic mean")
         val reciprocal = 1.0 / element
         val t = sumReciprocal + reciprocal
-        compensation += if (abs(sumReciprocal) >= abs(reciprocal)) (sumReciprocal - t) + reciprocal else (reciprocal - t) + sumReciprocal
+        compensation +=
+            if (abs(sumReciprocal) >= abs(reciprocal)) (sumReciprocal - t) + reciprocal
+            else (reciprocal - t) + sumReciprocal
         sumReciprocal = t
         count++
     }
@@ -197,12 +202,12 @@ public fun Iterable<Double>.harmonicMean(): Double {
 /**
  * Computes the harmonic mean of the values in this array.
  *
- * The harmonic mean is the reciprocal of the arithmetic mean of the reciprocals. It is
- * appropriate for averaging rates or ratios. All values must be positive. Uses compensated
- * summation for the reciprocals.
+ * The harmonic mean is the reciprocal of the arithmetic mean of the reciprocals. It is appropriate
+ * for averaging rates or ratios. All values must be positive. Uses compensated summation for the
+ * reciprocals.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -216,10 +221,13 @@ public fun DoubleArray.harmonicMean(): Double {
     var sumReciprocal = 0.0
     var compensation = 0.0
     for (element in this) {
-        if (element <= 0.0) throw InvalidParameterException("All elements must be positive for harmonic mean")
+        if (element <= 0.0)
+            throw InvalidParameterException("All elements must be positive for harmonic mean")
         val reciprocal = 1.0 / element
         val t = sumReciprocal + reciprocal
-        compensation += if (abs(sumReciprocal) >= abs(reciprocal)) (sumReciprocal - t) + reciprocal else (reciprocal - t) + sumReciprocal
+        compensation +=
+            if (abs(sumReciprocal) >= abs(reciprocal)) (sumReciprocal - t) + reciprocal
+            else (reciprocal - t) + sumReciprocal
         sumReciprocal = t
     }
     return size.toDouble() / neumaierTotal(sumReciprocal, compensation)
@@ -230,10 +238,10 @@ public fun DoubleArray.harmonicMean(): Double {
 /**
  * Computes the weighted arithmetic mean of the values using the given [weights].
  *
- * Each value is multiplied by its corresponding weight, the products are summed, and the
- * result is divided by the total weight. Weights must be non-negative and their sum must
- * be positive. The values and weights iterables must have the same number of elements.
- * Uses compensated summation for both the weighted sum and the total weight.
+ * Each value is multiplied by its corresponding weight, the products are summed, and the result is
+ * divided by the total weight. Weights must be non-negative and their sum must be positive. The
+ * values and weights iterables must have the same number of elements. Uses compensated summation
+ * for both the weighted sum and the total weight.
  *
  * ### Example:
  * ```kotlin
@@ -257,10 +265,12 @@ public fun Iterable<Double>.weightedMean(weights: Iterable<Double>): Double {
         if (w < 0.0) throw InvalidParameterException("Weights must be non-negative")
         val vw = v * w
         val t1 = weightedSum + vw
-        wsCompensation += if (abs(weightedSum) >= abs(vw)) (weightedSum - t1) + vw else (vw - t1) + weightedSum
+        wsCompensation +=
+            if (abs(weightedSum) >= abs(vw)) (weightedSum - t1) + vw else (vw - t1) + weightedSum
         weightedSum = t1
         val t2 = totalWeight + w
-        twCompensation += if (abs(totalWeight) >= abs(w)) (totalWeight - t2) + w else (w - t2) + totalWeight
+        twCompensation +=
+            if (abs(totalWeight) >= abs(w)) (totalWeight - t2) + w else (w - t2) + totalWeight
         totalWeight = t2
         count++
     }
@@ -274,9 +284,9 @@ public fun Iterable<Double>.weightedMean(weights: Iterable<Double>): Double {
 /**
  * Computes the weighted arithmetic mean of the values using the given [weights].
  *
- * Each value is multiplied by its corresponding weight, the products are summed, and the
- * result is divided by the total weight. Weights must be non-negative and their sum must
- * be positive. The arrays must have the same size. Uses compensated summation.
+ * Each value is multiplied by its corresponding weight, the products are summed, and the result is
+ * divided by the total weight. Weights must be non-negative and their sum must be positive. The
+ * arrays must have the same size. Uses compensated summation.
  *
  * ### Example:
  * ```kotlin
@@ -287,7 +297,8 @@ public fun Iterable<Double>.weightedMean(weights: Iterable<Double>): Double {
  * @return the weighted arithmetic mean.
  */
 public fun DoubleArray.weightedMean(weights: DoubleArray): Double {
-    if (size != weights.size) throw InvalidParameterException("Values and weights must have the same size")
+    if (size != weights.size)
+        throw InvalidParameterException("Values and weights must have the same size")
     if (isEmpty()) throw InsufficientDataException("Arrays must not be empty")
     var weightedSum = 0.0
     var wsCompensation = 0.0
@@ -297,11 +308,13 @@ public fun DoubleArray.weightedMean(weights: DoubleArray): Double {
         if (weights[i] < 0.0) throw InvalidParameterException("Weights must be non-negative")
         val vw = this[i] * weights[i]
         val t1 = weightedSum + vw
-        wsCompensation += if (abs(weightedSum) >= abs(vw)) (weightedSum - t1) + vw else (vw - t1) + weightedSum
+        wsCompensation +=
+            if (abs(weightedSum) >= abs(vw)) (weightedSum - t1) + vw else (vw - t1) + weightedSum
         weightedSum = t1
         val w = weights[i]
         val t2 = totalWeight + w
-        twCompensation += if (abs(totalWeight) >= abs(w)) (totalWeight - t2) + w else (w - t2) + totalWeight
+        twCompensation +=
+            if (abs(totalWeight) >= abs(w)) (totalWeight - t2) + w else (w - t2) + totalWeight
         totalWeight = t2
     }
     val finalWeight = neumaierTotal(totalWeight, twCompensation)
@@ -314,9 +327,8 @@ public fun DoubleArray.weightedMean(weights: DoubleArray): Double {
 /**
  * Computes the median of the values in this iterable.
  *
- * The median is the middle value when the data is sorted. For an even number of elements,
- * it is the average of the two middle values. Unlike the mean, the median is robust to
- * outliers.
+ * The median is the middle value when the data is sorted. For an even number of elements, it is the
+ * average of the two middle values. Unlike the mean, the median is robust to outliers.
  *
  * ### Example:
  * ```kotlin
@@ -326,15 +338,14 @@ public fun DoubleArray.weightedMean(weights: DoubleArray): Double {
  *
  * @return the median of the elements.
  */
-public fun Iterable<Double>.median(): Double =
-    medianInPlace(toList().toDoubleArray())
+public fun Iterable<Double>.median(): Double = medianInPlace(toList().toDoubleArray())
 
 /**
  * Computes the median of the values in this array.
  *
- * The median is the middle value when the data is sorted. For an even number of elements,
- * it is the average of the two middle values. Uses introselect (O(n) expected time) instead
- * of a full sort for efficiency.
+ * The median is the middle value when the data is sorted. For an even number of elements, it is the
+ * average of the two middle values. Uses introselect (O(n) expected time) instead of a full sort
+ * for efficiency.
  *
  * ### Example:
  * ```kotlin
@@ -371,12 +382,12 @@ private fun medianInPlace(work: DoubleArray): Double {
  * Returns the mode (most frequently occurring values) of this iterable.
  *
  * The mode is the set of values that appear most often. If multiple values share the highest
- * frequency, all of them are returned (multimodal). Works with any type that supports
- * equality checks, not just numeric types.
+ * frequency, all of them are returned (multimodal). Works with any type that supports equality
+ * checks, not just numeric types.
  *
- * **NaN handling (for `Double`):** Each `NaN` is treated as a unique value because `NaN != NaN`
- * per IEEE 754. NaN values will not be grouped together and will not appear as the mode unless
- * no other value is more frequent. Filter NaN values before calling if that is not desired.
+ * **NaN handling (for `Double`):** Each `NaN` is treated as a unique value because `NaN != NaN` per
+ * IEEE 754. NaN values will not be grouped together and will not appear as the mode unless no other
+ * value is more frequent. Filter NaN values before calling if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -402,10 +413,10 @@ public fun <T> Iterable<T>.mode(): Set<T> {
 /**
  * Computes the trimmed (truncated) mean by removing a fraction of values from each tail.
  *
- * The trimmed mean sorts the data, discards the lowest and highest [proportion] of values,
- * and computes the arithmetic mean of the remaining middle portion. This makes it more
- * robust to outliers than the regular mean. A proportion of 0.0 gives the ordinary mean;
- * a proportion approaching 0.5 converges toward the median.
+ * The trimmed mean sorts the data, discards the lowest and highest [proportion] of values, and
+ * computes the arithmetic mean of the remaining middle portion. This makes it more robust to
+ * outliers than the regular mean. A proportion of 0.0 gives the ordinary mean; a proportion
+ * approaching 0.5 converges toward the median.
  *
  * Uses compensated (Neumaier) summation for improved numerical precision with large values.
  *
@@ -414,8 +425,8 @@ public fun <T> Iterable<T>.mode(): Set<T> {
  * doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedMean(0.1) // 5.5
  * ```
  *
- * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
- * For example, 0.1 removes the lowest 10% and highest 10%.
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5). For example,
+ *   0.1 removes the lowest 10% and highest 10%.
  * @return the mean of the remaining values after trimming.
  * @see trimmedVariance
  */
@@ -443,18 +454,18 @@ public fun DoubleArray.trimmedMean(proportion: Double): Double {
 /**
  * Computes the trimmed (truncated) mean by removing a fraction of values from each tail.
  *
- * The trimmed mean sorts the data, discards the lowest and highest [proportion] of values,
- * and computes the arithmetic mean of the remaining middle portion. This makes it more
- * robust to outliers than the regular mean. A proportion of 0.0 gives the ordinary mean;
- * a proportion approaching 0.5 converges toward the median.
+ * The trimmed mean sorts the data, discards the lowest and highest [proportion] of values, and
+ * computes the arithmetic mean of the remaining middle portion. This makes it more robust to
+ * outliers than the regular mean. A proportion of 0.0 gives the ordinary mean; a proportion
+ * approaching 0.5 converges toward the median.
  *
  * ### Example:
  * ```kotlin
  * listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedMean(0.1) // 5.5
  * ```
  *
- * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
- * For example, 0.1 removes the lowest 10% and highest 10%.
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5). For example,
+ *   0.1 removes the lowest 10% and highest 10%.
  * @return the mean of the remaining values after trimming.
  * @see trimmedVariance
  */
@@ -464,18 +475,18 @@ public fun Iterable<Double>.trimmedMean(proportion: Double): Double =
 /**
  * Computes the trimmed (truncated) mean by removing a fraction of values from each tail.
  *
- * The trimmed mean sorts the data, discards the lowest and highest [proportion] of values,
- * and computes the arithmetic mean of the remaining middle portion. This makes it more
- * robust to outliers than the regular mean. A proportion of 0.0 gives the ordinary mean;
- * a proportion approaching 0.5 converges toward the median.
+ * The trimmed mean sorts the data, discards the lowest and highest [proportion] of values, and
+ * computes the arithmetic mean of the remaining middle portion. This makes it more robust to
+ * outliers than the regular mean. A proportion of 0.0 gives the ordinary mean; a proportion
+ * approaching 0.5 converges toward the median.
  *
  * ### Example:
  * ```kotlin
  * sequenceOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedMean(0.1) // 5.5
  * ```
  *
- * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
- * For example, 0.1 removes the lowest 10% and highest 10%.
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5). For example,
+ *   0.1 removes the lowest 10% and highest 10%.
  * @return the mean of the remaining values after trimming.
  * @see trimmedVariance
  */
@@ -491,8 +502,7 @@ public fun Sequence<Double>.trimmedMean(proportion: Double): Double =
  *
  * @return the geometric mean of the elements.
  */
-public fun Sequence<Double>.geometricMean(): Double =
-    toList().toDoubleArray().geometricMean()
+public fun Sequence<Double>.geometricMean(): Double = toList().toDoubleArray().geometricMean()
 
 /**
  * Computes the harmonic mean of the values in this sequence.
@@ -501,8 +511,7 @@ public fun Sequence<Double>.geometricMean(): Double =
  *
  * @return the harmonic mean of the elements.
  */
-public fun Sequence<Double>.harmonicMean(): Double =
-    toList().toDoubleArray().harmonicMean()
+public fun Sequence<Double>.harmonicMean(): Double = toList().toDoubleArray().harmonicMean()
 
 /**
  * Computes the median of the values in this sequence.
@@ -511,5 +520,4 @@ public fun Sequence<Double>.harmonicMean(): Double =
  *
  * @return the median of the elements.
  */
-public fun Sequence<Double>.median(): Double =
-    toList().toDoubleArray().median()
+public fun Sequence<Double>.median(): Double = toList().toDoubleArray().median()

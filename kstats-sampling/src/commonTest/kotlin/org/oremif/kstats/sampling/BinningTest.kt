@@ -1,10 +1,10 @@
 package org.oremif.kstats.sampling
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class BinningTest {
 
@@ -36,9 +36,7 @@ class BinningTest {
 
     @Test
     fun testBinBySizeNaNThrows() {
-        assertFailsWith<InvalidParameterException> {
-            listOf(1.0, Double.NaN).bin(1.0)
-        }
+        assertFailsWith<InvalidParameterException> { listOf(1.0, Double.NaN).bin(1.0) }
     }
 
     @Test
@@ -50,9 +48,7 @@ class BinningTest {
 
     @Test
     fun testBinBySizeNaNBinSizeThrows() {
-        assertFailsWith<InvalidParameterException> {
-            listOf(1.0, 2.0).bin(Double.NaN)
-        }
+        assertFailsWith<InvalidParameterException> { listOf(1.0, 2.0).bin(Double.NaN) }
     }
 
     @Test
@@ -111,9 +107,7 @@ class BinningTest {
 
     @Test
     fun testBinByCountNaNThrows() {
-        assertFailsWith<InvalidParameterException> {
-            listOf(1.0, Double.NaN).bin(2)
-        }
+        assertFailsWith<InvalidParameterException> { listOf(1.0, Double.NaN).bin(2) }
     }
 
     // --- boundary assignment ---
@@ -166,7 +160,8 @@ class BinningTest {
     @Test
     fun testBinByDoubleRangeStartInfThrows() {
         assertFailsWith<InvalidParameterException> {
-            listOf(1.0, 2.0).binByDouble({ it }, binSize = 1.0, rangeStart = Double.NEGATIVE_INFINITY)
+            listOf(1.0, 2.0)
+                .binByDouble({ it }, binSize = 1.0, rangeStart = Double.NEGATIVE_INFINITY)
         }
     }
 
@@ -281,9 +276,13 @@ class BinningTest {
     fun testBinByDoubleCustomSelector() {
         data class Item(val value: Double, val name: String)
 
-        val items = listOf(
-            Item(1.0, "a"), Item(3.5, "b"), Item(7.0, "c"), Item(8.0, "d")
-        )
+        val items =
+            listOf(
+                Item(1.0, "a"),
+                Item(3.5, "b"),
+                Item(7.0, "c"),
+                Item(8.0, "d"),
+            )
         val bins = items.binByDouble({ it.value }, binSize = 5.0)
         assertEquals(2, bins.size)
         assertEquals(2, bins[0].count) // 1.0, 3.5

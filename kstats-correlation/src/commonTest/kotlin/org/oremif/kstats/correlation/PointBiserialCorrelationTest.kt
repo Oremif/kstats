@@ -1,12 +1,12 @@
 package org.oremif.kstats.correlation
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class PointBiserialCorrelationTest {
 
@@ -150,7 +150,7 @@ class PointBiserialCorrelationTest {
         assertFailsWith<InvalidParameterException> {
             pointBiserialCorrelation(
                 doubleArrayOf(1.0, 1.0, 1.0, 1.0),
-                doubleArrayOf(1.0, 2.0, 3.0, 4.0)
+                doubleArrayOf(1.0, 2.0, 3.0, 4.0),
             )
         }
     }
@@ -160,7 +160,7 @@ class PointBiserialCorrelationTest {
         assertFailsWith<InvalidParameterException> {
             pointBiserialCorrelation(
                 doubleArrayOf(0.0, 1.0, 2.0, 0.0),
-                doubleArrayOf(1.0, 2.0, 3.0, 4.0)
+                doubleArrayOf(1.0, 2.0, 3.0, 4.0),
             )
         }
     }
@@ -170,7 +170,7 @@ class PointBiserialCorrelationTest {
         assertFailsWith<InsufficientDataException> {
             pointBiserialCorrelation(
                 doubleArrayOf(0.0, 1.0),
-                doubleArrayOf(1.0, 2.0)
+                doubleArrayOf(1.0, 2.0),
             )
         }
     }
@@ -180,7 +180,7 @@ class PointBiserialCorrelationTest {
         assertFailsWith<InvalidParameterException> {
             pointBiserialCorrelation(
                 doubleArrayOf(0.0, 1.0, 0.0),
-                doubleArrayOf(1.0, 2.0)
+                doubleArrayOf(1.0, 2.0),
             )
         }
     }
@@ -209,7 +209,7 @@ class PointBiserialCorrelationTest {
         assertFailsWith<InsufficientDataException> {
             pointBiserialCorrelation(
                 booleanArrayOf(true, false),
-                doubleArrayOf(1.0, 2.0)
+                doubleArrayOf(1.0, 2.0),
             )
         }
     }
@@ -219,7 +219,7 @@ class PointBiserialCorrelationTest {
         assertFailsWith<InvalidParameterException> {
             pointBiserialCorrelation(
                 booleanArrayOf(true, false, true),
-                doubleArrayOf(1.0, 2.0)
+                doubleArrayOf(1.0, 2.0),
             )
         }
     }
@@ -229,7 +229,7 @@ class PointBiserialCorrelationTest {
         assertFailsWith<InsufficientDataException> {
             pointBiserialCorrelation(
                 intArrayOf(0, 1),
-                doubleArrayOf(1.0, 2.0)
+                doubleArrayOf(1.0, 2.0),
             )
         }
     }
@@ -239,7 +239,7 @@ class PointBiserialCorrelationTest {
         assertFailsWith<InvalidParameterException> {
             pointBiserialCorrelation(
                 intArrayOf(0, 1, 0),
-                doubleArrayOf(1.0, 2.0)
+                doubleArrayOf(1.0, 2.0),
             )
         }
     }
@@ -273,7 +273,10 @@ class PointBiserialCorrelationTest {
         val n = 1000
         val x = DoubleArray(n) { if (random.nextDouble() < 0.5) 1.0 else 0.0 }
         // Use numpy-compatible seed 42 reference; just check bounds since RNG differs
-        val y = DoubleArray(n) { if (x[it] == 1.0) 5.0 + random.nextDouble() else 3.0 + random.nextDouble() }
+        val y =
+            DoubleArray(n) {
+                if (x[it] == 1.0) 5.0 + random.nextDouble() else 3.0 + random.nextDouble()
+            }
         val result = pointBiserialCorrelation(x, y)
         assertTrue(abs(result.coefficient) > 0.3)
         assertTrue(result.coefficient in -1.0..1.0)

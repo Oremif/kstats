@@ -48,6 +48,9 @@ jobs:
           add-job-summary: always
           cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
+      - name: Check formatting
+        run: ./gradlew ktfmtCheck --parallel
+
       - name: Check binary compatibility
         run: ./gradlew apiCheck --parallel
 

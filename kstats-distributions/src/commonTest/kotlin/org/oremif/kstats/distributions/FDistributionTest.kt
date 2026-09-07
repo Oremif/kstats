@@ -1,15 +1,16 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class FDistributionTest : ContinuousDistributionPropertyTests() {
 
     override fun createDistribution(): ContinuousDistribution = FDistribution(5.0, 10.0)
+
     override val testPoints = listOf(0.0, 0.5, 1.0, 2.0, 5.0, 10.0)
     override val pValues = listOf(0.25, 0.5, 0.75, 0.9)
     override val roundTripTol = 1e-6
@@ -184,5 +185,4 @@ class FDistributionTest : ContinuousDistributionPropertyTests() {
         // scipy: cdf(1.0) = 0.5 by symmetry
         assertEquals(0.5, d2.cdf(1.0), 1e-6)
     }
-
 }

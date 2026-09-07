@@ -1,24 +1,24 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 /**
  * Represents the geometric distribution, which models the number of failures before the first
  * success in a series of independent Bernoulli trials.
  *
- * This distribution uses the 0-indexed convention: `k = 0` means success occurred on the very
- * first trial (zero failures), `k = 1` means one failure before the first success, and so on.
- * The support is `{0, 1, 2, ...}` (all non-negative integers).
+ * This distribution uses the 0-indexed convention: `k = 0` means success occurred on the very first
+ * trial (zero failures), `k = 1` means one failure before the first success, and so on. The support
+ * is `{0, 1, 2, ...}` (all non-negative integers).
  *
- * The geometric distribution is memoryless -- the probability of needing at least `m` more
- * failures is the same regardless of how many failures have already occurred. It is also a
- * special case of the negative binomial distribution with `successes = 1`.
+ * The geometric distribution is memoryless -- the probability of needing at least `m` more failures
+ * is the same regardless of how many failures have already occurred. It is also a special case of
+ * the negative binomial distribution with `successes = 1`.
  *
- * Common applications include modeling the number of defective items inspected before finding
- * a good one, the number of unsuccessful sales calls before a sale, or the number of coin
- * flips before landing heads.
+ * Common applications include modeling the number of defective items inspected before finding a
+ * good one, the number of unsuccessful sales calls before a sale, or the number of coin flips
+ * before landing heads.
  *
  * ### Example:
  * ```kotlin
@@ -33,20 +33,19 @@ import kotlin.random.Random
  *
  * @property probability the probability of success on each trial. Must be in `(0, 1]`.
  */
-public class GeometricDistribution(
-    public val probability: Double
-) : DiscreteDistribution {
+public class GeometricDistribution(public val probability: Double) : DiscreteDistribution {
 
     init {
-        if (probability.isNaN() || probability <= 0.0 || probability > 1.0) throw InvalidParameterException("probability must be in (0, 1], got $probability")
+        if (probability.isNaN() || probability <= 0.0 || probability > 1.0)
+            throw InvalidParameterException("probability must be in (0, 1], got $probability")
     }
 
     private val p = probability
     private val q = 1.0 - p
 
     /**
-     * Returns the probability mass at [k], the probability of exactly [k] failures before
-     * the first success.
+     * Returns the probability mass at [k], the probability of exactly [k] failures before the first
+     * success.
      *
      * @param k the number of failures before the first success.
      * @return the probability of exactly [k] failures, or zero if [k] is negative.
@@ -61,7 +60,7 @@ public class GeometricDistribution(
      *
      * @param k the number of failures before the first success.
      * @return the natural log of the probability mass at [k]. Returns [Double.NEGATIVE_INFINITY]
-     * when [k] is negative.
+     *   when [k] is negative.
      */
     override fun logPmf(k: Int): Double {
         if (k < 0) return Double.NEGATIVE_INFINITY
@@ -85,8 +84,8 @@ public class GeometricDistribution(
      * Returns the quantile (inverse CDF) for the given probability [p] as an [Int].
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
-     * @return the smallest integer k at which `cdf(k) >= p`. Returns [Int.MAX_VALUE] when
-     * `p = 1.0`.
+     * @return the smallest integer k at which `cdf(k) >= p`. Returns [Int.MAX_VALUE] when `p =
+     *   1.0`.
      */
     override fun quantileInt(p: Double): Int {
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
@@ -96,18 +95,25 @@ public class GeometricDistribution(
     }
 
     /** The mean (expected number of failures before the first success). */
-    override val mean: Double get() = q / p
+    override val mean: Double
+        get() = q / p
 
     /** The variance of the number of failures before the first success. */
-    override val variance: Double get() = q / (p * p)
+    override val variance: Double
+        get() = q / (p * p)
 
     /** The skewness of this distribution. */
-    override val skewness: Double get() = (2.0 - p) / sqrt(q)
+    override val skewness: Double
+        get() = (2.0 - p) / sqrt(q)
 
     /** The excess kurtosis of this distribution. */
-    override val kurtosis: Double get() = 6.0 + p * p / q
+    override val kurtosis: Double
+        get() = 6.0 + p * p / q
 
-    /** The Shannon entropy of this distribution in nats. Returns zero when [probability] is 1.0 (degenerate case). */
+    /**
+     * The Shannon entropy of this distribution in nats. Returns zero when [probability] is 1.0
+     * (degenerate case).
+     */
     override val entropy: Double
         get() {
             if (p == 1.0) return 0.0

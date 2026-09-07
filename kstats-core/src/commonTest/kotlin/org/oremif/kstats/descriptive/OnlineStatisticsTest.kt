@@ -42,7 +42,7 @@ class OnlineStatisticsTest {
         assertEquals(
             sqrt(stats.variance(PopulationKind.POPULATION)),
             stats.standardDeviation(PopulationKind.POPULATION),
-            1e-15
+            1e-15,
         )
     }
 
@@ -259,9 +259,18 @@ class OnlineStatisticsTest {
         stats.addAll(data)
 
         assertTrue(stats.mean.isFinite(), "Mean should be finite for large-magnitude data")
-        assertTrue(stats.variance().isFinite(), "Variance should be finite for large-magnitude data")
-        assertTrue(stats.skewness().isFinite(), "Skewness should be finite for large-magnitude data")
-        assertTrue(stats.kurtosis().isFinite(), "Kurtosis should be finite for large-magnitude data")
+        assertTrue(
+            stats.variance().isFinite(),
+            "Variance should be finite for large-magnitude data",
+        )
+        assertTrue(
+            stats.skewness().isFinite(),
+            "Skewness should be finite for large-magnitude data",
+        )
+        assertTrue(
+            stats.kurtosis().isFinite(),
+            "Kurtosis should be finite for large-magnitude data",
+        )
     }
 
     @Test
@@ -269,12 +278,13 @@ class OnlineStatisticsTest {
         // Generate 100K samples from approximate standard normal using Box-Muller
         val n = 100_000
         val rng = kotlin.random.Random(42)
-        val data = DoubleArray(n) {
-            // Box-Muller transform
-            val u1 = rng.nextDouble()
-            val u2 = rng.nextDouble()
-            sqrt(-2.0 * kotlin.math.ln(u1)) * kotlin.math.cos(2.0 * kotlin.math.PI * u2)
-        }
+        val data =
+            DoubleArray(n) {
+                // Box-Muller transform
+                val u1 = rng.nextDouble()
+                val u2 = rng.nextDouble()
+                sqrt(-2.0 * kotlin.math.ln(u1)) * kotlin.math.cos(2.0 * kotlin.math.PI * u2)
+            }
 
         val stats = OnlineStatistics()
         stats.addAll(data)

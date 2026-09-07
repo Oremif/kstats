@@ -43,8 +43,10 @@ abstract class ContinuousDistributionPropertyTests {
         val d = createDistribution()
         for (x in testPoints) {
             assertEquals(
-                d.pdf(x), exp(d.logPdf(x)), consistencyTol,
-                "exp(logPdf($x)) ≈ pdf($x)"
+                d.pdf(x),
+                exp(d.logPdf(x)),
+                consistencyTol,
+                "exp(logPdf($x)) ≈ pdf($x)",
             )
         }
     }
@@ -54,8 +56,10 @@ abstract class ContinuousDistributionPropertyTests {
         val d = createDistribution()
         for (x in testPoints) {
             assertEquals(
-                1.0, d.sf(x) + d.cdf(x), consistencyTol,
-                "sf($x) + cdf($x) ≈ 1"
+                1.0,
+                d.sf(x) + d.cdf(x),
+                consistencyTol,
+                "sf($x) + cdf($x) ≈ 1",
             )
         }
     }
@@ -65,8 +69,10 @@ abstract class ContinuousDistributionPropertyTests {
         val d = createDistribution()
         for (p in pValues) {
             assertEquals(
-                p, d.cdf(d.quantile(p)), roundTripTol,
-                "cdf(quantile($p)) ≈ $p"
+                p,
+                d.cdf(d.quantile(p)),
+                roundTripTol,
+                "cdf(quantile($p)) ≈ $p",
             )
         }
     }
@@ -85,17 +91,22 @@ abstract class ContinuousDistributionPropertyTests {
     @Test
     open fun sampleStatistics() {
         val d = createDistribution()
-        if (d.mean.isNaN() || !d.mean.isFinite() || d.variance.isNaN() || !d.variance.isFinite()) return
+        if (d.mean.isNaN() || !d.mean.isFinite() || d.variance.isNaN() || !d.variance.isFinite())
+            return
         val samples = d.sample(100_000, Random(42))
         val sampleMean = samples.average()
         assertEquals(
-            d.mean, sampleMean, maxOf(abs(d.mean) * 0.05, 0.15),
-            "sample mean ≈ ${d.mean}"
+            d.mean,
+            sampleMean,
+            maxOf(abs(d.mean) * 0.05, 0.15),
+            "sample mean ≈ ${d.mean}",
         )
         val sampleVar = samples.sumOf { (it - sampleMean) * (it - sampleMean) } / (samples.size - 1)
         assertEquals(
-            d.variance, sampleVar, maxOf(d.variance * 0.1, 0.15),
-            "sample variance ≈ ${d.variance}"
+            d.variance,
+            sampleVar,
+            maxOf(d.variance * 0.1, 0.15),
+            "sample variance ≈ ${d.variance}",
         )
     }
 

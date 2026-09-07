@@ -18,18 +18,18 @@ description: "Zusammenfassende Statistiken, Lagemaße, Streuungsmaße, Quantile,
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
 val stats = data.describe()
 
-stats.count              // 8
-stats.mean               // 5.0
-stats.median             // 4.5
-stats.standardDeviation  // 2.1380
-stats.variance           // 4.5714
-stats.q1                 // 4.0
-stats.q3                 // 5.5
+stats.count // 8
+stats.mean // 5.0
+stats.median // 4.5
+stats.standardDeviation // 2.1380
+stats.variance // 4.5714
+stats.q1 // 4.0
+stats.q3 // 5.5
 stats.interquartileRange // 1.5
-stats.skewness           // 0.6563
-stats.kurtosis           // -0.1640
-stats.range              // 7.0
-stats.standardError      // 0.7559
+stats.skewness // 0.6563
+stats.kurtosis // -0.1640
+stats.range // 7.0
+stats.standardError // 0.7559
 ```
 
 {/*---END--*/}
@@ -47,19 +47,19 @@ Verschiedene Begriffe von „Mitte" passen zu verschiedenen Datenformen. `mean()
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
 
-data.mean()                    // 5.0
-data.median()                  // 4.5
-data.toList().mode()           // {4.0}
+data.mean() // 5.0
+data.median() // 4.5
+data.toList().mode() // {4.0}
 
-data.trimmedMean(0.1)          // 4.8333 — trims 10% from each tail
+data.trimmedMean(0.1) // 4.8333 — trims 10% from each tail
 
 val positive = doubleArrayOf(1.0, 2.0, 4.0, 8.0)
-positive.geometricMean()       // 2.8284
-positive.harmonicMean()        // 2.1333
+positive.geometricMean() // 2.8284
+positive.harmonicMean() // 2.1333
 
 val values = doubleArrayOf(1.0, 2.0, 3.0)
 val weights = doubleArrayOf(3.0, 1.0, 1.0)
-values.weightedMean(weights)   // 1.6
+values.weightedMean(weights) // 1.6
 ```
 
 {/*---END--*/}
@@ -98,17 +98,17 @@ Streuungsmaße beschreiben, wie weit die Werte vom Zentrum abweichen.
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
 
-data.variance()                                    // 4.5714 (sample)
-data.variance(PopulationKind.POPULATION)            // 4.0
-data.standardDeviation()                            // 2.1380
-data.range()                                        // 7.0
-data.interquartileRange()                           // 1.5
-data.meanAbsoluteDeviation()                        // 1.5
+data.variance() // 4.5714 (sample)
+data.variance(PopulationKind.POPULATION) // 4.0
+data.standardDeviation() // 2.1380
+data.range() // 7.0
+data.interquartileRange() // 1.5
+data.meanAbsoluteDeviation() // 1.5
 
-data.trimmedVariance(0.1)                           // trimmed sample variance
+data.trimmedVariance(0.1) // trimmed sample variance
 
 data.semiVariance(5.0, SemiVarianceDirection.DOWNSIDE) // 1.7143
-data.semiVariance(5.0, SemiVarianceDirection.UPSIDE)   // 2.8571
+data.semiVariance(5.0, SemiVarianceDirection.UPSIDE) // 2.8571
 ```
 
 {/*---END--*/}
@@ -142,9 +142,9 @@ Quantile teilen die Daten an bestimmten Wahrscheinlichkeitsschwellen. `percentil
 ```kotlin
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
 
-data.quantile(0.5)         // 5.5 (median)
-data.quantile(0.25)        // 3.25 (Q1)
-data.percentile(90.0)      // 9.1 (90th percentile)
+data.quantile(0.5) // 5.5 (median)
+data.quantile(0.25) // 3.25 (Q1)
+data.percentile(90.0) // 9.1 (90th percentile)
 
 val (q1, median, q3) = data.quartiles()
 // q1 = 3.25, median = 5.5, q3 = 7.75
@@ -175,16 +175,16 @@ Formkennzahlen beschreiben Asymmetrie und Randschwere über Mittelwert und Varia
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
 
-data.skewness()            // 0.6563 — positive: right tail is longer
-data.kurtosis()            // -0.1640 — negative excess: lighter tails than normal
+data.skewness() // 0.6563 — positive: right tail is longer
+data.kurtosis() // -0.1640 — negative excess: lighter tails than normal
 data.kurtosis(excess = false) // raw kurtosis (not centered at 0)
 
-data.centralMoment(2)      // 4.0 (equals population variance)
-data.centralMoment(3)      // 5.25
-data.centralMoment(4)      // 44.5
+data.centralMoment(2) // 4.0 (equals population variance)
+data.centralMoment(3) // 5.25
+data.centralMoment(4) // 44.5
 
-data.kStatistic(1)          // 5.0 (equals mean)
-data.kStatistic(2)          // 4.5714 (equals sample variance)
+data.kStatistic(1) // 5.0 (equals mean)
+data.kStatistic(2) // 4.5714 (equals sample variance)
 ```
 
 {/*---END--*/}
@@ -215,11 +215,11 @@ Die Klasse `Frequency` zählt Vorkommen, Anteile und kumulative Häufigkeiten f�
 
 ```kotlin
 val freq = listOf("a", "a", "b", "b", "b", "c").toFrequency()
-freq.totalCount            // 6
-freq.count("b")            // 3
-freq.proportion("b")       // 0.5
-freq.cumulativeCount("b")  // 5 (a=2 + b=3)
-freq.mode                  // {b}
+freq.totalCount // 6
+freq.count("b") // 3
+freq.proportion("b") // 0.5
+freq.cumulativeCount("b") // 5 (a=2 + b=3)
+freq.mode // {b}
 ```
 
 {/*---END--*/}
@@ -230,8 +230,8 @@ freq.mode                  // {b}
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
 val bins = data.asIterable().frequencyTable(3)
 // Each FrequencyBin has: range, count, relativeFrequency, cumulativeFrequency
-bins[0].count              // number of values in the first bin
-bins[0].relativeFrequency  // proportion of total
+bins[0].count // number of values in the first bin
+bins[0].relativeFrequency // proportion of total
 ```
 
 {/*---END--*/}
@@ -250,19 +250,19 @@ bins[0].relativeFrequency  // proportion of total
 val online = OnlineStatistics()
 online.addAll(doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0))
 
-online.count               // 8
-online.mean                // 5.0
-online.sum                 // 40.0
-online.min                 // 2.0
-online.max                 // 9.0
-online.variance()          // 4.5714 (sample)
+online.count // 8
+online.mean // 5.0
+online.sum // 40.0
+online.min // 2.0
+online.max // 9.0
+online.variance() // 4.5714 (sample)
 online.standardDeviation() // 2.1380
-online.skewness()          // 0.6563
+online.skewness() // 0.6563
 
 // Add more data later
 online.add(3.0)
-online.count               // 9
-online.mean                // 4.7778
+online.count // 9
+online.mean // 4.7778
 ```
 
 {/*---END--*/}
@@ -286,15 +286,25 @@ Die `-k`-Varianten bestrafen einen Prozess, der relativ zur Spezifikationsmitte 
 
 ```kotlin
 // Ten parts measured against a spec window of [48, 52]
-val measurements = doubleArrayOf(
-    50.0, 50.5, 49.5, 50.2, 49.8, 50.1, 49.9, 50.3, 49.7, 50.0
-)
+val measurements =
+    doubleArrayOf(
+        50.0,
+        50.5,
+        49.5,
+        50.2,
+        49.8,
+        50.1,
+        49.9,
+        50.3,
+        49.7,
+        50.0,
+    )
 val capability = measurements.processCapability(lsl = 48.0, usl = 52.0)
 
-capability.cp   // 2.2646 — potential capability (spread vs tolerance)
-capability.cpk  // 2.2646 — actual capability (penalizes off-centering)
-capability.pp   // 2.3870 — overall (population σ) counterpart of Cp
-capability.ppk  // 2.3870 — overall counterpart of Cpk
+capability.cp // 2.2646 — potential capability (spread vs tolerance)
+capability.cpk // 2.2646 — actual capability (penalizes off-centering)
+capability.pp // 2.3870 — overall (population σ) counterpart of Cp
+capability.ppk // 2.3870 — overall counterpart of Cpk
 ```
 
 {/*---END--*/}
@@ -322,21 +332,22 @@ Shewhart-<Tooltip tip="Zeitreihen-Plot von Untergruppenstatistiken mit ±3σ-Kon
 
 ```kotlin
 // Five subgroups of four parts; bracket width monitored per batch
-val subgroups = listOf(
-    doubleArrayOf(72.0, 84.0, 79.0, 49.0),
-    doubleArrayOf(56.0, 87.0, 33.0, 42.0),
-    doubleArrayOf(55.0, 73.0, 22.0, 60.0),
-    doubleArrayOf(44.0, 80.0, 54.0, 74.0),
-    doubleArrayOf(97.0, 26.0, 48.0, 58.0),
-)
+val subgroups =
+    listOf(
+        doubleArrayOf(72.0, 84.0, 79.0, 49.0),
+        doubleArrayOf(56.0, 87.0, 33.0, 42.0),
+        doubleArrayOf(55.0, 73.0, 22.0, 60.0),
+        doubleArrayOf(44.0, 80.0, 54.0, 74.0),
+        doubleArrayOf(97.0, 26.0, 48.0, 58.0),
+    )
 val chart = xBarRChart(subgroups)
 
-chart.centerLine     // 59.65 — grand mean (x-double-bar)
-chart.ucl            // 95.6626 — upper control limit for the mean
-chart.lcl            // 23.6374 — lower control limit for the mean
+chart.centerLine // 59.65 — grand mean (x-double-bar)
+chart.ucl // 95.6626 — upper control limit for the mean
+chart.lcl // 23.6374 — lower control limit for the mean
 chart.rChart.centerLine // 49.4 — average range (R-bar)
-chart.rChart.ucl     // 112.7308 — upper limit for within-subgroup range
-chart.rChart.lcl     // 0.0 — lower limit (D₃ = 0 for n ≤ 6)
+chart.rChart.ucl // 112.7308 — upper limit for within-subgroup range
+chart.rChart.lcl // 0.0 — lower limit (D₃ = 0 for n ≤ 6)
 ```
 
 {/*---END--*/}
@@ -366,8 +377,8 @@ Eine Shewhart-Karte reagiert langsam auf Drifts unter 2σ, weil jeder Punkt isol
 val observations = doubleArrayOf(10.2, 10.4, 10.6, 10.9, 11.2, 11.5, 11.8, 12.0)
 val result = cusum(observations, target = 10.0, k = 0.5, h = 3.0)
 
-result.sPlus      // [0.0, 0.0, 0.1, 0.5, 1.2, 2.2, 3.5, 5.0]
-result.sMinus     // all zero — no downward drift
+result.sPlus // [0.0, 0.0, 0.1, 0.5, 1.2, 2.2, 3.5, 5.0]
+result.sMinus // all zero — no downward drift
 result.alarmIndex // 6 — first index where C⁺ > H
 ```
 
@@ -395,19 +406,20 @@ EWMA (Roberts, 1959) ist das zweite klassische Werkzeug zur Erkennung kleiner Ve
 ```kotlin
 // EWMA chart: target = 25, σ = 1, λ = 0.2, L = 3
 val observations = doubleArrayOf(25.0, 24.5, 25.2, 26.1, 25.8, 27.0, 26.5, 28.0)
-val result = ewma(
-    observations,
-    target = 25.0,
-    sigma = 1.0,
-    lambda = 0.2,
-    controlLimitWidth = 3.0
-)
+val result =
+    ewma(
+        observations,
+        target = 25.0,
+        sigma = 1.0,
+        lambda = 0.2,
+        controlLimitWidth = 3.0,
+    )
 
 result.smoothedValues[0] // 25.0 — Z₀ = λ·x + (1-λ)·target
 result.smoothedValues[7] // 26.2549 — smoothed statistic at t = 7
-result.ucl[0]            // 25.6 — narrow at first, widens with t
-result.ucl[7]            // 25.9858 — approaching steady state
-result.outOfControl      // [7] — Z₇ exceeds UCL₇
+result.ucl[0] // 25.6 — narrow at first, widens with t
+result.ucl[7] // 25.9858 — approaching steady state
+result.outOfControl // [7] — Z₇ exceeds UCL₇
 ```
 
 {/*---END--*/}
@@ -443,9 +455,19 @@ Das Array jeder Regel enthält die *Auslöseindizes* — jene Beobachtung, deren
 
 ```kotlin
 // Process drifting upward in the last four observations
-val observations = doubleArrayOf(
-    0.1, 0.2, -0.3, 0.0, 1.4, 1.2, 2.4, 2.6, 3.5, 2.2
-)
+val observations =
+    doubleArrayOf(
+        0.1,
+        0.2,
+        -0.3,
+        0.0,
+        1.4,
+        1.2,
+        2.4,
+        2.6,
+        3.5,
+        2.2,
+    )
 val violations = westernElectricRules(observations, center = 0.0, sigma = 1.0)
 
 violations.rule1 // indices of points beyond ±3σ

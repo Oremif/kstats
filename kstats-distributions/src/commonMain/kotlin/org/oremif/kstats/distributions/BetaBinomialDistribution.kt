@@ -1,12 +1,12 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.core.lnBeta
-import org.oremif.kstats.core.lnCombination
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.random.Random
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.core.lnBeta
+import org.oremif.kstats.core.lnCombination
 
 /**
  * Represents the beta-binomial distribution, a compound distribution arising when the success
@@ -17,13 +17,13 @@ import kotlin.random.Random
  * its own success probability from a Beta([alpha], [beta]) distribution, and the count of successes
  * in [trials] independent trials then follows a binomial. This two-stage model captures extra
  * variability beyond what a simple binomial allows, making it suitable for scenarios such as the
- * number of defective items in batches with varying quality, or the number of positive responses
- * in surveys where response rates vary across groups.
+ * number of defective items in batches with varying quality, or the number of positive responses in
+ * surveys where response rates vary across groups.
  *
  * The support is `{0, 1, ..., trials}`. Sampling works by first drawing a random probability from
  * Beta([alpha], [beta]), then drawing from Binomial([trials], p). The PMF, CDF, and survival
- * function are computed in log-space using the log-beta function and the log-sum-exp technique
- * for numerical stability.
+ * function are computed in log-space using the log-beta function and the log-sum-exp technique for
+ * numerical stability.
  *
  * ### Example:
  * ```kotlin
@@ -48,8 +48,10 @@ public class BetaBinomialDistribution(
 
     init {
         if (trials < 0) throw InvalidParameterException("trials must be non-negative, got $trials")
-        if (!alpha.isFinite() || alpha <= 0.0) throw InvalidParameterException("alpha must be finite and positive, got $alpha")
-        if (!beta.isFinite() || beta <= 0.0) throw InvalidParameterException("beta must be finite and positive, got $beta")
+        if (!alpha.isFinite() || alpha <= 0.0)
+            throw InvalidParameterException("alpha must be finite and positive, got $alpha")
+        if (!beta.isFinite() || beta <= 0.0)
+            throw InvalidParameterException("beta must be finite and positive, got $beta")
     }
 
     private val n = trials
@@ -62,9 +64,9 @@ public class BetaBinomialDistribution(
     /**
      * Returns the probability of exactly [k] successes in this beta-binomial distribution.
      *
-     * Computes the probability mass by exponentiating the [logPmf] value. Returns zero for
-     * values outside the support (k < 0 or k > trials). When trials is zero, the only possible
-     * outcome is k = 0 with probability 1.
+     * Computes the probability mass by exponentiating the [logPmf] value. Returns zero for values
+     * outside the support (k < 0 or k > trials). When trials is zero, the only possible outcome is
+     * k = 0 with probability 1.
      *
      * @param k the number of successes at which to evaluate the probability.
      * @return the probability of exactly [k] successes, in the range `[0, 1]`.
@@ -76,7 +78,8 @@ public class BetaBinomialDistribution(
     }
 
     /**
-     * Returns the natural logarithm of the probability mass at [k] for this beta-binomial distribution.
+     * Returns the natural logarithm of the probability mass at [k] for this beta-binomial
+     * distribution.
      *
      * Computed directly in log-space using the log-binomial-coefficient and the log-beta function:
      * `ln C(n, k) + ln B(k + alpha, n - k + beta) - ln B(alpha, beta)`. This avoids overflow for
@@ -109,7 +112,8 @@ public class BetaBinomialDistribution(
     }
 
     /**
-     * Returns the cumulative distribution function value at [k] for this beta-binomial distribution.
+     * Returns the cumulative distribution function value at [k] for this beta-binomial
+     * distribution.
      *
      * Gives the probability of observing [k] or fewer successes. Computed by summing PMF values
      * from 0 to [k] using the log-sum-exp technique for numerical stability, then exponentiating
@@ -127,9 +131,9 @@ public class BetaBinomialDistribution(
     /**
      * Returns the survival function value at [k] for this beta-binomial distribution.
      *
-     * Gives the probability of observing strictly more than [k] successes. Computed directly
-     * by summing PMF values from k + 1 to trials using the log-sum-exp technique, rather than
-     * `1 - cdf(k)`, for better numerical accuracy in the upper tail.
+     * Gives the probability of observing strictly more than [k] successes. Computed directly by
+     * summing PMF values from k + 1 to trials using the log-sum-exp technique, rather than `1 -
+     * cdf(k)`, for better numerical accuracy in the upper tail.
      *
      * @param k the number of successes at which to evaluate the survival probability.
      * @return the probability of more than [k] successes, in the range `[0, 1]`.
@@ -143,8 +147,8 @@ public class BetaBinomialDistribution(
     /**
      * Returns the quantile (inverse CDF) for the given probability [p] as an integer.
      *
-     * Finds the smallest number of successes k such that the cumulative probability of k or
-     * fewer successes is at least [p]. Uses a linear search over the support from 0 to trials,
+     * Finds the smallest number of successes k such that the cumulative probability of k or fewer
+     * successes is at least [p]. Uses a linear search over the support from 0 to trials,
      * accumulating PMF values.
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
@@ -162,9 +166,13 @@ public class BetaBinomialDistribution(
     }
 
     /** The mean of this distribution, equal to n * alpha / (alpha + beta). */
-    override val mean: Double get() = n * a / (a + b)
+    override val mean: Double
+        get() = n * a / (a + b)
 
-    /** The variance of this distribution, overdispersed relative to the binomial by a factor of (alpha + beta + n) / (alpha + beta + 1). */
+    /**
+     * The variance of this distribution, overdispersed relative to the binomial by a factor of
+     * (alpha + beta + n) / (alpha + beta + 1).
+     */
     override val variance: Double
         get() {
             if (n == 0) return 0.0
@@ -172,7 +180,10 @@ public class BetaBinomialDistribution(
             return n * a * b * (ab + n) / (ab * ab * (ab + 1.0))
         }
 
-    /** The skewness of this distribution, computed from the shape parameters and trial count. Returns [Double.NaN] when trials is zero. */
+    /**
+     * The skewness of this distribution, computed from the shape parameters and trial count.
+     * Returns [Double.NaN] when trials is zero.
+     */
     override val skewness: Double
         get() {
             if (n == 0) return Double.NaN
@@ -183,9 +194,8 @@ public class BetaBinomialDistribution(
     /**
      * Returns the excess kurtosis (Fisher definition) of this beta-binomial distribution.
      *
-     * Computed from factorial moments of the distribution, which are converted to raw moments
-     * and then to central moments. Returns [Double.NaN] when trials is zero or the variance
-     * is zero.
+     * Computed from factorial moments of the distribution, which are converted to raw moments and
+     * then to central moments. Returns [Double.NaN] when trials is zero or the variance is zero.
      *
      * @return the excess kurtosis, or [Double.NaN] for degenerate cases.
      */
@@ -198,8 +208,9 @@ public class BetaBinomialDistribution(
             val e1 = nd * a / ab
             val e2 = nd * (nd - 1) * a * (a + 1) / (ab * (ab + 1))
             val e3 = nd * (nd - 1) * (nd - 2) * a * (a + 1) * (a + 2) / (ab * (ab + 1) * (ab + 2))
-            val e4 = nd * (nd - 1) * (nd - 2) * (nd - 3) * a * (a + 1) * (a + 2) * (a + 3) /
-                (ab * (ab + 1) * (ab + 2) * (ab + 3))
+            val e4 =
+                nd * (nd - 1) * (nd - 2) * (nd - 3) * a * (a + 1) * (a + 2) * (a + 3) /
+                    (ab * (ab + 1) * (ab + 2) * (ab + 3))
             // Raw moments from factorial moments
             val ex2 = e2 + e1
             val ex3 = e3 + 3 * e2 + e1

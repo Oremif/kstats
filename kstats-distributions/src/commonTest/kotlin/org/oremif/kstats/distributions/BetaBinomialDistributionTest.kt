@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class BetaBinomialDistributionTest : DiscreteDistributionPropertyTests() {
 
     override fun createDistribution() = BetaBinomialDistribution(10, 2.0, 5.0)
+
     override val testKRange = -1..11
 
     // ==================== Basic correctness (scipy 15-digit refs) ====================

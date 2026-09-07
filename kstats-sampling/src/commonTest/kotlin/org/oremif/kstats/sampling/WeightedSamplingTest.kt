@@ -1,12 +1,12 @@
 package org.oremif.kstats.sampling
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class WeightedSamplingTest {
 
@@ -61,23 +61,17 @@ class WeightedSamplingTest {
 
     @Test
     fun testWeightedDiceEmptyThrows() {
-        assertFailsWith<InsufficientDataException> {
-            WeightedDice(emptyMap<String, Double>())
-        }
+        assertFailsWith<InsufficientDataException> { WeightedDice(emptyMap<String, Double>()) }
     }
 
     @Test
     fun testWeightedDiceNegativeWeightThrows() {
-        assertFailsWith<InvalidParameterException> {
-            WeightedDice(mapOf("A" to 1.0, "B" to -0.5))
-        }
+        assertFailsWith<InvalidParameterException> { WeightedDice(mapOf("A" to 1.0, "B" to -0.5)) }
     }
 
     @Test
     fun testWeightedDiceAllZeroWeightThrows() {
-        assertFailsWith<InvalidParameterException> {
-            WeightedDice(mapOf("A" to 0.0, "B" to 0.0))
-        }
+        assertFailsWith<InvalidParameterException> { WeightedDice(mapOf("A" to 0.0, "B" to 0.0)) }
     }
 
     @Test
@@ -142,16 +136,12 @@ class WeightedSamplingTest {
 
     @Test
     fun testRandomSampleNegativeNThrows() {
-        assertFailsWith<InvalidParameterException> {
-            listOf(1, 2, 3).randomSample(-1)
-        }
+        assertFailsWith<InvalidParameterException> { listOf(1, 2, 3).randomSample(-1) }
     }
 
     @Test
     fun testRandomSampleExceedsSizeThrows() {
-        assertFailsWith<InvalidParameterException> {
-            listOf(1, 2, 3).randomSample(5)
-        }
+        assertFailsWith<InvalidParameterException> { listOf(1, 2, 3).randomSample(5) }
     }
 
     // --- bootstrapSample (List) ---
@@ -173,16 +163,12 @@ class WeightedSamplingTest {
 
     @Test
     fun testBootstrapSampleEmptyThrows() {
-        assertFailsWith<InsufficientDataException> {
-            emptyList<Int>().bootstrapSample(5)
-        }
+        assertFailsWith<InsufficientDataException> { emptyList<Int>().bootstrapSample(5) }
     }
 
     @Test
     fun testBootstrapSampleNegativeNThrows() {
-        assertFailsWith<InvalidParameterException> {
-            listOf(1, 2, 3).bootstrapSample(-1)
-        }
+        assertFailsWith<InvalidParameterException> { listOf(1, 2, 3).bootstrapSample(-1) }
     }
 
     @Test

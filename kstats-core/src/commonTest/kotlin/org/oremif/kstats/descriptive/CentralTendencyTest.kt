@@ -1,8 +1,8 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.random.Random
 import kotlin.test.*
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 
 class CentralTendencyTest {
 
@@ -169,8 +169,16 @@ class CentralTendencyTest {
 
     @Test
     fun medianInfinity() {
-        assertEquals(2.0, doubleArrayOf(Double.NEGATIVE_INFINITY, 2.0, Double.POSITIVE_INFINITY).median(), 0.0)
-        assertEquals(0.5, doubleArrayOf(Double.NEGATIVE_INFINITY, 0.0, 1.0, Double.POSITIVE_INFINITY).median(), 0.0)
+        assertEquals(
+            2.0,
+            doubleArrayOf(Double.NEGATIVE_INFINITY, 2.0, Double.POSITIVE_INFINITY).median(),
+            0.0,
+        )
+        assertEquals(
+            0.5,
+            doubleArrayOf(Double.NEGATIVE_INFINITY, 0.0, 1.0, Double.POSITIVE_INFINITY).median(),
+            0.0,
+        )
     }
 
     @Test
@@ -186,7 +194,8 @@ class CentralTendencyTest {
             val data = DoubleArray(rng.nextInt(1, 200)) { rng.nextDouble(-100.0, 100.0) }
             val sorted = data.sortedArray()
             val n = sorted.size
-            val expected = if (n % 2 == 1) sorted[n / 2] else (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0
+            val expected =
+                if (n % 2 == 1) sorted[n / 2] else (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0
             assertEquals(expected, data.median(), 1e-15, "Failed for size=$n")
         }
     }

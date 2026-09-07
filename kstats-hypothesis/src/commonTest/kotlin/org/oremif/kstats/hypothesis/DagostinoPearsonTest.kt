@@ -1,11 +1,11 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 
 class DagostinoPearsonTest {
 
@@ -34,28 +34,71 @@ class DagostinoPearsonTest {
         val result = dagostinoPearsonTest(TestData.NORMAL_N20)
         assertEquals(-1.21774543808947, result.additionalInfo["z1"]!!, 1e-8, "z1 n=20")
         assertEquals(-0.451201577152995, result.additionalInfo["z2"]!!, 1e-8, "z2 n=20")
-        assertEquals(-0.557894825215587, result.additionalInfo["skewness"]!!, 1e-10, "skewness n=20")
+        assertEquals(
+            -0.557894825215587,
+            result.additionalInfo["skewness"]!!,
+            1e-10,
+            "skewness n=20",
+        )
         assertEquals(2.30196781519457, result.additionalInfo["kurtosis"]!!, 1e-10, "kurtosis n=20")
     }
 
     @Test
     fun testN50NormalData() {
         // scipy: normaltest(data) → K²=0.419895247354848, p=0.810626702503978
-        val data = doubleArrayOf(
-            0.4967141530112327, -0.13826430117118466, 0.6476885381006925, 1.5230298564080254,
-            -0.23415337472333597, -0.23413695694918055, 1.5792128155073915, 0.7674347291529088,
-            -0.4694743859349521, 0.5425600435859647, -0.46341769281246226, -0.46572975357025687,
-            0.24196227156603412, -1.913280244657798, -1.7249178325130328, -0.5622875292409727,
-            -1.0128311203344238, 0.3142473325952739, -0.9080240755212111, -1.4123037013352917,
-            1.465648768921554, -0.22577630048653566, 0.06752820468792384, -1.4247481862134568,
-            -0.5443827245251827, 0.11092258970986608, -1.1509935774223028, 0.37569801834567196,
-            -0.600638689918805, -0.2916937497932768, -0.6017066122293969, 1.8522781845089378,
-            -0.013497224737933914, -1.0577109289559, 0.822544912103189, -1.2208436499710222,
-            0.2088635950047554, -1.9596701238797756, -1.3281860488984305, 0.19686123586912352,
-            0.7384665799954104, 0.1713682811899705, -0.11564828238824053, -0.3011036955892888,
-            -1.4785219903674274, -0.7198442083947086, -0.4606387709597875, 1.0571222262189157,
-            0.3436182895684614, -1.763040155362734
-        )
+        val data =
+            doubleArrayOf(
+                0.4967141530112327,
+                -0.13826430117118466,
+                0.6476885381006925,
+                1.5230298564080254,
+                -0.23415337472333597,
+                -0.23413695694918055,
+                1.5792128155073915,
+                0.7674347291529088,
+                -0.4694743859349521,
+                0.5425600435859647,
+                -0.46341769281246226,
+                -0.46572975357025687,
+                0.24196227156603412,
+                -1.913280244657798,
+                -1.7249178325130328,
+                -0.5622875292409727,
+                -1.0128311203344238,
+                0.3142473325952739,
+                -0.9080240755212111,
+                -1.4123037013352917,
+                1.465648768921554,
+                -0.22577630048653566,
+                0.06752820468792384,
+                -1.4247481862134568,
+                -0.5443827245251827,
+                0.11092258970986608,
+                -1.1509935774223028,
+                0.37569801834567196,
+                -0.600638689918805,
+                -0.2916937497932768,
+                -0.6017066122293969,
+                1.8522781845089378,
+                -0.013497224737933914,
+                -1.0577109289559,
+                0.822544912103189,
+                -1.2208436499710222,
+                0.2088635950047554,
+                -1.9596701238797756,
+                -1.3281860488984305,
+                0.19686123586912352,
+                0.7384665799954104,
+                0.1713682811899705,
+                -0.11564828238824053,
+                -0.3011036955892888,
+                -1.4785219903674274,
+                -0.7198442083947086,
+                -0.4606387709597875,
+                1.0571222262189157,
+                0.3436182895684614,
+                -1.763040155362734,
+            )
         val result = dagostinoPearsonTest(data)
         assertEquals(0.419895247354848, result.statistic, tolK2, "K² n=50 normal")
         assertEquals(0.810626702503978, result.pValue, tolP, "p-value n=50 normal")
@@ -75,7 +118,12 @@ class DagostinoPearsonTest {
     fun testN20Arange() {
         val data = DoubleArray(20) { (it + 1).toDouble() }
         val result = dagostinoPearsonTest(data)
-        assertEquals(0.0, result.additionalInfo["z1"]!!, 1e-15, "z1 should be 0 for perfectly symmetric data")
+        assertEquals(
+            0.0,
+            result.additionalInfo["z1"]!!,
+            1e-15,
+            "z1 should be 0 for perfectly symmetric data",
+        )
         assertTrue(result.statistic > 0.0, "K² should be positive (kurtosis term)")
         assertTrue(result.pValue in 0.0..1.0)
     }
@@ -95,14 +143,23 @@ class DagostinoPearsonTest {
         // scipy: normaltest(data) → K²=15.4528145680744, p=0.000441025754481787
         val result = dagostinoPearsonTest(TestData.EXPONENTIAL_N30)
         assertEquals(15.4528145680744, result.statistic, tolK2, "K² exponential n=30")
-        assertTrue(result.pValue < 0.001, "Exponential data should strongly reject, p=${result.pValue}")
+        assertTrue(
+            result.pValue < 0.001,
+            "Exponential data should strongly reject, p=${result.pValue}",
+        )
     }
 
     @Test
     fun testBimodalDataRejects() {
         val result = dagostinoPearsonTest(TestData.bimodal())
-        assertTrue(result.statistic > 100.0, "Bimodal should have very large K², got ${result.statistic}")
-        assertTrue(result.pValue < 1e-10, "Bimodal should have very small p-value, p=${result.pValue}")
+        assertTrue(
+            result.statistic > 100.0,
+            "Bimodal should have very large K², got ${result.statistic}",
+        )
+        assertTrue(
+            result.pValue < 1e-10,
+            "Bimodal should have very small p-value, p=${result.pValue}",
+        )
     }
 
     @Test
@@ -125,8 +182,12 @@ class DagostinoPearsonTest {
 
     @Test
     fun testInsufficientData() {
-        assertFailsWith<InsufficientDataException> { dagostinoPearsonTest(DoubleArray(19) { it.toDouble() }) }
-        assertFailsWith<InsufficientDataException> { dagostinoPearsonTest(DoubleArray(10) { it.toDouble() }) }
+        assertFailsWith<InsufficientDataException> {
+            dagostinoPearsonTest(DoubleArray(19) { it.toDouble() })
+        }
+        assertFailsWith<InsufficientDataException> {
+            dagostinoPearsonTest(DoubleArray(10) { it.toDouble() })
+        }
         assertFailsWith<InsufficientDataException> { dagostinoPearsonTest(doubleArrayOf()) }
     }
 
@@ -157,7 +218,7 @@ class DagostinoPearsonTest {
         assertEquals(5.41918814715635, result.statistic, tolK2, "K² symmetric n=30")
         assertTrue(
             abs(result.additionalInfo["z1"]!!) < 1e-10,
-            "z1 should be ~0 for symmetric data, got ${result.additionalInfo["z1"]}"
+            "z1 should be ~0 for symmetric data, got ${result.additionalInfo["z1"]}",
         )
     }
 

@@ -1,31 +1,31 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.core.lnCombination
-import org.oremif.kstats.core.regularizedBeta
 import kotlin.math.ceil
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 import kotlin.random.Random
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.core.lnCombination
+import org.oremif.kstats.core.regularizedBeta
 
 /**
  * Represents the negative binomial distribution, which models the number of failures before
  * achieving a specified number of successes in a sequence of independent Bernoulli trials.
  *
- * Each trial has the same success probability [probability]. The random variable counts how
- * many failures occur before accumulating [successes] successes. For example, with
- * `successes = 3` and `probability = 0.5`, this distribution gives the probability of
- * observing `k` tails before getting 3 heads in a series of fair coin flips.
+ * Each trial has the same success probability [probability]. The random variable counts how many
+ * failures occur before accumulating [successes] successes. For example, with `successes = 3` and
+ * `probability = 0.5`, this distribution gives the probability of observing `k` tails before
+ * getting 3 heads in a series of fair coin flips.
  *
- * The negative binomial generalizes the geometric distribution: setting `successes = 1` yields
- * a geometric distribution. The support is `{0, 1, 2, ...}` (all non-negative integers), where
- * `k = 0` means all required successes occurred with no failures.
+ * The negative binomial generalizes the geometric distribution: setting `successes = 1` yields a
+ * geometric distribution. The support is `{0, 1, 2, ...}` (all non-negative integers), where `k =
+ * 0` means all required successes occurred with no failures.
  *
- * The CDF and survival function are computed using the regularized incomplete beta function,
- * which provides high accuracy without summing many individual PMF terms. Sampling is performed
- * by summing [successes] independent geometric random variables.
+ * The CDF and survival function are computed using the regularized incomplete beta function, which
+ * provides high accuracy without summing many individual PMF terms. Sampling is performed by
+ * summing [successes] independent geometric random variables.
  *
  * ### Example:
  * ```kotlin
@@ -45,12 +45,14 @@ import kotlin.random.Random
  */
 public class NegativeBinomialDistribution(
     public val successes: Int,
-    public val probability: Double
+    public val probability: Double,
 ) : DiscreteDistribution {
 
     init {
-        if (successes <= 0) throw InvalidParameterException("successes must be positive, got $successes")
-        if (probability.isNaN() || probability <= 0.0 || probability > 1.0) throw InvalidParameterException("probability must be in (0, 1], got $probability")
+        if (successes <= 0)
+            throw InvalidParameterException("successes must be positive, got $successes")
+        if (probability.isNaN() || probability <= 0.0 || probability > 1.0)
+            throw InvalidParameterException("probability must be in (0, 1], got $probability")
     }
 
     private val r = successes
@@ -61,11 +63,10 @@ public class NegativeBinomialDistribution(
     private val gammaDelegate: GammaDistribution by lazy { GammaDistribution(r.toDouble(), p / q) }
 
     /**
-     * Returns the probability mass at [k], the probability of exactly [k] failures before
-     * the [successes]-th success.
+     * Returns the probability mass at [k], the probability of exactly [k] failures before the
+     * [successes]-th success.
      *
-     * When [probability] is 1.0 (every trial succeeds), returns 1.0 for `k = 0` and zero
-     * otherwise.
+     * When [probability] is 1.0 (every trial succeeds), returns 1.0 for `k = 0` and zero otherwise.
      *
      * @param k the number of failures before achieving the required successes.
      * @return the probability of exactly [k] failures, or zero if [k] is negative.
@@ -79,12 +80,12 @@ public class NegativeBinomialDistribution(
     /**
      * Returns the natural logarithm of the probability mass at [k].
      *
-     * Computed using log-combinations and log-probabilities to maintain numerical stability
-     * for large values of [k] or [successes].
+     * Computed using log-combinations and log-probabilities to maintain numerical stability for
+     * large values of [k] or [successes].
      *
      * @param k the number of failures before achieving the required successes.
      * @return the natural log of the probability mass at [k]. Returns [Double.NEGATIVE_INFINITY]
-     * when [k] is negative or has zero probability.
+     *   when [k] is negative or has zero probability.
      */
     override fun logPmf(k: Int): Double {
         if (k < 0) return Double.NEGATIVE_INFINITY
@@ -108,8 +109,8 @@ public class NegativeBinomialDistribution(
     /**
      * Returns the survival function value at [k] using the regularized incomplete beta function.
      *
-     * Computed directly via the beta function rather than `1 - cdf(k)`, which avoids
-     * catastrophic cancellation in the upper tail.
+     * Computed directly via the beta function rather than `1 - cdf(k)`, which avoids catastrophic
+     * cancellation in the upper tail.
      *
      * @param k the integer point at which to evaluate the survival probability.
      * @return the probability of strictly more than [k] failures before the [successes]-th success.
@@ -147,18 +148,25 @@ public class NegativeBinomialDistribution(
     }
 
     /** The mean (expected number of failures before achieving [successes] successes). */
-    override val mean: Double get() = r * q / p
+    override val mean: Double
+        get() = r * q / p
 
     /** The variance of the number of failures before achieving [successes] successes. */
-    override val variance: Double get() = r * q / (p * p)
+    override val variance: Double
+        get() = r * q / (p * p)
 
     /** The skewness of this distribution. */
-    override val skewness: Double get() = (2.0 - p) / sqrt(r.toDouble() * q)
+    override val skewness: Double
+        get() = (2.0 - p) / sqrt(r.toDouble() * q)
 
     /** The excess kurtosis of this distribution. */
-    override val kurtosis: Double get() = 6.0 / r + p * p / (r * q)
+    override val kurtosis: Double
+        get() = 6.0 / r + p * p / (r * q)
 
-    /** The Shannon entropy of this distribution in nats, computed by summing over the support until convergence. Returns zero when [probability] is 1.0 (degenerate case). */
+    /**
+     * The Shannon entropy of this distribution in nats, computed by summing over the support until
+     * convergence. Returns zero when [probability] is 1.0 (degenerate case).
+     */
     override val entropy: Double
         get() {
             var h = 0.0
@@ -184,8 +192,8 @@ public class NegativeBinomialDistribution(
      * geometric random variables.
      *
      * @param random the source of randomness.
-     * @return a random non-negative integer representing the number of failures before the
-     * required successes.
+     * @return a random non-negative integer representing the number of failures before the required
+     *   successes.
      */
     override fun sample(random: Random): Int {
         if (p == 1.0) return 0
@@ -205,6 +213,7 @@ public class NegativeBinomialDistribution(
         }
         val normal = sqrt(lambda)
         return (lambda + normal * NormalDistribution.STANDARD.sample(random))
-            .roundToInt().coerceAtLeast(0)
+            .roundToInt()
+            .coerceAtLeast(0)
     }
 }

@@ -43,8 +43,10 @@ abstract class DiscreteDistributionPropertyTests {
         val d = createDistribution()
         for (k in testKRange) {
             assertEquals(
-                d.pmf(k), exp(d.logPmf(k)), consistencyTol,
-                "exp(logPmf($k)) ≈ pmf($k)"
+                d.pmf(k),
+                exp(d.logPmf(k)),
+                consistencyTol,
+                "exp(logPmf($k)) ≈ pmf($k)",
             )
         }
     }
@@ -54,8 +56,10 @@ abstract class DiscreteDistributionPropertyTests {
         val d = createDistribution()
         for (k in testKRange) {
             assertEquals(
-                1.0, d.sf(k) + d.cdf(k), sfCdfTol,
-                "sf($k) + cdf($k) ≈ 1"
+                1.0,
+                d.sf(k) + d.cdf(k),
+                sfCdfTol,
+                "sf($k) + cdf($k) ≈ 1",
             )
         }
     }
@@ -66,10 +70,11 @@ abstract class DiscreteDistributionPropertyTests {
         for (p in pValues) {
             val k = d.quantileInt(p)
             assertTrue(d.cdf(k) >= p, "cdf(quantileInt($p)) >= $p")
-            if (k > supportMin) assertTrue(
-                d.cdf(k - 1) < p,
-                "cdf(quantileInt($p)-1) < $p"
-            )
+            if (k > supportMin)
+                assertTrue(
+                    d.cdf(k - 1) < p,
+                    "cdf(quantileInt($p)-1) < $p",
+                )
         }
     }
 
@@ -87,18 +92,23 @@ abstract class DiscreteDistributionPropertyTests {
     @Test
     open fun sampleStatistics() {
         val d = createDistribution()
-        if (d.mean.isNaN() || !d.mean.isFinite() || d.variance.isNaN() || !d.variance.isFinite()) return
+        if (d.mean.isNaN() || !d.mean.isFinite() || d.variance.isNaN() || !d.variance.isFinite())
+            return
         val samples = d.sample(100_000, Random(42))
         val doubles = samples.map { it.toDouble() }
         val sampleMean = doubles.average()
         assertEquals(
-            d.mean, sampleMean, maxOf(abs(d.mean) * 0.05, 0.15),
-            "sample mean ≈ ${d.mean}"
+            d.mean,
+            sampleMean,
+            maxOf(abs(d.mean) * 0.05, 0.15),
+            "sample mean ≈ ${d.mean}",
         )
         val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
         assertEquals(
-            d.variance, sampleVar, maxOf(d.variance * 0.1, 0.15),
-            "sample variance ≈ ${d.variance}"
+            d.variance,
+            sampleVar,
+            maxOf(d.variance * 0.1, 0.15),
+            "sample variance ≈ ${d.variance}",
         )
     }
 
@@ -106,9 +116,10 @@ abstract class DiscreteDistributionPropertyTests {
     fun pmfSumsToOne() {
         val d = createDistribution()
         val lower = d.quantileInt(0.0)
-        val upper = d.quantileInt(1.0).let { q ->
-            if (q == Int.MAX_VALUE) d.quantileInt(1.0 - 1e-10) else q
-        }
+        val upper =
+            d.quantileInt(1.0).let { q ->
+                if (q == Int.MAX_VALUE) d.quantileInt(1.0 - 1e-10) else q
+            }
         val total = (lower..upper).sumOf { d.pmf(it) }
         assertEquals(1.0, total, sfCdfTol)
     }

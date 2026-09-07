@@ -8,6 +8,7 @@ android-compileSdk = "36"
 vanniktechMavenPublish = "0.37.0"
 dokka = "2.2.0"
 bcv = "0.18.2"
+ktfmtGradle = "0.27.0"
 
 korro = "0.2.2"
 kotlinxBenchmark = "0.5.0"
@@ -20,6 +21,7 @@ kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.
 android-kotlin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 vanniktech-maven-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktechMavenPublish" }
 dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+ktfmt-gradle = { module = "com.ncorti.ktfmt.gradle:plugin", version.ref = "ktfmtGradle" }
 
 # Benchmark dependencies
 kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }

@@ -1,8 +1,8 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.test.*
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.test.*
 
 class FriedmanTestTest {
 
@@ -108,9 +108,12 @@ class FriedmanTestTest {
     @Test
     fun minimumValidK3N2() {
         // scipy: friedmanchisquare([10,20],[30,40],[50,60]) → (4.0, 0.135335283236613)
-        val result = friedmanTest(
-            doubleArrayOf(10.0, 20.0), doubleArrayOf(30.0, 40.0), doubleArrayOf(50.0, 60.0)
-        )
+        val result =
+            friedmanTest(
+                doubleArrayOf(10.0, 20.0),
+                doubleArrayOf(30.0, 40.0),
+                doubleArrayOf(50.0, 60.0),
+            )
         assertEquals(4.0, result.statistic, tolStat)
         assertEquals(0.135335283236613, result.pValue, tolP)
     }
@@ -122,17 +125,26 @@ class FriedmanTestTest {
         val g2 = TestData.largeSequential(n, offset = 100.0)
         val g3 = TestData.largeSequential(n, offset = 200.0)
         val result = friedmanTest(g1, g2, g3)
-        assertTrue(result.statistic > 50.0, "Large n with clear separation should give large statistic")
-        assertTrue(result.pValue < 1e-10, "Large n with clear separation should be highly significant")
+        assertTrue(
+            result.statistic > 50.0,
+            "Large n with clear separation should give large statistic",
+        )
+        assertTrue(
+            result.pValue < 1e-10,
+            "Large n with clear separation should be highly significant",
+        )
     }
 
     @Test
     fun dfVerification() {
-        val result = friedmanTest(
-            TestData.SHORT_3, doubleArrayOf(4.0, 5.0, 6.0),
-            doubleArrayOf(7.0, 8.0, 9.0), doubleArrayOf(10.0, 11.0, 12.0),
-            doubleArrayOf(13.0, 14.0, 15.0)
-        )
+        val result =
+            friedmanTest(
+                TestData.SHORT_3,
+                doubleArrayOf(4.0, 5.0, 6.0),
+                doubleArrayOf(7.0, 8.0, 9.0),
+                doubleArrayOf(10.0, 11.0, 12.0),
+                doubleArrayOf(13.0, 14.0, 15.0),
+            )
         assertEquals(4.0, result.degreesOfFreedom) // k-1 = 5-1 = 4
     }
 
@@ -180,9 +192,7 @@ class FriedmanTestTest {
 
     @Test
     fun zeroGroups() {
-        assertFailsWith<InsufficientDataException> {
-            @Suppress("SpreadOperator") friedmanTest()
-        }
+        assertFailsWith<InsufficientDataException> { @Suppress("SpreadOperator") friedmanTest() }
     }
 
     @Test
@@ -210,13 +220,15 @@ class FriedmanTestTest {
 
     @Test
     fun nanInGroup() {
-        val result = friedmanTest(TestData.WITH_NAN, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
+        val result =
+            friedmanTest(TestData.WITH_NAN, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
         assertTrue(result.pValue.isNaN(), "NaN in input should produce NaN p-value")
     }
 
     @Test
     fun infinityInGroup() {
-        val result = friedmanTest(TestData.WITH_POS_INF, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
+        val result =
+            friedmanTest(TestData.WITH_POS_INF, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
         assertTrue(result.pValue.isNaN(), "Infinity in input should produce NaN p-value")
     }
 

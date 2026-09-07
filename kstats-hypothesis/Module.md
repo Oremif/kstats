@@ -11,14 +11,16 @@ degrees of freedom, confidence interval, and `isSignificant(alpha)` helper.
 ```kotlin
 val sample = doubleArrayOf(5.0, 6.0, 7.0, 5.5, 6.5)
 val result = tTest(sample, mu = 5.0)
-result.statistic          // t-statistic
-result.pValue             // p-value
+result.statistic // t-statistic
+result.pValue // p-value
 result.confidenceInterval // 95% CI for the mean
-result.isSignificant()    // true if p < 0.05
+result.isSignificant() // true if p < 0.05
 
 // Normality check before choosing a test
 val sw = shapiroWilkTest(sample)
-if (!sw.isSignificant()) { /* data is consistent with normality */ }
+if (!sw.isSignificant()) {
+    /* data is consistent with normality */
+}
 ```
 
 <!---END-->

@@ -1,10 +1,10 @@
 package org.oremif.kstats.correlation
 
+import kotlin.math.sqrt
 import org.oremif.kstats.core.exceptions.DegenerateDataException
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.mean
-import kotlin.math.sqrt
 
 /**
  * The result of a simple linear regression fit (y = intercept + slope * x).
@@ -20,33 +20,35 @@ import kotlin.math.sqrt
  *
  * @property slope the change in y for a one-unit increase in x.
  * @property intercept the predicted value of y when x is zero.
- * @property rSquared the coefficient of determination, indicating the proportion of variance
- * in y explained by the linear relationship with x. Ranges from 0.0 (no explanatory power)
- * to 1.0 (perfect fit). Returns 1.0 when y has zero variance (all values identical), since
- * there is no variance left to explain.
- * @property standardErrorSlope the standard error of the slope estimate, measuring the
- * uncertainty in [slope]. Smaller values indicate a more precise estimate.
- * @property standardErrorIntercept the standard error of the intercept estimate, measuring
- * the uncertainty in [intercept].
+ * @property rSquared the coefficient of determination, indicating the proportion of variance in y
+ *   explained by the linear relationship with x. Ranges from 0.0 (no explanatory power) to 1.0
+ *   (perfect fit). Returns 1.0 when y has zero variance (all values identical), since there is no
+ *   variance left to explain.
+ * @property standardErrorSlope the standard error of the slope estimate, measuring the uncertainty
+ *   in [slope]. Smaller values indicate a more precise estimate.
+ * @property standardErrorIntercept the standard error of the intercept estimate, measuring the
+ *   uncertainty in [intercept].
  * @property n the number of observations used in the regression.
  */
 public class SimpleLinearRegressionResult
-@PublishedApi internal constructor(
+@PublishedApi
+internal constructor(
     public val slope: Double,
     public val intercept: Double,
     public val rSquared: Double,
     public val standardErrorSlope: Double,
     public val standardErrorIntercept: Double,
     private val _residuals: DoubleArray,
-    public val n: Int
+    public val n: Int,
 ) {
     /**
-     * The difference between each observed y value and the predicted value
-     * (y - predicted). Residuals sum to approximately zero for a correctly fitted model.
+     * The difference between each observed y value and the predicted value (y - predicted).
+     * Residuals sum to approximately zero for a correctly fitted model.
      *
      * Returns a defensive copy — modifications to the returned array do not affect this result.
      */
-    public val residuals: DoubleArray get() = _residuals.copyOf()
+    public val residuals: DoubleArray
+        get() = _residuals.copyOf()
 
     /**
      * Predicts the y value for a single x value using the fitted model.
@@ -85,10 +87,13 @@ public class SimpleLinearRegressionResult
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is SimpleLinearRegressionResult) return false
-        return slope == other.slope && intercept == other.intercept &&
-            rSquared == other.rSquared && standardErrorSlope == other.standardErrorSlope &&
+        return slope == other.slope &&
+            intercept == other.intercept &&
+            rSquared == other.rSquared &&
+            standardErrorSlope == other.standardErrorSlope &&
             standardErrorIntercept == other.standardErrorIntercept &&
-            _residuals.contentEquals(other._residuals) && n == other.n
+            _residuals.contentEquals(other._residuals) &&
+            n == other.n
     }
 
     override fun hashCode(): Int {
@@ -111,10 +116,9 @@ public class SimpleLinearRegressionResult
 /**
  * Fits a simple linear regression model (y = intercept + slope * x) using ordinary least squares.
  *
- * Simple linear regression finds the straight line that best fits the data by minimizing the
- * sum of squared residuals (differences between observed and predicted y values). The result
- * includes the fitted coefficients, goodness-of-fit measure (R²), standard errors, and
- * residuals.
+ * Simple linear regression finds the straight line that best fits the data by minimizing the sum of
+ * squared residuals (differences between observed and predicted y values). The result includes the
+ * fitted coefficients, goodness-of-fit measure (R²), standard errors, and residuals.
  *
  * ### Example:
  * ```kotlin
@@ -179,6 +183,6 @@ public fun simpleLinearRegression(x: DoubleArray, y: DoubleArray): SimpleLinearR
         standardErrorSlope = seSlope,
         standardErrorIntercept = seIntercept,
         _residuals = residuals,
-        n = n
+        n = n,
     )
 }

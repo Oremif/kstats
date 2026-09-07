@@ -1,13 +1,18 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.test.*
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 
 class AnovaTest {
 
     @Test
     fun testOneWayAnovaSignificant() {
-        val result = oneWayAnova(TestData.SEQUENTIAL_1_5, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
+        val result =
+            oneWayAnova(
+                TestData.SEQUENTIAL_1_5,
+                TestData.SEQUENTIAL_6_10,
+                TestData.SEQUENTIAL_11_15,
+            )
         assertTrue(result.pValue < 0.001, "Very different groups should have low p-value")
         assertEquals(2, result.dfBetween)
         assertEquals(12, result.dfWithin)
@@ -24,7 +29,12 @@ class AnovaTest {
     @Test
     fun testReference() {
         // ssBetween=250, ssWithin=30, msBetween=125, msWithin=2.5, F=50.0
-        val result = oneWayAnova(TestData.SEQUENTIAL_1_5, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
+        val result =
+            oneWayAnova(
+                TestData.SEQUENTIAL_1_5,
+                TestData.SEQUENTIAL_6_10,
+                TestData.SEQUENTIAL_11_15,
+            )
         assertEquals(50.0, result.fStatistic, 1e-10)
         assertTrue(result.pValue < 1e-5, "p-value should be very small, got ${result.pValue}")
     }
@@ -34,7 +44,10 @@ class AnovaTest {
         val g1 = doubleArrayOf(1.0, 2.0, 3.0)
         val g2 = doubleArrayOf(4.0, 5.0, 6.0, 7.0, 8.0)
         val result = oneWayAnova(g1, g2)
-        assertTrue(result.pValue < 0.05, "Unequal groups with different means should be significant")
+        assertTrue(
+            result.pValue < 0.05,
+            "Unequal groups with different means should be significant",
+        )
         assertEquals(1, result.dfBetween)
         assertEquals(6, result.dfWithin)
     }
@@ -53,9 +66,7 @@ class AnovaTest {
 
     @Test
     fun testFewerThanTwoGroups() {
-        assertFailsWith<InsufficientDataException> {
-            oneWayAnova(doubleArrayOf(1.0, 2.0, 3.0))
-        }
+        assertFailsWith<InsufficientDataException> { oneWayAnova(doubleArrayOf(1.0, 2.0, 3.0)) }
     }
 
     @Test
@@ -89,7 +100,11 @@ class AnovaTest {
         val g2 = doubleArrayOf(5.0, 5.0, 5.0)
         val g3 = doubleArrayOf(10.0, 10.0, 10.0)
         val result = oneWayAnova(g1, g2, g3)
-        assertEquals(Double.POSITIVE_INFINITY, result.fStatistic, "F should be +Inf when msWithin=0 and msBetween>0")
+        assertEquals(
+            Double.POSITIVE_INFINITY,
+            result.fStatistic,
+            "F should be +Inf when msWithin=0 and msBetween>0",
+        )
         assertEquals(0.0, result.pValue, 1e-15, "p should be 0 when F is infinite")
         assertEquals(0.0, result.ssWithin, 1e-15, "ssWithin should be 0")
         assertTrue(result.ssBetween > 0.0, "ssBetween should be positive")

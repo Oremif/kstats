@@ -1,9 +1,9 @@
 package org.oremif.kstats.benchmark.distributions
 
 import kotlinx.benchmark.*
-import org.oremif.kstats.distributions.GeometricDistribution
 import org.apache.commons.math3.distribution.GeometricDistribution as CommonsGeometric
 import org.openjdk.jmh.annotations.State as JmhState
+import org.oremif.kstats.distributions.GeometricDistribution
 
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
@@ -18,22 +18,19 @@ class GeometricBenchmark {
 
     // ===== PMF =====
 
-    @Benchmark
-    fun kstatsGeometricPmf(): Double = kDist.pmf(kValue)
-    @Benchmark
-    fun commonsGeometricPmf(): Double = cDist.probability(kValue)
+    @Benchmark fun kstatsGeometricPmf(): Double = kDist.pmf(kValue)
+
+    @Benchmark fun commonsGeometricPmf(): Double = cDist.probability(kValue)
 
     // ===== CDF =====
 
-    @Benchmark
-    fun kstatsGeometricCdf(): Double = kDist.cdf(kValue)
-    @Benchmark
-    fun commonsGeometricCdf(): Double = cDist.cumulativeProbability(kValue)
+    @Benchmark fun kstatsGeometricCdf(): Double = kDist.cdf(kValue)
+
+    @Benchmark fun commonsGeometricCdf(): Double = cDist.cumulativeProbability(kValue)
 
     // ===== Quantile =====
 
-    @Benchmark
-    fun kstatsGeometricQuantile(): Int = kDist.quantileInt(pValue)
-    @Benchmark
-    fun commonsGeometricQuantile(): Int = cDist.inverseCumulativeProbability(pValue)
+    @Benchmark fun kstatsGeometricQuantile(): Int = kDist.quantileInt(pValue)
+
+    @Benchmark fun commonsGeometricQuantile(): Int = cDist.inverseCumulativeProbability(pValue)
 }

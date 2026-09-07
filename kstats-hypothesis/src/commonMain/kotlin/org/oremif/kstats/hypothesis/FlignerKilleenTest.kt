@@ -1,23 +1,23 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.abs
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.descriptive.median
 import org.oremif.kstats.distributions.ChiSquaredDistribution
 import org.oremif.kstats.distributions.NormalDistribution
 import org.oremif.kstats.sampling.TieMethod
 import org.oremif.kstats.sampling.rank
-import kotlin.math.abs
 
 /**
  * Performs the Fligner-Killeen test for equality of variances across two or more groups.
  *
- * The null hypothesis is that all groups have equal variances (homoscedasticity).
- * This is a non-parametric test that computes absolute deviations from group medians,
- * ranks them across all groups, transforms the ranks to normal scores, and then tests
- * whether the group mean scores differ. It is the most robust of the three variance
- * homogeneity tests in kstats (along with [leveneTest] and [bartlettTest]), especially
- * for data from heavy-tailed distributions. The test statistic follows a chi-squared
- * distribution with k - 1 degrees of freedom under the null hypothesis.
+ * The null hypothesis is that all groups have equal variances (homoscedasticity). This is a
+ * non-parametric test that computes absolute deviations from group medians, ranks them across all
+ * groups, transforms the ranks to normal scores, and then tests whether the group mean scores
+ * differ. It is the most robust of the three variance homogeneity tests in kstats (along with
+ * [leveneTest] and [bartlettTest]), especially for data from heavy-tailed distributions. The test
+ * statistic follows a chi-squared distribution with k - 1 degrees of freedom under the null
+ * hypothesis.
  *
  * ### Example:
  * ```kotlin
@@ -30,27 +30,31 @@ import kotlin.math.abs
  * ```
  *
  * @param groups two or more groups of observations, each with at least 2 elements.
- * @return a [TestResult] containing the chi-squared statistic, p-value, and degrees of freedom (k - 1).
+ * @return a [TestResult] containing the chi-squared statistic, p-value, and degrees of freedom (k -
+ *   1).
  */
 public fun flignerKilleenTest(vararg groups: DoubleArray): TestResult {
-    if (groups.size < 2) throw InsufficientDataException(
-        "Fligner-Killeen test requires at least 2 groups, got ${groups.size}"
-    )
-    for (i in groups.indices) {
-        if (groups[i].size < 2) throw InsufficientDataException(
-            "Each group must have at least 2 elements, group $i has ${groups[i].size}"
+    if (groups.size < 2)
+        throw InsufficientDataException(
+            "Fligner-Killeen test requires at least 2 groups, got ${groups.size}"
         )
+    for (i in groups.indices) {
+        if (groups[i].size < 2)
+            throw InsufficientDataException(
+                "Each group must have at least 2 elements, group $i has ${groups[i].size}"
+            )
     }
 
     val k = groups.size
     val df = k - 1
 
     // Step 1: Compute absolute deviations from group medians
-    val deviations = Array(k) { i ->
-        val group = groups[i]
-        val med = group.median()
-        DoubleArray(group.size) { j -> abs(group[j] - med) }
-    }
+    val deviations =
+        Array(k) { i ->
+            val group = groups[i]
+            val med = group.median()
+            DoubleArray(group.size) { j -> abs(group[j] - med) }
+        }
 
     // Step 2: Combine all deviations into a single array
     val groupSizes = IntArray(k) { deviations[it].size }
@@ -69,7 +73,7 @@ public fun flignerKilleenTest(vararg groups: DoubleArray): TestResult {
             testName = "Fligner-Killeen Test",
             statistic = Double.NaN,
             pValue = Double.NaN,
-            degreesOfFreedom = df.toDouble()
+            degreesOfFreedom = df.toDouble(),
         )
     }
 
@@ -81,16 +85,14 @@ public fun flignerKilleenTest(vararg groups: DoubleArray): TestResult {
             testName = "Fligner-Killeen Test",
             statistic = 0.0,
             pValue = 1.0,
-            degreesOfFreedom = df.toDouble()
+            degreesOfFreedom = df.toDouble(),
         )
     }
 
     // Step 3: Rank and transform to normal scores
     val ranks = allDeviations.rank(TieMethod.AVERAGE)
     val normal = NormalDistribution.STANDARD
-    val scores = DoubleArray(totalN) { j ->
-        normal.quantile(ranks[j] / (2.0 * (totalN + 1)) + 0.5)
-    }
+    val scores = DoubleArray(totalN) { j -> normal.quantile(ranks[j] / (2.0 * (totalN + 1)) + 0.5) }
 
     // Step 4: Compute group means of scores and grand mean
     var grandSum = 0.0
@@ -98,14 +100,15 @@ public fun flignerKilleenTest(vararg groups: DoubleArray): TestResult {
     val grandMean = grandSum / totalN
 
     offset = 0
-    val groupMeans = DoubleArray(k) { i ->
-        var sum = 0.0
-        for (j in 0 until groupSizes[i]) {
-            sum += scores[offset + j]
+    val groupMeans =
+        DoubleArray(k) { i ->
+            var sum = 0.0
+            for (j in 0 until groupSizes[i]) {
+                sum += scores[offset + j]
+            }
+            offset += groupSizes[i]
+            sum / groupSizes[i]
         }
-        offset += groupSizes[i]
-        sum / groupSizes[i]
-    }
 
     // Step 5: Sample variance of all scores (ddof=1, matching scipy)
     var sumSqDev = 0.0
@@ -129,7 +132,7 @@ public fun flignerKilleenTest(vararg groups: DoubleArray): TestResult {
             testName = "Fligner-Killeen Test",
             statistic = stat,
             pValue = if (stat.isInfinite() && stat > 0) 0.0 else Double.NaN,
-            degreesOfFreedom = df.toDouble()
+            degreesOfFreedom = df.toDouble(),
         )
     }
 
@@ -139,6 +142,6 @@ public fun flignerKilleenTest(vararg groups: DoubleArray): TestResult {
         testName = "Fligner-Killeen Test",
         statistic = stat,
         pValue = pValue.coerceIn(0.0, 1.0),
-        degreesOfFreedom = df.toDouble()
+        degreesOfFreedom = df.toDouble(),
     )
 }

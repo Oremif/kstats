@@ -1,9 +1,9 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.distributions.NormalDistribution
 import kotlin.math.abs
 import kotlin.test.*
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.distributions.NormalDistribution
 
 class KolmogorovSmirnovTestTest {
 
@@ -13,7 +13,10 @@ class KolmogorovSmirnovTestTest {
     fun testOneSampleNormalData() {
         val sample = doubleArrayOf(-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, -1.5, -0.3, 0.3, 0.8)
         val result = kolmogorovSmirnovTest(sample, NormalDistribution.STANDARD)
-        assertFalse(result.isSignificant(), "Normal-looking data should not be significant against normal")
+        assertFalse(
+            result.isSignificant(),
+            "Normal-looking data should not be significant against normal",
+        )
         assertEquals("Kolmogorov-Smirnov Test (One-Sample)", result.testName)
     }
 
@@ -25,11 +28,11 @@ class KolmogorovSmirnovTestTest {
         val result = kolmogorovSmirnovTest(sample, NormalDistribution.STANDARD)
         assertTrue(
             abs(result.statistic - 0.1193) < 0.01,
-            "D statistic: expected~0.1193, actual=${result.statistic}"
+            "D statistic: expected~0.1193, actual=${result.statistic}",
         )
         assertTrue(
             abs(result.pValue - 0.9858) < 0.05,
-            "p-value: expected~0.9858, actual=${result.pValue}"
+            "p-value: expected~0.9858, actual=${result.pValue}",
         )
     }
 
@@ -70,10 +73,15 @@ class KolmogorovSmirnovTestTest {
         val s1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         val s2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
         val result = kolmogorovSmirnovTest(s1, s2)
-        assertEquals(1.0, result.statistic, 1e-10, "D should be 1.0 for completely separated samples")
+        assertEquals(
+            1.0,
+            result.statistic,
+            1e-10,
+            "D should be 1.0 for completely separated samples",
+        )
         assertTrue(
             abs(result.pValue - 0.00396825) < 0.005,
-            "p-value: expected~0.00397, actual=${result.pValue}"
+            "p-value: expected~0.00397, actual=${result.pValue}",
         )
         assertTrue(result.isSignificant(), "Completely separated samples should be significant")
         assertEquals("Kolmogorov-Smirnov Test (Two-Sample)", result.testName)

@@ -6,13 +6,13 @@ import org.oremif.kstats.core.exceptions.InvalidParameterException
 /**
  * Adjusts p-values using the Bonferroni correction for multiple comparisons.
  *
- * The Bonferroni correction controls the family-wise error rate (FWER) by multiplying
- * each p-value by the total number of tests. This is the simplest and most conservative
- * correction — it guarantees that the probability of any false positive across all tests
- * stays below the significance level, but may miss true effects when many tests are performed.
+ * The Bonferroni correction controls the family-wise error rate (FWER) by multiplying each p-value
+ * by the total number of tests. This is the simplest and most conservative correction — it
+ * guarantees that the probability of any false positive across all tests stays below the
+ * significance level, but may miss true effects when many tests are performed.
  *
- * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged,
- * but they still count towards the total number of tests used as the multiplier.
+ * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged, but they
+ * still count towards the total number of tests used as the multiplier.
  *
  * ### Example:
  * ```kotlin
@@ -38,13 +38,13 @@ public fun bonferroniCorrection(pValues: DoubleArray): DoubleArray {
 /**
  * Adjusts p-values using the Holm-Bonferroni step-down correction for multiple comparisons.
  *
- * The Holm-Bonferroni method controls the family-wise error rate (FWER) like Bonferroni but
- * is uniformly more powerful. It sorts p-values from smallest to largest and multiplies each
- * by a decreasing factor (number of remaining tests), enforcing monotonicity so that a p-value
- * at a higher rank is never smaller than one at a lower rank.
+ * The Holm-Bonferroni method controls the family-wise error rate (FWER) like Bonferroni but is
+ * uniformly more powerful. It sorts p-values from smallest to largest and multiplies each by a
+ * decreasing factor (number of remaining tests), enforcing monotonicity so that a p-value at a
+ * higher rank is never smaller than one at a lower rank.
  *
- * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged
- * and are placed last during ranking, but they still count towards the total number of tests.
+ * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged and are
+ * placed last during ranking, but they still count towards the total number of tests.
  *
  * ### Example:
  * ```kotlin
@@ -64,9 +64,10 @@ public fun holmBonferroniCorrection(pValues: DoubleArray): DoubleArray {
     val result = DoubleArray(m)
 
     // Indices sorted by p-value ascending; NaN goes last
-    val sortedIndices = (0 until m).sortedWith(
-        compareBy { if (pValues[it].isNaN()) Double.POSITIVE_INFINITY else pValues[it] }
-    )
+    val sortedIndices =
+        (0 until m).sortedWith(
+            compareBy { if (pValues[it].isNaN()) Double.POSITIVE_INFINITY else pValues[it] }
+        )
 
     // Step-down: p[rank] * (m - rank), enforce monotonicity via cumulative max
     var cumulativeMax = 0.0
@@ -87,18 +88,17 @@ public fun holmBonferroniCorrection(pValues: DoubleArray): DoubleArray {
 /**
  * Adjusts p-values using the Benjamini-Hochberg procedure for false discovery rate control.
  *
- * Unlike Bonferroni and Holm, which control the family-wise error rate (probability of any
- * false positive), Benjamini-Hochberg controls the false discovery rate (FDR) — the expected
- * proportion of false positives among all rejected hypotheses. This makes it substantially
- * more powerful when many tests are performed, at the cost of allowing a controlled fraction
- * of false discoveries.
+ * Unlike Bonferroni and Holm, which control the family-wise error rate (probability of any false
+ * positive), Benjamini-Hochberg controls the false discovery rate (FDR) — the expected proportion
+ * of false positives among all rejected hypotheses. This makes it substantially more powerful when
+ * many tests are performed, at the cost of allowing a controlled fraction of false discoveries.
  *
- * The procedure sorts p-values from largest to smallest and multiplies each by the ratio of
- * total tests to rank, enforcing monotonicity so that a p-value at a lower rank is never
- * larger than one at a higher rank.
+ * The procedure sorts p-values from largest to smallest and multiplies each by the ratio of total
+ * tests to rank, enforcing monotonicity so that a p-value at a lower rank is never larger than one
+ * at a higher rank.
  *
- * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged,
- * but they still count towards the total number of tests.
+ * Adjusted p-values are clamped to a maximum of 1.0. NaN p-values pass through unchanged, but they
+ * still count towards the total number of tests.
  *
  * ### Example:
  * ```kotlin
@@ -118,9 +118,12 @@ public fun benjaminiHochbergCorrection(pValues: DoubleArray): DoubleArray {
     val result = DoubleArray(m)
 
     // Indices sorted by p-value descending; NaN goes first (will be skipped)
-    val sortedIndices = (0 until m).sortedWith(
-        compareByDescending { if (pValues[it].isNaN()) Double.POSITIVE_INFINITY else pValues[it] }
-    )
+    val sortedIndices =
+        (0 until m).sortedWith(
+            compareByDescending {
+                if (pValues[it].isNaN()) Double.POSITIVE_INFINITY else pValues[it]
+            }
+        )
 
     // Step-up from largest: p[rank] * m / rank, enforce monotonicity via cumulative min
     var cumulativeMin = 1.0

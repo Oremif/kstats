@@ -1,10 +1,10 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 
 class JarqueBeraTest {
 
@@ -59,7 +59,12 @@ class JarqueBeraTest {
         val result = jarqueBeraTest(data)
         assertEquals(1.80801780745136, result.statistic, tolJB, "JB symmetric n=30")
         assertEquals(0.404943023808853, result.pValue, tolP, "p-value symmetric n=30")
-        assertEquals(0.0, result.additionalInfo["skewness"]!!, 1e-15, "Skewness should be 0 for symmetric data")
+        assertEquals(
+            0.0,
+            result.additionalInfo["skewness"]!!,
+            1e-15,
+            "Skewness should be 0 for symmetric data",
+        )
     }
 
     // ===== Degenerate input =====
@@ -87,7 +92,10 @@ class JarqueBeraTest {
         // scipy: jarque_bera(data) → JB=16.0920762731418, p=0.000320368668398256
         val result = jarqueBeraTest(TestData.EXPONENTIAL_N30)
         assertEquals(16.0920762731418, result.statistic, tolJB, "JB exponential n=30")
-        assertTrue(result.pValue < 0.001, "Exponential data should strongly reject, p=${result.pValue}")
+        assertTrue(
+            result.pValue < 0.001,
+            "Exponential data should strongly reject, p=${result.pValue}",
+        )
     }
 
     @Test

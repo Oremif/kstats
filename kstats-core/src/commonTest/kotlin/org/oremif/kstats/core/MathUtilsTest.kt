@@ -142,18 +142,21 @@ class MathUtilsTest {
     @Test
     fun testRegularizedBetaLargeParamsSymmetryProperty() {
         // Property: I_x(a, b) + I_{1-x}(b, a) = 1 for all valid x, a, b
-        val cases = listOf(
-            Triple(0.4999, 145274.0, 145311.0),
-            Triple(0.499, 10000.0, 10000.0),
-            Triple(0.4999, 50000.0, 50000.0),
-            Triple(0.5, 1000.0, 1000.0),
-        )
+        val cases =
+            listOf(
+                Triple(0.4999, 145274.0, 145311.0),
+                Triple(0.499, 10000.0, 10000.0),
+                Triple(0.4999, 50000.0, 50000.0),
+                Triple(0.5, 1000.0, 1000.0),
+            )
         for ((x, a, b) in cases) {
             val left = regularizedBeta(x, a, b)
             val right = regularizedBeta(1.0 - x, b, a)
             assertEquals(
-                1.0, left + right, 1e-6,
-                "I_$x($a,$b) + I_${1.0 - x}($b,$a) should equal 1"
+                1.0,
+                left + right,
+                1e-6,
+                "I_$x($a,$b) + I_${1.0 - x}($b,$a) should equal 1",
             )
         }
     }
@@ -169,7 +172,7 @@ class MathUtilsTest {
             val curr = regularizedBeta(xs[i], a, b)
             assertTrue(
                 curr >= prev,
-                "regularizedBeta should be monotonic: I_${xs[i]}($a,$b) = $curr >= I_${xs[i - 1]}($a,$b) = $prev"
+                "regularizedBeta should be monotonic: I_${xs[i]}($a,$b) = $curr >= I_${xs[i - 1]}($a,$b) = $prev",
             )
             prev = curr
         }
@@ -178,15 +181,19 @@ class MathUtilsTest {
     @Test
     fun testRegularizedBetaLargeParamsRange() {
         // Property: result must be in [0, 1] for any valid inputs including large params
-        val cases = listOf(
-            Triple(0.4999, 145274.0, 145311.0),
-            Triple(0.5, 145274.0, 145311.0),
-            Triple(0.5, 100000.0, 100000.0),
-            Triple(0.4999, 200000.0, 200000.0),
-        )
+        val cases =
+            listOf(
+                Triple(0.4999, 145274.0, 145311.0),
+                Triple(0.5, 145274.0, 145311.0),
+                Triple(0.5, 100000.0, 100000.0),
+                Triple(0.4999, 200000.0, 200000.0),
+            )
         for ((x, a, b) in cases) {
             val result = regularizedBeta(x, a, b)
-            assertTrue(result in 0.0..1.0, "regularizedBeta($x, $a, $b) = $result should be in [0, 1]")
+            assertTrue(
+                result in 0.0..1.0,
+                "regularizedBeta($x, $a, $b) = $result should be in [0, 1]",
+            )
         }
     }
 
@@ -199,15 +206,9 @@ class MathUtilsTest {
 
     @Test
     fun testRegularizedBetaInvalidParameters() {
-        assertFailsWith<InvalidParameterException> {
-            regularizedBeta(0.5, -1.0, 3.0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            regularizedBeta(0.5, 2.0, 0.0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            regularizedBeta(0.5, 0.0, 3.0)
-        }
+        assertFailsWith<InvalidParameterException> { regularizedBeta(0.5, -1.0, 3.0) }
+        assertFailsWith<InvalidParameterException> { regularizedBeta(0.5, 2.0, 0.0) }
+        assertFailsWith<InvalidParameterException> { regularizedBeta(0.5, 0.0, 3.0) }
     }
 
     // ── Regularized gamma ───────────────────────────────────────────────
@@ -291,7 +292,7 @@ class MathUtilsTest {
                 x,
                 erfInv(erfX),
                 ITERATIVE_TOLERANCE,
-                "erfInv(erf($x)) should ≈ $x, erf($x)=$erfX, erfInv=${erfInv(erfX)}"
+                "erfInv(erf($x)) should ≈ $x, erf($x)=$erfX, erfInv=${erfInv(erfX)}",
             )
         }
     }
@@ -351,7 +352,10 @@ class MathUtilsTest {
         assertTrue(smallResult > 5.0, "erfcInv(1e-15) should be large positive, got $smallResult")
         // Very close to 2 → large negative result
         val largeResult = erfcInv(2.0 - 1e-15)
-        assertTrue(largeResult < -5.0, "erfcInv(2-1e-15) should be large negative, got $largeResult")
+        assertTrue(
+            largeResult < -5.0,
+            "erfcInv(2-1e-15) should be large negative, got $largeResult",
+        )
     }
 
     @Test
@@ -379,7 +383,7 @@ class MathUtilsTest {
                 erfInv(1.0 - y),
                 erfcInv(y),
                 PRECISE_TOLERANCE,
-                "erfcInv($y) should equal erfInv(${1.0 - y})"
+                "erfcInv($y) should equal erfInv(${1.0 - y})",
             )
         }
     }
@@ -457,7 +461,7 @@ class MathUtilsTest {
                 digamma(x) + 1.0 / x,
                 digamma(x + 1.0),
                 PRECISE_TOLERANCE,
-                "Recurrence psi(${x}+1) = psi($x) + 1/$x"
+                "Recurrence psi(${x}+1) = psi($x) + 1/$x",
             )
         }
     }
@@ -471,7 +475,7 @@ class MathUtilsTest {
                 expected,
                 digamma(1.0 - x) - digamma(x),
                 PRECISE_TOLERANCE,
-                "Reflection psi(1-$x) - psi($x) = pi/tan(pi*$x)"
+                "Reflection psi(1-$x) - psi($x) = pi/tan(pi*$x)",
             )
         }
     }
@@ -544,7 +548,7 @@ class MathUtilsTest {
                 trigamma(x) - 1.0 / (x * x),
                 trigamma(x + 1.0),
                 PRECISE_TOLERANCE,
-                "Recurrence psi'(${x}+1) = psi'($x) - 1/$x^2"
+                "Recurrence psi'(${x}+1) = psi'($x) - 1/$x^2",
             )
         }
     }
@@ -559,7 +563,7 @@ class MathUtilsTest {
                 expected,
                 trigamma(x) + trigamma(1.0 - x),
                 PRECISE_TOLERANCE,
-                "Reflection psi'($x) + psi'(1-$x) = pi^2/sin^2(pi*$x)"
+                "Reflection psi'($x) + psi'(1-$x) = pi^2/sin^2(pi*$x)",
             )
         }
     }
@@ -643,7 +647,7 @@ class MathUtilsTest {
                 lnCombination(n, k) + lnFactorial(k),
                 lnPermutation(n, k),
                 PRECISE_TOLERANCE,
-                "lnPermutation($n, $k) should equal lnCombination + lnFactorial($k)"
+                "lnPermutation($n, $k) should equal lnCombination + lnFactorial($k)",
             )
         }
     }
@@ -717,7 +721,11 @@ class MathUtilsTest {
     fun testGcdLcmRelationship() {
         // |a * b| = gcd(a, b) * lcm(a, b) for non-zero a, b
         for ((a, b) in listOf(12L to 8L, 7L to 13L, 100L to 75L, 48L to 18L)) {
-            assertEquals(a * b, gcd(a, b) * lcm(a, b), "gcd($a,$b) * lcm($a,$b) should equal $a * $b")
+            assertEquals(
+                a * b,
+                gcd(a, b) * lcm(a, b),
+                "gcd($a,$b) * lcm($a,$b) should equal $a * $b",
+            )
         }
     }
 

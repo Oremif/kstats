@@ -1,10 +1,10 @@
 package org.oremif.kstats.sampling
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class RankingTest {
 
@@ -96,16 +96,12 @@ class RankingTest {
 
     @Test
     fun testRankEmptyThrows() {
-        assertFailsWith<InsufficientDataException> {
-            doubleArrayOf().rank()
-        }
+        assertFailsWith<InsufficientDataException> { doubleArrayOf().rank() }
     }
 
     @Test
     fun testRankNaNThrows() {
-        assertFailsWith<InvalidParameterException> {
-            doubleArrayOf(1.0, Double.NaN, 3.0).rank()
-        }
+        assertFailsWith<InvalidParameterException> { doubleArrayOf(1.0, Double.NaN, 3.0).rank() }
     }
 
     @Test
@@ -142,9 +138,7 @@ class RankingTest {
 
     @Test
     fun testPercentileRankEmptyThrows() {
-        assertFailsWith<InsufficientDataException> {
-            doubleArrayOf().percentileRank()
-        }
+        assertFailsWith<InsufficientDataException> { doubleArrayOf().percentileRank() }
     }
 
     @Test
@@ -179,9 +173,7 @@ class RankingTest {
 
     @Test
     fun testRankIterableEmptyThrows() {
-        assertFailsWith<InsufficientDataException> {
-            emptyList<Double>().rank()
-        }
+        assertFailsWith<InsufficientDataException> { emptyList<Double>().rank() }
     }
 
     @Test
@@ -197,9 +189,7 @@ class RankingTest {
 
     @Test
     fun testPercentileRankIterableEmptyThrows() {
-        assertFailsWith<InsufficientDataException> {
-            emptyList<Double>().percentileRank()
-        }
+        assertFailsWith<InsufficientDataException> { emptyList<Double>().percentileRank() }
     }
 
     // --- Large array tests ---
@@ -229,9 +219,9 @@ class RankingTest {
         val data = doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0)
         val pr = data.percentileRank()
         // Sorted: 1.0 (rank 1), 3.0 (rank 2), +Inf (rank 3)
-        assertEquals(0.0, pr[0], 1e-10)   // 1.0 → rank 1 → (1-1)/2*100 = 0
-        assertEquals(100.0, pr[1], 1e-10)  // +Inf → rank 3 → (3-1)/2*100 = 100
-        assertEquals(50.0, pr[2], 1e-10)   // 3.0 → rank 2 → (2-1)/2*100 = 50
+        assertEquals(0.0, pr[0], 1e-10) // 1.0 → rank 1 → (1-1)/2*100 = 0
+        assertEquals(100.0, pr[1], 1e-10) // +Inf → rank 3 → (3-1)/2*100 = 100
+        assertEquals(50.0, pr[2], 1e-10) // 3.0 → rank 2 → (2-1)/2*100 = 50
     }
 
     @Test

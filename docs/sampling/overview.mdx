@@ -18,13 +18,13 @@ description: "Ranking, z-score normalization, min-max scaling, binning, frequenc
 ```kotlin
 val data = doubleArrayOf(3.0, 1.0, 4.0, 1.0, 5.0)
 
-data.rank()                        // [3.0, 1.5, 4.0, 1.5, 5.0]
-data.rank(TieMethod.MIN)           // [3.0, 1.0, 4.0, 1.0, 5.0]
-data.rank(TieMethod.MAX)           // [3.0, 2.0, 4.0, 2.0, 5.0]
-data.rank(TieMethod.DENSE)         // [2.0, 1.0, 3.0, 1.0, 4.0]
-data.rank(TieMethod.ORDINAL)       // [3.0, 1.0, 4.0, 2.0, 5.0]
+data.rank() // [3.0, 1.5, 4.0, 1.5, 5.0]
+data.rank(TieMethod.MIN) // [3.0, 1.0, 4.0, 1.0, 5.0]
+data.rank(TieMethod.MAX) // [3.0, 2.0, 4.0, 2.0, 5.0]
+data.rank(TieMethod.DENSE) // [2.0, 1.0, 3.0, 1.0, 4.0]
+data.rank(TieMethod.ORDINAL) // [3.0, 1.0, 4.0, 2.0, 5.0]
 
-data.percentileRank()              // ranks scaled to 0-100
+data.percentileRank() // ranks scaled to 0-100
 ```
 
 {/*---END--*/}
@@ -47,10 +47,10 @@ Two standard scaling methods: z-score standardization (mean 0, standard deviatio
 ```kotlin
 val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
 
-data.zScore()                      // [-1.2649, -0.6325, 0.0, 0.6325, 1.2649]
+data.zScore() // [-1.2649, -0.6325, 0.0, 0.6325, 1.2649]
 
-data.minMaxNormalize()             // [0.0, 0.25, 0.5, 0.75, 1.0]
-data.minMaxNormalize(0.0, 100.0)   // [0.0, 25.0, 50.0, 75.0, 100.0]
+data.minMaxNormalize() // [0.0, 0.25, 0.5, 0.75, 1.0]
+data.minMaxNormalize(0.0, 100.0) // [0.0, 25.0, 50.0, 75.0, 100.0]
 ```
 
 {/*---END--*/}
@@ -78,19 +78,19 @@ val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
 
 // By bin count
 val bins = data.asIterable().bin(3)
-bins.size                          // 3
-bins[0].range                      // interval of the first bin
-bins[0].items                      // values that fall in the first bin
-bins[0].count                      // number of values
+bins.size // 3
+bins[0].range // interval of the first bin
+bins[0].items // values that fall in the first bin
+bins[0].count // number of values
 
 // By bin width
 val wideBins = data.asIterable().bin(5.0)
 
 // Frequency table -- counts and proportions instead of items
 val freq = data.asIterable().frequencyTable(3)
-freq[0].count                      // number of values in the first bin
-freq[0].relativeFrequency          // proportion of total
-freq[0].cumulativeFrequency        // running total of relative frequencies
+freq[0].count // number of values in the first bin
+freq[0].relativeFrequency // proportion of total
+freq[0].cumulativeFrequency // running total of relative frequencies
 ```
 
 {/*---END--*/}
@@ -112,8 +112,8 @@ Both `bin()` and `frequencyTable()` accept either a **bin count** (number of bin
 ```kotlin
 val items = listOf("A", "B", "C", "D", "E")
 
-items.randomSample(3, Random(42))     // 3 distinct items
-items.bootstrapSample(6, Random(42))  // 6 items, may have repeats
+items.randomSample(3, Random(42)) // 3 distinct items
+items.bootstrapSample(6, Random(42)) // 6 items, may have repeats
 ```
 
 {/*---END--*/}
@@ -132,10 +132,10 @@ items.bootstrapSample(6, Random(42))  // 6 items, may have repeats
 
 ```kotlin
 val coin = WeightedCoin(probability = 0.7)
-coin.flip()                        // true with 70% probability
+coin.flip() // true with 70% probability
 
 val dice = WeightedDice(mapOf("A" to 3.0, "B" to 1.0))
-dice.roll()                        // "A" with 75% probability, "B" with 25%
+dice.roll() // "A" with 75% probability, "B" with 25%
 ```
 
 {/*---END--*/}

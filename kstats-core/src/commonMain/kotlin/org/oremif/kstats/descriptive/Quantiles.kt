@@ -1,18 +1,18 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.core.introSelect
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.round
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.core.introSelect
 
 /**
- * Controls how values between two data points are interpolated when computing quantiles
- * and percentiles.
+ * Controls how values between two data points are interpolated when computing quantiles and
+ * percentiles.
  *
  * @deprecated Use [QuantileMethod] instead, which provides the nine standard Hyndman and Fan
- * estimation methods in addition to the interpolation modes available here.
+ *   estimation methods in addition to the interpolation modes available here.
  */
 @Suppress("DEPRECATION")
 @Deprecated(
@@ -41,13 +41,14 @@ public enum class QuantileInterpolation {
      *
      * @return the [QuantileMethod] that matches this interpolation mode.
      */
-    public fun toQuantileMethod(): QuantileMethod = when (this) {
-        LINEAR -> QuantileMethod.LINEAR
-        LOWER -> QuantileMethod.LOWER
-        HIGHER -> QuantileMethod.HIGHER
-        NEAREST -> QuantileMethod.NEAREST
-        MIDPOINT -> QuantileMethod.MIDPOINT
-    }
+    public fun toQuantileMethod(): QuantileMethod =
+        when (this) {
+            LINEAR -> QuantileMethod.LINEAR
+            LOWER -> QuantileMethod.LOWER
+            HIGHER -> QuantileMethod.HIGHER
+            NEAREST -> QuantileMethod.NEAREST
+            MIDPOINT -> QuantileMethod.MIDPOINT
+        }
 }
 
 // ── percentile ──────────────────────────────────────────────────────────────
@@ -55,9 +56,9 @@ public enum class QuantileInterpolation {
 /**
  * Computes the p-th percentile of the values in this iterable.
  *
- * The percentile indicates the value below which a given percentage of observations fall.
- * For example, the 50th percentile is the median. Delegates to [quantile] after converting
- * the percentile (0–100 scale) to a quantile (0–1 scale).
+ * The percentile indicates the value below which a given percentage of observations fall. For
+ * example, the 50th percentile is the median. Delegates to [quantile] after converting the
+ * percentile (0–100 scale) to a quantile (0–1 scale).
  *
  * ### Example:
  * ```kotlin
@@ -80,9 +81,9 @@ public fun Iterable<Double>.percentile(
 /**
  * Computes the p-th percentile of the values in this array.
  *
- * The percentile indicates the value below which a given percentage of observations fall.
- * For example, the 50th percentile is the median. Uses introselect (expected O(n) time)
- * instead of a full sort.
+ * The percentile indicates the value below which a given percentage of observations fall. For
+ * example, the 50th percentile is the median. Uses introselect (expected O(n) time) instead of a
+ * full sort.
  *
  * ### Example:
  * ```kotlin
@@ -144,8 +145,8 @@ public fun DoubleArray.percentile(
  * Computes the q-th quantile of the values in this iterable.
  *
  * The quantile at q is the value below which a fraction q of the data falls. For example,
- * quantile(0.5) is the median. The estimation method determines how positions between data
- * points are handled — see [QuantileMethod] for the nine standard Hyndman and Fan methods.
+ * quantile(0.5) is the median. The estimation method determines how positions between data points
+ * are handled — see [QuantileMethod] for the nine standard Hyndman and Fan methods.
  *
  * ### Example:
  * ```kotlin
@@ -166,9 +167,9 @@ public fun Iterable<Double>.quantile(
  * Computes the q-th quantile of the values in this array.
  *
  * The quantile at q is the value below which a fraction q of the data falls. For example,
- * quantile(0.5) is the median. Uses introselect (expected O(n) time) instead of a full sort.
- * The estimation method determines how positions between data points are handled — see
- * [QuantileMethod] for the nine standard Hyndman and Fan methods.
+ * quantile(0.5) is the median. Uses introselect (expected O(n) time) instead of a full sort. The
+ * estimation method determines how positions between data points are handled — see [QuantileMethod]
+ * for the nine standard Hyndman and Fan methods.
  *
  * ### Example:
  * ```kotlin
@@ -238,39 +239,44 @@ public fun DoubleArray.quantile(
 // The American Statistician, 50, 361-365.
 
 /** Computes the 1-based position h(q, n) for the given Hyndman-Fan method. */
-private fun computePosition(n: Int, q: Double, method: QuantileMethod): Double = when (method) {
-    QuantileMethod.INVERTED_CDF,
-    QuantileMethod.AVERAGED_INVERTED_CDF,
-    QuantileMethod.HAZEN -> n * q + 0.5
+private fun computePosition(n: Int, q: Double, method: QuantileMethod): Double =
+    when (method) {
+        QuantileMethod.INVERTED_CDF,
+        QuantileMethod.AVERAGED_INVERTED_CDF,
+        QuantileMethod.HAZEN -> n * q + 0.5
 
-    QuantileMethod.CLOSEST_OBSERVATION,
-    QuantileMethod.INTERPOLATED_INVERTED_CDF -> n * q
+        QuantileMethod.CLOSEST_OBSERVATION,
+        QuantileMethod.INTERPOLATED_INVERTED_CDF -> n * q
 
-    QuantileMethod.WEIBULL -> (n + 1) * q
+        QuantileMethod.WEIBULL -> (n + 1) * q
 
-    QuantileMethod.LINEAR,
-    QuantileMethod.LOWER,
-    QuantileMethod.HIGHER,
-    QuantileMethod.NEAREST,
-    QuantileMethod.MIDPOINT -> (n - 1) * q + 1.0
+        QuantileMethod.LINEAR,
+        QuantileMethod.LOWER,
+        QuantileMethod.HIGHER,
+        QuantileMethod.NEAREST,
+        QuantileMethod.MIDPOINT -> (n - 1) * q + 1.0
 
-    QuantileMethod.MEDIAN_UNBIASED -> (n + 1.0 / 3.0) * q + 1.0 / 3.0
-    QuantileMethod.NORMAL_UNBIASED -> (n + 0.25) * q + 3.0 / 8.0
-}
+        QuantileMethod.MEDIAN_UNBIASED -> (n + 1.0 / 3.0) * q + 1.0 / 3.0
+        QuantileMethod.NORMAL_UNBIASED -> (n + 0.25) * q + 3.0 / 8.0
+    }
 
-/** Computes a 0-based discrete index for non-interpolating methods from the 1-based position [h]. */
-private fun discreteIndex(h: Double, n: Int, method: QuantileMethod): Int = when (method) {
-    // x_(ceil(h - 0.5)), clamped to [1, n]
-    QuantileMethod.INVERTED_CDF,
-    QuantileMethod.AVERAGED_INVERTED_CDF -> ceil(h - 0.5).toInt().coerceIn(1, n) - 1
-    // x_(round(h)), banker's rounding (ties to even), clamped to [1, n]
-    QuantileMethod.CLOSEST_OBSERVATION -> bankersRound(h.coerceIn(1.0, n.toDouble())).coerceIn(1, n) - 1
-    QuantileMethod.LOWER -> floor(h).toInt().coerceIn(1, n) - 1
-    QuantileMethod.HIGHER -> ceil(h).toInt().coerceIn(1, n) - 1
-    // Round half up (not banker's rounding)
-    QuantileMethod.NEAREST -> floor(h + 0.5).toInt().coerceIn(1, n) - 1
-    else -> error("$method is not a discrete selector")
-}
+/**
+ * Computes a 0-based discrete index for non-interpolating methods from the 1-based position [h].
+ */
+private fun discreteIndex(h: Double, n: Int, method: QuantileMethod): Int =
+    when (method) {
+        // x_(ceil(h - 0.5)), clamped to [1, n]
+        QuantileMethod.INVERTED_CDF,
+        QuantileMethod.AVERAGED_INVERTED_CDF -> ceil(h - 0.5).toInt().coerceIn(1, n) - 1
+        // x_(round(h)), banker's rounding (ties to even), clamped to [1, n]
+        QuantileMethod.CLOSEST_OBSERVATION ->
+            bankersRound(h.coerceIn(1.0, n.toDouble())).coerceIn(1, n) - 1
+        QuantileMethod.LOWER -> floor(h).toInt().coerceIn(1, n) - 1
+        QuantileMethod.HIGHER -> ceil(h).toInt().coerceIn(1, n) - 1
+        // Round half up (not banker's rounding)
+        QuantileMethod.NEAREST -> floor(h + 0.5).toInt().coerceIn(1, n) - 1
+        else -> error("$method is not a discrete selector")
+    }
 
 private fun computeQuantile(
     work: DoubleArray,
@@ -380,13 +386,21 @@ private fun bankersRound(x: Double): Int = round(x).toInt()
 // ── sortedQuantile (internal helper) ─────────────────────────────────────────
 
 /** Computes a quantile from an already-sorted array without copying. */
-internal fun sortedQuantile(sorted: DoubleArray, q: Double, method: QuantileMethod = QuantileMethod.LINEAR): Double {
+internal fun sortedQuantile(
+    sorted: DoubleArray,
+    q: Double,
+    method: QuantileMethod = QuantileMethod.LINEAR,
+): Double {
     if (sorted.size == 1) return sorted[0]
     return computeQuantile(sorted, q, method, useIntroSelect = false)
 }
 
 /** Computes a quantile from an already-sorted list. */
-internal fun sortedQuantile(sorted: List<Double>, q: Double, method: QuantileMethod = QuantileMethod.LINEAR): Double {
+internal fun sortedQuantile(
+    sorted: List<Double>,
+    q: Double,
+    method: QuantileMethod = QuantileMethod.LINEAR,
+): Double {
     if (sorted.size == 1) return sorted[0]
     val arr = sorted.toDoubleArray()
     return computeQuantile(arr, q, method, useIntroSelect = false)
@@ -397,9 +411,9 @@ internal fun sortedQuantile(sorted: List<Double>, q: Double, method: QuantileMet
 /**
  * Computes the three quartiles (Q1, Q2, Q3) of the values in this iterable.
  *
- * Q1 (25th percentile), Q2 (median, 50th percentile), and Q3 (75th percentile) divide the
- * data into four equal-frequency groups. The data is sorted once and reused for all three
- * quartile computations.
+ * Q1 (25th percentile), Q2 (median, 50th percentile), and Q3 (75th percentile) divide the data into
+ * four equal-frequency groups. The data is sorted once and reused for all three quartile
+ * computations.
  *
  * ### Example:
  * ```kotlin
@@ -410,7 +424,9 @@ internal fun sortedQuantile(sorted: List<Double>, q: Double, method: QuantileMet
  * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return a [Triple] of (Q1, Q2, Q3).
  */
-public fun Iterable<Double>.quartiles(method: QuantileMethod = QuantileMethod.LINEAR): Triple<Double, Double, Double> {
+public fun Iterable<Double>.quartiles(
+    method: QuantileMethod = QuantileMethod.LINEAR
+): Triple<Double, Double, Double> {
     val sorted = toList().sorted()
     if (sorted.isEmpty()) throw InsufficientDataException("Collection must not be empty")
     return Triple(
@@ -423,8 +439,8 @@ public fun Iterable<Double>.quartiles(method: QuantileMethod = QuantileMethod.LI
 /**
  * Computes the three quartiles (Q1, Q2, Q3) of the values in this array.
  *
- * Q1 (25th percentile), Q2 (median, 50th percentile), and Q3 (75th percentile) divide the
- * data into four equal-frequency groups.
+ * Q1 (25th percentile), Q2 (median, 50th percentile), and Q3 (75th percentile) divide the data into
+ * four equal-frequency groups.
  *
  * ### Example:
  * ```kotlin
@@ -435,7 +451,9 @@ public fun Iterable<Double>.quartiles(method: QuantileMethod = QuantileMethod.LI
  * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return a [Triple] of (Q1, Q2, Q3).
  */
-public fun DoubleArray.quartiles(method: QuantileMethod = QuantileMethod.LINEAR): Triple<Double, Double, Double> {
+public fun DoubleArray.quartiles(
+    method: QuantileMethod = QuantileMethod.LINEAR
+): Triple<Double, Double, Double> {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     val sorted = sortedArray()
     return Triple(
@@ -450,13 +468,13 @@ public fun DoubleArray.quartiles(method: QuantileMethod = QuantileMethod.LINEAR)
 /**
  * Selects the element at the q-th quantile position from this list.
  *
- * Unlike [quantile], this function works with any [Comparable] type (not just Double) and
- * always returns an actual element from the list rather than an interpolated value. This is
- * useful when you need, for example, the 20th percentile from an ordered list of strings.
+ * Unlike [quantile], this function works with any [Comparable] type (not just Double) and always
+ * returns an actual element from the list rather than an interpolated value. This is useful when
+ * you need, for example, the 20th percentile from an ordered list of strings.
  *
  * Only non-interpolating methods are supported: [QuantileMethod.INVERTED_CDF],
- * [QuantileMethod.CLOSEST_OBSERVATION], [QuantileMethod.LOWER], [QuantileMethod.HIGHER],
- * and [QuantileMethod.NEAREST].
+ * [QuantileMethod.CLOSEST_OBSERVATION], [QuantileMethod.LOWER], [QuantileMethod.HIGHER], and
+ * [QuantileMethod.NEAREST].
  *
  * ### Example:
  * ```kotlin
@@ -464,8 +482,8 @@ public fun DoubleArray.quartiles(method: QuantileMethod = QuantileMethod.LINEAR)
  * listOf(10, 20, 30, 40, 50).quantileSelect(0.25, QuantileMethod.LOWER) // 20
  * ```
  *
- * Note: the default method is [QuantileMethod.NEAREST], not [QuantileMethod.LINEAR] (which is
- * the default for [quantile]), because `quantileSelect` only supports non-interpolating methods.
+ * Note: the default method is [QuantileMethod.NEAREST], not [QuantileMethod.LINEAR] (which is the
+ * default for [quantile]), because `quantileSelect` only supports non-interpolating methods.
  *
  * @param q the quantile to compute, in [0, 1].
  * @param method the non-interpolating quantile method. Defaults to [QuantileMethod.NEAREST].
@@ -492,9 +510,8 @@ public fun <T : Comparable<T>> List<T>.quantileSelect(
 /**
  * Selects the element at the p-th percentile position from this sorted list.
  *
- * This is a convenience wrapper around [quantileSelect] that accepts a percentile (0–100)
- * instead of a quantile (0–1). See [quantileSelect] for details on supported methods and
- * behavior.
+ * This is a convenience wrapper around [quantileSelect] that accepts a percentile (0–100) instead
+ * of a quantile (0–1). See [quantileSelect] for details on supported methods and behavior.
  *
  * ### Example:
  * ```kotlin
@@ -513,13 +530,14 @@ public fun <T : Comparable<T>> List<T>.percentileSelect(
     return quantileSelect(p / 100.0, method)
 }
 
-private val NON_INTERPOLATING_METHODS: Set<QuantileMethod> = setOf(
-    QuantileMethod.INVERTED_CDF,
-    QuantileMethod.CLOSEST_OBSERVATION,
-    QuantileMethod.LOWER,
-    QuantileMethod.HIGHER,
-    QuantileMethod.NEAREST,
-)
+private val NON_INTERPOLATING_METHODS: Set<QuantileMethod> =
+    setOf(
+        QuantileMethod.INVERTED_CDF,
+        QuantileMethod.CLOSEST_OBSERVATION,
+        QuantileMethod.LOWER,
+        QuantileMethod.HIGHER,
+        QuantileMethod.NEAREST,
+    )
 
 private fun requireNonInterpolating(method: QuantileMethod) {
     if (method !in NON_INTERPOLATING_METHODS) {
@@ -568,8 +586,9 @@ public fun Sequence<Double>.quantile(
  * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return a [Triple] of (Q1, Q2, Q3).
  */
-public fun Sequence<Double>.quartiles(method: QuantileMethod = QuantileMethod.LINEAR): Triple<Double, Double, Double> =
-    toList().toDoubleArray().quartiles(method)
+public fun Sequence<Double>.quartiles(
+    method: QuantileMethod = QuantileMethod.LINEAR
+): Triple<Double, Double, Double> = toList().toDoubleArray().quartiles(method)
 
 /**
  * Computes the p-th percentile of the values in this sequence.

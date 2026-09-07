@@ -17,11 +17,11 @@ Every test produces a result with a consistent shape. The `statistic` is the com
 val sample = doubleArrayOf(5.0, 6.0, 7.0, 5.5, 6.5)
 val result = tTest(sample, mu = 5.0)
 
-result.testName          // "One-Sample T-Test"
-result.statistic         // 2.8284
-result.pValue            // 0.0474
-result.degreesOfFreedom  // 4.0
-result.isSignificant()   // true (p < 0.05)
+result.testName // "One-Sample T-Test"
+result.statistic // 2.8284
+result.pValue // 0.0474
+result.degreesOfFreedom // 4.0
+result.isSignificant() // true (p < 0.05)
 result.confidenceInterval // (5.02, 6.98)
 ```
 
@@ -46,12 +46,12 @@ val sample = doubleArrayOf(5.1, 4.9, 5.3, 5.0, 4.8)
 
 // Two-sided: is the mean different from 5.0?
 val two = tTest(sample, mu = 5.0)
-two.statistic            // t value
-two.pValue               // two-sided p-value
+two.statistic // t value
+two.pValue // two-sided p-value
 
 // One-sided: is the mean greater than 5.0?
 val one = tTest(sample, mu = 5.0, alternative = Alternative.GREATER)
-one.pValue               // one-sided p-value
+one.pValue // one-sided p-value
 ```
 
 {/*---END--*/}
@@ -73,9 +73,9 @@ val group1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
 val group2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
 
 val result = tTest(group1, group2)
-result.statistic         // -5.0
-result.pValue            // 0.0011
-result.isSignificant()   // true
+result.statistic // -5.0
+result.pValue // 0.0011
+result.isSignificant() // true
 ```
 
 {/*---END--*/}
@@ -95,9 +95,9 @@ val before = doubleArrayOf(200.0, 190.0, 210.0, 180.0, 195.0)
 val after = doubleArrayOf(190.0, 180.0, 195.0, 170.0, 185.0)
 
 val result = pairedTTest(before, after)
-result.statistic         // positive t (before > after)
-result.pValue            // p-value for the difference
-result.isSignificant()   // true if the change is significant
+result.statistic // positive t (before > after)
+result.pValue // p-value for the difference
+result.isSignificant() // true if the change is significant
 ```
 
 {/*---END--*/}
@@ -113,9 +113,9 @@ val group1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
 val group2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
 
 val result = mannWhitneyUTest(group1, group2)
-result.statistic         // U = 0.0
-result.pValue            // < 0.02
-result.isSignificant()   // true
+result.statistic // U = 0.0
+result.pValue // < 0.02
+result.isSignificant() // true
 ```
 
 {/*---END--*/}
@@ -131,8 +131,8 @@ val before = doubleArrayOf(10.0, 12.0, 14.0, 16.0, 18.0)
 val after = doubleArrayOf(8.0, 9.0, 11.0, 12.0, 13.0)
 
 val result = wilcoxonSignedRankTest(before, after)
-result.statistic         // W+ = 15.0
-result.pValue            // p-value with continuity correction
+result.statistic // W+ = 15.0
+result.pValue // p-value with continuity correction
 ```
 
 {/*---END--*/}
@@ -151,14 +151,14 @@ val g2 = doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0)
 val g3 = doubleArrayOf(11.0, 12.0, 13.0, 14.0, 15.0)
 
 val anova = oneWayAnova(g1, g2, g3)
-anova.fStatistic         // 50.0
-anova.pValue             // < 0.00001
-anova.dfBetween          // 2
-anova.dfWithin           // 12
-anova.ssBetween          // 250.0
-anova.ssWithin           // 30.0
-anova.msBetween          // 125.0
-anova.msWithin           // 2.5
+anova.fStatistic // 50.0
+anova.pValue // < 0.00001
+anova.dfBetween // 2
+anova.dfWithin // 12
+anova.ssBetween // 250.0
+anova.ssWithin // 30.0
+anova.msBetween // 125.0
+anova.msWithin // 2.5
 ```
 
 {/*---END--*/}
@@ -179,8 +179,8 @@ val treatment2 = doubleArrayOf(4.0, 5.0, 6.0, 4.5, 5.5)
 val treatment3 = doubleArrayOf(7.0, 8.0, 9.0, 7.5, 8.5)
 
 val result = friedmanTest(treatment1, treatment2, treatment3)
-result.statistic         // Friedman chi-squared
-result.pValue            // p-value
+result.statistic // Friedman chi-squared
+result.pValue // p-value
 ```
 
 {/*---END--*/}
@@ -192,15 +192,34 @@ Four normality tests are available. Each returns a `TestResult` — a significan
 {/*---FUN hypNormality--*/}
 
 ```kotlin
-val sample = doubleArrayOf(
-    -1.2, -0.5, 0.0, 0.5, 1.2, 0.3, -0.1, 0.8, -0.4, 0.6,
-    -0.8, 0.2, 0.9, -0.3, 0.4, -0.6, 1.0, -0.9, 0.1, 0.7
-)
+val sample =
+    doubleArrayOf(
+        -1.2,
+        -0.5,
+        0.0,
+        0.5,
+        1.2,
+        0.3,
+        -0.1,
+        0.8,
+        -0.4,
+        0.6,
+        -0.8,
+        0.2,
+        0.9,
+        -0.3,
+        0.4,
+        -0.6,
+        1.0,
+        -0.9,
+        0.1,
+        0.7,
+    )
 
-shapiroWilkTest(sample).pValue       // high p → consistent with normality
-andersonDarlingTest(sample).pValue   // high p → consistent with normality
-dagostinoPearsonTest(sample).pValue  // combines skewness and kurtosis tests
-jarqueBeraTest(sample).pValue        // asymptotic test based on skewness and kurtosis
+shapiroWilkTest(sample).pValue // high p → consistent with normality
+andersonDarlingTest(sample).pValue // high p → consistent with normality
+dagostinoPearsonTest(sample).pValue // combines skewness and kurtosis tests
+jarqueBeraTest(sample).pValue // asymptotic test based on skewness and kurtosis
 ```
 
 {/*---END--*/}
@@ -222,9 +241,9 @@ val observed = intArrayOf(50, 30, 20)
 val expected = doubleArrayOf(40.0, 40.0, 20.0)
 
 val result = chiSquaredTest(observed, expected)
-result.statistic         // 5.0
-result.pValue            // 0.0821
-result.isSignificant()   // false at α = 0.05
+result.statistic // 5.0
+result.pValue // 0.0821
+result.isSignificant() // false at α = 0.05
 ```
 
 {/*---END--*/}
@@ -240,8 +259,8 @@ val observed = intArrayOf(50, 30, 20)
 val expected = doubleArrayOf(40.0, 40.0, 20.0)
 
 val result = gTest(observed, expected)
-result.statistic         // G statistic
-result.pValue            // p-value
+result.statistic // G statistic
+result.pValue // p-value
 ```
 
 {/*---END--*/}
@@ -254,8 +273,8 @@ Tests whether the observed proportion of successes matches a hypothesized probab
 
 ```kotlin
 val result = binomialTest(successes = 60, trials = 100, probability = 0.5)
-result.pValue            // p-value for H₀: p = 0.5
-result.isSignificant()   // true if 60/100 is significantly different from 0.5
+result.pValue // p-value for H₀: p = 0.5
+result.isSignificant() // true if 60/100 is significantly different from 0.5
 ```
 
 {/*---END--*/}
@@ -269,8 +288,8 @@ Exact test for 2×2 contingency tables. Preferred over chi-squared for small sam
 ```kotlin
 // 2×2 table: [[10, 30], [20, 40]]
 val result = fisherExactTest(arrayOf(intArrayOf(10, 30), intArrayOf(20, 40)))
-result.pValue            // exact p-value
-result.isSignificant()   // true or false
+result.pValue // exact p-value
+result.isSignificant() // true or false
 ```
 
 {/*---END--*/}
@@ -290,8 +309,8 @@ val g1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
 val g2 = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
 val g3 = doubleArrayOf(1.0, 3.0, 5.0, 7.0, 9.0)
 
-leveneTest(g1, g2, g3).pValue         // robust to non-normality
-bartlettTest(g1, g2, g3).pValue       // most powerful when normality holds
+leveneTest(g1, g2, g3).pValue // robust to non-normality
+bartlettTest(g1, g2, g3).pValue // most powerful when normality holds
 flignerKilleenTest(g1, g2, g3).pValue // rank-based, robust to outliers
 ```
 
@@ -314,8 +333,8 @@ val sample1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
 val sample2 = doubleArrayOf(1.5, 2.5, 3.5, 4.5, 5.5)
 
 val result = kolmogorovSmirnovTest(sample1, sample2)
-result.statistic         // D = max difference between ECDFs
-result.pValue            // p-value
+result.statistic // D = max difference between ECDFs
+result.pValue // p-value
 ```
 
 {/*---END--*/}
@@ -339,11 +358,11 @@ converted to a Student-$t$ statistic on $N - 2$ degrees of freedom and Bonferron
 val latencies = doubleArrayOf(12.0, 14.0, 11.0, 13.0, 15.0, 98.0, 12.0)
 
 val result = grubbsTest(latencies)
-result.statistic                       // G statistic
-result.pValue                          // Bonferroni-corrected p-value
-result.additionalInfo["outlierIndex"]  // index of the suspected outlier
-result.additionalInfo["outlierValue"]  // the suspected outlier's value
-result.isSignificant()                 // true if outlier is significant at α = 0.05
+result.statistic // G statistic
+result.pValue // Bonferroni-corrected p-value
+result.additionalInfo["outlierIndex"] // index of the suspected outlier
+result.additionalInfo["outlierValue"] // the suspected outlier's value
+result.isSignificant() // true if outlier is significant at α = 0.05
 ```
 
 {/*---END--*/}
@@ -376,8 +395,8 @@ val data = doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 80.0, 90.0)
 val cleaned = grubbsTestIterative(data, alpha = 0.05)
 
 cleaned.outlierIndices // indices (in the original array) that were removed
-cleaned.cleanedData    // observations after removing all detected outliers
-cleaned.iterations     // TestResult from each round (last one is non-significant)
+cleaned.cleanedData // observations after removing all detected outliers
+cleaned.iterations // TestResult from each round (last one is non-significant)
 ```
 
 {/*---END--*/}

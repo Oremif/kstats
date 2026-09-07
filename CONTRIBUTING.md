@@ -72,6 +72,9 @@ JDK 21 is required (set via `jvmToolchain(21)`).
 # Verify API compatibility
 ./gradlew apiCheck
 
+# Reformat sources with ktfmt
+./gradlew ktfmtFormat
+
 # Generate API docs locally
 ./gradlew :dokkaGenerate
 
@@ -79,9 +82,13 @@ JDK 21 is required (set via `jvmToolchain(21)`).
 ./gradlew :benchmark:benchmark
 ```
 
-CI runs `jvmTest`, `linuxX64Test`, and `wasmJsNodeTest` on pull requests.
+CI runs `ktfmtCheck`, `apiCheck`, `jvmTest`, `linuxX64Test`, and `wasmJsNodeTest` on pull requests.
 
 ## Code Style
+
+Formatting is handled by [ktfmt](https://github.com/Kotlin/ktfmt) in kotlinlang style (4-space indent,
+trailing commas). Run `./gradlew ktfmtFormat` before committing — `./gradlew ktfmtCheck` gates every PR.
+`.editorconfig` keeps the IDE's own formatter close to the same rules.
 
 - `DoubleArray` is the primary data type for public API (not `List<Double>`).
 - Use typed exceptions from `core/exceptions/Exceptions.kt` instead of `require()`.

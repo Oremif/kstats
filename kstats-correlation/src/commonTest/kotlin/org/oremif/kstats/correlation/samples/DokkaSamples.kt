@@ -1,8 +1,8 @@
 package org.oremif.kstats.correlation.samples
 
+import kotlin.test.Test
 import org.oremif.kstats.correlation.pearsonCorrelation
 import org.oremif.kstats.correlation.simpleLinearRegression
-import kotlin.test.Test
 
 class DokkaSamples {
 
@@ -14,12 +14,12 @@ class DokkaSamples {
 
         val r = pearsonCorrelation(x, y)
         r.coefficient // 0.999...
-        r.pValue      // < 0.001
+        r.pValue // < 0.001
 
         val reg = simpleLinearRegression(x, y)
-        reg.slope        // ~2.0
-        reg.intercept    // ~0.04
-        reg.rSquared     // 0.999...
+        reg.slope // ~2.0
+        reg.intercept // ~0.04
+        reg.rSquared // 0.999...
         reg.predict(6.0) // predicted y for x = 6
         // SampleEnd
     }

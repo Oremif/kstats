@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class UniformDistributionTest : ContinuousDistributionPropertyTests() {
 
     override fun createDistribution(): ContinuousDistribution = UniformDistribution(0.0, 10.0)
+
     override val testPoints = listOf(-1.0, 0.0, 2.5, 5.0, 7.5, 10.0, 11.0)
 
     private val tol = 1e-10
@@ -68,12 +69,16 @@ class UniformDistributionTest : ContinuousDistributionPropertyTests() {
         assertFailsWith<InvalidParameterException> { UniformDistribution(Double.NaN, 1.0) }
         assertFailsWith<InvalidParameterException> { UniformDistribution(0.0, Double.NaN) }
         assertFailsWith<InvalidParameterException> { UniformDistribution(Double.NaN, Double.NaN) }
-        assertFailsWith<InvalidParameterException> { UniformDistribution(Double.POSITIVE_INFINITY, 1.0) }
-        assertFailsWith<InvalidParameterException> { UniformDistribution(0.0, Double.NEGATIVE_INFINITY) }
+        assertFailsWith<InvalidParameterException> {
+            UniformDistribution(Double.POSITIVE_INFINITY, 1.0)
+        }
+        assertFailsWith<InvalidParameterException> {
+            UniformDistribution(0.0, Double.NEGATIVE_INFINITY)
+        }
         assertFailsWith<InvalidParameterException> {
             UniformDistribution(
                 Double.NEGATIVE_INFINITY,
-                Double.POSITIVE_INFINITY
+                Double.POSITIVE_INFINITY,
             )
         }
     }
@@ -113,5 +118,4 @@ class UniformDistributionTest : ContinuousDistributionPropertyTests() {
         assertEquals(1.0, u.sf(Double.NEGATIVE_INFINITY), 0.0)
         assertEquals(0.0, u.sf(Double.POSITIVE_INFINITY), 0.0)
     }
-
 }

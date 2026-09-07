@@ -1,24 +1,24 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.core.generalizedHarmonic
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.random.Random
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.core.generalizedHarmonic
 
 /**
- * Represents the Zipf distribution (finite support variant), a discrete power-law distribution
- * over the integers 1, 2, ..., [numberOfElements].
+ * Represents the Zipf distribution (finite support variant), a discrete power-law distribution over
+ * the integers 1, 2, ..., [numberOfElements].
  *
- * The probability of observing rank k is proportional to 1/k^[exponent]. This distribution
- * models phenomena where a few items are very frequent and the rest are increasingly rare,
- * such as word frequencies in natural language (Zipf's law), city population sizes, and
- * website traffic distributions.
+ * The probability of observing rank k is proportional to 1/k^[exponent]. This distribution models
+ * phenomena where a few items are very frequent and the rest are increasingly rare, such as word
+ * frequencies in natural language (Zipf's law), city population sizes, and website traffic
+ * distributions.
  *
- * This is the finite-support parameterization matching Apache Commons Math: all moments are
- * finite and the CDF is an exact finite sum. The normalization constant is the generalized
- * harmonic number H([numberOfElements], [exponent]).
+ * This is the finite-support parameterization matching Apache Commons Math: all moments are finite
+ * and the CDF is an exact finite sum. The normalization constant is the generalized harmonic number
+ * H([numberOfElements], [exponent]).
  *
  * ### Example:
  * ```kotlin
@@ -36,19 +36,18 @@ import kotlin.random.Random
  */
 public class ZipfDistribution(
     public val numberOfElements: Int,
-    public val exponent: Double
+    public val exponent: Double,
 ) : DiscreteDistribution {
 
     init {
-        if (numberOfElements < 1) throw InvalidParameterException(
-            "numberOfElements must be >= 1, got $numberOfElements"
-        )
-        if (numberOfElements > 10_000_000) throw InvalidParameterException(
-            "numberOfElements must be <= 10,000,000, got $numberOfElements"
-        )
-        if (exponent.isNaN() || exponent <= 0.0 || exponent.isInfinite()) throw InvalidParameterException(
-            "exponent must be finite and positive, got $exponent"
-        )
+        if (numberOfElements < 1)
+            throw InvalidParameterException("numberOfElements must be >= 1, got $numberOfElements")
+        if (numberOfElements > 10_000_000)
+            throw InvalidParameterException(
+                "numberOfElements must be <= 10,000,000, got $numberOfElements"
+            )
+        if (exponent.isNaN() || exponent <= 0.0 || exponent.isInfinite())
+            throw InvalidParameterException("exponent must be finite and positive, got $exponent")
     }
 
     private val n = numberOfElements
@@ -61,14 +60,15 @@ public class ZipfDistribution(
     private val logHns = ln(hns)
 
     /** Precomputed cumulative probabilities: cdfTable[k-1] = CDF(k) for k in 1..n. */
-    private val cdfTable = DoubleArray(n).also { arr ->
-        var sum = 0.0
-        for (i in 0 until n) {
-            sum += exp(-s * ln((i + 1).toDouble()) - logHns)
-            arr[i] = sum
+    private val cdfTable =
+        DoubleArray(n).also { arr ->
+            var sum = 0.0
+            for (i in 0 until n) {
+                sum += exp(-s * ln((i + 1).toDouble()) - logHns)
+                arr[i] = sum
+            }
+            arr[n - 1] = 1.0
         }
-        arr[n - 1] = 1.0
-    }
 
     /** Raw moment μ'_1 = H(n, s-1) / H(n, s). */
     private val mu1 by lazy { generalizedHarmonic(n, s - 1.0) / hns }
@@ -100,7 +100,7 @@ public class ZipfDistribution(
      *
      * @param k the rank at which to evaluate the log-mass.
      * @return the natural log of the probability mass at [k]. Returns [Double.NEGATIVE_INFINITY]
-     * when [k] is outside the support.
+     *   when [k] is outside the support.
      */
     override fun logPmf(k: Int): Double {
         if (k !in 1..n) return Double.NEGATIVE_INFINITY
@@ -154,16 +154,18 @@ public class ZipfDistribution(
     }
 
     /** The mean of this distribution: H(n, s-1) / H(n, s). */
-    override val mean: Double get() = mu1
+    override val mean: Double
+        get() = mu1
 
     /** The variance of this distribution. */
-    override val variance: Double get() = mu2 - mu1 * mu1
+    override val variance: Double
+        get() = mu2 - mu1 * mu1
 
     /**
      * The skewness of this distribution.
      *
-     * Computed from raw moments μ'_r = H(n, s-r) / H(n, s) via the third central moment.
-     * Returns [Double.NaN] when [numberOfElements] is 1 (degenerate case with zero variance).
+     * Computed from raw moments μ'_r = H(n, s-r) / H(n, s) via the third central moment. Returns
+     * [Double.NaN] when [numberOfElements] is 1 (degenerate case with zero variance).
      */
     override val skewness: Double
         get() {
@@ -177,8 +179,8 @@ public class ZipfDistribution(
     /**
      * The excess kurtosis (Fisher definition) of this distribution.
      *
-     * Computed from raw moments μ'_r = H(n, s-r) / H(n, s) via the fourth central moment.
-     * Returns [Double.NaN] when [numberOfElements] is 1 (degenerate case with zero variance).
+     * Computed from raw moments μ'_r = H(n, s-r) / H(n, s) via the fourth central moment. Returns
+     * [Double.NaN] when [numberOfElements] is 1 (degenerate case with zero variance).
      */
     override val kurtosis: Double
         get() {
@@ -190,7 +192,8 @@ public class ZipfDistribution(
         }
 
     /**
-     * The Shannon entropy of this distribution in nats, computed by summing over the entire support.
+     * The Shannon entropy of this distribution in nats, computed by summing over the entire
+     * support.
      */
     override val entropy: Double
         get() {

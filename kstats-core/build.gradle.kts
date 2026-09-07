@@ -1,3 +1,1 @@
-plugins {
-    id("kstats.kmp-library")
-}
+plugins { id("kstats.kmp-library") }

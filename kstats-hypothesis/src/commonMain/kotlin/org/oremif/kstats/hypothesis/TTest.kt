@@ -1,5 +1,7 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.abs
+import kotlin.math.sqrt
 import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
@@ -7,15 +9,13 @@ import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.descriptive.standardDeviation
 import org.oremif.kstats.descriptive.variance
 import org.oremif.kstats.distributions.StudentTDistribution
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 /**
  * Performs a one-sample t-test for whether the population mean equals [mu].
  *
- * The null hypothesis is that the true mean of the population from which [sample] was
- * drawn equals [mu]. The test uses the Student's t-distribution with n-1 degrees of freedom,
- * where n is the sample size.
+ * The null hypothesis is that the true mean of the population from which [sample] was drawn equals
+ * [mu]. The test uses the Student's t-distribution with n-1 degrees of freedom, where n is the
+ * sample size.
  *
  * ### Example:
  * ```kotlin
@@ -29,22 +29,23 @@ import kotlin.math.sqrt
  *
  * @param sample the observed values. Must contain at least 2 elements.
  * @param mu the hypothesized population mean. Defaults to `0.0`.
- * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED],
- * which tests whether the true mean differs from [mu] in either direction.
- * @param confidenceLevel the confidence level for the confidence interval. Defaults to `0.95` (95%).
- * @return a [TestResult] containing the t-statistic, p-value, degrees of freedom (n-1),
- * a confidence interval for the mean, and additional info with "mean" and "standardError".
+ * @param alternative the direction of the alternative hypothesis. Defaults to
+ *   [Alternative.TWO_SIDED], which tests whether the true mean differs from [mu] in either
+ *   direction.
+ * @param confidenceLevel the confidence level for the confidence interval. Defaults to `0.95`
+ *   (95%).
+ * @return a [TestResult] containing the t-statistic, p-value, degrees of freedom (n-1), a
+ *   confidence interval for the mean, and additional info with "mean" and "standardError".
  */
 public fun tTest(
     sample: DoubleArray,
     mu: Double = 0.0,
     alternative: Alternative = Alternative.TWO_SIDED,
-    confidenceLevel: Double = 0.95
+    confidenceLevel: Double = 0.95,
 ): TestResult {
     if (sample.size < 2) throw InsufficientDataException("Sample must have at least 2 elements")
-    if (confidenceLevel <= 0.0 || confidenceLevel >= 1.0) throw InvalidParameterException(
-        "confidenceLevel must be in (0, 1), got $confidenceLevel"
-    )
+    if (confidenceLevel <= 0.0 || confidenceLevel >= 1.0)
+        throw InvalidParameterException("confidenceLevel must be in (0, 1), got $confidenceLevel")
 
     val n = sample.size
     val mean = sample.mean()
@@ -56,16 +57,21 @@ public fun tTest(
         val diff = mean - mu
         return TestResult(
             testName = "One-Sample t-Test",
-            statistic = if (diff == 0.0) Double.NaN else if (diff > 0) Double.POSITIVE_INFINITY else Double.NEGATIVE_INFINITY,
-            pValue = if (diff == 0.0) Double.NaN else when (alternative) {
-                Alternative.TWO_SIDED -> 0.0
-                Alternative.LESS -> if (diff < 0) 0.0 else 1.0
-                Alternative.GREATER -> if (diff > 0) 0.0 else 1.0
-            },
+            statistic =
+                if (diff == 0.0) Double.NaN
+                else if (diff > 0) Double.POSITIVE_INFINITY else Double.NEGATIVE_INFINITY,
+            pValue =
+                if (diff == 0.0) Double.NaN
+                else
+                    when (alternative) {
+                        Alternative.TWO_SIDED -> 0.0
+                        Alternative.LESS -> if (diff < 0) 0.0 else 1.0
+                        Alternative.GREATER -> if (diff > 0) 0.0 else 1.0
+                    },
             degreesOfFreedom = (n - 1).toDouble(),
             alternative = alternative,
             confidenceInterval = ConfidenceInterval(mean, mean),
-            additionalInfo = mapOf("mean" to mean, "standardError" to 0.0)
+            additionalInfo = mapOf("mean" to mean, "standardError" to 0.0),
         )
     }
 
@@ -73,29 +79,31 @@ public fun tTest(
     val df = (n - 1).toDouble()
 
     val dist = StudentTDistribution(df)
-    val pValue = when (alternative) {
-        Alternative.TWO_SIDED -> 2.0 * dist.sf(abs(t))
-        Alternative.LESS -> dist.cdf(t)
-        Alternative.GREATER -> dist.sf(t)
-    }
+    val pValue =
+        when (alternative) {
+            Alternative.TWO_SIDED -> 2.0 * dist.sf(abs(t))
+            Alternative.LESS -> dist.cdf(t)
+            Alternative.GREATER -> dist.sf(t)
+        }
 
     val alpha = 1.0 - confidenceLevel
-    val ci = when (alternative) {
-        Alternative.TWO_SIDED -> {
-            val tCrit = dist.quantile(1.0 - alpha / 2.0)
-            ConfidenceInterval(mean - tCrit * se, mean + tCrit * se)
-        }
+    val ci =
+        when (alternative) {
+            Alternative.TWO_SIDED -> {
+                val tCrit = dist.quantile(1.0 - alpha / 2.0)
+                ConfidenceInterval(mean - tCrit * se, mean + tCrit * se)
+            }
 
-        Alternative.LESS -> {
-            val tCrit = dist.quantile(1.0 - alpha)
-            ConfidenceInterval(Double.NEGATIVE_INFINITY, mean + tCrit * se)
-        }
+            Alternative.LESS -> {
+                val tCrit = dist.quantile(1.0 - alpha)
+                ConfidenceInterval(Double.NEGATIVE_INFINITY, mean + tCrit * se)
+            }
 
-        Alternative.GREATER -> {
-            val tCrit = dist.quantile(1.0 - alpha)
-            ConfidenceInterval(mean - tCrit * se, Double.POSITIVE_INFINITY)
+            Alternative.GREATER -> {
+                val tCrit = dist.quantile(1.0 - alpha)
+                ConfidenceInterval(mean - tCrit * se, Double.POSITIVE_INFINITY)
+            }
         }
-    }
 
     return TestResult(
         testName = "One-Sample t-Test",
@@ -104,17 +112,17 @@ public fun tTest(
         degreesOfFreedom = df,
         alternative = alternative,
         confidenceInterval = ci,
-        additionalInfo = mapOf("mean" to mean, "standardError" to se)
+        additionalInfo = mapOf("mean" to mean, "standardError" to se),
     )
 }
 
 /**
  * Performs a two-sample t-test for whether two populations have the same mean.
  *
- * The null hypothesis is that the two populations from which [sample1] and [sample2] were
- * drawn have equal means. By default, uses Welch's t-test which does not assume equal
- * variances. Set [equalVariances] to `true` for the pooled (Student's) variant when the
- * populations are known to have similar variances.
+ * The null hypothesis is that the two populations from which [sample1] and [sample2] were drawn
+ * have equal means. By default, uses Welch's t-test which does not assume equal variances. Set
+ * [equalVariances] to `true` for the pooled (Student's) variant when the populations are known to
+ * have similar variances.
  *
  * ### Example:
  * ```kotlin
@@ -128,26 +136,27 @@ public fun tTest(
  *
  * @param sample1 the first sample. Must contain at least 2 elements.
  * @param sample2 the second sample. Must contain at least 2 elements.
- * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED],
- * which tests whether the means differ in either direction.
+ * @param alternative the direction of the alternative hypothesis. Defaults to
+ *   [Alternative.TWO_SIDED], which tests whether the means differ in either direction.
  * @param equalVariances whether to assume equal variances in both populations. Defaults to `false`
- * (Welch's t-test). Set to `true` for the pooled (Student's) t-test.
- * @param confidenceLevel the confidence level for the confidence interval. Defaults to `0.95` (95%).
+ *   (Welch's t-test). Set to `true` for the pooled (Student's) t-test.
+ * @param confidenceLevel the confidence level for the confidence interval. Defaults to `0.95`
+ *   (95%).
  * @return a [TestResult] containing the t-statistic, p-value, degrees of freedom, a confidence
- * interval for the difference in means, and additional info with "mean1", "mean2", and "meanDifference".
+ *   interval for the difference in means, and additional info with "mean1", "mean2", and
+ *   "meanDifference".
  */
 public fun tTest(
     sample1: DoubleArray,
     sample2: DoubleArray,
     alternative: Alternative = Alternative.TWO_SIDED,
     equalVariances: Boolean = false,
-    confidenceLevel: Double = 0.95
+    confidenceLevel: Double = 0.95,
 ): TestResult {
     if (sample1.size < 2) throw InsufficientDataException("Sample 1 must have at least 2 elements")
     if (sample2.size < 2) throw InsufficientDataException("Sample 2 must have at least 2 elements")
-    if (confidenceLevel <= 0.0 || confidenceLevel >= 1.0) throw InvalidParameterException(
-        "confidenceLevel must be in (0, 1), got $confidenceLevel"
-    )
+    if (confidenceLevel <= 0.0 || confidenceLevel >= 1.0)
+        throw InvalidParameterException("confidenceLevel must be in (0, 1), got $confidenceLevel")
 
     val n1 = sample1.size.toDouble()
     val n2 = sample2.size.toDouble()
@@ -179,45 +188,53 @@ public fun tTest(
     if (se == 0.0) {
         val diff = mean1 - mean2
         return TestResult(
-            testName = if (equalVariances) "Two-Sample t-Test (Equal Variances)" else "Welch's t-Test",
-            statistic = if (diff == 0.0) Double.NaN else if (diff > 0) Double.POSITIVE_INFINITY else Double.NEGATIVE_INFINITY,
-            pValue = if (diff == 0.0) Double.NaN else when (alternative) {
-                Alternative.TWO_SIDED -> 0.0
-                Alternative.LESS -> if (diff < 0) 0.0 else 1.0
-                Alternative.GREATER -> if (diff > 0) 0.0 else 1.0
-            },
+            testName =
+                if (equalVariances) "Two-Sample t-Test (Equal Variances)" else "Welch's t-Test",
+            statistic =
+                if (diff == 0.0) Double.NaN
+                else if (diff > 0) Double.POSITIVE_INFINITY else Double.NEGATIVE_INFINITY,
+            pValue =
+                if (diff == 0.0) Double.NaN
+                else
+                    when (alternative) {
+                        Alternative.TWO_SIDED -> 0.0
+                        Alternative.LESS -> if (diff < 0) 0.0 else 1.0
+                        Alternative.GREATER -> if (diff > 0) 0.0 else 1.0
+                    },
             degreesOfFreedom = df,
             alternative = alternative,
             confidenceInterval = ConfidenceInterval(diff, diff),
-            additionalInfo = mapOf("mean1" to mean1, "mean2" to mean2, "meanDifference" to diff)
+            additionalInfo = mapOf("mean1" to mean1, "mean2" to mean2, "meanDifference" to diff),
         )
     }
 
     val dist = StudentTDistribution(df)
-    val pValue = when (alternative) {
-        Alternative.TWO_SIDED -> 2.0 * dist.sf(abs(t))
-        Alternative.LESS -> dist.cdf(t)
-        Alternative.GREATER -> dist.sf(t)
-    }
+    val pValue =
+        when (alternative) {
+            Alternative.TWO_SIDED -> 2.0 * dist.sf(abs(t))
+            Alternative.LESS -> dist.cdf(t)
+            Alternative.GREATER -> dist.sf(t)
+        }
 
     val diff = mean1 - mean2
     val alpha = 1.0 - confidenceLevel
-    val ci = when (alternative) {
-        Alternative.TWO_SIDED -> {
-            val tCrit = dist.quantile(1.0 - alpha / 2.0)
-            ConfidenceInterval(diff - tCrit * se, diff + tCrit * se)
-        }
+    val ci =
+        when (alternative) {
+            Alternative.TWO_SIDED -> {
+                val tCrit = dist.quantile(1.0 - alpha / 2.0)
+                ConfidenceInterval(diff - tCrit * se, diff + tCrit * se)
+            }
 
-        Alternative.LESS -> {
-            val tCrit = dist.quantile(1.0 - alpha)
-            ConfidenceInterval(Double.NEGATIVE_INFINITY, diff + tCrit * se)
-        }
+            Alternative.LESS -> {
+                val tCrit = dist.quantile(1.0 - alpha)
+                ConfidenceInterval(Double.NEGATIVE_INFINITY, diff + tCrit * se)
+            }
 
-        Alternative.GREATER -> {
-            val tCrit = dist.quantile(1.0 - alpha)
-            ConfidenceInterval(diff - tCrit * se, Double.POSITIVE_INFINITY)
+            Alternative.GREATER -> {
+                val tCrit = dist.quantile(1.0 - alpha)
+                ConfidenceInterval(diff - tCrit * se, Double.POSITIVE_INFINITY)
+            }
         }
-    }
 
     return TestResult(
         testName = if (equalVariances) "Two-Sample t-Test (Equal Variances)" else "Welch's t-Test",
@@ -226,7 +243,7 @@ public fun tTest(
         degreesOfFreedom = df,
         alternative = alternative,
         confidenceInterval = ci,
-        additionalInfo = mapOf("mean1" to mean1, "mean2" to mean2, "meanDifference" to diff)
+        additionalInfo = mapOf("mean1" to mean1, "mean2" to mean2, "meanDifference" to diff),
     )
 }
 
@@ -234,9 +251,9 @@ public fun tTest(
  * Performs a paired t-test for whether the mean difference between matched observations is zero.
  *
  * The null hypothesis is that the true mean difference between the paired observations is zero.
- * Internally computes the element-wise differences and delegates to a one-sample t-test on
- * those differences. This test is appropriate when the two samples are not independent — for
- * example, before/after measurements on the same subjects.
+ * Internally computes the element-wise differences and delegates to a one-sample t-test on those
+ * differences. This test is appropriate when the two samples are not independent — for example,
+ * before/after measurements on the same subjects.
  *
  * ### Example:
  * ```kotlin
@@ -249,27 +266,31 @@ public fun tTest(
  * ```
  *
  * @param sample1 the first set of observations (e.g. "before"). Must have at least 2 elements.
- * @param sample2 the second set of observations (e.g. "after"). Must have the same size as [sample1].
- * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED],
- * which tests whether the mean difference differs from zero in either direction.
- * @param confidenceLevel the confidence level for the confidence interval. Defaults to `0.95` (95%).
- * @return a [TestResult] containing the t-statistic, p-value, degrees of freedom (n-1),
- * and a confidence interval for the mean difference.
+ * @param sample2 the second set of observations (e.g. "after"). Must have the same size as
+ *   [sample1].
+ * @param alternative the direction of the alternative hypothesis. Defaults to
+ *   [Alternative.TWO_SIDED], which tests whether the mean difference differs from zero in either
+ *   direction.
+ * @param confidenceLevel the confidence level for the confidence interval. Defaults to `0.95`
+ *   (95%).
+ * @return a [TestResult] containing the t-statistic, p-value, degrees of freedom (n-1), and a
+ *   confidence interval for the mean difference.
  */
 public fun pairedTTest(
     sample1: DoubleArray,
     sample2: DoubleArray,
     alternative: Alternative = Alternative.TWO_SIDED,
-    confidenceLevel: Double = 0.95
+    confidenceLevel: Double = 0.95,
 ): TestResult {
-    if (sample1.size != sample2.size) throw InvalidParameterException("Samples must have the same size")
+    if (sample1.size != sample2.size)
+        throw InvalidParameterException("Samples must have the same size")
     if (sample1.size < 2) throw InsufficientDataException("Samples must have at least 2 elements")
-    if (confidenceLevel <= 0.0 || confidenceLevel >= 1.0) throw InvalidParameterException(
-        "confidenceLevel must be in (0, 1), got $confidenceLevel"
-    )
+    if (confidenceLevel <= 0.0 || confidenceLevel >= 1.0)
+        throw InvalidParameterException("confidenceLevel must be in (0, 1), got $confidenceLevel")
 
     val differences = DoubleArray(sample1.size) { sample1[it] - sample2[it] }
-    val result = tTest(differences, mu = 0.0, alternative = alternative, confidenceLevel = confidenceLevel)
+    val result =
+        tTest(differences, mu = 0.0, alternative = alternative, confidenceLevel = confidenceLevel)
 
     return result.copy(testName = "Paired t-Test")
 }

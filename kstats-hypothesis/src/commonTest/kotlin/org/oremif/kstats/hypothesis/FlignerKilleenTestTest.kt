@@ -28,7 +28,12 @@ class FlignerKilleenTestTest : AbstractVarianceTestTest() {
     fun threeGroupsDifferentVariance() {
         // scipy: fligner([10,11,12,9,10], [5,15,10,20,0], [8,9,10,11,12])
         //   → (5.8192, 0.05450)
-        val result = flignerKilleenTest(TestData.LOW_VARIANCE, TestData.HIGH_VARIANCE, TestData.MEDIUM_VARIANCE)
+        val result =
+            flignerKilleenTest(
+                TestData.LOW_VARIANCE,
+                TestData.HIGH_VARIANCE,
+                TestData.MEDIUM_VARIANCE,
+            )
         assertEquals(5.819209146478717, result.statistic, tolStat)
         assertEquals(0.05449727529012288, result.pValue, tolP)
     }
@@ -37,10 +42,14 @@ class FlignerKilleenTestTest : AbstractVarianceTestTest() {
     fun fiveGroups() {
         // scipy: fligner([1..5], [2,4,6,8,10], [1,3,5,7,9], [3,6,9,12,15], [0.5,1,1.5,2,2.5])
         //   → (8.0778, 0.08877)
-        val result = flignerKilleenTest(
-            TestData.SEQUENTIAL_1_5, TestData.EVEN_SPREAD, TestData.ODD_SPREAD,
-            TestData.TRIPLE_SPREAD, TestData.HALF_SPREAD
-        )
+        val result =
+            flignerKilleenTest(
+                TestData.SEQUENTIAL_1_5,
+                TestData.EVEN_SPREAD,
+                TestData.ODD_SPREAD,
+                TestData.TRIPLE_SPREAD,
+                TestData.HALF_SPREAD,
+            )
         assertEquals(8.077844101257757, result.statistic, tolStat)
         assertEquals(0.08876792756759197, result.pValue, tolP)
     }
@@ -73,7 +82,12 @@ class FlignerKilleenTestTest : AbstractVarianceTestTest() {
 
     @Test
     fun dfVerification() {
-        val result = flignerKilleenTest(TestData.SEQUENTIAL_1_5, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
+        val result =
+            flignerKilleenTest(
+                TestData.SEQUENTIAL_1_5,
+                TestData.SEQUENTIAL_6_10,
+                TestData.SEQUENTIAL_11_15,
+            )
         assertEquals(2.0, result.degreesOfFreedom) // k-1 = 3-1 = 2
     }
 

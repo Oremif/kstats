@@ -20,29 +20,141 @@ Diese Anleitung analysiert Performance-Metriken eines Backend-Dienstes, die übe
 {/*---FUN edaDataset--*/}
 
 ```kotlin
-val responseTimeMs = doubleArrayOf(
-    89.2, 95.1, 87.6, 102.3, 91.8, 88.4, 96.7, 103.5, 90.1, 94.3,
-    88.9, 97.2, 105.8, 91.4, 93.6, 87.1, 99.0, 92.5, 96.1, 104.2,
-    90.7, 88.3, 101.6, 93.9, 95.4, 89.8, 98.3, 106.1, 91.0, 94.7
-)
+val responseTimeMs =
+    doubleArrayOf(
+        89.2,
+        95.1,
+        87.6,
+        102.3,
+        91.8,
+        88.4,
+        96.7,
+        103.5,
+        90.1,
+        94.3,
+        88.9,
+        97.2,
+        105.8,
+        91.4,
+        93.6,
+        87.1,
+        99.0,
+        92.5,
+        96.1,
+        104.2,
+        90.7,
+        88.3,
+        101.6,
+        93.9,
+        95.4,
+        89.8,
+        98.3,
+        106.1,
+        91.0,
+        94.7,
+    )
 
-val errorsPerHour = doubleArrayOf(
-    2.0, 3.0, 1.0, 5.0, 2.0, 1.0, 4.0, 6.0, 2.0, 3.0,
-    1.0, 4.0, 7.0, 2.0, 3.0, 1.0, 5.0, 2.0, 4.0, 6.0,
-    2.0, 1.0, 5.0, 3.0, 3.0, 1.0, 4.0, 8.0, 2.0, 3.0
-)
+val errorsPerHour =
+    doubleArrayOf(
+        2.0,
+        3.0,
+        1.0,
+        5.0,
+        2.0,
+        1.0,
+        4.0,
+        6.0,
+        2.0,
+        3.0,
+        1.0,
+        4.0,
+        7.0,
+        2.0,
+        3.0,
+        1.0,
+        5.0,
+        2.0,
+        4.0,
+        6.0,
+        2.0,
+        1.0,
+        5.0,
+        3.0,
+        3.0,
+        1.0,
+        4.0,
+        8.0,
+        2.0,
+        3.0,
+    )
 
-val memoryUsageMb = doubleArrayOf(
-    512.3, 528.1, 505.7, 545.2, 519.6, 508.4, 534.8, 551.3, 515.0, 526.7,
-    509.2, 537.1, 558.4, 517.8, 524.3, 503.1, 541.6, 520.9, 531.5, 549.7,
-    514.2, 506.8, 543.9, 522.5, 529.0, 511.4, 539.3, 561.2, 516.3, 527.4
-)
+val memoryUsageMb =
+    doubleArrayOf(
+        512.3,
+        528.1,
+        505.7,
+        545.2,
+        519.6,
+        508.4,
+        534.8,
+        551.3,
+        515.0,
+        526.7,
+        509.2,
+        537.1,
+        558.4,
+        517.8,
+        524.3,
+        503.1,
+        541.6,
+        520.9,
+        531.5,
+        549.7,
+        514.2,
+        506.8,
+        543.9,
+        522.5,
+        529.0,
+        511.4,
+        539.3,
+        561.2,
+        516.3,
+        527.4,
+    )
 
-val throughputRps = doubleArrayOf(
-    245.0, 238.0, 251.0, 225.0, 242.0, 249.0, 232.0, 218.0, 244.0, 236.0,
-    250.0, 230.0, 212.0, 243.0, 237.0, 253.0, 227.0, 241.0, 233.0, 220.0,
-    246.0, 252.0, 224.0, 239.0, 235.0, 248.0, 228.0, 210.0, 243.0, 234.0
-)
+val throughputRps =
+    doubleArrayOf(
+        245.0,
+        238.0,
+        251.0,
+        225.0,
+        242.0,
+        249.0,
+        232.0,
+        218.0,
+        244.0,
+        236.0,
+        250.0,
+        230.0,
+        212.0,
+        243.0,
+        237.0,
+        253.0,
+        227.0,
+        241.0,
+        233.0,
+        220.0,
+        246.0,
+        252.0,
+        224.0,
+        239.0,
+        235.0,
+        248.0,
+        228.0,
+        210.0,
+        243.0,
+        234.0,
+    )
 ```
 
 {/*---END--*/}
@@ -57,10 +169,22 @@ val errSummary = errorsPerHour.describe()
 val memSummary = memoryUsageMb.describe()
 val tpSummary = throughputRps.describe()
 
-rtSummary.mean; rtSummary.standardDeviation; rtSummary.min; rtSummary.max
-errSummary.mean; errSummary.standardDeviation; errSummary.min; errSummary.max
-memSummary.mean; memSummary.standardDeviation; memSummary.min; memSummary.max
-tpSummary.mean; tpSummary.standardDeviation; tpSummary.min; tpSummary.max
+rtSummary.mean
+rtSummary.standardDeviation
+rtSummary.min
+rtSummary.max
+errSummary.mean
+errSummary.standardDeviation
+errSummary.min
+errSummary.max
+memSummary.mean
+memSummary.standardDeviation
+memSummary.min
+memSummary.max
+tpSummary.mean
+tpSummary.standardDeviation
+tpSummary.min
+tpSummary.max
 ```
 
 {/*---END--*/}
@@ -118,16 +242,18 @@ shapiroWilkTest(throughputRps).pValue
 {/*---FUN edaFitDistribution--*/}
 
 ```kotlin
-val rtFit = NormalDistribution(
-    mu = responseTimeMs.mean(),
-    sigma = responseTimeMs.standardDeviation()
-)
+val rtFit =
+    NormalDistribution(
+        mu = responseTimeMs.mean(),
+        sigma = responseTimeMs.standardDeviation(),
+    )
 kolmogorovSmirnovTest(responseTimeMs, rtFit).pValue
 
-val memFit = NormalDistribution(
-    mu = memoryUsageMb.mean(),
-    sigma = memoryUsageMb.standardDeviation()
-)
+val memFit =
+    NormalDistribution(
+        mu = memoryUsageMb.mean(),
+        sigma = memoryUsageMb.standardDeviation(),
+    )
 kolmogorovSmirnovTest(memoryUsageMb, memFit).pValue
 ```
 
@@ -162,9 +288,9 @@ rtVsThroughput.pValue
 // Model: how does error count relate to response time?
 val regression = simpleLinearRegression(errorsPerHour, responseTimeMs)
 
-regression.slope     // ms increase per additional error/hour
+regression.slope // ms increase per additional error/hour
 regression.intercept // baseline response time at zero errors
-regression.rSquared  // proportion of variance explained
+regression.rSquared // proportion of variance explained
 
 regression.predict(4.0) // expected latency at 4 errors/hour
 ```

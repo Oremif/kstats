@@ -1,15 +1,20 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.test.*
 import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.test.*
 
 class ProportionZTestTest {
 
     private val tol = 1e-10
 
-    private fun assertP(expected: Double, actual: Double, tol: Double = 1e-10, message: String = "") {
+    private fun assertP(
+        expected: Double,
+        actual: Double,
+        tol: Double = 1e-10,
+        message: String = "",
+    ) {
         assertEquals(expected, actual, tol, "p-value $message")
     }
 
@@ -18,7 +23,7 @@ class ProportionZTestTest {
         expectedHigh: Double,
         ci: ConfidenceInterval?,
         tol: Double = 1e-10,
-        message: String = ""
+        message: String = "",
     ) {
         requireNotNull(ci) { "CI should not be null $message" }
         assertEquals(expectedLow, ci.lower, tol, "CI lower $message")
@@ -44,8 +49,15 @@ class ProportionZTestTest {
     fun testOneSampleKnownValuesAllAlternatives60of100() {
         // scipy: z = 2.0 for all alternatives
         val two = proportionZTest(successes = 60, trials = 100, p0 = 0.5)
-        val less = proportionZTest(successes = 60, trials = 100, p0 = 0.5, alternative = Alternative.LESS)
-        val greater = proportionZTest(successes = 60, trials = 100, p0 = 0.5, alternative = Alternative.GREATER)
+        val less =
+            proportionZTest(successes = 60, trials = 100, p0 = 0.5, alternative = Alternative.LESS)
+        val greater =
+            proportionZTest(
+                successes = 60,
+                trials = 100,
+                p0 = 0.5,
+                alternative = Alternative.GREATER,
+            )
 
         assertEquals(2.0, two.statistic, tol)
         assertEquals(2.0, less.statistic, tol)
@@ -151,20 +163,40 @@ class ProportionZTestTest {
         // z_crit_95 = norm.ppf(0.95) = 1.64485362695147
         // se_wald = sqrt(0.6*0.4/100) = 0.0489897948556636
         // upper = 0.6 + 1.64485... * 0.04898... = 0.680581041751947
-        val result = proportionZTest(
-            successes = 60, trials = 100, p0 = 0.5, alternative = Alternative.LESS
+        val result =
+            proportionZTest(
+                successes = 60,
+                trials = 100,
+                p0 = 0.5,
+                alternative = Alternative.LESS,
+            )
+        assertCI(
+            0.0,
+            0.680581041751947,
+            result.confidenceInterval,
+            tol = 1e-10,
+            message = "one-sided LESS",
         )
-        assertCI(0.0, 0.680581041751947, result.confidenceInterval, tol = 1e-10, message = "one-sided LESS")
     }
 
     @Test
     fun testOneSampleOneSidedCIGreater() {
         // scipy: CI GREATER(0.95) for 60/100 => [pHat - z_crit_95 * se_wald, 1]
         // lower = 0.6 - 1.64485... * 0.04898... = 0.519418958248053
-        val result = proportionZTest(
-            successes = 60, trials = 100, p0 = 0.5, alternative = Alternative.GREATER
+        val result =
+            proportionZTest(
+                successes = 60,
+                trials = 100,
+                p0 = 0.5,
+                alternative = Alternative.GREATER,
+            )
+        assertCI(
+            0.519418958248053,
+            1.0,
+            result.confidenceInterval,
+            tol = 1e-10,
+            message = "one-sided GREATER",
         )
-        assertCI(0.519418958248053, 1.0, result.confidenceInterval, tol = 1e-10, message = "one-sided GREATER")
     }
 
     // =========================================================================
@@ -276,7 +308,10 @@ class ProportionZTestTest {
         // z = 20, pval_two = 5.50724823721043e-89
         val result = proportionZTest(successes = 510000, trials = 1000000, p0 = 0.5)
         assertEquals(20.0, result.statistic, 1e-6)
-        assertTrue(result.pValue < 1e-80, "p-value should be extremely small for z=20, got ${result.pValue}")
+        assertTrue(
+            result.pValue < 1e-80,
+            "p-value should be extremely small for z=20, got ${result.pValue}",
+        )
         assertTrue(result.isSignificant())
     }
 
@@ -313,7 +348,8 @@ class ProportionZTestTest {
     @Test
     fun testOneSampleNaNConfidenceLevel() {
         // IEEE 754: NaN passes <= / >= validation. NaN propagates through alpha -> CI bounds.
-        val result = proportionZTest(successes = 50, trials = 100, p0 = 0.5, confidenceLevel = Double.NaN)
+        val result =
+            proportionZTest(successes = 50, trials = 100, p0 = 0.5, confidenceLevel = Double.NaN)
         assertTrue(result.statistic.isFinite(), "statistic should be finite (NaN only affects CI)")
         val ci = result.confidenceInterval!!
         assertTrue(ci.lower.isNaN(), "CI lower should be NaN when confidenceLevel is NaN")
@@ -336,17 +372,18 @@ class ProportionZTestTest {
 
     @Test
     fun testOneSamplePValueRange() {
-        val cases = listOf(
-            proportionZTest(successes = 60, trials = 100, p0 = 0.5),
-            proportionZTest(successes = 30, trials = 200, p0 = 0.2),
-            proportionZTest(successes = 1, trials = 1, p0 = 0.5),
-            proportionZTest(successes = 0, trials = 100, p0 = 0.5),
-            proportionZTest(successes = 100, trials = 100, p0 = 0.5),
-        )
+        val cases =
+            listOf(
+                proportionZTest(successes = 60, trials = 100, p0 = 0.5),
+                proportionZTest(successes = 30, trials = 200, p0 = 0.2),
+                proportionZTest(successes = 1, trials = 1, p0 = 0.5),
+                proportionZTest(successes = 0, trials = 100, p0 = 0.5),
+                proportionZTest(successes = 100, trials = 100, p0 = 0.5),
+            )
         for (result in cases) {
             assertTrue(
                 result.pValue in 0.0..1.0,
-                "p-value should be in [0, 1], got ${result.pValue}"
+                "p-value should be in [0, 1], got ${result.pValue}",
             )
         }
     }
@@ -354,8 +391,15 @@ class ProportionZTestTest {
     @Test
     fun testOneSampleAlternativeConsistency() {
         val two = proportionZTest(successes = 60, trials = 100, p0 = 0.5)
-        val less = proportionZTest(successes = 60, trials = 100, p0 = 0.5, alternative = Alternative.LESS)
-        val greater = proportionZTest(successes = 60, trials = 100, p0 = 0.5, alternative = Alternative.GREATER)
+        val less =
+            proportionZTest(successes = 60, trials = 100, p0 = 0.5, alternative = Alternative.LESS)
+        val greater =
+            proportionZTest(
+                successes = 60,
+                trials = 100,
+                p0 = 0.5,
+                alternative = Alternative.GREATER,
+            )
 
         // Same statistic regardless of alternative
         assertEquals(two.statistic, less.statistic, 1e-14, "statistic: two vs less")
@@ -366,8 +410,10 @@ class ProportionZTestTest {
 
         // Two-sided = 2 * min(less, greater)
         assertEquals(
-            two.pValue, 2.0 * minOf(less.pValue, greater.pValue), 1e-14,
-            "two-sided = 2 * min(one-sided)"
+            two.pValue,
+            2.0 * minOf(less.pValue, greater.pValue),
+            1e-14,
+            "two-sided = 2 * min(one-sided)",
         )
     }
 
@@ -375,8 +421,15 @@ class ProportionZTestTest {
     fun testOneSampleAlternativeConsistencyNegativeZ() {
         // When z is negative (pHat < p0), verify the same properties
         val two = proportionZTest(successes = 30, trials = 200, p0 = 0.2)
-        val less = proportionZTest(successes = 30, trials = 200, p0 = 0.2, alternative = Alternative.LESS)
-        val greater = proportionZTest(successes = 30, trials = 200, p0 = 0.2, alternative = Alternative.GREATER)
+        val less =
+            proportionZTest(successes = 30, trials = 200, p0 = 0.2, alternative = Alternative.LESS)
+        val greater =
+            proportionZTest(
+                successes = 30,
+                trials = 200,
+                p0 = 0.2,
+                alternative = Alternative.GREATER,
+            )
 
         assertEquals(two.statistic, less.statistic, 1e-14)
         assertEquals(two.statistic, greater.statistic, 1e-14)
@@ -396,25 +449,37 @@ class ProportionZTestTest {
 
     @Test
     fun testOneSampleIsSignificantConsistency() {
-        val cases = listOf(
-            proportionZTest(successes = 60, trials = 100, p0 = 0.5),  // p ≈ 0.046, significant
-            proportionZTest(successes = 75, trials = 150, p0 = 0.5),  // p = 1.0, not significant
-            proportionZTest(successes = 85, trials = 100, p0 = 0.75), // p ≈ 0.021, significant
-            proportionZTest(successes = 10, trials = 50, p0 = 0.3),   // p ≈ 0.123, not significant
-        )
+        val cases =
+            listOf(
+                proportionZTest(successes = 60, trials = 100, p0 = 0.5), // p ≈ 0.046, significant
+                proportionZTest(successes = 75, trials = 150, p0 = 0.5), // p = 1.0, not significant
+                proportionZTest(successes = 85, trials = 100, p0 = 0.75), // p ≈ 0.021, significant
+                proportionZTest(
+                    successes = 10,
+                    trials = 50,
+                    p0 = 0.3,
+                ), // p ≈ 0.123, not significant
+            )
         for (result in cases) {
             assertEquals(
-                result.pValue < 0.05, result.isSignificant(),
-                "isSignificant for p=${result.pValue}"
+                result.pValue < 0.05,
+                result.isSignificant(),
+                "isSignificant for p=${result.pValue}",
             )
         }
     }
 
     @Test
     fun testOneSampleCINarrowerAtHigherConfidence() {
-        val ci90 = proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.90).confidenceInterval!!
-        val ci95 = proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.95).confidenceInterval!!
-        val ci99 = proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.99).confidenceInterval!!
+        val ci90 =
+            proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.90)
+                .confidenceInterval!!
+        val ci95 =
+            proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.95)
+                .confidenceInterval!!
+        val ci99 =
+            proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.99)
+                .confidenceInterval!!
 
         // Higher confidence = wider CI
         assertTrue(ci90.lower > ci95.lower, "90% lower > 95% lower")
@@ -426,8 +491,12 @@ class ProportionZTestTest {
     @Test
     fun testOneSampleCustomConfidenceLevels() {
         // scipy: Wald CI for 60/100 at different confidence levels
-        val ci90 = proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.90).confidenceInterval!!
-        val ci99 = proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.99).confidenceInterval!!
+        val ci90 =
+            proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.90)
+                .confidenceInterval!!
+        val ci99 =
+            proportionZTest(successes = 60, trials = 100, p0 = 0.5, confidenceLevel = 0.99)
+                .confidenceInterval!!
 
         // scipy: CI(0.9): [0.519418958248053, 0.680581041751947]
         assertCI(0.519418958248053, 0.680581041751947, ci90, tol = 1e-10, message = "90% CI")
@@ -457,15 +526,17 @@ class ProportionZTestTest {
     fun testOneSampleAlternativeInResult() {
         assertEquals(
             Alternative.TWO_SIDED,
-            proportionZTest(successes = 5, trials = 10, p0 = 0.5).alternative
+            proportionZTest(successes = 5, trials = 10, p0 = 0.5).alternative,
         )
         assertEquals(
             Alternative.LESS,
-            proportionZTest(successes = 5, trials = 10, p0 = 0.5, alternative = Alternative.LESS).alternative
+            proportionZTest(successes = 5, trials = 10, p0 = 0.5, alternative = Alternative.LESS)
+                .alternative,
         )
         assertEquals(
             Alternative.GREATER,
-            proportionZTest(successes = 5, trials = 10, p0 = 0.5, alternative = Alternative.GREATER).alternative
+            proportionZTest(successes = 5, trials = 10, p0 = 0.5, alternative = Alternative.GREATER)
+                .alternative,
         )
     }
 
@@ -477,10 +548,13 @@ class ProportionZTestTest {
     fun testTwoSampleKnownValues60vs40() {
         // scipy: 60/100 vs 40/100
         // z = 2.82842712474619, pval_two = 0.00467773498104728
-        val result = proportionZTest(
-            successes1 = 60, trials1 = 100,
-            successes2 = 40, trials2 = 100
-        )
+        val result =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+            )
         assertEquals(2.82842712474619, result.statistic, tol)
         assertP(0.00467773498104728, result.pValue, message = "60/100 vs 40/100 two-sided")
         assertCI(0.0642097119108593, 0.335790288089141, result.confidenceInterval, tol = 1e-10)
@@ -490,14 +564,22 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleKnownValuesAllAlternatives() {
         // scipy: 60/100 vs 40/100
-        val less = proportionZTest(
-            successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100,
-            alternative = Alternative.LESS
-        )
-        val greater = proportionZTest(
-            successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100,
-            alternative = Alternative.GREATER
-        )
+        val less =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+                alternative = Alternative.LESS,
+            )
+        val greater =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+                alternative = Alternative.GREATER,
+            )
 
         // scipy: pval_less = 0.997661132509476
         assertP(0.997661132509476, less.pValue, message = "60/100 vs 40/100 less")
@@ -509,10 +591,13 @@ class ProportionZTestTest {
     fun testTwoSampleKnownValues30of200vs50of300() {
         // scipy: 30/200 vs 50/300
         // z = -0.498011920555997, pval_two = 0.61847564019994
-        val result = proportionZTest(
-            successes1 = 30, trials1 = 200,
-            successes2 = 50, trials2 = 300
-        )
+        val result =
+            proportionZTest(
+                successes1 = 30,
+                trials1 = 200,
+                successes2 = 50,
+                trials2 = 300,
+            )
         assertEquals(-0.498011920555997, result.statistic, tol)
         assertP(0.61847564019994, result.pValue, message = "30/200 vs 50/300 two-sided")
         assertCI(-0.0816849960509354, 0.0483516627176021, result.confidenceInterval, tol = 1e-10)
@@ -523,10 +608,13 @@ class ProportionZTestTest {
     fun testTwoSampleKnownValues90vs80() {
         // scipy: 90/100 vs 80/100
         // z = 1.98029508595335, pval_two = 0.0476703806561615
-        val result = proportionZTest(
-            successes1 = 90, trials1 = 100,
-            successes2 = 80, trials2 = 100
-        )
+        val result =
+            proportionZTest(
+                successes1 = 90,
+                trials1 = 100,
+                successes2 = 80,
+                trials2 = 100,
+            )
         assertEquals(1.98029508595335, result.statistic, tol)
         assertP(0.0476703806561615, result.pValue, message = "90/100 vs 80/100 two-sided")
         assertCI(0.00200180077299729, 0.197998199227003, result.confidenceInterval, tol = 1e-10)
@@ -535,10 +623,13 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleEqualProportions() {
         // scipy: 150/500 vs 120/400 (both 0.3) => z = 0, pval = 1.0
-        val result = proportionZTest(
-            successes1 = 150, trials1 = 500,
-            successes2 = 120, trials2 = 400
-        )
+        val result =
+            proportionZTest(
+                successes1 = 150,
+                trials1 = 500,
+                successes2 = 120,
+                trials2 = 400,
+            )
         assertEquals(0.0, result.statistic, tol)
         assertP(1.0, result.pValue, message = "equal proportions two-sided")
         assertCI(-0.0602509633579078, 0.0602509633579078, result.confidenceInterval, tol = 1e-10)
@@ -552,10 +643,13 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleBothZeroSuccesses() {
         // Both pHat=0 => pPool=0, sePool=0, diff=0 => z=0, p=1
-        val result = proportionZTest(
-            successes1 = 0, trials1 = 100,
-            successes2 = 0, trials2 = 100
-        )
+        val result =
+            proportionZTest(
+                successes1 = 0,
+                trials1 = 100,
+                successes2 = 0,
+                trials2 = 100,
+            )
         assertEquals(0.0, result.statistic, tol)
         assertP(1.0, result.pValue, message = "both zero successes")
     }
@@ -563,10 +657,13 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleBothAllSuccesses() {
         // Both pHat=1 => pPool=1, sePool=0, diff=0 => z=0, p=1
-        val result = proportionZTest(
-            successes1 = 100, trials1 = 100,
-            successes2 = 100, trials2 = 100
-        )
+        val result =
+            proportionZTest(
+                successes1 = 100,
+                trials1 = 100,
+                successes2 = 100,
+                trials2 = 100,
+            )
         assertEquals(0.0, result.statistic, tol)
         assertP(1.0, result.pValue, message = "both all successes")
     }
@@ -576,10 +673,13 @@ class ProportionZTestTest {
         // 0/100 vs 100/100: extreme case
         // scipy: ppool=0.5, se_pool=0.0707106781186548
         // z = -14.142135623731, pval ≈ 2e-45
-        val result = proportionZTest(
-            successes1 = 0, trials1 = 100,
-            successes2 = 100, trials2 = 100
-        )
+        val result =
+            proportionZTest(
+                successes1 = 0,
+                trials1 = 100,
+                successes2 = 100,
+                trials2 = 100,
+            )
         assertEquals(-14.142135623731, result.statistic, 1e-6)
         assertTrue(result.pValue < 1e-40, "p should be extremely small for 0/100 vs 100/100")
     }
@@ -587,24 +687,30 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleSingleTrialEach() {
         // Minimal sample sizes: 1/1 vs 0/1
-        val result = proportionZTest(
-            successes1 = 1, trials1 = 1,
-            successes2 = 0, trials2 = 1
-        )
+        val result =
+            proportionZTest(
+                successes1 = 1,
+                trials1 = 1,
+                successes2 = 0,
+                trials2 = 1,
+            )
         assertTrue(
             result.statistic.isFinite() || result.statistic.isInfinite(),
-            "statistic should be computable for single trials"
+            "statistic should be computable for single trials",
         )
         assertTrue(result.pValue in 0.0..1.0, "p should be in [0, 1]")
     }
 
     @Test
     fun testTwoSampleOneSidedCILess() {
-        val result = proportionZTest(
-            successes1 = 60, trials1 = 100,
-            successes2 = 40, trials2 = 100,
-            alternative = Alternative.LESS
-        )
+        val result =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+                alternative = Alternative.LESS,
+            )
         val ci = result.confidenceInterval!!
         assertEquals(Double.NEGATIVE_INFINITY, ci.lower, "LESS CI lower should be -Inf")
         assertTrue(ci.upper.isFinite(), "LESS CI upper should be finite")
@@ -612,11 +718,14 @@ class ProportionZTestTest {
 
     @Test
     fun testTwoSampleOneSidedCIGreater() {
-        val result = proportionZTest(
-            successes1 = 60, trials1 = 100,
-            successes2 = 40, trials2 = 100,
-            alternative = Alternative.GREATER
-        )
+        val result =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+                alternative = Alternative.GREATER,
+            )
         val ci = result.confidenceInterval!!
         assertTrue(ci.lower.isFinite(), "GREATER CI lower should be finite")
         assertEquals(Double.POSITIVE_INFINITY, ci.upper, "GREATER CI upper should be +Inf")
@@ -686,9 +795,11 @@ class ProportionZTestTest {
     fun testTwoSampleConfidenceLevelZero() {
         assertFailsWith<InvalidParameterException> {
             proportionZTest(
-                successes1 = 5, trials1 = 10,
-                successes2 = 5, trials2 = 10,
-                confidenceLevel = 0.0
+                successes1 = 5,
+                trials1 = 10,
+                successes2 = 5,
+                trials2 = 10,
+                confidenceLevel = 0.0,
             )
         }
     }
@@ -697,9 +808,11 @@ class ProportionZTestTest {
     fun testTwoSampleConfidenceLevelOne() {
         assertFailsWith<InvalidParameterException> {
             proportionZTest(
-                successes1 = 5, trials1 = 10,
-                successes2 = 5, trials2 = 10,
-                confidenceLevel = 1.0
+                successes1 = 5,
+                trials1 = 10,
+                successes2 = 5,
+                trials2 = 10,
+                confidenceLevel = 1.0,
             )
         }
     }
@@ -708,9 +821,11 @@ class ProportionZTestTest {
     fun testTwoSampleConfidenceLevelNegative() {
         assertFailsWith<InvalidParameterException> {
             proportionZTest(
-                successes1 = 5, trials1 = 10,
-                successes2 = 5, trials2 = 10,
-                confidenceLevel = -0.5
+                successes1 = 5,
+                trials1 = 10,
+                successes2 = 5,
+                trials2 = 10,
+                confidenceLevel = -0.5,
             )
         }
     }
@@ -722,10 +837,13 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleLargeN() {
         // Large sample sizes should remain numerically stable
-        val result = proportionZTest(
-            successes1 = 50500, trials1 = 100000,
-            successes2 = 49500, trials2 = 100000
-        )
+        val result =
+            proportionZTest(
+                successes1 = 50500,
+                trials1 = 100000,
+                successes2 = 49500,
+                trials2 = 100000,
+            )
         assertTrue(result.statistic.isFinite(), "statistic should be finite for large n")
         assertTrue(result.pValue.isFinite(), "p-value should be finite for large n")
         assertTrue(result.pValue in 0.0..1.0)
@@ -734,10 +852,13 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleAsymmetricSizes() {
         // Very different sample sizes: 10 vs 10000
-        val result = proportionZTest(
-            successes1 = 5, trials1 = 10,
-            successes2 = 5000, trials2 = 10000
-        )
+        val result =
+            proportionZTest(
+                successes1 = 5,
+                trials1 = 10,
+                successes2 = 5000,
+                trials2 = 10000,
+            )
         assertTrue(result.statistic.isFinite())
         assertTrue(result.pValue in 0.0..1.0)
     }
@@ -749,11 +870,14 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleNaNConfidenceLevel() {
         // IEEE 754: NaN passes <= / >= validation. NaN propagates through alpha -> CI bounds.
-        val result = proportionZTest(
-            successes1 = 60, trials1 = 100,
-            successes2 = 40, trials2 = 100,
-            confidenceLevel = Double.NaN
-        )
+        val result =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+                confidenceLevel = Double.NaN,
+            )
         assertTrue(result.statistic.isFinite(), "statistic should be finite (NaN only affects CI)")
         val ci = result.confidenceInterval!!
         assertTrue(ci.lower.isNaN(), "CI lower should be NaN when confidenceLevel is NaN")
@@ -766,18 +890,19 @@ class ProportionZTestTest {
 
     @Test
     fun testTwoSamplePValueRange() {
-        val cases = listOf(
-            proportionZTest(successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100),
-            proportionZTest(successes1 = 30, trials1 = 200, successes2 = 50, trials2 = 300),
-            proportionZTest(successes1 = 0, trials1 = 100, successes2 = 0, trials2 = 100),
-            proportionZTest(successes1 = 100, trials1 = 100, successes2 = 100, trials2 = 100),
-            proportionZTest(successes1 = 0, trials1 = 100, successes2 = 100, trials2 = 100),
-            proportionZTest(successes1 = 1, trials1 = 1, successes2 = 0, trials2 = 1),
-        )
+        val cases =
+            listOf(
+                proportionZTest(successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100),
+                proportionZTest(successes1 = 30, trials1 = 200, successes2 = 50, trials2 = 300),
+                proportionZTest(successes1 = 0, trials1 = 100, successes2 = 0, trials2 = 100),
+                proportionZTest(successes1 = 100, trials1 = 100, successes2 = 100, trials2 = 100),
+                proportionZTest(successes1 = 0, trials1 = 100, successes2 = 100, trials2 = 100),
+                proportionZTest(successes1 = 1, trials1 = 1, successes2 = 0, trials2 = 1),
+            )
         for (result in cases) {
             assertTrue(
                 result.pValue in 0.0..1.0,
-                "p-value should be in [0, 1], got ${result.pValue}"
+                "p-value should be in [0, 1], got ${result.pValue}",
             )
         }
     }
@@ -785,14 +910,22 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleAlternativeConsistency() {
         val two = proportionZTest(successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100)
-        val less = proportionZTest(
-            successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100,
-            alternative = Alternative.LESS
-        )
-        val greater = proportionZTest(
-            successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100,
-            alternative = Alternative.GREATER
-        )
+        val less =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+                alternative = Alternative.LESS,
+            )
+        val greater =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+                alternative = Alternative.GREATER,
+            )
 
         // Same statistic regardless of alternative
         assertEquals(two.statistic, less.statistic, 1e-14, "statistic: two vs less")
@@ -803,22 +936,30 @@ class ProportionZTestTest {
 
         // Two-sided = 2 * min(less, greater)
         assertEquals(
-            two.pValue, 2.0 * minOf(less.pValue, greater.pValue), 1e-14,
-            "two-sided = 2 * min(one-sided)"
+            two.pValue,
+            2.0 * minOf(less.pValue, greater.pValue),
+            1e-14,
+            "two-sided = 2 * min(one-sided)",
         )
     }
 
     @Test
     fun testTwoSampleAntiSymmetry() {
         // Swapping the two groups should negate the statistic, keep p-value (two-sided) equal
-        val r1 = proportionZTest(
-            successes1 = 60, trials1 = 100,
-            successes2 = 40, trials2 = 100
-        )
-        val r2 = proportionZTest(
-            successes1 = 40, trials1 = 100,
-            successes2 = 60, trials2 = 100
-        )
+        val r1 =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+            )
+        val r2 =
+            proportionZTest(
+                successes1 = 40,
+                trials1 = 100,
+                successes2 = 60,
+                trials2 = 100,
+            )
         assertEquals(r1.statistic, -r2.statistic, 1e-14, "swapping groups negates z")
         assertEquals(r1.pValue, r2.pValue, 1e-14, "two-sided p should be equal after swap")
     }
@@ -826,25 +967,45 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleEqualGroupsZeroStatistic() {
         // Same proportions => z = 0
-        val result = proportionZTest(
-            successes1 = 50, trials1 = 100,
-            successes2 = 50, trials2 = 100
-        )
+        val result =
+            proportionZTest(
+                successes1 = 50,
+                trials1 = 100,
+                successes2 = 50,
+                trials2 = 100,
+            )
         assertEquals(0.0, result.statistic, tol)
         assertP(1.0, result.pValue, message = "equal proportions => p = 1")
     }
 
     @Test
     fun testTwoSampleIsSignificantConsistency() {
-        val cases = listOf(
-            proportionZTest(successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100), // significant
-            proportionZTest(successes1 = 150, trials1 = 500, successes2 = 120, trials2 = 400), // not significant
-            proportionZTest(successes1 = 90, trials1 = 100, successes2 = 80, trials2 = 100), // borderline
-        )
+        val cases =
+            listOf(
+                proportionZTest(
+                    successes1 = 60,
+                    trials1 = 100,
+                    successes2 = 40,
+                    trials2 = 100,
+                ), // significant
+                proportionZTest(
+                    successes1 = 150,
+                    trials1 = 500,
+                    successes2 = 120,
+                    trials2 = 400,
+                ), // not significant
+                proportionZTest(
+                    successes1 = 90,
+                    trials1 = 100,
+                    successes2 = 80,
+                    trials2 = 100,
+                ), // borderline
+            )
         for (result in cases) {
             assertEquals(
-                result.pValue < 0.05, result.isSignificant(),
-                "isSignificant for p=${result.pValue}"
+                result.pValue < 0.05,
+                result.isSignificant(),
+                "isSignificant for p=${result.pValue}",
             )
         }
     }
@@ -852,17 +1013,18 @@ class ProportionZTestTest {
     @Test
     fun testTwoSampleCIContainsDifference() {
         // The CI for the difference should contain the observed difference
-        val cases = listOf(
-            proportionZTest(successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100),
-            proportionZTest(successes1 = 30, trials1 = 200, successes2 = 50, trials2 = 300),
-            proportionZTest(successes1 = 150, trials1 = 500, successes2 = 120, trials2 = 400),
-        )
+        val cases =
+            listOf(
+                proportionZTest(successes1 = 60, trials1 = 100, successes2 = 40, trials2 = 100),
+                proportionZTest(successes1 = 30, trials1 = 200, successes2 = 50, trials2 = 300),
+                proportionZTest(successes1 = 150, trials1 = 500, successes2 = 120, trials2 = 400),
+            )
         for (result in cases) {
             val diff = result.additionalInfo["proportionDifference"]!!
             val ci = result.confidenceInterval!!
             assertTrue(
                 diff >= ci.lower && diff <= ci.upper,
-                "CI should contain observed difference $diff, got [${ci.lower}, ${ci.upper}]"
+                "CI should contain observed difference $diff, got [${ci.lower}, ${ci.upper}]",
             )
         }
     }
@@ -873,19 +1035,25 @@ class ProportionZTestTest {
 
     @Test
     fun testTwoSampleTestName() {
-        val result = proportionZTest(
-            successes1 = 60, trials1 = 100,
-            successes2 = 40, trials2 = 100
-        )
+        val result =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+            )
         assertEquals("Two-Sample Proportion z-Test", result.testName)
     }
 
     @Test
     fun testTwoSampleAdditionalInfo() {
-        val result = proportionZTest(
-            successes1 = 60, trials1 = 100,
-            successes2 = 40, trials2 = 100
-        )
+        val result =
+            proportionZTest(
+                successes1 = 60,
+                trials1 = 100,
+                successes2 = 40,
+                trials2 = 100,
+            )
         assertEquals(0.6, result.additionalInfo["proportion1"]!!, tol)
         assertEquals(0.4, result.additionalInfo["proportion2"]!!, tol)
         assertEquals(0.2, result.additionalInfo["proportionDifference"]!!, tol)
@@ -898,22 +1066,34 @@ class ProportionZTestTest {
         assertEquals(
             Alternative.TWO_SIDED,
             proportionZTest(
-                successes1 = 5, trials1 = 10, successes2 = 5, trials2 = 10
-            ).alternative
+                    successes1 = 5,
+                    trials1 = 10,
+                    successes2 = 5,
+                    trials2 = 10,
+                )
+                .alternative,
         )
         assertEquals(
             Alternative.LESS,
             proportionZTest(
-                successes1 = 5, trials1 = 10, successes2 = 5, trials2 = 10,
-                alternative = Alternative.LESS
-            ).alternative
+                    successes1 = 5,
+                    trials1 = 10,
+                    successes2 = 5,
+                    trials2 = 10,
+                    alternative = Alternative.LESS,
+                )
+                .alternative,
         )
         assertEquals(
             Alternative.GREATER,
             proportionZTest(
-                successes1 = 5, trials1 = 10, successes2 = 5, trials2 = 10,
-                alternative = Alternative.GREATER
-            ).alternative
+                    successes1 = 5,
+                    trials1 = 10,
+                    successes2 = 5,
+                    trials2 = 10,
+                    alternative = Alternative.GREATER,
+                )
+                .alternative,
         )
     }
 }

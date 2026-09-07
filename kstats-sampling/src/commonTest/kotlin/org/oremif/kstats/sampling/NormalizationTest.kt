@@ -1,11 +1,11 @@
 package org.oremif.kstats.sampling
 
-import org.oremif.kstats.core.exceptions.DegenerateDataException
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import org.oremif.kstats.core.exceptions.DegenerateDataException
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class NormalizationTest {
 
@@ -23,26 +23,18 @@ class NormalizationTest {
 
     @Test
     fun testZScoreInsufficientDataThrows() {
-        assertFailsWith<InsufficientDataException> {
-            doubleArrayOf(1.0).zScore()
-        }
-        assertFailsWith<InsufficientDataException> {
-            doubleArrayOf().zScore()
-        }
+        assertFailsWith<InsufficientDataException> { doubleArrayOf(1.0).zScore() }
+        assertFailsWith<InsufficientDataException> { doubleArrayOf().zScore() }
     }
 
     @Test
     fun testZScoreDegenerateThrows() {
-        assertFailsWith<DegenerateDataException> {
-            doubleArrayOf(5.0, 5.0, 5.0).zScore()
-        }
+        assertFailsWith<DegenerateDataException> { doubleArrayOf(5.0, 5.0, 5.0).zScore() }
     }
 
     @Test
     fun testZScoreNaNThrows() {
-        assertFailsWith<InvalidParameterException> {
-            doubleArrayOf(1.0, Double.NaN, 3.0).zScore()
-        }
+        assertFailsWith<InvalidParameterException> { doubleArrayOf(1.0, Double.NaN, 3.0).zScore() }
     }
 
     @Test
@@ -63,23 +55,17 @@ class NormalizationTest {
 
     @Test
     fun testZScoreIterableInsufficientDataThrows() {
-        assertFailsWith<InsufficientDataException> {
-            listOf(1.0).zScore()
-        }
+        assertFailsWith<InsufficientDataException> { listOf(1.0).zScore() }
     }
 
     @Test
     fun testZScoreIterableDegenerateThrows() {
-        assertFailsWith<DegenerateDataException> {
-            listOf(5.0, 5.0, 5.0).zScore()
-        }
+        assertFailsWith<DegenerateDataException> { listOf(5.0, 5.0, 5.0).zScore() }
     }
 
     @Test
     fun testZScoreIterableNaNThrows() {
-        assertFailsWith<InvalidParameterException> {
-            listOf(1.0, Double.NaN, 3.0).zScore()
-        }
+        assertFailsWith<InvalidParameterException> { listOf(1.0, Double.NaN, 3.0).zScore() }
     }
 
     // --- minMaxNormalize ---
@@ -109,9 +95,7 @@ class NormalizationTest {
 
     @Test
     fun testMinMaxNormalizeEmptyThrows() {
-        assertFailsWith<InsufficientDataException> {
-            doubleArrayOf().minMaxNormalize()
-        }
+        assertFailsWith<InsufficientDataException> { doubleArrayOf().minMaxNormalize() }
     }
 
     @Test
@@ -158,9 +142,7 @@ class NormalizationTest {
 
     @Test
     fun testMinMaxNormalizeCustomRangeEmptyThrows() {
-        assertFailsWith<InsufficientDataException> {
-            doubleArrayOf().minMaxNormalize(-1.0, 1.0)
-        }
+        assertFailsWith<InsufficientDataException> { doubleArrayOf().minMaxNormalize(-1.0, 1.0) }
     }
 
     @Test
@@ -209,9 +191,7 @@ class NormalizationTest {
 
     @Test
     fun testMinMaxNormalizeIterableEmptyThrows() {
-        assertFailsWith<InsufficientDataException> {
-            emptyList<Double>().minMaxNormalize()
-        }
+        assertFailsWith<InsufficientDataException> { emptyList<Double>().minMaxNormalize() }
     }
 
     @Test
@@ -225,9 +205,7 @@ class NormalizationTest {
 
     @Test
     fun testMinMaxNormalizeIterableCustomRangeInvalidThrows() {
-        assertFailsWith<InvalidParameterException> {
-            listOf(1.0, 2.0).minMaxNormalize(5.0, 3.0)
-        }
+        assertFailsWith<InvalidParameterException> { listOf(1.0, 2.0).minMaxNormalize(5.0, 3.0) }
     }
 
     // --- Large array tests ---

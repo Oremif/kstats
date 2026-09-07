@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class GammaDistributionTest : ContinuousDistributionPropertyTests() {
 
     override fun createDistribution(): ContinuousDistribution = GammaDistribution(5.0, 0.5)
+
     override val testPoints = listOf(0.5, 1.0, 2.0, 3.0, 5.0, 10.0)
     override val pValues = listOf(0.1, 0.25, 0.5, 0.75, 0.9)
     override val roundTripTol = 1e-8

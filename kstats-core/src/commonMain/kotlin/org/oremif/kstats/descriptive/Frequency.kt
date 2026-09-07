@@ -14,10 +14,9 @@ public data class FrequencyEntry<T>(val value: T, val count: Long)
 /**
  * A mutable accumulator that counts the frequency of discrete values.
  *
- * Maintains exact counts for each distinct value of type [T], and provides
- * cumulative counts, proportions, and mode queries. This is the discrete
- * counterpart of histogram binning — it counts exact matches rather than
- * grouping values into intervals.
+ * Maintains exact counts for each distinct value of type [T], and provides cumulative counts,
+ * proportions, and mode queries. This is the discrete counterpart of histogram binning — it counts
+ * exact matches rather than grouping values into intervals.
  *
  * Analogous to Apache Commons Math `Frequency`.
  *
@@ -31,7 +30,8 @@ public data class FrequencyEntry<T>(val value: T, val count: Long)
  * freq.mode                  // setOf("b")
  * ```
  *
- * @param T the type of observed values; must be [Comparable] for cumulative queries and sorted output.
+ * @param T the type of observed values; must be [Comparable] for cumulative queries and sorted
+ *   output.
  */
 public class Frequency<T : Comparable<T>> {
 
@@ -82,9 +82,7 @@ public class Frequency<T : Comparable<T>> {
         for (v in values) add(v)
     }
 
-    /**
-     * Resets the accumulator to its initial empty state.
-     */
+    /** Resets the accumulator to its initial empty state. */
     public fun clear() {
         counts.clear()
         cachedTotal = 0L
@@ -98,12 +96,12 @@ public class Frequency<T : Comparable<T>> {
      *
      * Uses [Long] to support streams with more than 2^31 values.
      */
-    public val totalCount: Long get() = cachedTotal
+    public val totalCount: Long
+        get() = cachedTotal
 
-    /**
-     * The number of distinct values observed.
-     */
-    public val uniqueCount: Int get() = counts.size
+    /** The number of distinct values observed. */
+    public val uniqueCount: Int
+        get() = counts.size
 
     /**
      * Returns the number of times [value] has been observed, or 0 if it has never been observed.
@@ -114,8 +112,8 @@ public class Frequency<T : Comparable<T>> {
     public fun count(value: T): Long = counts[value] ?: 0L
 
     /**
-     * Returns the cumulative count for [value]: the sum of counts for all observed values
-     * less than or equal to [value].
+     * Returns the cumulative count for [value]: the sum of counts for all observed values less than
+     * or equal to [value].
      *
      * @param value the upper bound (inclusive).
      * @return the cumulative count.
@@ -162,27 +160,21 @@ public class Frequency<T : Comparable<T>> {
     /**
      * The set of values with the highest observed frequency (the statistical mode).
      *
-     * Returns an empty set if no observations have been added.
-     * Returns multiple values in case of a tie.
+     * Returns an empty set if no observations have been added. Returns multiple values in case of a
+     * tie.
      */
     public val mode: Set<T>
         get() {
             if (counts.isEmpty()) return emptySet()
             val maxCount = counts.values.max()
-            return counts.entries
-                .filter { it.value == maxCount }
-                .map { it.key }
-                .toSet()
+            return counts.entries.filter { it.value == maxCount }.map { it.key }.toSet()
         }
 
-    /**
-     * All distinct observed values, sorted in ascending order.
-     */
-    public val values: List<T> get() = sortedKeys()
+    /** All distinct observed values, sorted in ascending order. */
+    public val values: List<T>
+        get() = sortedKeys()
 
-    /**
-     * All observed values with their counts, sorted by value in ascending order.
-     */
+    /** All observed values with their counts, sorted by value in ascending order. */
     public val entries: List<FrequencyEntry<T>>
         get() = sortedKeys().map { FrequencyEntry(it, counts[it]!!) }
 }

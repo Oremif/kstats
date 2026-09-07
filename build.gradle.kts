@@ -1,6 +1,6 @@
-
 plugins {
     id("kstats.dokka")
+    id("kstats.ktfmt")
     alias(libs.plugins.korro)
     alias(libs.plugins.binary.compatibility.validator)
 }
@@ -23,34 +23,33 @@ allprojects {
 apiValidation {
     ignoredProjects.addAll(listOf("benchmark"))
 
-    @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
-    klib {
-        enabled = true
-    }
+    @OptIn(kotlinx.validation.ExperimentalBCVApi::class) klib { enabled = true }
 }
 
 dokka {
     moduleName = "Kstats"
 
-    dokkaPublications.html {
-        includes.from("dokka/modules.md")
-    }
+    dokkaPublications.html { includes.from("dokka/modules.md") }
 }
 
 korro {
     docs {
-        from(fileTree(rootProject.rootDir) {
-            include("README.md")
-            include("kstats-*/Module.md")
-            include("docs/**/*.mdx")
-            include("dokka/modules.md")
-        })
+        from(
+            fileTree(rootProject.rootDir) {
+                include("README.md")
+                include("kstats-*/Module.md")
+                include("docs/**/*.mdx")
+                include("dokka/modules.md")
+            }
+        )
         baseDir.set(rootProject.layout.projectDirectory)
     }
 
     samples {
-        from(fileTree(project.projectDir) {
-            include("kstats-*/src/commonTest/kotlin/org/oremif/kstats/**/samples/*.kt")
-        })
+        from(
+            fileTree(project.projectDir) {
+                include("kstats-*/src/commonTest/kotlin/org/oremif/kstats/**/samples/*.kt")
+            }
+        )
     }
 }

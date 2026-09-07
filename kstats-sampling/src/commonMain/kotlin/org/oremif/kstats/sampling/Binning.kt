@@ -1,23 +1,22 @@
 package org.oremif.kstats.sampling
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.round
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 /**
  * A histogram bin containing the items that fall within a value range.
  *
- * Bin boundaries follow the half-open interval convention: items are assigned to the bin
- * whose range contains them as `[start, end)`, except for the last bin which is `[start, end]`.
- * Boundary values (values that fall exactly on an interior bin edge) are assigned to the
- * higher bin via `floor(index)` arithmetic. As a result, [range] (a [ClosedRange]) may
- * report `contains(value) == true` for boundary values that are actually assigned to the
- * adjacent bin.
+ * Bin boundaries follow the half-open interval convention: items are assigned to the bin whose
+ * range contains them as `[start, end)`, except for the last bin which is `[start, end]`. Boundary
+ * values (values that fall exactly on an interior bin edge) are assigned to the higher bin via
+ * `floor(index)` arithmetic. As a result, [range] (a [ClosedRange]) may report `contains(value) ==
+ * true` for boundary values that are actually assigned to the adjacent bin.
  *
- * This is a stable value type: its property set ([range], [items]) is fixed and will not
- * change in future versions.
+ * This is a stable value type: its property set ([range], [items]) is fixed and will not change in
+ * future versions.
  *
  * ### Example:
  * ```kotlin
@@ -33,12 +32,11 @@ import kotlin.math.round
  */
 public data class Bin<T>(
     val range: ClosedRange<Double>,
-    val items: List<T>
+    val items: List<T>,
 ) {
-    /**
-     * Returns the number of items in this bin.
-     */
-    public val count: Int get() = items.size
+    /** Returns the number of items in this bin. */
+    public val count: Int
+        get() = items.size
 }
 
 /**
@@ -59,26 +57,26 @@ public data class Bin<T>(
  * @property range the closed interval of values that this bin covers.
  * @property count the number of values that fall within [range].
  * @property relativeFrequency the proportion of total values in this bin (between 0 and 1).
- * @property cumulativeFrequency the running total of relative frequencies up to and including
- * this bin (between 0 and 1, with the last bin always equal to 1).
+ * @property cumulativeFrequency the running total of relative frequencies up to and including this
+ *   bin (between 0 and 1, with the last bin always equal to 1).
  */
 public data class FrequencyBin(
     val range: ClosedRange<Double>,
     val count: Int,
     val relativeFrequency: Double,
-    val cumulativeFrequency: Double
+    val cumulativeFrequency: Double,
 )
 
 /**
  * Groups items into equal-width bins based on a numeric value extracted by [valueSelector].
  *
- * Each bin covers a range of width [binSize]. The first bin starts at [rangeStart] (or the
- * minimum extracted value if not specified). The number of bins is determined automatically
- * to cover all values.
+ * Each bin covers a range of width [binSize]. The first bin starts at [rangeStart] (or the minimum
+ * extracted value if not specified). The number of bins is determined automatically to cover all
+ * values.
  *
- * Items whose extracted value falls exactly on an interior bin boundary are assigned to the
- * higher bin via `floor(index)` arithmetic. The last bin includes its upper boundary
- * (i.e., bins are `[start, end)` except the last which is `[start, end]`).
+ * Items whose extracted value falls exactly on an interior bin boundary are assigned to the higher
+ * bin via `floor(index)` arithmetic. The last bin includes its upper boundary (i.e., bins are
+ * `[start, end)` except the last which is `[start, end]`).
  *
  * ### Example:
  * ```kotlin
@@ -93,18 +91,17 @@ public data class FrequencyBin(
  * @param T the type of items being binned.
  * @param valueSelector extracts the numeric value to bin on from each item.
  * @param binSize the width of each bin. Must be a positive finite number.
- * @param rangeStart the lower bound of the first bin. Must be finite and less than or equal
- * to the minimum extracted value. Defaults to the minimum value in the collection.
- * @return a list of [Bin] objects ordered by range, each containing the items that fall
- * within that range. Returns an empty list if the collection is empty.
- * @throws InvalidParameterException if [binSize] is not positive or not finite, if
- * [rangeStart] is non-finite or exceeds the minimum value, or if [valueSelector]
- * produces non-finite values.
+ * @param rangeStart the lower bound of the first bin. Must be finite and less than or equal to the
+ *   minimum extracted value. Defaults to the minimum value in the collection.
+ * @return a list of [Bin] objects ordered by range, each containing the items that fall within that
+ *   range. Returns an empty list if the collection is empty.
+ * @throws InvalidParameterException if [binSize] is not positive or not finite, if [rangeStart] is
+ *   non-finite or exceeds the minimum value, or if [valueSelector] produces non-finite values.
  */
 public fun <T> Iterable<T>.binByDouble(
     valueSelector: (T) -> Double,
     binSize: Double,
-    rangeStart: Double? = null
+    rangeStart: Double? = null,
 ): List<Bin<T>> {
     if (!binSize.isFinite() || binSize <= 0.0) {
         throw InvalidParameterException("binSize must be a positive finite number, got $binSize")
@@ -117,7 +114,8 @@ public fun <T> Iterable<T>.binByDouble(
     var maxActual = Double.NEGATIVE_INFINITY
     for (i in items.indices) {
         val v = valueSelector(items[i])
-        if (!v.isFinite()) throw InvalidParameterException("valueSelector produced non-finite value: $v")
+        if (!v.isFinite())
+            throw InvalidParameterException("valueSelector produced non-finite value: $v")
         values[i] = v
         if (v < minActual) minActual = v
         if (v > maxActual) maxActual = v
@@ -138,12 +136,14 @@ public fun <T> Iterable<T>.binByDouble(
 
     val raw = (maxVal - minVal) / binSize
     val rounded = round(raw)
-    val numBins = (if (abs(raw - rounded) < 1e-9) rounded.toInt() else ceil(raw).toInt()).coerceAtLeast(1)
-    val bins = Array(numBins) { i ->
-        val start = minVal + i * binSize
-        val end = if (i == numBins - 1) maxOf(start + binSize, maxVal) else start + binSize
-        start..end to mutableListOf<T>()
-    }
+    val numBins =
+        (if (abs(raw - rounded) < 1e-9) rounded.toInt() else ceil(raw).toInt()).coerceAtLeast(1)
+    val bins =
+        Array(numBins) { i ->
+            val start = minVal + i * binSize
+            val end = if (i == numBins - 1) maxOf(start + binSize, maxVal) else start + binSize
+            start..end to mutableListOf<T>()
+        }
 
     for ((index, item) in items.withIndex()) {
         val v = values[index]
@@ -155,14 +155,14 @@ public fun <T> Iterable<T>.binByDouble(
 }
 
 /**
- * Groups items into a fixed number of equal-width bins based on a numeric value extracted
- * by [valueSelector].
+ * Groups items into a fixed number of equal-width bins based on a numeric value extracted by
+ * [valueSelector].
  *
- * The bin width is computed automatically by dividing the data range by [binCount].
- * If all values are identical, a single bin is created regardless of [binCount].
+ * The bin width is computed automatically by dividing the data range by [binCount]. If all values
+ * are identical, a single bin is created regardless of [binCount].
  *
- * Items on a bin boundary are assigned to the higher bin, except for items in the last bin
- * which includes its upper boundary.
+ * Items on a bin boundary are assigned to the higher bin, except for items in the last bin which
+ * includes its upper boundary.
  *
  * ### Example:
  * ```kotlin
@@ -174,14 +174,14 @@ public fun <T> Iterable<T>.binByDouble(
  * @param T the type of items being binned.
  * @param valueSelector extracts the numeric value to bin on from each item.
  * @param binCount the desired number of bins. Must be positive.
- * @return a list of [Bin] objects ordered by range. Returns an empty list if the
- * collection is empty.
- * @throws InvalidParameterException if [binCount] is not positive or if [valueSelector]
- * produces non-finite values.
+ * @return a list of [Bin] objects ordered by range. Returns an empty list if the collection is
+ *   empty.
+ * @throws InvalidParameterException if [binCount] is not positive or if [valueSelector] produces
+ *   non-finite values.
  */
 public fun <T> Iterable<T>.binByDouble(
     valueSelector: (T) -> Double,
-    binCount: Int
+    binCount: Int,
 ): List<Bin<T>> {
     if (binCount <= 0) throw InvalidParameterException("binCount must be positive")
     val items = toList()
@@ -192,7 +192,8 @@ public fun <T> Iterable<T>.binByDouble(
     var computedMax = Double.NEGATIVE_INFINITY
     for (i in items.indices) {
         val v = valueSelector(items[i])
-        if (!v.isFinite()) throw InvalidParameterException("valueSelector produced non-finite value: $v")
+        if (!v.isFinite())
+            throw InvalidParameterException("valueSelector produced non-finite value: $v")
         values[i] = v
         if (v < computedMin) computedMin = v
         if (v > computedMax) computedMax = v
@@ -204,20 +205,23 @@ public fun <T> Iterable<T>.binByDouble(
     val effectiveCount = if (range == 0.0) 1 else binCount
     val binSize = if (range == 0.0) 1.0 else range / binCount
 
-    val bins = Array(effectiveCount) { i ->
-        val start = minVal + i * binSize
-        val end = if (i == effectiveCount - 1) maxOf(start + binSize, maxVal) else start + binSize
-        start..end to mutableListOf<T>()
-    }
+    val bins =
+        Array(effectiveCount) { i ->
+            val start = minVal + i * binSize
+            val end =
+                if (i == effectiveCount - 1) maxOf(start + binSize, maxVal) else start + binSize
+            start..end to mutableListOf<T>()
+        }
 
     for ((index, item) in items.withIndex()) {
         val v = values[index]
-        val idx = if (range == 0.0) {
-            0
-        } else {
-            // Use floor() consistent with binByDouble(binSize) for boundary assignment
-            floor((v - minVal) / range * binCount).toInt().coerceIn(0, effectiveCount - 1)
-        }
+        val idx =
+            if (range == 0.0) {
+                0
+            } else {
+                // Use floor() consistent with binByDouble(binSize) for boundary assignment
+                floor((v - minVal) / range * binCount).toInt().coerceIn(0, effectiveCount - 1)
+            }
         bins[idx].second.add(item)
     }
 
@@ -238,8 +242,7 @@ public fun <T> Iterable<T>.binByDouble(
  * @param binSize the width of each bin. Must be positive.
  * @return a list of [Bin] objects containing the values that fall within each range.
  */
-public fun Iterable<Double>.bin(binSize: Double): List<Bin<Double>> =
-    binByDouble({ it }, binSize)
+public fun Iterable<Double>.bin(binSize: Double): List<Bin<Double>> = binByDouble({ it }, binSize)
 
 /**
  * Groups the values into a fixed number of equal-width bins.
@@ -255,14 +258,13 @@ public fun Iterable<Double>.bin(binSize: Double): List<Bin<Double>> =
  * @param binCount the desired number of bins. Must be positive.
  * @return a list of [Bin] objects containing the values that fall within each range.
  */
-public fun Iterable<Double>.bin(binCount: Int): List<Bin<Double>> =
-    binByDouble({ it }, binCount)
+public fun Iterable<Double>.bin(binCount: Int): List<Bin<Double>> = binByDouble({ it }, binCount)
 
 /**
  * Builds a frequency table by dividing the values into a fixed number of equal-width bins.
  *
- * Each bin includes its count, relative frequency (proportion of total), and cumulative
- * frequency (running proportion). The cumulative frequency of the last bin is always 1.0.
+ * Each bin includes its count, relative frequency (proportion of total), and cumulative frequency
+ * (running proportion). The cumulative frequency of the last bin is always 1.0.
  *
  * ### Example:
  * ```kotlin
@@ -273,7 +275,7 @@ public fun Iterable<Double>.bin(binCount: Int): List<Bin<Double>> =
  *
  * @param binCount the desired number of bins. Must be positive.
  * @return a list of [FrequencyBin] objects ordered by range. Returns an empty list if the
- * collection is empty.
+ *   collection is empty.
  */
 public fun Iterable<Double>.frequencyTable(binCount: Int): List<FrequencyBin> =
     bin(binCount).toFrequencyBins()
@@ -281,8 +283,8 @@ public fun Iterable<Double>.frequencyTable(binCount: Int): List<FrequencyBin> =
 /**
  * Builds a frequency table by dividing the values into equal-width bins of the given size.
  *
- * Each bin includes its count, relative frequency (proportion of total), and cumulative
- * frequency (running proportion). The cumulative frequency of the last bin is always 1.0.
+ * Each bin includes its count, relative frequency (proportion of total), and cumulative frequency
+ * (running proportion). The cumulative frequency of the last bin is always 1.0.
  *
  * ### Example:
  * ```kotlin
@@ -293,7 +295,7 @@ public fun Iterable<Double>.frequencyTable(binCount: Int): List<FrequencyBin> =
  *
  * @param binSize the width of each bin. Must be positive.
  * @return a list of [FrequencyBin] objects ordered by range. Returns an empty list if the
- * collection is empty.
+ *   collection is empty.
  */
 public fun Iterable<Double>.frequencyTable(binSize: Double): List<FrequencyBin> =
     bin(binSize).toFrequencyBins()
@@ -301,38 +303,36 @@ public fun Iterable<Double>.frequencyTable(binSize: Double): List<FrequencyBin> 
 /**
  * Groups the values into equal-width bins of the given [binSize].
  *
- * This is a convenience overload that accepts a [DoubleArray]. The array is
- * converted to a list internally.
+ * This is a convenience overload that accepts a [DoubleArray]. The array is converted to a list
+ * internally.
  *
  * @param binSize the width of each bin. Must be positive.
  * @return a list of [Bin] objects containing the values that fall within each range.
  * @see [Iterable.bin]
  */
-public fun DoubleArray.bin(binSize: Double): List<Bin<Double>> =
-    asList().bin(binSize)
+public fun DoubleArray.bin(binSize: Double): List<Bin<Double>> = asList().bin(binSize)
 
 /**
  * Groups the values into a fixed number of equal-width bins.
  *
- * This is a convenience overload that accepts a [DoubleArray]. The array is
- * converted to a list internally.
+ * This is a convenience overload that accepts a [DoubleArray]. The array is converted to a list
+ * internally.
  *
  * @param binCount the desired number of bins. Must be positive.
  * @return a list of [Bin] objects containing the values that fall within each range.
  * @see [Iterable.bin]
  */
-public fun DoubleArray.bin(binCount: Int): List<Bin<Double>> =
-    asList().bin(binCount)
+public fun DoubleArray.bin(binCount: Int): List<Bin<Double>> = asList().bin(binCount)
 
 /**
  * Builds a frequency table by dividing the values into a fixed number of equal-width bins.
  *
- * This is a convenience overload that accepts a [DoubleArray]. The array is
- * converted to a list internally.
+ * This is a convenience overload that accepts a [DoubleArray]. The array is converted to a list
+ * internally.
  *
  * @param binCount the desired number of bins. Must be positive.
- * @return a list of [FrequencyBin] objects ordered by range. Returns an empty list if the
- * array is empty.
+ * @return a list of [FrequencyBin] objects ordered by range. Returns an empty list if the array is
+ *   empty.
  * @see [Iterable.frequencyTable]
  */
 public fun DoubleArray.frequencyTable(binCount: Int): List<FrequencyBin> =
@@ -341,12 +341,12 @@ public fun DoubleArray.frequencyTable(binCount: Int): List<FrequencyBin> =
 /**
  * Builds a frequency table by dividing the values into equal-width bins of the given size.
  *
- * This is a convenience overload that accepts a [DoubleArray]. The array is
- * converted to a list internally.
+ * This is a convenience overload that accepts a [DoubleArray]. The array is converted to a list
+ * internally.
  *
  * @param binSize the width of each bin. Must be positive.
- * @return a list of [FrequencyBin] objects ordered by range. Returns an empty list if the
- * array is empty.
+ * @return a list of [FrequencyBin] objects ordered by range. Returns an empty list if the array is
+ *   empty.
  * @see [Iterable.frequencyTable]
  */
 public fun DoubleArray.frequencyTable(binSize: Double): List<FrequencyBin> =

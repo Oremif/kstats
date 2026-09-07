@@ -1,11 +1,11 @@
 package org.oremif.kstats.correlation
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class PearsonCorrelationTest {
 
@@ -135,7 +135,8 @@ class PearsonCorrelationTest {
 
     @Test
     fun testNearPerfectPositiveStable() {
-        // r very close to 1 — old formula (1 - r²) loses precision, new formula (1-r)(1+r) is stable
+        // r very close to 1 — old formula (1 - r²) loses precision, new formula (1-r)(1+r) is
+        // stable
         val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
         val y = DoubleArray(10) { x[it] + 1e-12 * (it % 2 * 2 - 1) }
         val result = pearsonCorrelation(x, y)

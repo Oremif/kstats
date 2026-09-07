@@ -1,12 +1,12 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 internal class GrubbsTestTest {
 
@@ -32,10 +32,24 @@ internal class GrubbsTestTest {
     @Test
     fun testTwoSidedSpringConstantData() {
         // Classic Grubbs 1969 spring constant data: suspected outlier 7.019
-        val data = doubleArrayOf(
-            7.006, 7.003, 7.009, 7.012, 7.019, 7.008, 6.996, 6.997,
-            7.006, 7.005, 7.001, 7.003, 6.998, 7.005, 7.007
-        )
+        val data =
+            doubleArrayOf(
+                7.006,
+                7.003,
+                7.009,
+                7.012,
+                7.019,
+                7.008,
+                6.996,
+                6.997,
+                7.006,
+                7.005,
+                7.001,
+                7.003,
+                6.998,
+                7.005,
+                7.007,
+            )
         val result = grubbsTest(data)
         // G = 2.35683174419494, p = 0.126596314787549 (not significant at 5%)
         assertEquals(2.35683174419494, result.statistic, tol, "G statistic")
@@ -196,23 +210,17 @@ internal class GrubbsTestTest {
 
     @Test
     fun testEmptyArray() {
-        assertFailsWith<InsufficientDataException> {
-            grubbsTest(doubleArrayOf())
-        }
+        assertFailsWith<InsufficientDataException> { grubbsTest(doubleArrayOf()) }
     }
 
     @Test
     fun testSingleElement() {
-        assertFailsWith<InsufficientDataException> {
-            grubbsTest(doubleArrayOf(5.0))
-        }
+        assertFailsWith<InsufficientDataException> { grubbsTest(doubleArrayOf(5.0)) }
     }
 
     @Test
     fun testTwoElements() {
-        assertFailsWith<InsufficientDataException> {
-            grubbsTest(doubleArrayOf(1.0, 2.0))
-        }
+        assertFailsWith<InsufficientDataException> { grubbsTest(doubleArrayOf(1.0, 2.0)) }
     }
 
     @Test
@@ -333,18 +341,19 @@ internal class GrubbsTestTest {
 
     @Test
     fun testPValueRange() {
-        val datasets = listOf(
-            doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0),
-            doubleArrayOf(1.0, 2.0, 3.0, 100.0),
-            doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 100.0),
-            doubleArrayOf(199.31, 199.53, 200.19, 200.82, 201.92, 201.95, 202.18, 245.57)
-        )
+        val datasets =
+            listOf(
+                doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0),
+                doubleArrayOf(1.0, 2.0, 3.0, 100.0),
+                doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 100.0),
+                doubleArrayOf(199.31, 199.53, 200.19, 200.82, 201.92, 201.95, 202.18, 245.57),
+            )
         for (data in datasets) {
             for (alt in Alternative.entries) {
                 val result = grubbsTest(data, alternative = alt)
                 assertTrue(
                     result.pValue in 0.0..1.0,
-                    "p-value should be in [0, 1] for $alt, got ${result.pValue}"
+                    "p-value should be in [0, 1] for $alt, got ${result.pValue}",
                 )
             }
         }
@@ -352,18 +361,19 @@ internal class GrubbsTestTest {
 
     @Test
     fun testStatisticNonNegative() {
-        val datasets = listOf(
-            doubleArrayOf(1.0, 2.0, 3.0),
-            doubleArrayOf(1.0, 2.0, 3.0, 100.0),
-            doubleArrayOf(-5.0, 1.0, 2.0, 3.0, 4.0),
-            doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0)
-        )
+        val datasets =
+            listOf(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                doubleArrayOf(1.0, 2.0, 3.0, 100.0),
+                doubleArrayOf(-5.0, 1.0, 2.0, 3.0, 4.0),
+                doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0),
+            )
         for (data in datasets) {
             for (alt in Alternative.entries) {
                 val result = grubbsTest(data, alternative = alt)
                 assertTrue(
                     result.statistic >= 0.0,
-                    "G statistic should be >= 0 for $alt, got ${result.statistic}"
+                    "G statistic should be >= 0 for $alt, got ${result.statistic}",
                 )
             }
         }
@@ -378,8 +388,10 @@ internal class GrubbsTestTest {
         val greater = grubbsTest(data, alternative = Alternative.GREATER)
         // When max deviation = max value deviation, both G statistics are equal
         assertEquals(
-            twoSided.statistic, greater.statistic, 1e-14,
-            "TWO_SIDED and GREATER should have same G when max value has max deviation"
+            twoSided.statistic,
+            greater.statistic,
+            1e-14,
+            "TWO_SIDED and GREATER should have same G when max value has max deviation",
         )
     }
 
@@ -390,8 +402,10 @@ internal class GrubbsTestTest {
         val twoSided = grubbsTest(data, alternative = Alternative.TWO_SIDED)
         val greater = grubbsTest(data, alternative = Alternative.GREATER)
         assertEquals(
-            twoSided.pValue, 2.0 * greater.pValue, 1e-14,
-            "two-sided p should equal 2 * greater p when max outlier has max deviation"
+            twoSided.pValue,
+            2.0 * greater.pValue,
+            1e-14,
+            "two-sided p should equal 2 * greater p when max outlier has max deviation",
         )
     }
 
@@ -402,8 +416,10 @@ internal class GrubbsTestTest {
             val data = DoubleArray(n) { it.toDouble() }
             val result = grubbsTest(data)
             assertEquals(
-                (n - 2).toDouble(), result.degreesOfFreedom, tol,
-                "df should be ${n - 2} for n = $n"
+                (n - 2).toDouble(),
+                result.degreesOfFreedom,
+                tol,
+                "df should be ${n - 2} for n = $n",
             )
         }
     }
@@ -414,8 +430,12 @@ internal class GrubbsTestTest {
         val result = grubbsTest(data)
         val idx = result.additionalInfo["outlierIndex"]!!.toInt()
         assertTrue(idx in data.indices, "Outlier index should be within array bounds")
-        assertEquals(data[idx], result.additionalInfo["outlierValue"]!!, 0.0,
-            "outlierValue should match data[outlierIndex]")
+        assertEquals(
+            data[idx],
+            result.additionalInfo["outlierValue"]!!,
+            0.0,
+            "outlierValue should match data[outlierIndex]",
+        )
     }
 
     @Test
@@ -426,8 +446,10 @@ internal class GrubbsTestTest {
             val result = grubbsTest(data, alternative = alt)
             val idx = result.additionalInfo["outlierIndex"]!!.toInt()
             assertEquals(
-                data[idx], result.additionalInfo["outlierValue"]!!, 0.0,
-                "outlierValue should match data[outlierIndex] for $alt"
+                data[idx],
+                result.additionalInfo["outlierValue"]!!,
+                0.0,
+                "outlierValue should match data[outlierIndex] for $alt",
             )
         }
     }
@@ -436,8 +458,12 @@ internal class GrubbsTestTest {
     fun testGreaterDetectsMaximum() {
         val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 50.0)
         val result = grubbsTest(data, alternative = Alternative.GREATER)
-        assertEquals(4.0, result.additionalInfo["outlierIndex"]!!, tol,
-            "GREATER should detect the maximum value")
+        assertEquals(
+            4.0,
+            result.additionalInfo["outlierIndex"]!!,
+            tol,
+            "GREATER should detect the maximum value",
+        )
         assertEquals(50.0, result.additionalInfo["outlierValue"]!!, tol)
     }
 
@@ -445,8 +471,12 @@ internal class GrubbsTestTest {
     fun testLessDetectsMinimum() {
         val data = doubleArrayOf(-50.0, 1.0, 2.0, 3.0, 4.0)
         val result = grubbsTest(data, alternative = Alternative.LESS)
-        assertEquals(0.0, result.additionalInfo["outlierIndex"]!!, tol,
-            "LESS should detect the minimum value")
+        assertEquals(
+            0.0,
+            result.additionalInfo["outlierIndex"]!!,
+            tol,
+            "LESS should detect the minimum value",
+        )
         assertEquals(-50.0, result.additionalInfo["outlierValue"]!!, tol)
     }
 
@@ -457,10 +487,18 @@ internal class GrubbsTestTest {
         val scaled = DoubleArray(data.size) { data[it] * 1000.0 }
         val result1 = grubbsTest(data)
         val result2 = grubbsTest(scaled)
-        assertEquals(result1.statistic, result2.statistic, 1e-8,
-            "G should be scale-invariant")
-        assertEquals(result1.pValue, result2.pValue, 1e-8,
-            "p-value should be scale-invariant")
+        assertEquals(
+            result1.statistic,
+            result2.statistic,
+            1e-8,
+            "G should be scale-invariant",
+        )
+        assertEquals(
+            result1.pValue,
+            result2.pValue,
+            1e-8,
+            "p-value should be scale-invariant",
+        )
     }
 
     @Test
@@ -470,8 +508,12 @@ internal class GrubbsTestTest {
         val shifted = DoubleArray(data.size) { data[it] + 1e6 }
         val result1 = grubbsTest(data)
         val result2 = grubbsTest(shifted)
-        assertEquals(result1.statistic, result2.statistic, 1e-6,
-            "G should be location-invariant")
+        assertEquals(
+            result1.statistic,
+            result2.statistic,
+            1e-6,
+            "G should be location-invariant",
+        )
     }
 
     @Test
@@ -507,7 +549,8 @@ internal class GrubbsTestTest {
     @Test
     fun testIterativeMultipleOutliers() {
         // Larger dataset with two outliers — enough inliers so SD isn't dominated by outliers
-        val data = doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 50.0, 80.0)
+        val data =
+            doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 50.0, 80.0)
         val result = grubbsTestIterative(data, alpha = 0.05)
         // Should detect both 80.0 and 50.0 as outliers
         assertTrue(result.outlierIndices.size >= 2, "Should find at least 2 outliers")
@@ -526,8 +569,9 @@ internal class GrubbsTestTest {
         val result = grubbsTestIterative(data, alpha = 0.05)
         // Outlier indices + cleaned data should account for all original elements
         assertEquals(
-            data.size, result.outlierIndices.size + result.cleanedData.size,
-            "outliers + cleaned = original size"
+            data.size,
+            result.outlierIndices.size + result.cleanedData.size,
+            "outliers + cleaned = original size",
         )
     }
 
@@ -553,16 +597,12 @@ internal class GrubbsTestTest {
 
     @Test
     fun testIterativeEmptyArray() {
-        assertFailsWith<InsufficientDataException> {
-            grubbsTestIterative(doubleArrayOf())
-        }
+        assertFailsWith<InsufficientDataException> { grubbsTestIterative(doubleArrayOf()) }
     }
 
     @Test
     fun testIterativeTooFewElements() {
-        assertFailsWith<InsufficientDataException> {
-            grubbsTestIterative(doubleArrayOf(1.0, 2.0))
-        }
+        assertFailsWith<InsufficientDataException> { grubbsTestIterative(doubleArrayOf(1.0, 2.0)) }
     }
 
     @Test
@@ -600,7 +640,10 @@ internal class GrubbsTestTest {
         val data = doubleArrayOf(1.0, 2.0, Double.NaN, 4.0, 5.0)
         val result = grubbsTestIterative(data, alpha = 0.05)
         // Iterative should stop at first NaN result
-        assertTrue(result.outlierIndices.isEmpty(), "No outliers should be detected when NaN present")
+        assertTrue(
+            result.outlierIndices.isEmpty(),
+            "No outliers should be detected when NaN present",
+        )
         assertTrue(result.iterations.isNotEmpty(), "Should have at least one iteration")
         val lastResult = result.iterations.last()
         assertTrue(lastResult.pValue.isNaN(), "Last iteration p-value should be NaN")
@@ -617,18 +660,21 @@ internal class GrubbsTestTest {
 
     @Test
     fun testIterativeOutlierIndicesAreUnique() {
-        val data = doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 50.0, 80.0)
+        val data =
+            doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 50.0, 80.0)
         val result = grubbsTestIterative(data, alpha = 0.05)
         val uniqueIndices = result.outlierIndices.toSet()
         assertEquals(
-            result.outlierIndices.size, uniqueIndices.size,
-            "Outlier indices should be unique"
+            result.outlierIndices.size,
+            uniqueIndices.size,
+            "Outlier indices should be unique",
         )
     }
 
     @Test
     fun testIterativeOutlierIndicesInRange() {
-        val data = doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 50.0, 80.0)
+        val data =
+            doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 50.0, 80.0)
         val result = grubbsTestIterative(data, alpha = 0.05)
         for (idx in result.outlierIndices) {
             assertTrue(idx in data.indices, "Outlier index $idx should be in [0, ${data.size})")
@@ -650,7 +696,7 @@ internal class GrubbsTestTest {
         val lenient = grubbsTestIterative(data, alpha = 0.1)
         assertTrue(
             strict.outlierIndices.size <= lenient.outlierIndices.size,
-            "Stricter alpha should find fewer or equal outliers"
+            "Stricter alpha should find fewer or equal outliers",
         )
     }
 
@@ -662,7 +708,11 @@ internal class GrubbsTestTest {
         val result1 = grubbsTestIterative(data, alpha = 0.05)
         val result2 = grubbsTestIterative(data, alpha = 0.05)
         assertEquals(result1, result2, "Same input should produce equal results")
-        assertEquals(result1.hashCode(), result2.hashCode(), "Equal results should have same hashCode")
+        assertEquals(
+            result1.hashCode(),
+            result2.hashCode(),
+            "Equal results should have same hashCode",
+        )
     }
 
     @Test

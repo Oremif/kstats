@@ -1,15 +1,16 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class ParetoDistributionTest : ContinuousDistributionPropertyTests() {
 
     override fun createDistribution(): ContinuousDistribution = ParetoDistribution(3.0, 2.0)
+
     override val testPoints = listOf(2.0, 3.0, 4.0, 5.0, 10.0, 100.0)
 
     private val std = ParetoDistribution.STANDARD

@@ -1,43 +1,45 @@
 package org.oremif.kstats.descriptive
 
+import kotlin.math.sqrt
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.sqrt
 
-private fun intPow(base: Double, exp: Int): Double = when (exp) {
-    0 -> 1.0
-    1 -> base
-    2 -> base * base
-    3 -> base * base * base
-    4 -> {
-        val b2 = base * base; b2 * b2
-    }
-
-    else -> {
-        var result = 1.0
-        var b = base
-        var e = exp
-        while (e > 0) {
-            if (e % 2 == 1) result *= b
-            b *= b
-            e /= 2
+private fun intPow(base: Double, exp: Int): Double =
+    when (exp) {
+        0 -> 1.0
+        1 -> base
+        2 -> base * base
+        3 -> base * base * base
+        4 -> {
+            val b2 = base * base
+            b2 * b2
         }
-        result
+
+        else -> {
+            var result = 1.0
+            var b = base
+            var e = exp
+            while (e > 0) {
+                if (e % 2 == 1) result *= b
+                b *= b
+                e /= 2
+            }
+            result
+        }
     }
-}
 
 // ── centralMoment ──────────────────────────────────────────────────────────
 
 /**
  * Computes the n-th central moment of the values.
  *
- * The r-th central moment is the average of the r-th power of deviations from the mean,
- * dividing by n (population-style). Order 0 returns 1.0 by convention, order 1 returns 0.0
- * by definition, and order 2 equals the population variance. Odd central moments measure
- * asymmetry, while even central moments measure tail weight.
+ * The r-th central moment is the average of the r-th power of deviations from the mean, dividing by
+ * n (population-style). Order 0 returns 1.0 by convention, order 1 returns 0.0 by definition, and
+ * order 2 equals the population variance. Odd central moments measure asymmetry, while even central
+ * moments measure tail weight.
  *
- * Uses a two-pass algorithm with z-normalization (dividing deviations by the standard
- * deviation) to prevent overflow with large-magnitude data.
+ * Uses a two-pass algorithm with z-normalization (dividing deviations by the standard deviation) to
+ * prevent overflow with large-magnitude data.
  *
  * ### Example:
  * ```kotlin
@@ -80,13 +82,13 @@ public fun Iterable<Double>.centralMoment(order: Int): Double {
 /**
  * Computes the n-th central moment of the values.
  *
- * The r-th central moment is the average of the r-th power of deviations from the mean,
- * dividing by n (population-style). Order 0 returns 1.0 by convention, order 1 returns 0.0
- * by definition, and order 2 equals the population variance. Odd central moments measure
- * asymmetry, while even central moments measure tail weight.
+ * The r-th central moment is the average of the r-th power of deviations from the mean, dividing by
+ * n (population-style). Order 0 returns 1.0 by convention, order 1 returns 0.0 by definition, and
+ * order 2 equals the population variance. Odd central moments measure asymmetry, while even central
+ * moments measure tail weight.
  *
- * Uses a two-pass algorithm with z-normalization (dividing deviations by the standard
- * deviation) to prevent overflow with large-magnitude data.
+ * Uses a two-pass algorithm with z-normalization (dividing deviations by the standard deviation) to
+ * prevent overflow with large-magnitude data.
  *
  * ### Example:
  * ```kotlin
@@ -127,14 +129,13 @@ public fun DoubleArray.centralMoment(order: Int): Double {
 /**
  * Computes the n-th central moment of the values in this sequence.
  *
- * The r-th central moment is the average of the r-th power of deviations from the mean,
- * dividing by n (population-style). Order 0 returns 1.0 by convention, order 1 returns 0.0
- * by definition, and order 2 equals the population variance. Odd central moments measure
- * asymmetry, while even central moments measure tail weight.
+ * The r-th central moment is the average of the r-th power of deviations from the mean, dividing by
+ * n (population-style). Order 0 returns 1.0 by convention, order 1 returns 0.0 by definition, and
+ * order 2 equals the population variance. Odd central moments measure asymmetry, while even central
+ * moments measure tail weight.
  *
- * Uses a two-pass algorithm with z-normalization (dividing deviations by the standard
- * deviation) to prevent overflow with large-magnitude data. The sequence is materialized
- * into a list internally.
+ * Uses a two-pass algorithm with z-normalization (dividing deviations by the standard deviation) to
+ * prevent overflow with large-magnitude data. The sequence is materialized into a list internally.
  *
  * ### Example:
  * ```kotlin
@@ -153,14 +154,13 @@ public fun Sequence<Double>.centralMoment(order: Int): Double =
 // ── kStatistic ─────────────────────────────────────────────────────────────
 
 /**
- * Computes the k-statistic of the given order, the unique symmetric unbiased estimator
- * of the corresponding cumulant.
+ * Computes the k-statistic of the given order, the unique symmetric unbiased estimator of the
+ * corresponding cumulant.
  *
- * K-statistics generalize familiar estimators to higher orders: k1 equals the sample mean,
- * k2 equals the sample variance (with Bessel's correction, dividing by n-1), k3 and k4
- * estimate the third and fourth cumulants respectively. Only orders 1 through 4 are
- * supported, matching scipy's `kstat` function. Each order requires at least that many
- * data points (e.g. k4 needs n >= 4).
+ * K-statistics generalize familiar estimators to higher orders: k1 equals the sample mean, k2
+ * equals the sample variance (with Bessel's correction, dividing by n-1), k3 and k4 estimate the
+ * third and fourth cumulants respectively. Only orders 1 through 4 are supported, matching scipy's
+ * `kstat` function. Each order requires at least that many data points (e.g. k4 needs n >= 4).
  *
  * Uses z-normalization for orders 3 and 4 to prevent overflow with large-magnitude data.
  *
@@ -180,17 +180,17 @@ public fun Sequence<Double>.centralMoment(order: Int): Double =
  * @see variance
  */
 public fun Iterable<Double>.kStatistic(order: Int): Double {
-    if (order !in 1..4) throw InvalidParameterException(
-        "k-statistic order must be 1, 2, 3, or 4, got $order"
-    )
+    if (order !in 1..4)
+        throw InvalidParameterException("k-statistic order must be 1, 2, 3, or 4, got $order")
 
     val list = toList()
     if (list.isEmpty()) throw InsufficientDataException("Collection must not be empty")
 
     val n = list.size
-    if (n < order) throw InsufficientDataException(
-        "k-statistic of order $order requires at least $order elements, got $n"
-    )
+    if (n < order)
+        throw InsufficientDataException(
+            "k-statistic of order $order requires at least $order elements, got $n"
+        )
 
     return list.welford { _, mean, m2 ->
         if (order == 1) return mean
@@ -228,14 +228,13 @@ public fun Iterable<Double>.kStatistic(order: Int): Double {
 }
 
 /**
- * Computes the k-statistic of the given order, the unique symmetric unbiased estimator
- * of the corresponding cumulant.
+ * Computes the k-statistic of the given order, the unique symmetric unbiased estimator of the
+ * corresponding cumulant.
  *
- * K-statistics generalize familiar estimators to higher orders: k1 equals the sample mean,
- * k2 equals the sample variance (with Bessel's correction, dividing by n-1), k3 and k4
- * estimate the third and fourth cumulants respectively. Only orders 1 through 4 are
- * supported, matching scipy's `kstat` function. Each order requires at least that many
- * data points (e.g. k4 needs n >= 4).
+ * K-statistics generalize familiar estimators to higher orders: k1 equals the sample mean, k2
+ * equals the sample variance (with Bessel's correction, dividing by n-1), k3 and k4 estimate the
+ * third and fourth cumulants respectively. Only orders 1 through 4 are supported, matching scipy's
+ * `kstat` function. Each order requires at least that many data points (e.g. k4 needs n >= 4).
  *
  * Uses z-normalization for orders 3 and 4 to prevent overflow with large-magnitude data.
  *
@@ -255,15 +254,15 @@ public fun Iterable<Double>.kStatistic(order: Int): Double {
  * @see variance
  */
 public fun DoubleArray.kStatistic(order: Int): Double {
-    if (order !in 1..4) throw InvalidParameterException(
-        "k-statistic order must be 1, 2, 3, or 4, got $order"
-    )
+    if (order !in 1..4)
+        throw InvalidParameterException("k-statistic order must be 1, 2, 3, or 4, got $order")
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
 
     val n = size
-    if (n < order) throw InsufficientDataException(
-        "k-statistic of order $order requires at least $order elements, got $n"
-    )
+    if (n < order)
+        throw InsufficientDataException(
+            "k-statistic of order $order requires at least $order elements, got $n"
+        )
 
     return welford { mean, m2 ->
         if (order == 1) return mean
@@ -301,17 +300,16 @@ public fun DoubleArray.kStatistic(order: Int): Double {
 }
 
 /**
- * Computes the k-statistic of the given order, the unique symmetric unbiased estimator
- * of the corresponding cumulant.
+ * Computes the k-statistic of the given order, the unique symmetric unbiased estimator of the
+ * corresponding cumulant.
  *
- * K-statistics generalize familiar estimators to higher orders: k1 equals the sample mean,
- * k2 equals the sample variance (with Bessel's correction, dividing by n-1), k3 and k4
- * estimate the third and fourth cumulants respectively. Only orders 1 through 4 are
- * supported, matching scipy's `kstat` function. Each order requires at least that many
- * data points (e.g. k4 needs n >= 4).
+ * K-statistics generalize familiar estimators to higher orders: k1 equals the sample mean, k2
+ * equals the sample variance (with Bessel's correction, dividing by n-1), k3 and k4 estimate the
+ * third and fourth cumulants respectively. Only orders 1 through 4 are supported, matching scipy's
+ * `kstat` function. Each order requires at least that many data points (e.g. k4 needs n >= 4).
  *
- * Uses z-normalization for orders 3 and 4 to prevent overflow with large-magnitude data.
- * The sequence is materialized into a list internally.
+ * Uses z-normalization for orders 3 and 4 to prevent overflow with large-magnitude data. The
+ * sequence is materialized into a list internally.
  *
  * ### Example:
  * ```kotlin

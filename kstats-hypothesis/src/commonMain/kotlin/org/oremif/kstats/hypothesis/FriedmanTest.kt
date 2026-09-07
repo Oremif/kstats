@@ -9,12 +9,12 @@ import org.oremif.kstats.sampling.rank
 /**
  * Performs the Friedman test for differences among repeated measures.
  *
- * The Friedman test is a non-parametric alternative to one-way repeated measures ANOVA.
- * It tests whether k related treatments (measured on the same n subjects or blocks)
- * have identical effects. The test ranks the treatment values within each block using
- * average tie-breaking, sums the ranks per treatment, and computes a chi-squared
- * statistic from the rank sums. Under the null hypothesis of no treatment effect,
- * the statistic follows a chi-squared distribution with k - 1 degrees of freedom.
+ * The Friedman test is a non-parametric alternative to one-way repeated measures ANOVA. It tests
+ * whether k related treatments (measured on the same n subjects or blocks) have identical effects.
+ * The test ranks the treatment values within each block using average tie-breaking, sums the ranks
+ * per treatment, and computes a chi-squared statistic from the rank sums. Under the null hypothesis
+ * of no treatment effect, the statistic follows a chi-squared distribution with k - 1 degrees of
+ * freedom.
  *
  * ### Example:
  * ```kotlin
@@ -27,25 +27,26 @@ import org.oremif.kstats.sampling.rank
  * result.degreesOfFreedom // k - 1
  * ```
  *
- * @param groups two or more treatment groups, each with the same number of observations (one per block).
+ * @param groups two or more treatment groups, each with the same number of observations (one per
+ *   block).
  * @return a [TestResult] containing the chi-squared statistic, p-value, degrees of freedom (k - 1),
- * and additional info with "numGroups" and "numBlocks".
+ *   and additional info with "numGroups" and "numBlocks".
  */
 public fun friedmanTest(vararg groups: DoubleArray): TestResult {
-    if (groups.size < 2) throw InsufficientDataException(
-        "Friedman test requires at least 2 groups, got ${groups.size}"
-    )
+    if (groups.size < 2)
+        throw InsufficientDataException(
+            "Friedman test requires at least 2 groups, got ${groups.size}"
+        )
 
     val n = groups[0].size
     for (i in 1 until groups.size) {
-        if (groups[i].size != n) throw InvalidParameterException(
-            "All groups must have the same size, group 0 has $n but group $i has ${groups[i].size}"
-        )
+        if (groups[i].size != n)
+            throw InvalidParameterException(
+                "All groups must have the same size, group 0 has $n but group $i has ${groups[i].size}"
+            )
     }
 
-    if (n < 2) throw InsufficientDataException(
-        "Each group must have at least 2 elements, got $n"
-    )
+    if (n < 2) throw InsufficientDataException("Each group must have at least 2 elements, got $n")
 
     val k = groups.size
     val df = k - 1
@@ -58,7 +59,7 @@ public fun friedmanTest(vararg groups: DoubleArray): TestResult {
                 statistic = Double.NaN,
                 pValue = Double.NaN,
                 degreesOfFreedom = df.toDouble(),
-                additionalInfo = mapOf("numGroups" to k.toDouble(), "numBlocks" to n.toDouble())
+                additionalInfo = mapOf("numGroups" to k.toDouble(), "numBlocks" to n.toDouble()),
             )
         }
     }
@@ -92,7 +93,7 @@ public fun friedmanTest(vararg groups: DoubleArray): TestResult {
             statistic = 0.0,
             pValue = 1.0,
             degreesOfFreedom = df.toDouble(),
-            additionalInfo = mapOf("numGroups" to k.toDouble(), "numBlocks" to n.toDouble())
+            additionalInfo = mapOf("numGroups" to k.toDouble(), "numBlocks" to n.toDouble()),
         )
     }
 
@@ -114,6 +115,6 @@ public fun friedmanTest(vararg groups: DoubleArray): TestResult {
         statistic = q,
         pValue = pValue.coerceIn(0.0, 1.0),
         degreesOfFreedom = df.toDouble(),
-        additionalInfo = mapOf("numGroups" to k.toDouble(), "numBlocks" to n.toDouble())
+        additionalInfo = mapOf("numGroups" to k.toDouble(), "numBlocks" to n.toDouble()),
     )
 }

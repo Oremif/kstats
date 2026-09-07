@@ -1,15 +1,14 @@
 package org.oremif.kstats.core
 
+import kotlin.random.Random
 import org.khronos.webgl.Int32Array
 import org.khronos.webgl.get
-import kotlin.random.Random
 
 /**
  * Returns a cryptographically secure random number generator backed by the Web Crypto API.
  *
- * Uses `crypto.getRandomValues` to fill an internal buffer of 64 integers, refilling
- * when exhausted. This avoids calling into the native crypto API on every random number
- * request.
+ * Uses `crypto.getRandomValues` to fill an internal buffer of 64 integers, refilling when
+ * exhausted. This avoids calling into the native crypto API on every random number request.
  *
  * @return a [Random] instance backed by `crypto.getRandomValues`.
  */

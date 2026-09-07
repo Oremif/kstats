@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.PI
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class CauchyDistributionTest : ContinuousDistributionPropertyTests() {
     override fun createDistribution() = CauchyDistribution.STANDARD
+
     override val testPoints = listOf(-100.0, -10.0, -1.0, 0.0, 1.0, 10.0, 100.0)
     override val integrationEpsilon = 0.01
 
@@ -187,5 +188,4 @@ class CauchyDistributionTest : ContinuousDistributionPropertyTests() {
         // scipy: cdf(1e15) = 0.5
         assertEquals(0.5, d3.cdf(1e15), 1e-10)
     }
-
 }

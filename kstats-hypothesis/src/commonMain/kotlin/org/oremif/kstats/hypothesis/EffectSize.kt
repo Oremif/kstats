@@ -1,19 +1,19 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.asin
+import kotlin.math.sqrt
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.descriptive.variance
-import kotlin.math.asin
-import kotlin.math.sqrt
 
 /**
  * Computes Cohen's d effect size for the standardized mean difference between two groups.
  *
- * Cohen's d measures how far apart two group means are in units of standard deviation.
- * A value of 0 means identical means; values around 0.2, 0.5, and 0.8 are conventionally
- * considered small, medium, and large effects respectively (Cohen, 1988). The sign indicates
- * direction: positive when the mean of [x] exceeds the mean of [y].
+ * Cohen's d measures how far apart two group means are in units of standard deviation. A value of 0
+ * means identical means; values around 0.2, 0.5, and 0.8 are conventionally considered small,
+ * medium, and large effects respectively (Cohen, 1988). The sign indicates direction: positive when
+ * the mean of [x] exceeds the mean of [y].
  *
  * ### Example:
  * ```kotlin
@@ -25,11 +25,11 @@ import kotlin.math.sqrt
  *
  * @param x the first sample. Must contain at least 2 elements.
  * @param y the second sample. Must contain at least 2 elements.
- * @param pooled whether to use the pooled standard deviation, which weights each group's
- * variance by its degrees of freedom. Defaults to `true`. When `false`, uses the unweighted
- * root-mean-square of the two group standard deviations, which treats both groups equally
- * regardless of sample size. The two variants give identical results when the sample sizes
- * are equal.
+ * @param pooled whether to use the pooled standard deviation, which weights each group's variance
+ *   by its degrees of freedom. Defaults to `true`. When `false`, uses the unweighted
+ *   root-mean-square of the two group standard deviations, which treats both groups equally
+ *   regardless of sample size. The two variants give identical results when the sample sizes are
+ *   equal.
  * @return the Cohen's d effect size.
  */
 public fun cohensD(
@@ -47,13 +47,14 @@ public fun cohensD(
     val var1 = x.variance()
     val var2 = y.variance()
 
-    val sd = if (pooled) {
-        // Pooled standard deviation, weighted by degrees of freedom
-        sqrt(((n1 - 1.0) * var1 + (n2 - 1.0) * var2) / (n1 + n2 - 2.0))
-    } else {
-        // Root-mean-square of the two standard deviations (unweighted)
-        sqrt((var1 + var2) / 2.0)
-    }
+    val sd =
+        if (pooled) {
+            // Pooled standard deviation, weighted by degrees of freedom
+            sqrt(((n1 - 1.0) * var1 + (n2 - 1.0) * var2) / (n1 + n2 - 2.0))
+        } else {
+            // Root-mean-square of the two standard deviations (unweighted)
+            sqrt((var1 + var2) / 2.0)
+        }
 
     return (mean1 - mean2) / sd
 }
@@ -61,11 +62,11 @@ public fun cohensD(
 /**
  * Computes Hedges' g effect size, a bias-corrected version of Cohen's d for small samples.
  *
- * Cohen's d overestimates the true effect size when sample sizes are small. Hedges' g
- * corrects this by multiplying Cohen's d by a correction factor J that approaches 1.0
- * as sample sizes grow. For large samples (combined n > 50), the difference between
- * Cohen's d and Hedges' g is negligible. The same conventional thresholds apply:
- * values around 0.2, 0.5, and 0.8 are considered small, medium, and large effects.
+ * Cohen's d overestimates the true effect size when sample sizes are small. Hedges' g corrects this
+ * by multiplying Cohen's d by a correction factor J that approaches 1.0 as sample sizes grow. For
+ * large samples (combined n > 50), the difference between Cohen's d and Hedges' g is negligible.
+ * The same conventional thresholds apply: values around 0.2, 0.5, and 0.8 are considered small,
+ * medium, and large effects.
  *
  * ### Example:
  * ```kotlin
@@ -77,9 +78,9 @@ public fun cohensD(
  *
  * @param x the first sample. Must contain at least 2 elements.
  * @param y the second sample. Must contain at least 2 elements.
- * @param pooled whether to use the pooled standard deviation when computing the underlying
- * Cohen's d. Defaults to `true`. When `false`, uses the unweighted root-mean-square of
- * the two group standard deviations.
+ * @param pooled whether to use the pooled standard deviation when computing the underlying Cohen's
+ *   d. Defaults to `true`. When `false`, uses the unweighted root-mean-square of the two group
+ *   standard deviations.
  * @return the Hedges' g effect size.
  * @see cohensD for the uncorrected version.
  */
@@ -101,12 +102,12 @@ public fun hedgesG(
 /**
  * Computes Cohen's h effect size for the difference between two proportions.
  *
- * Cohen's h measures how far apart two proportions are on a scale that accounts for the
- * non-linear nature of proportions. It applies an arcsine transformation to each proportion
- * before computing the difference, which stabilizes comparisons across the full range from
- * 0 to 1. Values around 0.2, 0.5, and 0.8 are conventionally considered small, medium,
- * and large effects respectively (Cohen, 1988). The sign indicates direction: positive when
- * [p1] exceeds [p2]. The result is bounded between -pi and pi.
+ * Cohen's h measures how far apart two proportions are on a scale that accounts for the non-linear
+ * nature of proportions. It applies an arcsine transformation to each proportion before computing
+ * the difference, which stabilizes comparisons across the full range from 0 to 1. Values around
+ * 0.2, 0.5, and 0.8 are conventionally considered small, medium, and large effects respectively
+ * (Cohen, 1988). The sign indicates direction: positive when [p1] exceeds [p2]. The result is
+ * bounded between -pi and pi.
  *
  * ### Example:
  * ```kotlin

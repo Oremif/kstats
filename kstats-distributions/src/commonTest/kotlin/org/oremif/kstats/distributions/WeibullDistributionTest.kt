@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class WeibullDistributionTest : ContinuousDistributionPropertyTests() {
     override fun createDistribution() = WeibullDistribution(1.5, 2.0)
+
     override val testPoints = listOf(0.0, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0)
     override val roundTripTol = 1e-12
 
@@ -207,5 +208,4 @@ class WeibullDistributionTest : ContinuousDistributionPropertyTests() {
         assertFailsWith<InvalidParameterException> { w.quantile(-0.1) }
         assertFailsWith<InvalidParameterException> { w.quantile(1.1) }
     }
-
 }

@@ -1,13 +1,14 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class BetaDistributionTest : ContinuousDistributionPropertyTests() {
     override fun createDistribution() = BetaDistribution(2.0, 5.0)
+
     override val testPoints = listOf(0.0, 0.1, 0.2, 0.3, 0.5, 0.8, 1.0)
     override val roundTripTol = 1e-8
 
@@ -213,5 +214,4 @@ class BetaDistributionTest : ContinuousDistributionPropertyTests() {
         // scipy: cdf(0.01) = 0.975893
         assertEquals(0.975892711294802, d3.cdf(0.01), 1e-4)
     }
-
 }

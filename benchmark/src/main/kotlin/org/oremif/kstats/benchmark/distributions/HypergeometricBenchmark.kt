@@ -1,9 +1,9 @@
 package org.oremif.kstats.benchmark.distributions
 
 import kotlinx.benchmark.*
-import org.oremif.kstats.distributions.HypergeometricDistribution
 import org.apache.commons.math3.distribution.HypergeometricDistribution as CommonsHypergeometric
 import org.openjdk.jmh.annotations.State as JmhState
+import org.oremif.kstats.distributions.HypergeometricDistribution
 
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
@@ -18,22 +18,19 @@ class HypergeometricBenchmark {
 
     // ===== PMF =====
 
-    @Benchmark
-    fun kstatsHypergeometricPmf(): Double = kDist.pmf(kValue)
-    @Benchmark
-    fun commonsHypergeometricPmf(): Double = cDist.probability(kValue)
+    @Benchmark fun kstatsHypergeometricPmf(): Double = kDist.pmf(kValue)
+
+    @Benchmark fun commonsHypergeometricPmf(): Double = cDist.probability(kValue)
 
     // ===== CDF =====
 
-    @Benchmark
-    fun kstatsHypergeometricCdf(): Double = kDist.cdf(kValue)
-    @Benchmark
-    fun commonsHypergeometricCdf(): Double = cDist.cumulativeProbability(kValue)
+    @Benchmark fun kstatsHypergeometricCdf(): Double = kDist.cdf(kValue)
+
+    @Benchmark fun commonsHypergeometricCdf(): Double = cDist.cumulativeProbability(kValue)
 
     // ===== Quantile =====
 
-    @Benchmark
-    fun kstatsHypergeometricQuantile(): Int = kDist.quantileInt(pValue)
-    @Benchmark
-    fun commonsHypergeometricQuantile(): Int = cDist.inverseCumulativeProbability(pValue)
+    @Benchmark fun kstatsHypergeometricQuantile(): Int = kDist.quantileInt(pValue)
+
+    @Benchmark fun commonsHypergeometricQuantile(): Int = cDist.inverseCumulativeProbability(pValue)
 }

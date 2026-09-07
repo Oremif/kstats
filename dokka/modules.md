@@ -46,15 +46,15 @@ Descriptive statistics, special math functions, and shared foundations for every
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
 
 val stats = data.describe()
-stats.mean              // 5.0
+stats.mean // 5.0
 stats.standardDeviation // 2.0
-stats.median            // 4.5
-stats.skewness          // 0.656...
+stats.median // 4.5
+stats.skewness // 0.656...
 
 // Streaming computation — no need to hold all data in memory
 val online = OnlineStatistics()
 online.addAll(data)
-online.mean       // 5.0
+online.mean // 5.0
 online.variance() // 4.571...
 ```
 
@@ -80,15 +80,15 @@ and `entropy` as properties.
 
 ```kotlin
 val normal = NormalDistribution(mu = 0.0, sigma = 1.0)
-normal.pdf(0.0)           // 0.3989...
-normal.cdf(1.96)          // 0.975...
-normal.quantile(0.975)    // 1.96
+normal.pdf(0.0) // 0.3989...
+normal.cdf(1.96) // 0.975...
+normal.quantile(0.975) // 1.96
 normal.sample(Random(42)) // a single random draw
 
 val poisson = PoissonDistribution(rate = 4.0)
-poisson.pmf(3)            // P(X = 3)
-poisson.cdf(5)            // P(X <= 5)
-poisson.mean              // 4.0
+poisson.pmf(3) // P(X = 3)
+poisson.cdf(5) // P(X <= 5)
+poisson.mean // 4.0
 ```
 
 <!---END-->
@@ -111,14 +111,16 @@ degrees of freedom, confidence interval, and `isSignificant(alpha)` helper.
 ```kotlin
 val sample = doubleArrayOf(5.0, 6.0, 7.0, 5.5, 6.5)
 val result = tTest(sample, mu = 5.0)
-result.statistic          // t-statistic
-result.pValue             // p-value
+result.statistic // t-statistic
+result.pValue // p-value
 result.confidenceInterval // 95% CI for the mean
-result.isSignificant()    // true if p < 0.05
+result.isSignificant() // true if p < 0.05
 
 // Normality check before choosing a test
 val sw = shapiroWilkTest(sample)
-if (!sw.isSignificant()) { /* data is consistent with normality */ }
+if (!sw.isSignificant()) {
+    /* data is consistent with normality */
+}
 ```
 
 <!---END-->
@@ -143,12 +145,12 @@ val y = doubleArrayOf(2.1, 3.9, 6.2, 7.8, 10.1)
 
 val r = pearsonCorrelation(x, y)
 r.coefficient // 0.999...
-r.pValue      // < 0.001
+r.pValue // < 0.001
 
 val reg = simpleLinearRegression(x, y)
-reg.slope        // ~2.0
-reg.intercept    // ~0.04
-reg.rSquared     // 0.999...
+reg.slope // ~2.0
+reg.intercept // ~0.04
+reg.rSquared // 0.999...
 reg.predict(6.0) // predicted y for x = 6
 ```
 
@@ -171,12 +173,12 @@ Ranking, normalization, binning, and weighted random sampling utilities.
 ```kotlin
 val data = doubleArrayOf(3.0, 1.0, 4.0, 1.0, 5.0)
 
-data.rank()              // [3.0, 1.5, 4.0, 1.5, 5.0] (average ties)
-data.zScore()            // standardized to mean=0, sd=1
-data.minMaxNormalize()   // scaled to [0.0, 1.0]
+data.rank() // [3.0, 1.5, 4.0, 1.5, 5.0] (average ties)
+data.zScore() // standardized to mean=0, sd=1
+data.minMaxNormalize() // scaled to [0.0, 1.0]
 
 val die = WeightedDice(mapOf("A" to 0.7, "B" to 0.2, "C" to 0.1), Random(42))
-die.roll()               // "A" (most likely)
+die.roll() // "A" (most likely)
 ```
 
 <!---END-->

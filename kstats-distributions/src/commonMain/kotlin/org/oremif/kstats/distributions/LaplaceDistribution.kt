@@ -1,20 +1,19 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 /**
- * Represents the Laplace distribution (also known as the double exponential distribution),
- * defined by its location [mu] and [scale] parameters.
+ * Represents the Laplace distribution (also known as the double exponential distribution), defined
+ * by its location [mu] and [scale] parameters.
  *
- * The Laplace distribution is a symmetric, peaked distribution centered at [mu] with
- * exponentially decaying tails on both sides. Compared to the normal distribution with
- * the same variance, the Laplace has a sharper peak at the center and heavier tails,
- * meaning extreme values are more likely. This makes it useful in robust statistics
- * where outliers are common, in signal processing for modeling Laplacian noise, and
- * in Bayesian inference as a sparsity-promoting prior (the Lasso penalty in regression
- * corresponds to a Laplace prior). The support is the entire real line.
+ * The Laplace distribution is a symmetric, peaked distribution centered at [mu] with exponentially
+ * decaying tails on both sides. Compared to the normal distribution with the same variance, the
+ * Laplace has a sharper peak at the center and heavier tails, meaning extreme values are more
+ * likely. This makes it useful in robust statistics where outliers are common, in signal processing
+ * for modeling Laplacian noise, and in Bayesian inference as a sparsity-promoting prior (the Lasso
+ * penalty in regression corresponds to a Laplace prior). The support is the entire real line.
  *
  * ### Example:
  * ```kotlin
@@ -37,7 +36,8 @@ public class LaplaceDistribution(
 
     init {
         if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
-        if (!scale.isFinite() || scale <= 0.0) throw InvalidParameterException("scale must be finite and positive, got $scale")
+        if (!scale.isFinite() || scale <= 0.0)
+            throw InvalidParameterException("scale must be finite and positive, got $scale")
     }
 
     public companion object {
@@ -48,9 +48,9 @@ public class LaplaceDistribution(
     /**
      * Returns the probability density at [x] for this Laplace distribution.
      *
-     * The density is highest at [mu] (where it equals 1 / (2 * scale)) and decays
-     * exponentially on both sides. Unlike the normal distribution, the decay is purely
-     * exponential rather than Gaussian, which produces the characteristic sharp peak.
+     * The density is highest at [mu] (where it equals 1 / (2 * scale)) and decays exponentially on
+     * both sides. Unlike the normal distribution, the decay is purely exponential rather than
+     * Gaussian, which produces the characteristic sharp peak.
      *
      * @param x the point at which to evaluate the density.
      * @return the probability density at [x]. Always non-negative.
@@ -60,11 +60,12 @@ public class LaplaceDistribution(
     }
 
     /**
-     * Returns the natural logarithm of the probability density at [x] for this Laplace distribution.
+     * Returns the natural logarithm of the probability density at [x] for this Laplace
+     * distribution.
      *
-     * Computed directly in log-space as -|x - mu| / scale - ln(2 * scale), avoiding
-     * intermediate exponentiation and providing better precision for extreme values
-     * where the density is very small.
+     * Computed directly in log-space as -|x - mu| / scale - ln(2 * scale), avoiding intermediate
+     * exponentiation and providing better precision for extreme values where the density is very
+     * small.
      *
      * @param x the point at which to evaluate the log-density.
      * @return the natural log of the probability density at [x].
@@ -76,10 +77,9 @@ public class LaplaceDistribution(
     /**
      * Returns the cumulative distribution function value at [x] for this Laplace distribution.
      *
-     * The CDF has a piecewise form: for values at or below [mu] it equals 0.5 * exp(z),
-     * and for values above [mu] it equals 1 - 0.5 * exp(-z), where z = (x - mu) / scale.
-     * This gives the probability that a random value from this distribution is less than
-     * or equal to [x].
+     * The CDF has a piecewise form: for values at or below [mu] it equals 0.5 * exp(z), and for
+     * values above [mu] it equals 1 - 0.5 * exp(-z), where z = (x - mu) / scale. This gives the
+     * probability that a random value from this distribution is less than or equal to [x].
      *
      * @param x the point at which to evaluate the cumulative probability.
      * @return the probability that a value is less than or equal to [x], in the range `[0, 1]`.
@@ -92,8 +92,8 @@ public class LaplaceDistribution(
     /**
      * Returns the survival function value at [x] for this Laplace distribution.
      *
-     * The survival function is 1 - cdf(x), computed using the complementary piecewise
-     * formula to avoid catastrophic cancellation when the CDF is close to 1.
+     * The survival function is 1 - cdf(x), computed using the complementary piecewise formula to
+     * avoid catastrophic cancellation when the CDF is close to 1.
      *
      * @param x the point at which to evaluate the survival probability.
      * @return the probability that a value is greater than [x], in the range `[0, 1]`.
@@ -106,9 +106,9 @@ public class LaplaceDistribution(
     /**
      * Returns the quantile (inverse CDF) for the given probability [p].
      *
-     * The quantile function inverts the piecewise CDF. For probabilities up to 0.5,
-     * the result lies at or below [mu]; for probabilities above 0.5, the result lies
-     * above [mu]. Returns negative infinity for p = 0 and positive infinity for p = 1.
+     * The quantile function inverts the piecewise CDF. For probabilities up to 0.5, the result lies
+     * at or below [mu]; for probabilities above 0.5, the result lies above [mu]. Returns negative
+     * infinity for p = 0 and positive infinity for p = 1.
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
      * @return the value x at which `cdf(x) = p`.
@@ -121,19 +121,27 @@ public class LaplaceDistribution(
     }
 
     /** The mean of this distribution, equal to [mu]. */
-    override val mean: Double get() = mu
+    override val mean: Double
+        get() = mu
 
     /** The variance of this distribution, equal to 2 * scale^2. */
-    override val variance: Double get() = 2.0 * scale * scale
+    override val variance: Double
+        get() = 2.0 * scale * scale
 
     /** The standard deviation of this distribution, equal to scale * sqrt(2). */
-    override val standardDeviation: Double get() = scale * sqrt(2.0)
+    override val standardDeviation: Double
+        get() = scale * sqrt(2.0)
 
     /** The skewness of this distribution, always zero due to symmetry around [mu]. */
-    override val skewness: Double get() = 0.0
+    override val skewness: Double
+        get() = 0.0
 
-    /** The excess kurtosis of this distribution, always 3.0 (leptokurtic, heavier tails than normal). */
-    override val kurtosis: Double get() = 3.0 // excess kurtosis
+    /**
+     * The excess kurtosis of this distribution, always 3.0 (leptokurtic, heavier tails than
+     * normal).
+     */
+    override val kurtosis: Double
+        get() = 3.0 // excess kurtosis
 
     /** The Shannon entropy of this distribution in nats, equal to 1 + ln(2 * scale). */
     override val entropy: Double = 1.0 + ln(2.0 * scale)
@@ -141,8 +149,8 @@ public class LaplaceDistribution(
     /**
      * Draws a single random value from this Laplace distribution using inverse CDF sampling.
      *
-     * Generates a uniform random variable shifted to the range (-0.5, 0.5) and applies
-     * the inverse CDF transform to produce a Laplace-distributed value.
+     * Generates a uniform random variable shifted to the range (-0.5, 0.5) and applies the inverse
+     * CDF transform to produce a Laplace-distributed value.
      *
      * @param random the source of randomness.
      * @return a random value drawn from this distribution.

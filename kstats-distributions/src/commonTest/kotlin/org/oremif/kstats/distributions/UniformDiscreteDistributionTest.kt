@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class UniformDiscreteDistributionTest : DiscreteDistributionPropertyTests() {
 
     override fun createDistribution() = UniformDiscreteDistribution(1, 6)
+
     override val testKRange = 0..7
 
     // --- Basic correctness (scipy 15-digit refs) ---
@@ -161,5 +162,4 @@ class UniformDiscreteDistributionTest : DiscreteDistributionPropertyTests() {
         assertFailsWith<InvalidParameterException> { d.quantileInt(-0.1) }
         assertFailsWith<InvalidParameterException> { d.quantileInt(1.1) }
     }
-
 }

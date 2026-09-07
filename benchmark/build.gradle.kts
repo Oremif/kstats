@@ -1,12 +1,11 @@
 plugins {
     kotlin("jvm")
+    id("kstats.ktfmt")
     alias(libs.plugins.kotlin.allopen)
     alias(libs.plugins.kotlinx.benchmark)
 }
 
-allOpen {
-    annotation("org.openjdk.jmh.annotations.State")
-}
+allOpen { annotation("org.openjdk.jmh.annotations.State") }
 
 dependencies {
     implementation(project(":kstats-core"))

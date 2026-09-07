@@ -1,12 +1,12 @@
 package org.oremif.kstats.correlation
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class PartialCorrelationTest {
 
@@ -131,7 +131,7 @@ class PartialCorrelationTest {
         val pearson = pearsonCorrelation(x, y)
         assertTrue(
             abs(result.coefficient) < abs(pearson.coefficient),
-            "Partial r (${result.coefficient}) should be closer to zero than Pearson r (${pearson.coefficient})"
+            "Partial r (${result.coefficient}) should be closer to zero than Pearson r (${pearson.coefficient})",
         )
     }
 
@@ -139,16 +139,19 @@ class PartialCorrelationTest {
     fun testSpuriousCorrelationRemoved() {
         // Classic confounding: ice cream sales and drownings both caused by temperature
         // x = ice cream, y = drownings, z = temperature
-        val z = doubleArrayOf(60.0, 65.0, 70.0, 75.0, 80.0, 85.0, 90.0, 95.0, 70.0, 75.0, 80.0, 85.0)
-        val x = DoubleArray(z.size) { 2.0 * z[it] + 10.0 + (it % 3) * 5.0 } // ice cream ~ temperature
-        val y = DoubleArray(z.size) { 1.5 * z[it] - 50.0 + (it % 4) * 3.0 } // drownings ~ temperature
+        val z =
+            doubleArrayOf(60.0, 65.0, 70.0, 75.0, 80.0, 85.0, 90.0, 95.0, 70.0, 75.0, 80.0, 85.0)
+        val x =
+            DoubleArray(z.size) { 2.0 * z[it] + 10.0 + (it % 3) * 5.0 } // ice cream ~ temperature
+        val y =
+            DoubleArray(z.size) { 1.5 * z[it] - 50.0 + (it % 4) * 3.0 } // drownings ~ temperature
         val pearson = pearsonCorrelation(x, y)
         val partial = partialCorrelation(x, y, z)
         // Pearson should be high, partial should be lower
         assertTrue(abs(pearson.coefficient) > 0.5, "Pearson should show correlation")
         assertTrue(
             abs(partial.coefficient) < abs(pearson.coefficient),
-            "Partial correlation should be reduced after controlling for confound"
+            "Partial correlation should be reduced after controlling for confound",
         )
     }
 
@@ -213,7 +216,7 @@ class PartialCorrelationTest {
             partialCorrelation(
                 doubleArrayOf(1.0, 2.0, 3.0),
                 doubleArrayOf(4.0, 5.0, 6.0),
-                doubleArrayOf(7.0, 8.0, 9.0)
+                doubleArrayOf(7.0, 8.0, 9.0),
             )
         }
     }
@@ -226,7 +229,7 @@ class PartialCorrelationTest {
                 doubleArrayOf(1.0, 2.0, 3.0, 4.0),
                 doubleArrayOf(5.0, 6.0, 7.0, 8.0),
                 doubleArrayOf(9.0, 10.0, 11.0, 12.0),
-                doubleArrayOf(13.0, 14.0, 15.0, 16.0)
+                doubleArrayOf(13.0, 14.0, 15.0, 16.0),
             )
         }
     }
@@ -237,7 +240,7 @@ class PartialCorrelationTest {
             partialCorrelation(
                 doubleArrayOf(1.0, 2.0, 3.0),
                 doubleArrayOf(4.0, 5.0),
-                doubleArrayOf(7.0, 8.0, 9.0)
+                doubleArrayOf(7.0, 8.0, 9.0),
             )
         }
     }
@@ -248,7 +251,7 @@ class PartialCorrelationTest {
             partialCorrelation(
                 doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0),
                 doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0),
-                doubleArrayOf(11.0, 12.0, 13.0) // wrong size
+                doubleArrayOf(11.0, 12.0, 13.0), // wrong size
             )
         }
     }
@@ -358,11 +361,11 @@ class PartialCorrelationTest {
             if (!result.coefficient.isNaN()) {
                 assertTrue(
                     result.coefficient in -1.0..1.0,
-                    "r out of bounds: ${result.coefficient}"
+                    "r out of bounds: ${result.coefficient}",
                 )
                 assertTrue(
                     result.pValue in 0.0..1.0,
-                    "p out of bounds: ${result.pValue}"
+                    "p out of bounds: ${result.pValue}",
                 )
             }
         }
@@ -396,7 +399,7 @@ class PartialCorrelationTest {
             if (!partial.coefficient.isNaN()) {
                 assertTrue(
                     abs(partial.coefficient) <= abs(pearson.coefficient) + 1e-6,
-                    "Partial r (${partial.coefficient}) > Pearson r (${pearson.coefficient})"
+                    "Partial r (${partial.coefficient}) > Pearson r (${pearson.coefficient})",
                 )
             }
         }
@@ -414,7 +417,10 @@ class PartialCorrelationTest {
         val y = DoubleArray(n) { random.nextDouble() + 5.0 * w[it] }
         val result = partialCorrelation(x, y, z)
         // Since z is independent, controlling for z shouldn't reduce the high correlation
-        assertTrue(result.coefficient > 0.9, "Expected high partial correlation, got ${result.coefficient}")
+        assertTrue(
+            result.coefficient > 0.9,
+            "Expected high partial correlation, got ${result.coefficient}",
+        )
         assertTrue(result.pValue < 0.001)
     }
 }

@@ -10,11 +10,11 @@ private const val RELATIVE_TOLERANCE = 1e-12
 /**
  * Finds the quantile value x such that cdf(x) = [p], using Newton-Raphson with bisection fallback.
  *
- * This is the shared numerical root-finder used by distribution quantile methods. It first
- * attempts Newton-Raphson iteration (up to 50 steps) for fast quadratic convergence, then
- * falls back to bisection (up to 100 steps) if Newton stalls or the PDF is zero at the
- * current estimate. For unbounded distributions, the bisection phase automatically expands
- * the search bracket until it contains the target probability.
+ * This is the shared numerical root-finder used by distribution quantile methods. It first attempts
+ * Newton-Raphson iteration (up to 50 steps) for fast quadratic convergence, then falls back to
+ * bisection (up to 100 steps) if Newton stalls or the PDF is zero at the current estimate. For
+ * unbounded distributions, the bisection phase automatically expands the search bracket until it
+ * contains the target probability.
  *
  * ### Example:
  * ```kotlin
@@ -34,8 +34,8 @@ private const val RELATIVE_TOLERANCE = 1e-12
  * @param lowerBound the lower bound of the distribution's support. Defaults to negative infinity.
  * @param upperBound the upper bound of the distribution's support. Defaults to positive infinity.
  * @return the value x such that cdf(x) is approximately equal to [p].
- * @throws org.oremif.kstats.core.exceptions.ConvergenceException if neither Newton-Raphson nor bisection converges within the
- * iteration limits.
+ * @throws org.oremif.kstats.core.exceptions.ConvergenceException if neither Newton-Raphson nor
+ *   bisection converges within the iteration limits.
  */
 public fun findQuantile(
     p: Double,

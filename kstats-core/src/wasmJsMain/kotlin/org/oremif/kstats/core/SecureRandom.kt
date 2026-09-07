@@ -29,8 +29,7 @@ private object WasmJsSecureRandom : Random() {
     }
 }
 
-@JsFun("(size) => new Int32Array(size)")
-private external fun createInt32Array(size: Int): JsAny
+@JsFun("(size) => new Int32Array(size)") private external fun createInt32Array(size: Int): JsAny
 
 @JsFun("(array) => crypto.getRandomValues(array)")
 private external fun cryptoGetRandomValues(array: JsAny): JsAny

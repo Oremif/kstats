@@ -28,20 +28,48 @@ Parametric methods (t-tests, ANOVA, Pearson correlation) assume specific propert
 {/*---FUN testingNormality--*/}
 
 ```kotlin
-val sensorReadings = doubleArrayOf(
-    150.2, 151.8, 149.6, 152.1, 150.9, 151.3, 149.8, 152.5, 150.4, 151.1,
-    150.7, 149.5, 151.6, 150.0, 152.3, 151.0, 149.9, 150.8, 151.5, 150.3,
-    151.2, 149.7, 150.6, 152.0, 150.1, 151.4, 149.4, 151.9, 150.5, 151.7
-)
+val sensorReadings =
+    doubleArrayOf(
+        150.2,
+        151.8,
+        149.6,
+        152.1,
+        150.9,
+        151.3,
+        149.8,
+        152.5,
+        150.4,
+        151.1,
+        150.7,
+        149.5,
+        151.6,
+        150.0,
+        152.3,
+        151.0,
+        149.9,
+        150.8,
+        151.5,
+        150.3,
+        151.2,
+        149.7,
+        150.6,
+        152.0,
+        150.1,
+        151.4,
+        149.4,
+        151.9,
+        150.5,
+        151.7,
+    )
 
 val shapiro = shapiroWilkTest(sensorReadings)
 val anderson = andersonDarlingTest(sensorReadings)
 val dagostino = dagostinoPearsonTest(sensorReadings)
 val jarqueBera = jarqueBeraTest(sensorReadings)
 
-shapiro.pValue    // Shapiro-Wilk
-anderson.pValue   // Anderson-Darling
-dagostino.pValue  // D'Agostino-Pearson
+shapiro.pValue // Shapiro-Wilk
+anderson.pValue // Anderson-Darling
+dagostino.pValue // D'Agostino-Pearson
 jarqueBera.pValue // Jarque-Bera
 ```
 
@@ -86,9 +114,9 @@ val levene = leveneTest(batchA, batchB, batchC)
 val bartlett = bartlettTest(batchA, batchB, batchC)
 val fligner = flignerKilleenTest(batchA, batchB, batchC)
 
-levene.pValue   // Levene
+levene.pValue // Levene
 bartlett.pValue // Bartlett
-fligner.pValue  // Fligner-Killeen
+fligner.pValue // Fligner-Killeen
 ```
 
 {/*---END--*/}
@@ -116,16 +144,36 @@ Compare observed data against a theoretical distribution.
 {/*---FUN testingKsOneSample--*/}
 
 ```kotlin
-val temperatureReadings = doubleArrayOf(
-    155.2, 154.8, 156.1, 155.5, 154.3, 155.9, 155.0, 156.3, 154.7, 155.4,
-    155.8, 154.5, 156.0, 155.3, 154.9, 155.7, 155.1, 156.2, 154.6, 155.6
-)
+val temperatureReadings =
+    doubleArrayOf(
+        155.2,
+        154.8,
+        156.1,
+        155.5,
+        154.3,
+        155.9,
+        155.0,
+        156.3,
+        154.7,
+        155.4,
+        155.8,
+        154.5,
+        156.0,
+        155.3,
+        154.9,
+        155.7,
+        155.1,
+        156.2,
+        154.6,
+        155.6,
+    )
 
 // Fit Normal from sample
-val fitted = NormalDistribution(
-    mu = temperatureReadings.mean(),
-    sigma = temperatureReadings.standardDeviation()
-)
+val fitted =
+    NormalDistribution(
+        mu = temperatureReadings.mean(),
+        sigma = temperatureReadings.standardDeviation(),
+    )
 
 val ks = kolmogorovSmirnovTest(temperatureReadings, fitted)
 ks.statistic // smaller means better fit
@@ -163,12 +211,32 @@ Compare two samples without assuming a specific distribution.
 {/*---FUN testingKsTwoSample--*/}
 
 ```kotlin
-val morningReadings = doubleArrayOf(
-    155.2, 154.8, 156.1, 155.5, 154.3, 155.9, 155.0, 156.3, 154.7, 155.4
-)
-val nightReadings = doubleArrayOf(
-    156.1, 155.3, 157.0, 156.5, 155.8, 156.8, 155.5, 157.2, 155.9, 156.3
-)
+val morningReadings =
+    doubleArrayOf(
+        155.2,
+        154.8,
+        156.1,
+        155.5,
+        154.3,
+        155.9,
+        155.0,
+        156.3,
+        154.7,
+        155.4,
+    )
+val nightReadings =
+    doubleArrayOf(
+        156.1,
+        155.3,
+        157.0,
+        156.5,
+        155.8,
+        156.8,
+        155.5,
+        157.2,
+        155.9,
+        156.3,
+    )
 
 val twoSampleKs = kolmogorovSmirnovTest(morningReadings, nightReadings)
 twoSampleKs.pValue // low p-value suggests different underlying distributions

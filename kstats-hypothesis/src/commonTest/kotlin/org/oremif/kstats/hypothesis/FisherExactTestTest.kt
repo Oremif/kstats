@@ -1,7 +1,7 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.*
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class FisherExactTestTest {
 

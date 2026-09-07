@@ -1,14 +1,13 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 internal class EffectSizeTest {
 
@@ -29,7 +28,12 @@ internal class EffectSizeTest {
         // scipy (manual): cohens_d_pooled([10,12,11,13,14,15], [8,9,7,10]) = 2.38513917599978
         val x = doubleArrayOf(10.0, 12.0, 11.0, 13.0, 14.0, 15.0)
         val y = doubleArrayOf(8.0, 9.0, 7.0, 10.0)
-        assertEquals(2.38513917599978, cohensD(x, y, pooled = true), tol, "pooled d with unequal sizes")
+        assertEquals(
+            2.38513917599978,
+            cohensD(x, y, pooled = true),
+            tol,
+            "pooled d with unequal sizes",
+        )
     }
 
     @Test
@@ -37,7 +41,12 @@ internal class EffectSizeTest {
         // scipy (manual): cohens_d_pooled([100,101,102,103,104], [0,1,2,3,4]) = 63.2455532033676
         val x = doubleArrayOf(100.0, 101.0, 102.0, 103.0, 104.0)
         val y = doubleArrayOf(0.0, 1.0, 2.0, 3.0, 4.0)
-        assertEquals(63.2455532033676, cohensD(x, y, pooled = true), tol, "pooled d for large effect")
+        assertEquals(
+            63.2455532033676,
+            cohensD(x, y, pooled = true),
+            tol,
+            "pooled d for large effect",
+        )
     }
 
     @Test
@@ -53,7 +62,12 @@ internal class EffectSizeTest {
         // scipy (manual): cohens_d_pooled([1,2,3,4,5], [10,20,30,40,50]) = -2.40296846124592
         val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         val y = doubleArrayOf(10.0, 20.0, 30.0, 40.0, 50.0)
-        assertEquals(-2.40296846124592, cohensD(x, y, pooled = true), tol, "pooled d with different variances")
+        assertEquals(
+            -2.40296846124592,
+            cohensD(x, y, pooled = true),
+            tol,
+            "pooled d with different variances",
+        )
     }
 
     // ===== Basic correctness: unpooled =====
@@ -71,7 +85,12 @@ internal class EffectSizeTest {
         // scipy (manual): cohens_d_unpooled([10,12,11,13,14,15], [8,9,7,10]) = 2.48868406735302
         val x = doubleArrayOf(10.0, 12.0, 11.0, 13.0, 14.0, 15.0)
         val y = doubleArrayOf(8.0, 9.0, 7.0, 10.0)
-        assertEquals(2.48868406735302, cohensD(x, y, pooled = false), tol, "unpooled d with unequal sizes")
+        assertEquals(
+            2.48868406735302,
+            cohensD(x, y, pooled = false),
+            tol,
+            "unpooled d with unequal sizes",
+        )
     }
 
     @Test
@@ -79,7 +98,12 @@ internal class EffectSizeTest {
         // scipy (manual): cohens_d_unpooled([1,2,3,4,5], [10,20,30,40,50]) = -2.40296846124592
         val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         val y = doubleArrayOf(10.0, 20.0, 30.0, 40.0, 50.0)
-        assertEquals(-2.40296846124592, cohensD(x, y, pooled = false), tol, "unpooled d with different variances")
+        assertEquals(
+            -2.40296846124592,
+            cohensD(x, y, pooled = false),
+            tol,
+            "unpooled d with different variances",
+        )
     }
 
     // ===== Basic: pooled default parameter =====
@@ -92,7 +116,7 @@ internal class EffectSizeTest {
             cohensD(x, y, pooled = true),
             cohensD(x, y),
             0.0,
-            "default should be pooled"
+            "default should be pooled",
         )
     }
 
@@ -129,12 +153,23 @@ internal class EffectSizeTest {
 
     @Test
     fun testCohensDLargeSizeDifference() {
-        // scipy (manual): cohens_d_pooled([1,2], [10,11,12,13,14,15,16,17,18,19]) = -4.51236587425405
+        // scipy (manual): cohens_d_pooled([1,2], [10,11,12,13,14,15,16,17,18,19]) =
+        // -4.51236587425405
         val x = doubleArrayOf(1.0, 2.0)
         val y = doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0)
-        assertEquals(-4.51236587425405, cohensD(x, y, pooled = true), tol, "pooled d with large size diff")
+        assertEquals(
+            -4.51236587425405,
+            cohensD(x, y, pooled = true),
+            tol,
+            "pooled d with large size diff",
+        )
         // scipy (manual): cohens_d_unpooled = -5.91316473991545
-        assertEquals(-5.91316473991545, cohensD(x, y, pooled = false), tol, "unpooled d with large size diff")
+        assertEquals(
+            -5.91316473991545,
+            cohensD(x, y, pooled = false),
+            tol,
+            "unpooled d with large size diff",
+        )
     }
 
     // ===== Degenerate input =====
@@ -197,15 +232,26 @@ internal class EffectSizeTest {
         // scipy (manual): cohens_d_pooled([5,5,5], [1,2,3]) = 4.24264068711928
         val x = doubleArrayOf(5.0, 5.0, 5.0)
         val y = doubleArrayOf(1.0, 2.0, 3.0)
-        assertEquals(4.24264068711928, cohensD(x, y, pooled = true), tol, "one constant array pooled")
-        assertEquals(4.24264068711928, cohensD(x, y, pooled = false), tol, "one constant array unpooled")
+        assertEquals(
+            4.24264068711928,
+            cohensD(x, y, pooled = true),
+            tol,
+            "one constant array pooled",
+        )
+        assertEquals(
+            4.24264068711928,
+            cohensD(x, y, pooled = false),
+            tol,
+            "one constant array unpooled",
+        )
     }
 
     // ===== Extreme parameters =====
 
     @Test
     fun testCohensDLargeValues() {
-        // scipy (manual): cohens_d_pooled([1e10, 1e10+1, 1e10+2], [1e10+100, 1e10+101, 1e10+102]) = -100.0
+        // scipy (manual): cohens_d_pooled([1e10, 1e10+1, 1e10+2], [1e10+100, 1e10+101, 1e10+102]) =
+        // -100.0
         val x = doubleArrayOf(1e10, 1e10 + 1.0, 1e10 + 2.0)
         val y = doubleArrayOf(1e10 + 100.0, 1e10 + 101.0, 1e10 + 102.0)
         assertEquals(-100.0, cohensD(x, y, pooled = true), tol, "large offset values pooled")
@@ -268,7 +314,10 @@ internal class EffectSizeTest {
         val x = doubleArrayOf(1.0, 2.0, 3.0)
         val y = doubleArrayOf(4.0, Double.NEGATIVE_INFINITY, 6.0)
         val d = cohensD(x, y)
-        assertTrue(d.isNaN() || d.isInfinite(), "Negative Infinity in y should produce non-finite result")
+        assertTrue(
+            d.isNaN() || d.isInfinite(),
+            "Negative Infinity in y should produce non-finite result",
+        )
     }
 
     // ===== Property-based tests =====
@@ -282,13 +331,13 @@ internal class EffectSizeTest {
             cohensD(x, y, pooled = true),
             -cohensD(y, x, pooled = true),
             1e-14,
-            "pooled: d(x,y) = -d(y,x)"
+            "pooled: d(x,y) = -d(y,x)",
         )
         assertEquals(
             cohensD(x, y, pooled = false),
             -cohensD(y, x, pooled = false),
             1e-14,
-            "unpooled: d(x,y) = -d(y,x)"
+            "unpooled: d(x,y) = -d(y,x)",
         )
     }
 
@@ -301,13 +350,13 @@ internal class EffectSizeTest {
             cohensD(x, y, pooled = true),
             -cohensD(y, x, pooled = true),
             1e-14,
-            "sign reversal pooled, unequal sizes"
+            "sign reversal pooled, unequal sizes",
         )
         assertEquals(
             cohensD(x, y, pooled = false),
             -cohensD(y, x, pooled = false),
             1e-14,
-            "sign reversal unpooled, unequal sizes"
+            "sign reversal unpooled, unequal sizes",
         )
     }
 
@@ -321,7 +370,7 @@ internal class EffectSizeTest {
             cohensD(x, y, pooled = true),
             cohensD(x, y, pooled = false),
             1e-14,
-            "pooled = unpooled when n1 = n2"
+            "pooled = unpooled when n1 = n2",
         )
     }
 
@@ -334,23 +383,24 @@ internal class EffectSizeTest {
         val unpooled = cohensD(x, y, pooled = false)
         assertTrue(
             abs(pooled - unpooled) > 0.01,
-            "pooled ($pooled) and unpooled ($unpooled) should differ for unequal sizes with different variances"
+            "pooled ($pooled) and unpooled ($unpooled) should differ for unequal sizes with different variances",
         )
     }
 
     @Test
     fun testCohensDSignMatchesMeanDifference() {
         // Property: sign of d matches sign of (mean(x) - mean(y))
-        val pairs = listOf(
-            doubleArrayOf(10.0, 20.0, 30.0) to doubleArrayOf(1.0, 2.0, 3.0),   // positive d
-            doubleArrayOf(1.0, 2.0, 3.0) to doubleArrayOf(10.0, 20.0, 30.0),   // negative d
-        )
+        val pairs =
+            listOf(
+                doubleArrayOf(10.0, 20.0, 30.0) to doubleArrayOf(1.0, 2.0, 3.0), // positive d
+                doubleArrayOf(1.0, 2.0, 3.0) to doubleArrayOf(10.0, 20.0, 30.0), // negative d
+            )
         for ((x, y) in pairs) {
             val d = cohensD(x, y)
             val meanDiff = x.average() - y.average()
             assertTrue(
                 d * meanDiff >= 0.0,
-                "sign of d ($d) should match sign of mean diff ($meanDiff)"
+                "sign of d ($d) should match sign of mean diff ($meanDiff)",
             )
         }
     }
@@ -359,13 +409,18 @@ internal class EffectSizeTest {
     fun testCohensDZeroWhenMeansEqual() {
         // Property: d = 0 whenever means are equal (regardless of variances)
         val x1 = doubleArrayOf(0.0, 10.0) // mean = 5
-        val y1 = doubleArrayOf(4.0, 6.0)  // mean = 5
+        val y1 = doubleArrayOf(4.0, 6.0) // mean = 5
         assertEquals(0.0, cohensD(x1, y1, pooled = true), tol, "d = 0 for equal means (pooled)")
         assertEquals(0.0, cohensD(x1, y1, pooled = false), tol, "d = 0 for equal means (unpooled)")
 
-        val x2 = doubleArrayOf(2.0, 4.0, 6.0)   // mean = 4
-        val y2 = doubleArrayOf(1.0, 4.0, 7.0)    // mean = 4
-        assertEquals(0.0, cohensD(x2, y2, pooled = true), tol, "d = 0 for equal means, different spread (pooled)")
+        val x2 = doubleArrayOf(2.0, 4.0, 6.0) // mean = 4
+        val y2 = doubleArrayOf(1.0, 4.0, 7.0) // mean = 4
+        assertEquals(
+            0.0,
+            cohensD(x2, y2, pooled = true),
+            tol,
+            "d = 0 for equal means, different spread (pooled)",
+        )
     }
 
     @Test
@@ -378,7 +433,12 @@ internal class EffectSizeTest {
         for (c in listOf(0.001, 0.1, 10.0, 1000.0)) {
             val xScaled = DoubleArray(x.size) { x[it] * c }
             val yScaled = DoubleArray(y.size) { y[it] * c }
-            assertEquals(d, cohensD(xScaled, yScaled, pooled = true), 1e-8, "scale invariance for c=$c")
+            assertEquals(
+                d,
+                cohensD(xScaled, yScaled, pooled = true),
+                1e-8,
+                "scale invariance for c=$c",
+            )
         }
     }
 
@@ -392,7 +452,12 @@ internal class EffectSizeTest {
         for (c in listOf(-1000.0, -1.0, 0.0, 1.0, 1000.0)) {
             val xShifted = DoubleArray(x.size) { x[it] + c }
             val yShifted = DoubleArray(y.size) { y[it] + c }
-            assertEquals(d, cohensD(xShifted, yShifted, pooled = true), 1e-8, "translation invariance for c=$c")
+            assertEquals(
+                d,
+                cohensD(xShifted, yShifted, pooled = true),
+                1e-8,
+                "translation invariance for c=$c",
+            )
         }
     }
 
@@ -491,64 +556,44 @@ internal class EffectSizeTest {
 
     @Test
     fun testCohensHInvalidP1Negative() {
-        assertFailsWith<InvalidParameterException> {
-            cohensH(-0.1, 0.5)
-        }
+        assertFailsWith<InvalidParameterException> { cohensH(-0.1, 0.5) }
     }
 
     @Test
     fun testCohensHInvalidP1AboveOne() {
-        assertFailsWith<InvalidParameterException> {
-            cohensH(1.1, 0.5)
-        }
+        assertFailsWith<InvalidParameterException> { cohensH(1.1, 0.5) }
     }
 
     @Test
     fun testCohensHInvalidP2Negative() {
-        assertFailsWith<InvalidParameterException> {
-            cohensH(0.5, -0.1)
-        }
+        assertFailsWith<InvalidParameterException> { cohensH(0.5, -0.1) }
     }
 
     @Test
     fun testCohensHInvalidP2AboveOne() {
-        assertFailsWith<InvalidParameterException> {
-            cohensH(0.5, 1.1)
-        }
+        assertFailsWith<InvalidParameterException> { cohensH(0.5, 1.1) }
     }
 
     @Test
     fun testCohensHBothInvalid() {
-        assertFailsWith<InvalidParameterException> {
-            cohensH(-0.5, 1.5)
-        }
+        assertFailsWith<InvalidParameterException> { cohensH(-0.5, 1.5) }
     }
 
     @Test
     fun testCohensHInvalidLargeValues() {
-        assertFailsWith<InvalidParameterException> {
-            cohensH(100.0, 0.5)
-        }
-        assertFailsWith<InvalidParameterException> {
-            cohensH(0.5, 100.0)
-        }
+        assertFailsWith<InvalidParameterException> { cohensH(100.0, 0.5) }
+        assertFailsWith<InvalidParameterException> { cohensH(0.5, 100.0) }
     }
 
     @Test
     fun testCohensHInvalidNegativeInfinity() {
-        assertFailsWith<InvalidParameterException> {
-            cohensH(Double.NEGATIVE_INFINITY, 0.5)
-        }
+        assertFailsWith<InvalidParameterException> { cohensH(Double.NEGATIVE_INFINITY, 0.5) }
     }
 
     @Test
     fun testCohensHInvalidPositiveInfinity() {
-        assertFailsWith<InvalidParameterException> {
-            cohensH(Double.POSITIVE_INFINITY, 0.5)
-        }
-        assertFailsWith<InvalidParameterException> {
-            cohensH(0.5, Double.POSITIVE_INFINITY)
-        }
+        assertFailsWith<InvalidParameterException> { cohensH(Double.POSITIVE_INFINITY, 0.5) }
+        assertFailsWith<InvalidParameterException> { cohensH(0.5, Double.POSITIVE_INFINITY) }
     }
 
     // ===== Extreme parameters: numerical stability =====
@@ -613,22 +658,23 @@ internal class EffectSizeTest {
     @Test
     fun testCohensHAntisymmetry() {
         // h(p1, p2) = -h(p2, p1)
-        val pairs = listOf(
-            0.1 to 0.9,
-            0.2 to 0.8,
-            0.3 to 0.7,
-            0.4 to 0.6,
-            0.5 to 0.75,
-            0.05 to 0.95,
-            0.0 to 1.0,
-            0.01 to 0.5,
-        )
+        val pairs =
+            listOf(
+                0.1 to 0.9,
+                0.2 to 0.8,
+                0.3 to 0.7,
+                0.4 to 0.6,
+                0.5 to 0.75,
+                0.05 to 0.95,
+                0.0 to 1.0,
+                0.01 to 0.5,
+            )
         for ((p1, p2) in pairs) {
             assertEquals(
                 -cohensH(p2, p1),
                 cohensH(p1, p2),
                 1e-14,
-                "h($p1, $p2) should equal -h($p2, $p1)"
+                "h($p1, $p2) should equal -h($p2, $p1)",
             )
         }
     }
@@ -650,7 +696,7 @@ internal class EffectSizeTest {
                 val h = cohensH(p1, p2)
                 assertTrue(
                     abs(h) <= PI + 1e-14,
-                    "|h($p1, $p2)| = ${abs(h)} should be <= pi"
+                    "|h($p1, $p2)| = ${abs(h)} should be <= pi",
                 )
             }
         }
@@ -665,7 +711,7 @@ internal class EffectSizeTest {
         for (i in 0 until hValues.size - 1) {
             assertTrue(
                 hValues[i] <= hValues[i + 1] + 1e-14,
-                "h should be non-decreasing in p1: h(${p1Values[i]}, $p2) = ${hValues[i]} should be <= h(${p1Values[i + 1]}, $p2) = ${hValues[i + 1]}"
+                "h should be non-decreasing in p1: h(${p1Values[i]}, $p2) = ${hValues[i]} should be <= h(${p1Values[i + 1]}, $p2) = ${hValues[i + 1]}",
             )
         }
     }
@@ -679,7 +725,7 @@ internal class EffectSizeTest {
         for (i in 0 until hValues.size - 1) {
             assertTrue(
                 hValues[i] >= hValues[i + 1] - 1e-14,
-                "h should be non-increasing in p2: h($p1, ${p2Values[i]}) = ${hValues[i]} should be >= h($p1, ${p2Values[i + 1]}) = ${hValues[i + 1]}"
+                "h should be non-increasing in p2: h($p1, ${p2Values[i]}) = ${hValues[i]} should be >= h($p1, ${p2Values[i + 1]}) = ${hValues[i + 1]}",
             )
         }
     }
@@ -687,12 +733,13 @@ internal class EffectSizeTest {
     @Test
     fun testCohensHSignConvention() {
         // h > 0 when p1 > p2, h < 0 when p1 < p2
-        val cases = listOf(
-            0.8 to 0.2,
-            0.6 to 0.4,
-            0.9 to 0.1,
-            0.51 to 0.49,
-        )
+        val cases =
+            listOf(
+                0.8 to 0.2,
+                0.6 to 0.4,
+                0.9 to 0.1,
+                0.51 to 0.49,
+            )
         for ((p1, p2) in cases) {
             assertTrue(cohensH(p1, p2) > 0.0, "h($p1, $p2) should be positive when p1 > p2")
             assertTrue(cohensH(p2, p1) < 0.0, "h($p2, $p1) should be negative when p1 < p2")
@@ -707,19 +754,20 @@ internal class EffectSizeTest {
         // Tests a dense grid of p1 values against p2=0.5
         val p2 = 0.5
         val p1Values = doubleArrayOf(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
-        val expected = doubleArrayOf(
-            -1.5707963267949,   // scipy: cohens_h(0.0, 0.5)
-            -0.927295218001612, // scipy: cohens_h(0.1, 0.5)
-            -0.643501108793285, // scipy: cohens_h(0.2, 0.5)
-            -0.411516846067488, // scipy: cohens_h(0.3, 0.5)
-            -0.201357920790331, // scipy: cohens_h(0.4, 0.5)
-            0.0,                // scipy: cohens_h(0.5, 0.5)
-            0.201357920790331,  // scipy: cohens_h(0.6, 0.5)
-            0.411516846067488,  // scipy: cohens_h(0.7, 0.5)
-            0.643501108793285,  // scipy: cohens_h(0.8, 0.5)
-            0.927295218001612,  // scipy: cohens_h(0.9, 0.5)
-            1.5707963267949,    // scipy: cohens_h(1.0, 0.5)
-        )
+        val expected =
+            doubleArrayOf(
+                -1.5707963267949, // scipy: cohens_h(0.0, 0.5)
+                -0.927295218001612, // scipy: cohens_h(0.1, 0.5)
+                -0.643501108793285, // scipy: cohens_h(0.2, 0.5)
+                -0.411516846067488, // scipy: cohens_h(0.3, 0.5)
+                -0.201357920790331, // scipy: cohens_h(0.4, 0.5)
+                0.0, // scipy: cohens_h(0.5, 0.5)
+                0.201357920790331, // scipy: cohens_h(0.6, 0.5)
+                0.411516846067488, // scipy: cohens_h(0.7, 0.5)
+                0.643501108793285, // scipy: cohens_h(0.8, 0.5)
+                0.927295218001612, // scipy: cohens_h(0.9, 0.5)
+                1.5707963267949, // scipy: cohens_h(1.0, 0.5)
+            )
         for (i in p1Values.indices) {
             assertEquals(expected[i], cohensH(p1Values[i], p2), tol, "cohensH(${p1Values[i]}, $p2)")
         }
@@ -734,7 +782,12 @@ internal class EffectSizeTest {
         // scipy (manual): hedges_g([1,2,3,4,5], [2,4,6,8,10], pooled=True) = -1.08387096774194
         val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
-        assertEquals(-1.08387096774194, hedgesG(x, y, pooled = true), tol, "pooled g for simple arrays")
+        assertEquals(
+            -1.08387096774194,
+            hedgesG(x, y, pooled = true),
+            tol,
+            "pooled g for simple arrays",
+        )
     }
 
     @Test
@@ -742,15 +795,26 @@ internal class EffectSizeTest {
         // scipy (manual): hedges_g([10,12,11,13,14,15], [8,9,7,10], pooled=True) = 2.15431925574173
         val x = doubleArrayOf(10.0, 12.0, 11.0, 13.0, 14.0, 15.0)
         val y = doubleArrayOf(8.0, 9.0, 7.0, 10.0)
-        assertEquals(2.15431925574173, hedgesG(x, y, pooled = true), tol, "pooled g with unequal sizes")
+        assertEquals(
+            2.15431925574173,
+            hedgesG(x, y, pooled = true),
+            tol,
+            "pooled g with unequal sizes",
+        )
     }
 
     @Test
     fun testHedgesGPooledLargeEffect() {
-        // scipy (manual): hedges_g([100,101,102,103,104], [0,1,2,3,4], pooled=True) = 57.1250157965901
+        // scipy (manual): hedges_g([100,101,102,103,104], [0,1,2,3,4], pooled=True) =
+        // 57.1250157965901
         val x = doubleArrayOf(100.0, 101.0, 102.0, 103.0, 104.0)
         val y = doubleArrayOf(0.0, 1.0, 2.0, 3.0, 4.0)
-        assertEquals(57.1250157965901, hedgesG(x, y, pooled = true), tol, "pooled g for large effect")
+        assertEquals(
+            57.1250157965901,
+            hedgesG(x, y, pooled = true),
+            tol,
+            "pooled g for large effect",
+        )
     }
 
     @Test
@@ -766,7 +830,12 @@ internal class EffectSizeTest {
         // scipy (manual): hedges_g([1,2,3,4,5], [10,20,30,40,50], pooled=True) = -2.17042312628664
         val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         val y = doubleArrayOf(10.0, 20.0, 30.0, 40.0, 50.0)
-        assertEquals(-2.17042312628664, hedgesG(x, y, pooled = true), tol, "pooled g with different variances")
+        assertEquals(
+            -2.17042312628664,
+            hedgesG(x, y, pooled = true),
+            tol,
+            "pooled g with different variances",
+        )
     }
 
     // =============================================================================
@@ -779,15 +848,26 @@ internal class EffectSizeTest {
         // scipy (manual): hedges_g([1,2,3,4,5], [2,4,6,8,10], pooled=False) = -1.08387096774194
         val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         val y = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
-        assertEquals(-1.08387096774194, hedgesG(x, y, pooled = false), tol, "unpooled g for simple arrays")
+        assertEquals(
+            -1.08387096774194,
+            hedgesG(x, y, pooled = false),
+            tol,
+            "unpooled g for simple arrays",
+        )
     }
 
     @Test
     fun testHedgesGUnpooledUnequalSizes() {
-        // scipy (manual): hedges_g([10,12,11,13,14,15], [8,9,7,10], pooled=False) = 2.24784367373821
+        // scipy (manual): hedges_g([10,12,11,13,14,15], [8,9,7,10], pooled=False) =
+        // 2.24784367373821
         val x = doubleArrayOf(10.0, 12.0, 11.0, 13.0, 14.0, 15.0)
         val y = doubleArrayOf(8.0, 9.0, 7.0, 10.0)
-        assertEquals(2.24784367373821, hedgesG(x, y, pooled = false), tol, "unpooled g with unequal sizes")
+        assertEquals(
+            2.24784367373821,
+            hedgesG(x, y, pooled = false),
+            tol,
+            "unpooled g with unequal sizes",
+        )
     }
 
     @Test
@@ -795,7 +875,12 @@ internal class EffectSizeTest {
         // scipy (manual): hedges_g([1,2,3,4,5], [10,20,30,40,50], pooled=False) = -2.17042312628664
         val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         val y = doubleArrayOf(10.0, 20.0, 30.0, 40.0, 50.0)
-        assertEquals(-2.17042312628664, hedgesG(x, y, pooled = false), tol, "unpooled g with different variances")
+        assertEquals(
+            -2.17042312628664,
+            hedgesG(x, y, pooled = false),
+            tol,
+            "unpooled g with different variances",
+        )
     }
 
     // =============================================================================
@@ -810,7 +895,7 @@ internal class EffectSizeTest {
             hedgesG(x, y, pooled = true),
             hedgesG(x, y),
             0.0,
-            "default should be pooled"
+            "default should be pooled",
         )
     }
 
@@ -851,9 +936,19 @@ internal class EffectSizeTest {
         // scipy (manual): hedges_g([1,2], [10..19], pooled=True) = -4.16526080700374
         val x = doubleArrayOf(1.0, 2.0)
         val y = doubleArrayOf(10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0)
-        assertEquals(-4.16526080700374, hedgesG(x, y, pooled = true), tol, "pooled g with large size diff")
+        assertEquals(
+            -4.16526080700374,
+            hedgesG(x, y, pooled = true),
+            tol,
+            "pooled g with large size diff",
+        )
         // scipy (manual): hedges_g([1,2], [10..19], pooled=False) = -5.45830591376811
-        assertEquals(-5.45830591376811, hedgesG(x, y, pooled = false), tol, "unpooled g with large size diff")
+        assertEquals(
+            -5.45830591376811,
+            hedgesG(x, y, pooled = false),
+            tol,
+            "unpooled g with large size diff",
+        )
     }
 
     // =============================================================================
@@ -915,7 +1010,8 @@ internal class EffectSizeTest {
 
     @Test
     fun testHedgesGOneConstantArray() {
-        // scipy (manual): hedges_g([5,5,5], [1,2,3], pooled=True) = d * J = 4.24264068711928 * 0.8 = 3.39411254969543
+        // scipy (manual): hedges_g([5,5,5], [1,2,3], pooled=True) = d * J = 4.24264068711928 * 0.8
+        // = 3.39411254969543
         val x = doubleArrayOf(5.0, 5.0, 5.0)
         val y = doubleArrayOf(1.0, 2.0, 3.0)
         val expected = 4.24264068711928 * 0.8 // d * J(df=4)
@@ -1006,7 +1102,10 @@ internal class EffectSizeTest {
         val x = doubleArrayOf(1.0, 2.0, 3.0)
         val y = doubleArrayOf(4.0, Double.NEGATIVE_INFINITY, 6.0)
         val g = hedgesG(x, y)
-        assertTrue(g.isNaN() || g.isInfinite(), "Negative Infinity in y should produce non-finite result")
+        assertTrue(
+            g.isNaN() || g.isInfinite(),
+            "Negative Infinity in y should produce non-finite result",
+        )
     }
 
     // =============================================================================
@@ -1022,13 +1121,13 @@ internal class EffectSizeTest {
             hedgesG(x, y, pooled = true),
             -hedgesG(y, x, pooled = true),
             1e-14,
-            "pooled: g(x,y) = -g(y,x)"
+            "pooled: g(x,y) = -g(y,x)",
         )
         assertEquals(
             hedgesG(x, y, pooled = false),
             -hedgesG(y, x, pooled = false),
             1e-14,
-            "unpooled: g(x,y) = -g(y,x)"
+            "unpooled: g(x,y) = -g(y,x)",
         )
     }
 
@@ -1041,13 +1140,13 @@ internal class EffectSizeTest {
             hedgesG(x, y, pooled = true),
             -hedgesG(y, x, pooled = true),
             1e-14,
-            "sign reversal pooled, unequal sizes"
+            "sign reversal pooled, unequal sizes",
         )
         assertEquals(
             hedgesG(x, y, pooled = false),
             -hedgesG(y, x, pooled = false),
             1e-14,
-            "sign reversal unpooled, unequal sizes"
+            "sign reversal unpooled, unequal sizes",
         )
     }
 
@@ -1060,7 +1159,7 @@ internal class EffectSizeTest {
             hedgesG(x, y, pooled = true),
             hedgesG(x, y, pooled = false),
             1e-14,
-            "pooled = unpooled when n1 = n2"
+            "pooled = unpooled when n1 = n2",
         )
     }
 
@@ -1073,18 +1172,19 @@ internal class EffectSizeTest {
         val unpooled = hedgesG(x, y, pooled = false)
         assertTrue(
             abs(pooled - unpooled) > 0.01,
-            "pooled ($pooled) and unpooled ($unpooled) should differ for unequal sizes"
+            "pooled ($pooled) and unpooled ($unpooled) should differ for unequal sizes",
         )
     }
 
     @Test
     fun testHedgesGMagnitudeSmallerThanCohensD() {
         // Property: |g| < |d| because J < 1 for any finite sample
-        val testCases = listOf(
-            doubleArrayOf(1.0, 2.0, 3.0) to doubleArrayOf(4.0, 5.0, 6.0),
-            doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0) to doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0),
-            doubleArrayOf(1.0, 2.0) to doubleArrayOf(3.0, 4.0),
-        )
+        val testCases =
+            listOf(
+                doubleArrayOf(1.0, 2.0, 3.0) to doubleArrayOf(4.0, 5.0, 6.0),
+                doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0) to doubleArrayOf(6.0, 7.0, 8.0, 9.0, 10.0),
+                doubleArrayOf(1.0, 2.0) to doubleArrayOf(3.0, 4.0),
+            )
         for ((x, y) in testCases) {
             val g = abs(hedgesG(x, y, pooled = true))
             val d = abs(cohensD(x, y, pooled = true))
@@ -1111,16 +1211,17 @@ internal class EffectSizeTest {
     @Test
     fun testHedgesGSignMatchesMeanDifference() {
         // Property: sign of g matches sign of (mean(x) - mean(y))
-        val pairs = listOf(
-            doubleArrayOf(10.0, 20.0, 30.0) to doubleArrayOf(1.0, 2.0, 3.0),   // positive g
-            doubleArrayOf(1.0, 2.0, 3.0) to doubleArrayOf(10.0, 20.0, 30.0),   // negative g
-        )
+        val pairs =
+            listOf(
+                doubleArrayOf(10.0, 20.0, 30.0) to doubleArrayOf(1.0, 2.0, 3.0), // positive g
+                doubleArrayOf(1.0, 2.0, 3.0) to doubleArrayOf(10.0, 20.0, 30.0), // negative g
+            )
         for ((x, y) in pairs) {
             val g = hedgesG(x, y)
             val meanDiff = x.average() - y.average()
             assertTrue(
                 g * meanDiff >= 0.0,
-                "sign of g ($g) should match sign of mean diff ($meanDiff)"
+                "sign of g ($g) should match sign of mean diff ($meanDiff)",
             )
         }
     }
@@ -1129,7 +1230,7 @@ internal class EffectSizeTest {
     fun testHedgesGZeroWhenMeansEqual() {
         // Property: g = 0 whenever means are equal
         val x1 = doubleArrayOf(0.0, 10.0) // mean = 5
-        val y1 = doubleArrayOf(4.0, 6.0)  // mean = 5
+        val y1 = doubleArrayOf(4.0, 6.0) // mean = 5
         assertEquals(0.0, hedgesG(x1, y1, pooled = true), tol, "g = 0 for equal means (pooled)")
         assertEquals(0.0, hedgesG(x1, y1, pooled = false), tol, "g = 0 for equal means (unpooled)")
     }
@@ -1143,7 +1244,12 @@ internal class EffectSizeTest {
         for (c in listOf(0.001, 0.1, 10.0, 1000.0)) {
             val xScaled = DoubleArray(x.size) { x[it] * c }
             val yScaled = DoubleArray(y.size) { y[it] * c }
-            assertEquals(g, hedgesG(xScaled, yScaled, pooled = true), 1e-8, "scale invariance for c=$c")
+            assertEquals(
+                g,
+                hedgesG(xScaled, yScaled, pooled = true),
+                1e-8,
+                "scale invariance for c=$c",
+            )
         }
     }
 
@@ -1156,7 +1262,12 @@ internal class EffectSizeTest {
         for (c in listOf(-1000.0, -1.0, 0.0, 1.0, 1000.0)) {
             val xShifted = DoubleArray(x.size) { x[it] + c }
             val yShifted = DoubleArray(y.size) { y[it] + c }
-            assertEquals(g, hedgesG(xShifted, yShifted, pooled = true), 1e-8, "translation invariance for c=$c")
+            assertEquals(
+                g,
+                hedgesG(xShifted, yShifted, pooled = true),
+                1e-8,
+                "translation invariance for c=$c",
+            )
         }
     }
 

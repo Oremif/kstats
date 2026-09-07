@@ -20,15 +20,15 @@ Descriptive statistics, special math functions, and shared foundations for every
 val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
 
 val stats = data.describe()
-stats.mean              // 5.0
+stats.mean // 5.0
 stats.standardDeviation // 2.0
-stats.median            // 4.5
-stats.skewness          // 0.656...
+stats.median // 4.5
+stats.skewness // 0.656...
 
 // Streaming computation — no need to hold all data in memory
 val online = OnlineStatistics()
 online.addAll(data)
-online.mean       // 5.0
+online.mean // 5.0
 online.variance() // 4.571...
 ```
 

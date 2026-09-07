@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class HypergeometricDistributionTest : DiscreteDistributionPropertyTests() {
 
     override fun createDistribution() = HypergeometricDistribution(50, 20, 10)
+
     override val testKRange = -1..11
 
     // --- Basic correctness (scipy 15-digit refs) ---
@@ -222,5 +223,4 @@ class HypergeometricDistributionTest : DiscreteDistributionPropertyTests() {
             assertEquals(1.0, d.sf(k) + d.cdf(k), 1e-12, "sf($k) + cdf($k) ≈ 1")
         }
     }
-
 }

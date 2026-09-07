@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class LogarithmicDistributionTest : DiscreteDistributionPropertyTests() {
 
     override fun createDistribution() = LogarithmicDistribution(0.7)
+
     override val testKRange = 0..15
     override val supportMin = 1
 
@@ -253,5 +254,4 @@ class LogarithmicDistributionTest : DiscreteDistributionPropertyTests() {
         assertFailsWith<InvalidParameterException> { LogarithmicDistribution(1.5) }
         assertFailsWith<InvalidParameterException> { LogarithmicDistribution(Double.NaN) }
     }
-
 }

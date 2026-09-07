@@ -1,15 +1,16 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class LevyDistributionTest : ContinuousDistributionPropertyTests() {
 
     override fun createDistribution(): ContinuousDistribution = LevyDistribution.STANDARD
+
     override val testPoints = listOf(0.5, 1.0, 2.0, 5.0, 10.0, 50.0)
     override val integrationEpsilon = 0.01
     override val pValues = listOf(0.01, 0.1, 0.25, 0.5, 0.75, 0.9)

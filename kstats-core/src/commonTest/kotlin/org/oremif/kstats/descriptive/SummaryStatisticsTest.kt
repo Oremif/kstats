@@ -1,10 +1,10 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 
 class SummaryStatisticsTest {
 

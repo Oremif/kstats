@@ -1,6 +1,7 @@
 plugins {
     `java-platform`
     id("kstats.maven-publish")
+    id("kstats.ktfmt")
 }
 
 dependencies {
