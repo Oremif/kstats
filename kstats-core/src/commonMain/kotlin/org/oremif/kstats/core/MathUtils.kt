@@ -651,7 +651,7 @@ public fun generalizedHarmonic(n: Int, s: Double): Double {
         compensation += if (abs(sum) >= abs(x)) (sum - t) + x else (x - t) + sum
         sum = t
     }
-    return sum + compensation
+    return neumaierTotal(sum, compensation)
 }
 
 // ── Combinatorics ───────────────────────────────────────────────────────────
@@ -799,6 +799,8 @@ public fun lcm(a: Long, b: Long): Long {
  * Reduces floating-point rounding error from O(n*epsilon) to O(epsilon) by tracking a running
  * compensation term. Improves on Kahan summation by handling the case where the next addend
  * is larger than the running sum.
+ *
+ * An infinite total is preserved rather than collapsing to NaN — see [neumaierTotal].
  */
 internal fun DoubleArray.compensatedSum(): Double {
     var sum = 0.0
@@ -808,5 +810,19 @@ internal fun DoubleArray.compensatedSum(): Double {
         compensation += if (abs(sum) >= abs(x)) (sum - t) + x else (x - t) + sum
         sum = t
     }
-    return sum + compensation
+    return neumaierTotal(sum, compensation)
+}
+
+/**
+ * Combines a Neumaier running [sum] with its [compensation] term, preserving an infinite total.
+ *
+ * Once the running sum reaches infinity the compensation term degenerates to NaN (`Inf - Inf`),
+ * which would mask a genuinely infinite total. In that case the uncompensated sum is returned
+ * instead, so an infinite total stays infinite while a real NaN in the data still propagates.
+ * This matches `numpy.sum`/`numpy.mean`, which propagate infinity, and Python's `math.fsum`,
+ * which special-cases non-finite terms out of its exact summation.
+ */
+internal fun neumaierTotal(sum: Double, compensation: Double): Double {
+    val total = sum + compensation
+    return if (total.isNaN() && sum.isInfinite()) sum else total
 }

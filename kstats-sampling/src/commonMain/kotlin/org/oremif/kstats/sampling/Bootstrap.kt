@@ -253,7 +253,7 @@ private fun computeBca(
         compensation += if (abs(jackSum) >= abs(v)) (jackSum - t) + v else (v - t) + jackSum
         jackSum = t
     }
-    val jackMean = (jackSum + compensation) / n
+    val jackMean = neumaierTotal(jackSum, compensation) / n
 
     var sumCubed = 0.0
     var compCubed = 0.0
@@ -272,8 +272,8 @@ private fun computeBca(
         compCubed += if (abs(sumCubed) >= abs(diffCu)) (sumCubed - t) + diffCu else (diffCu - t) + sumCubed
         sumCubed = t
     }
-    sumSquared += compSquared
-    sumCubed += compCubed
+    sumSquared = neumaierTotal(sumSquared, compSquared)
+    sumCubed = neumaierTotal(sumCubed, compCubed)
 
     // â = Σ(θ̄ − θ̂₍₋ᵢ₎)³ / [6 · (Σ(θ̄ − θ̂₍₋ᵢ₎)²)^(3/2)]
     // If all jackknife estimates are equal, acceleration is zero (no skewness)
@@ -310,4 +310,17 @@ private fun sortedQuantile(sorted: DoubleArray, q: Double): Double {
     val hi = minOf(lo + 1, sorted.lastIndex)
     val frac = pos - lo
     return sorted[lo] + frac * (sorted[hi] - sorted[lo])
+}
+
+/**
+ * Combines a Neumaier running [sum] with its [compensation] term, preserving an infinite total.
+ *
+ * Mirrors `org.oremif.kstats.core.neumaierTotal`, which is `internal` to kstats-core and therefore
+ * not visible here. Once the running sum reaches infinity the compensation term degenerates to NaN
+ * (`Inf - Inf`); returning the uncompensated sum in that case keeps an infinite total infinite,
+ * while a real NaN in the data still propagates.
+ */
+private fun neumaierTotal(sum: Double, compensation: Double): Double {
+    val total = sum + compensation
+    return if (total.isNaN() && sum.isInfinite()) sum else total
 }

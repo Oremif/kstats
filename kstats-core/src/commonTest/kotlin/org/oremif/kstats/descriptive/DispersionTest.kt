@@ -58,4 +58,13 @@ class DispersionTest {
         val cv = data.coefficientOfVariation()
         assertEquals(data.standardDeviation() / data.mean(), cv, 1e-10)
     }
+
+    @Test
+    fun testMeanAbsoluteDeviationPreservesInfinity() {
+        // mean is 0, both deviations are 1e308, and their sum overflows to infinity.
+        val data = doubleArrayOf(1e308, -1e308)
+        assertEquals(Double.POSITIVE_INFINITY, data.meanAbsoluteDeviation())
+        assertEquals(Double.POSITIVE_INFINITY, data.toList().meanAbsoluteDeviation())
+    }
+
 }

@@ -190,4 +190,36 @@ class CentralTendencyTest {
             assertEquals(expected, data.median(), 1e-15, "Failed for size=$n")
         }
     }
+
+    // ── Non-finite totals (Neumaier compensation fallback) ────────────────
+
+    @Test
+    fun testGeometricMeanPreservesInfinity() {
+        // ln(inf) = inf, so the compensated log-sum overflows and its compensation term becomes
+        // NaN; the fallback keeps the result infinite. numpy: exp(np.mean(np.log([1, 2, inf]))) = inf
+        val data = doubleArrayOf(1.0, 2.0, Double.POSITIVE_INFINITY)
+        assertEquals(Double.POSITIVE_INFINITY, data.geometricMean())
+        assertEquals(Double.POSITIVE_INFINITY, data.toList().geometricMean())
+        assertEquals(Double.POSITIVE_INFINITY, data.asSequence().geometricMean())
+    }
+
+    @Test
+    fun testHarmonicMeanWithOverflowingReciprocal() {
+        // 1 / Double.MIN_VALUE overflows to infinity, so the harmonic mean is n / inf = 0.
+        val data = doubleArrayOf(1.0, Double.MIN_VALUE)
+        assertEquals(0.0, data.harmonicMean())
+        assertEquals(0.0, data.toList().harmonicMean())
+        assertEquals(0.0, data.asSequence().harmonicMean())
+    }
+
+    @Test
+    fun testWeightedMeanWithOverflowingWeightSum() {
+        // The weight total overflows to infinity while the weighted sum stays finite,
+        // so the result is finite / inf = 0.
+        val values = doubleArrayOf(1e-300, 1e-300)
+        val weights = doubleArrayOf(1e308, 1e308)
+        assertEquals(0.0, values.weightedMean(weights))
+        assertEquals(0.0, values.toList().weightedMean(weights.toList()))
+    }
+
 }

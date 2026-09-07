@@ -178,4 +178,15 @@ class SemiVarianceTest {
             1e-15
         )
     }
+
+    @Test
+    fun testSemiVariancePreservesInfinity() {
+        // The single downside deviation squares past Double.MAX_VALUE.
+        val data = doubleArrayOf(1e200, -1e200)
+        assertEquals(
+            Double.POSITIVE_INFINITY,
+            data.semiVariance(threshold = 0.0, direction = SemiVarianceDirection.DOWNSIDE)
+        )
+    }
+
 }
