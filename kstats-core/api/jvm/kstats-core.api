@@ -434,6 +434,15 @@ public final class org/oremif/kstats/descriptive/QuantilesKt {
 	public static synthetic fun quartiles$default ([DLorg/oremif/kstats/descriptive/QuantileMethod;ILjava/lang/Object;)Lkotlin/Triple;
 }
 
+public final class org/oremif/kstats/descriptive/RegressionMetricsKt {
+	public static final fun mae (Ljava/lang/Iterable;Ljava/lang/Iterable;)D
+	public static final fun mae (Lkotlin/sequences/Sequence;Lkotlin/sequences/Sequence;)D
+	public static final fun mae ([D[D)D
+	public static final fun rmse (Ljava/lang/Iterable;Ljava/lang/Iterable;)D
+	public static final fun rmse (Lkotlin/sequences/Sequence;Lkotlin/sequences/Sequence;)D
+	public static final fun rmse ([D[D)D
+}
+
 public final class org/oremif/kstats/descriptive/SemiVarianceDirection : java/lang/Enum {
 	public static final field DOWNSIDE Lorg/oremif/kstats/descriptive/SemiVarianceDirection;
 	public static final field UPSIDE Lorg/oremif/kstats/descriptive/SemiVarianceDirection;
