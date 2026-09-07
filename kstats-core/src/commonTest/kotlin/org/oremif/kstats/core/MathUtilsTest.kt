@@ -1,6 +1,8 @@
 package org.oremif.kstats.core
 
 import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.descriptive.OnlineStatistics
+import org.oremif.kstats.descriptive.mean
 import kotlin.math.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -781,4 +783,48 @@ class MathUtilsTest {
         val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         assertEquals(15.0, data.compensatedSum(), 0.0)
     }
+
+    @Test
+    fun testCompensatedSumPreservesInfinity() {
+        // The Neumaier compensation term evaluates Inf - Inf to NaN; without the fallback in
+        // neumaierTotal that NaN masks the infinite total. numpy: np.sum([1.0, 2.0, np.inf]) = inf
+        val data = doubleArrayOf(1.0, 2.0, Double.POSITIVE_INFINITY)
+        assertEquals(Double.POSITIVE_INFINITY, data.compensatedSum())
+    }
+
+    @Test
+    fun testCompensatedSumPreservesNegativeInfinity() {
+        val data = doubleArrayOf(1.0, 2.0, Double.NEGATIVE_INFINITY)
+        assertEquals(Double.NEGATIVE_INFINITY, data.compensatedSum())
+    }
+
+    @Test
+    fun testCompensatedSumOppositeInfinitiesGiveNaN() {
+        // numpy: np.sum([inf, -inf]) = nan
+        val data = doubleArrayOf(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)
+        assertTrue(data.compensatedSum().isNaN())
+    }
+
+    @Test
+    fun testCompensatedSumNaNPropagates() {
+        // A genuine NaN in the data must still win over the infinity fallback.
+        val data = doubleArrayOf(1.0, Double.NaN, Double.POSITIVE_INFINITY)
+        assertTrue(data.compensatedSum().isNaN())
+    }
+
+    @Test
+    fun testMeanPreservesInfinity() {
+        // DoubleArray.mean() and OnlineStatistics.mean must agree. numpy: np.mean([1, 2, inf]) = inf
+        val data = doubleArrayOf(1.0, 2.0, Double.POSITIVE_INFINITY)
+        assertEquals(Double.POSITIVE_INFINITY, data.mean())
+        assertEquals(Double.POSITIVE_INFINITY, data.toList().mean())
+        assertEquals(Double.POSITIVE_INFINITY, OnlineStatistics().apply { addAll(data) }.mean)
+    }
+
+    @Test
+    fun testGeneralizedHarmonicPreservesInfinity() {
+        // With s = -400 the term for i = 10 is 10^400, which overflows to infinity.
+        assertEquals(Double.POSITIVE_INFINITY, generalizedHarmonic(10, -400.0))
+    }
+
 }

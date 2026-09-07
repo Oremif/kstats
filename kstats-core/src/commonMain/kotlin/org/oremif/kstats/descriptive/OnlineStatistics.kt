@@ -1,5 +1,6 @@
 package org.oremif.kstats.descriptive
 
+import org.oremif.kstats.core.neumaierTotal
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -133,10 +134,7 @@ public class OnlineStatistics {
      * Returns the compensated sum, falling back to the raw sum when
      * the compensation term is corrupted by non-finite arithmetic (Inf - Inf = NaN).
      */
-    private fun compensatedTotal(): Double {
-        val total = sumVal + sumCompensation
-        return if (total.isNaN() && sumVal.isInfinite()) sumVal else total
-    }
+    private fun compensatedTotal(): Double = neumaierTotal(sumVal, sumCompensation)
 
     /**
      * The minimum observed value, or [Double.NaN] if no observations have been added.

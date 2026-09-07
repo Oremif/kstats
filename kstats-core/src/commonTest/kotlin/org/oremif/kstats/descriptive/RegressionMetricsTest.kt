@@ -15,6 +15,7 @@ class RegressionMetricsTest {
     fun testRmseKnownValues() {
         val actual = doubleArrayOf(3.0, 5.0, 2.5, 7.0)
         val predicted = doubleArrayOf(2.8, 5.2, 2.1, 6.8)
+        // numpy: np.sqrt(np.mean((np.array([3.0, 5.0, 2.5, 7.0]) - np.array([2.8, 5.2, 2.1, 6.8])) ** 2))
         assertEquals(0.264575131106459, rmse(actual, predicted), 1e-10)
     }
 
@@ -33,6 +34,7 @@ class RegressionMetricsTest {
     fun testRmseMixedSignValues() {
         val actual = doubleArrayOf(-5.0, 0.0, 5.0)
         val predicted = doubleArrayOf(-4.5, 0.5, 4.0)
+        // numpy: np.sqrt(np.mean(np.array([-0.5, -0.5, 1.0]) ** 2)) = sqrt(1.5 / 3)
         assertEquals(0.7071067811865476, rmse(actual, predicted), 1e-10)
     }
 
@@ -47,7 +49,9 @@ class RegressionMetricsTest {
 
         val rmseOutlier = rmse(actual, predictedOneOutlier)
         val maeOutlier = mae(actual, predictedOneOutlier)
+        // numpy: np.sqrt(np.mean([0.0, 0.0, 0.0, 0.0, 4.0])) = sqrt(0.8)
         assertEquals(0.8944271909999159, rmseOutlier, 1e-10)
+        // numpy: np.mean([0.0, 0.0, 0.0, 0.0, 2.0])
         assertEquals(0.4, maeOutlier, 1e-10)
         assertTrue(
             rmseOutlier > maeOutlier,
@@ -105,12 +109,23 @@ class RegressionMetricsTest {
         assertTrue(rmse(actual, predicted).isNaN())
     }
 
+    @Test
+    fun testRmseNaNWinsOverInfinity() {
+        // A NaN term must dominate an infinite one, in every overload.
+        val actual = doubleArrayOf(Double.MAX_VALUE, Double.NaN)
+        val predicted = doubleArrayOf(-Double.MAX_VALUE, 0.0)
+        assertTrue(rmse(actual, predicted).isNaN())
+        assertTrue(rmse(actual.toList(), predicted.toList()).isNaN())
+        assertTrue(rmse(actual.asSequence(), predicted.asSequence()).isNaN())
+    }
+
     // ── mae ───────────────────────────────────────────────────────────────
 
     @Test
     fun testMaeKnownValues() {
         val actual = doubleArrayOf(3.0, 5.0, 2.5, 7.0)
         val predicted = doubleArrayOf(2.8, 5.2, 2.1, 6.8)
+        // numpy: np.mean(np.abs(np.array([3.0, 5.0, 2.5, 7.0]) - np.array([2.8, 5.2, 2.1, 6.8])))
         assertEquals(0.25, mae(actual, predicted), 1e-10)
     }
 
@@ -129,6 +144,7 @@ class RegressionMetricsTest {
     fun testMaeMixedSignValues() {
         val actual = doubleArrayOf(-5.0, 0.0, 5.0)
         val predicted = doubleArrayOf(-4.5, 0.5, 4.0)
+        // numpy: np.mean(np.abs([-0.5, -0.5, 1.0])) = 2.0 / 3
         assertEquals(0.6666666666666666, mae(actual, predicted), 1e-10)
     }
 
@@ -174,6 +190,16 @@ class RegressionMetricsTest {
         assertTrue(mae(actual, predicted).isNaN())
     }
 
+    @Test
+    fun testMaeNaNWinsOverInfinity() {
+        // A NaN term must dominate an infinite one, in every overload.
+        val actual = doubleArrayOf(Double.MAX_VALUE, Double.NaN)
+        val predicted = doubleArrayOf(-Double.MAX_VALUE, 0.0)
+        assertTrue(mae(actual, predicted).isNaN())
+        assertTrue(mae(actual.toList(), predicted.toList()).isNaN())
+        assertTrue(mae(actual.asSequence(), predicted.asSequence()).isNaN())
+    }
+
     // ── overload consistency (DoubleArray / Iterable / Sequence) ───────────
 
     @Test
@@ -207,6 +233,26 @@ class RegressionMetricsTest {
     }
 
     @Test
+    fun testRmseOverloadsAgreeOnInfiniteError() {
+        val actualArr = doubleArrayOf(Double.MAX_VALUE)
+        val predictedArr = doubleArrayOf(-Double.MAX_VALUE)
+
+        assertEquals(Double.POSITIVE_INFINITY, rmse(actualArr, predictedArr))
+        assertEquals(Double.POSITIVE_INFINITY, rmse(actualArr.toList(), predictedArr.toList()))
+        assertEquals(Double.POSITIVE_INFINITY, rmse(actualArr.asSequence(), predictedArr.asSequence()))
+    }
+
+    @Test
+    fun testMaeOverloadsAgreeOnInfiniteError() {
+        val actualArr = doubleArrayOf(Double.MAX_VALUE)
+        val predictedArr = doubleArrayOf(-Double.MAX_VALUE)
+
+        assertEquals(Double.POSITIVE_INFINITY, mae(actualArr, predictedArr))
+        assertEquals(Double.POSITIVE_INFINITY, mae(actualArr.toList(), predictedArr.toList()))
+        assertEquals(Double.POSITIVE_INFINITY, mae(actualArr.asSequence(), predictedArr.asSequence()))
+    }
+
+    @Test
     fun testRmseIterableMismatchedSizeThrows() {
         assertFailsWith<InvalidParameterException> {
             rmse(listOf(1.0, 2.0), listOf(1.0))
@@ -217,6 +263,36 @@ class RegressionMetricsTest {
     fun testMaeIterableMismatchedSizeThrows() {
         assertFailsWith<InvalidParameterException> {
             mae(listOf(1.0, 2.0), listOf(1.0))
+        }
+    }
+
+    @Test
+    fun testRmseIterableMismatchedSizeThrowsWhenErrorIsInfinite() {
+        // An infinite error term must not short-circuit the size check.
+        assertFailsWith<InvalidParameterException> {
+            rmse(listOf(Double.MAX_VALUE), listOf(-Double.MAX_VALUE, 5.0))
+        }
+    }
+
+    @Test
+    fun testMaeIterableMismatchedSizeThrowsWhenErrorIsInfinite() {
+        assertFailsWith<InvalidParameterException> {
+            mae(listOf(Double.MAX_VALUE), listOf(-Double.MAX_VALUE, 5.0))
+        }
+    }
+
+    @Test
+    fun testRmseIterableMismatchedSizeThrowsWhenErrorIsNaN() {
+        // A NaN error term must not short-circuit the size check either.
+        assertFailsWith<InvalidParameterException> {
+            rmse(listOf(Double.NaN, 2.0), listOf(1.0))
+        }
+    }
+
+    @Test
+    fun testMaeIterableMismatchedSizeThrowsWhenErrorIsNaN() {
+        assertFailsWith<InvalidParameterException> {
+            mae(listOf(Double.NaN, 2.0), listOf(1.0))
         }
     }
 

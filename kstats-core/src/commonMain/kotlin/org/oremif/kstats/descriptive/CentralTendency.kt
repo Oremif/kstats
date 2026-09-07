@@ -1,6 +1,7 @@
 package org.oremif.kstats.descriptive
 
 import org.oremif.kstats.core.compensatedSum
+import org.oremif.kstats.core.neumaierTotal
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.introSelect
@@ -38,7 +39,7 @@ public fun Iterable<Double>.mean(): Double {
         count++
     }
     if (count == 0) throw InsufficientDataException("Collection must not be empty")
-    return (sum + compensation) / count
+    return neumaierTotal(sum, compensation) / count
 }
 
 /**
@@ -89,7 +90,7 @@ public fun Sequence<Double>.mean(): Double {
         count++
     }
     if (count == 0) throw InsufficientDataException("Sequence must not be empty")
-    return (sum + compensation) / count
+    return neumaierTotal(sum, compensation) / count
 }
 
 // ── geometricMean ───────────────────────────────────────────────────────────
@@ -124,7 +125,7 @@ public fun Iterable<Double>.geometricMean(): Double {
         count++
     }
     if (count == 0) throw InsufficientDataException("Collection must not be empty")
-    return exp((sumLn + compensation) / count)
+    return exp(neumaierTotal(sumLn, compensation) / count)
 }
 
 /**
@@ -155,7 +156,7 @@ public fun DoubleArray.geometricMean(): Double {
         compensation += if (abs(sumLn) >= abs(lnVal)) (sumLn - t) + lnVal else (lnVal - t) + sumLn
         sumLn = t
     }
-    return exp((sumLn + compensation) / size)
+    return exp(neumaierTotal(sumLn, compensation) / size)
 }
 
 // ── harmonicMean ────────────────────────────────────────────────────────────
@@ -190,7 +191,7 @@ public fun Iterable<Double>.harmonicMean(): Double {
         count++
     }
     if (count == 0) throw InsufficientDataException("Collection must not be empty")
-    return count.toDouble() / (sumReciprocal + compensation)
+    return count.toDouble() / neumaierTotal(sumReciprocal, compensation)
 }
 
 /**
@@ -221,7 +222,7 @@ public fun DoubleArray.harmonicMean(): Double {
         compensation += if (abs(sumReciprocal) >= abs(reciprocal)) (sumReciprocal - t) + reciprocal else (reciprocal - t) + sumReciprocal
         sumReciprocal = t
     }
-    return size.toDouble() / (sumReciprocal + compensation)
+    return size.toDouble() / neumaierTotal(sumReciprocal, compensation)
 }
 
 // ── weightedMean ────────────────────────────────────────────────────────────
@@ -265,9 +266,9 @@ public fun Iterable<Double>.weightedMean(weights: Iterable<Double>): Double {
     }
     if (count == 0) throw InsufficientDataException("Collections must not be empty")
     if (valueIter.hasNext() || weightIter.hasNext()) throw InvalidParameterException("Values and weights must have the same size")
-    val finalWeight = totalWeight + twCompensation
+    val finalWeight = neumaierTotal(totalWeight, twCompensation)
     if (finalWeight <= 0.0) throw InvalidParameterException("Total weight must be positive")
-    return (weightedSum + wsCompensation) / finalWeight
+    return neumaierTotal(weightedSum, wsCompensation) / finalWeight
 }
 
 /**
@@ -303,9 +304,9 @@ public fun DoubleArray.weightedMean(weights: DoubleArray): Double {
         twCompensation += if (abs(totalWeight) >= abs(w)) (totalWeight - t2) + w else (w - t2) + totalWeight
         totalWeight = t2
     }
-    val finalWeight = totalWeight + twCompensation
+    val finalWeight = neumaierTotal(totalWeight, twCompensation)
     if (finalWeight <= 0.0) throw InvalidParameterException("Total weight must be positive")
-    return (weightedSum + wsCompensation) / finalWeight
+    return neumaierTotal(weightedSum, wsCompensation) / finalWeight
 }
 
 // ── median ──────────────────────────────────────────────────────────────────
@@ -436,7 +437,7 @@ public fun DoubleArray.trimmedMean(proportion: Double): Double {
         compensation += if (abs(sum) >= abs(work[i])) (sum - t) + work[i] else (work[i] - t) + sum
         sum = t
     }
-    return (sum + compensation) / m
+    return neumaierTotal(sum, compensation) / m
 }
 
 /**

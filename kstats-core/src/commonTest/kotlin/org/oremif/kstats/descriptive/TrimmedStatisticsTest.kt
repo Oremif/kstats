@@ -213,4 +213,12 @@ class TrimmedStatisticsTest {
             assertEquals(sqrt(v), s, 1e-15, "trimmedStd($p) should equal sqrt(trimmedVariance($p))")
         }
     }
+
+    @Test
+    fun testTrimmedMeanPreservesInfinity() {
+        // The retained values sum past Double.MAX_VALUE; the total must stay infinite, not NaN.
+        val data = DoubleArray(8) { 1e308 }
+        assertEquals(Double.POSITIVE_INFINITY, data.trimmedMean(0.25))
+    }
+
 }

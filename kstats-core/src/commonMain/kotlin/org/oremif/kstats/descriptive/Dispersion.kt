@@ -4,6 +4,7 @@ import org.oremif.kstats.core.exceptions.DegenerateDataException
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.introSelect
+import org.oremif.kstats.core.neumaierTotal
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 import kotlin.math.abs
 import kotlin.math.floor
@@ -235,7 +236,7 @@ public fun Iterable<Double>.meanAbsoluteDeviation(): Double {
         compensation += if (abs(sum) >= abs(dev)) (sum - t) + dev else (dev - t) + sum
         sum = t
     }
-    return (sum + compensation) / list.size
+    return neumaierTotal(sum, compensation) / list.size
 }
 
 /**
@@ -261,7 +262,7 @@ public fun DoubleArray.meanAbsoluteDeviation(): Double {
         compensation += if (abs(sum) >= abs(dev)) (sum - t) + dev else (dev - t) + sum
         sum = t
     }
-    return (sum + compensation) / size
+    return neumaierTotal(sum, compensation) / size
 }
 
 // ── medianAbsoluteDeviation ─────────────────────────────────────────────────
@@ -635,7 +636,7 @@ public fun DoubleArray.semiVariance(
             sum = t
         }
     }
-    return (sum + compensation) / divisor
+    return neumaierTotal(sum, compensation) / divisor
 }
 
 /**
