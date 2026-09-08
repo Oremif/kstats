@@ -19,8 +19,8 @@ private fun Iterable<Long>.toStatArray(): DoubleArray {
 /**
  * Computes the arithmetic mean of the Long values.
  *
- * Values are converted to Double internally. Long values whose absolute value exceeds
- * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ * Values are converted to Double internally. Long values whose absolute value exceeds 2^53
+ * (9,007,199,254,740,992) may lose precision in the least-significant digits.
  *
  * ### Example:
  * ```kotlin
@@ -29,14 +29,13 @@ private fun Iterable<Long>.toStatArray(): DoubleArray {
  *
  * @return the arithmetic mean of the Long values as a Double.
  */
-@JvmName("meanOfLong")
-public fun Iterable<Long>.mean(): Double = toStatArray().mean()
+@JvmName("meanOfLong") public fun Iterable<Long>.mean(): Double = toStatArray().mean()
 
 /**
  * Computes the median of the Long values.
  *
- * Values are converted to Double internally. Long values whose absolute value exceeds
- * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ * Values are converted to Double internally. Long values whose absolute value exceeds 2^53
+ * (9,007,199,254,740,992) may lose precision in the least-significant digits.
  *
  * ### Example:
  * ```kotlin
@@ -45,21 +44,21 @@ public fun Iterable<Long>.mean(): Double = toStatArray().mean()
  *
  * @return the median of the Long values as a Double.
  */
-@JvmName("medianOfLong")
-public fun Iterable<Long>.median(): Double = toStatArray().median()
+@JvmName("medianOfLong") public fun Iterable<Long>.median(): Double = toStatArray().median()
 
 /**
  * Computes the variance of the Long values.
  *
- * Values are converted to Double internally. Long values whose absolute value exceeds
- * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ * Values are converted to Double internally. Long values whose absolute value exceeds 2^53
+ * (9,007,199,254,740,992) may lose precision in the least-significant digits.
  *
  * ### Example:
  * ```kotlin
  * listOf(2L, 4L, 4L, 4L, 5L, 5L, 7L, 9L).variance() // 4.5714...
  * ```
  *
- * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample or population variance. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the variance of the Long values as a Double.
  */
 @JvmName("varianceOfLong")
@@ -69,15 +68,16 @@ public fun Iterable<Long>.variance(kind: PopulationKind = PopulationKind.SAMPLE)
 /**
  * Computes the standard deviation of the Long values.
  *
- * Values are converted to Double internally. Long values whose absolute value exceeds
- * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ * Values are converted to Double internally. Long values whose absolute value exceeds 2^53
+ * (9,007,199,254,740,992) may lose precision in the least-significant digits.
  *
  * ### Example:
  * ```kotlin
  * listOf(2L, 4L, 4L, 4L, 5L, 5L, 7L, 9L).standardDeviation() // 2.1380...
  * ```
  *
- * @param kind whether to compute sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample or population standard deviation. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the standard deviation of the Long values as a Double.
  */
 @JvmName("standardDeviationOfLong")
@@ -87,8 +87,8 @@ public fun Iterable<Long>.standardDeviation(kind: PopulationKind = PopulationKin
 /**
  * Computes the p-th percentile of the Long values.
  *
- * Values are converted to Double internally. Long values whose absolute value exceeds
- * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ * Values are converted to Double internally. Long values whose absolute value exceeds 2^53
+ * (9,007,199,254,740,992) may lose precision in the least-significant digits.
  *
  * ### Example:
  * ```kotlin
@@ -108,8 +108,8 @@ public fun Iterable<Long>.percentile(
 /**
  * Computes the p-th percentile of the Long values.
  *
- * Values are converted to Double internally. Long values whose absolute value exceeds
- * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ * Values are converted to Double internally. Long values whose absolute value exceeds 2^53
+ * (9,007,199,254,740,992) may lose precision in the least-significant digits.
  *
  * @param p the percentile to compute, in [0, 100].
  * @param interpolation the interpolation mode.
@@ -130,8 +130,8 @@ public fun Iterable<Long>.percentile(
 /**
  * Computes a descriptive statistics summary of the Long values.
  *
- * Values are converted to Double internally. Long values whose absolute value exceeds
- * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ * Values are converted to Double internally. Long values whose absolute value exceeds 2^53
+ * (9,007,199,254,740,992) may lose precision in the least-significant digits.
  *
  * ### Example:
  * ```kotlin
@@ -148,8 +148,8 @@ public fun Iterable<Long>.describe(): DescriptiveStatistics = toStatArray().desc
 /**
  * Computes process capability indices (Cp, Cpk, Pp, Ppk) for the Long values.
  *
- * Values are converted to Double internally. Long values whose absolute value exceeds
- * 2^53 (9,007,199,254,740,992) may lose precision in the least-significant digits.
+ * Values are converted to Double internally. Long values whose absolute value exceeds 2^53
+ * (9,007,199,254,740,992) may lose precision in the least-significant digits.
  *
  * ### Example:
  * ```kotlin
@@ -160,7 +160,8 @@ public fun Iterable<Long>.describe(): DescriptiveStatistics = toStatArray().desc
  * @param lsl the lower specification limit. Must be less than [usl].
  * @param usl the upper specification limit. Must be greater than [lsl].
  * @return a [ProcessCapabilityResult] containing Cp, Cpk, Pp, and Ppk.
- * @throws org.oremif.kstats.core.exceptions.DegenerateDataException if all values are identical (standard deviation is zero).
+ * @throws org.oremif.kstats.core.exceptions.DegenerateDataException if all values are identical
+ *   (standard deviation is zero).
  */
 @JvmName("processCapabilityOfLong")
 public fun Iterable<Long>.processCapability(lsl: Double, usl: Double): ProcessCapabilityResult =

@@ -1,15 +1,16 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.exp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class LogNormalDistributionTest : ContinuousDistributionPropertyTests() {
 
     override fun createDistribution(): ContinuousDistribution = LogNormalDistribution(0.0, 1.0)
+
     override val testPoints = listOf(0.5, 1.0, 2.0, 5.0, 10.0)
 
     // --- Basic correctness (scipy 15-digit refs) ---
@@ -143,8 +144,12 @@ class LogNormalDistributionTest : ContinuousDistributionPropertyTests() {
         assertFailsWith<InvalidParameterException> { LogNormalDistribution(0.0, -1.0) }
         assertFailsWith<InvalidParameterException> { LogNormalDistribution(0.0, Double.NaN) }
         assertFailsWith<InvalidParameterException> { LogNormalDistribution(Double.NaN, 1.0) }
-        assertFailsWith<InvalidParameterException> { LogNormalDistribution(Double.POSITIVE_INFINITY, 1.0) }
-        assertFailsWith<InvalidParameterException> { LogNormalDistribution(Double.NEGATIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> {
+            LogNormalDistribution(Double.POSITIVE_INFINITY, 1.0)
+        }
+        assertFailsWith<InvalidParameterException> {
+            LogNormalDistribution(Double.NEGATIVE_INFINITY, 1.0)
+        }
     }
 
     @Test
@@ -193,5 +198,4 @@ class LogNormalDistributionTest : ContinuousDistributionPropertyTests() {
         // scipy: cdf(exp(50)) = 0.5
         assertEquals(0.5, d3.cdf(exp(50.0)), 1e-10)
     }
-
 }

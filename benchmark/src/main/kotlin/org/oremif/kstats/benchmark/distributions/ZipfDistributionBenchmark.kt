@@ -1,9 +1,9 @@
 package org.oremif.kstats.benchmark.distributions
 
 import kotlinx.benchmark.*
+import org.apache.commons.math3.distribution.ZipfDistribution as CommonsZipf
 import org.openjdk.jmh.annotations.State as JmhState
 import org.oremif.kstats.distributions.ZipfDistribution
-import org.apache.commons.math3.distribution.ZipfDistribution as CommonsZipf
 
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
@@ -22,15 +22,18 @@ class ZipfDistributionBenchmark {
     // ===== Zipf PMF =====
 
     @Benchmark fun kstatsZipfPmf(): Double = kZipf.pmf(kValue)
+
     @Benchmark fun commonsZipfPmf(): Double = cZipf.probability(kValue)
 
     // ===== Zipf CDF =====
 
     @Benchmark fun kstatsZipfCdf(): Double = kZipf.cdf(kValue)
+
     @Benchmark fun commonsZipfCdf(): Double = cZipf.cumulativeProbability(kValue)
 
     // ===== Zipf Quantile =====
 
     @Benchmark fun kstatsZipfQuantile(): Int = kZipf.quantileInt(pValue)
+
     @Benchmark fun commonsZipfQuantile(): Int = cZipf.inverseCumulativeProbability(pValue)
 }

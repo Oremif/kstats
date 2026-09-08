@@ -1,20 +1,20 @@
 package org.oremif.kstats.sampling
 
+import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.sqrt
+import kotlin.random.Random
 import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.core.erf
 import org.oremif.kstats.core.erfInv
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.abs
-import kotlin.math.floor
-import kotlin.math.sqrt
-import kotlin.random.Random
 
 /**
  * The result of a bootstrap confidence interval computation, containing three CI methods.
  *
- * All three intervals are computed from the same set of bootstrap resamples, so they can
- * be compared directly without re-running the bootstrap.
+ * All three intervals are computed from the same set of bootstrap resamples, so they can be
+ * compared directly without re-running the bootstrap.
  *
  * ### Example:
  * ```kotlin
@@ -28,14 +28,14 @@ import kotlin.random.Random
  * result.basic      // ConfidenceInterval(lower=24.66..., upper=30.16...)
  * ```
  *
- * @property percentile the percentile confidence interval, computed from quantiles of the
- * bootstrap distribution. Simple and intuitive but does not correct for bias or skewness.
+ * @property percentile the percentile confidence interval, computed from quantiles of the bootstrap
+ *   distribution. Simple and intuitive but does not correct for bias or skewness.
  * @property basic the basic (pivotal) confidence interval, which reflects the bootstrap
- * distribution around the observed statistic. Defined as twice the observed statistic minus
- * the opposite-tail quantile of the bootstrap distribution.
- * @property bca the bias-corrected and accelerated (BCa) confidence interval. Adjusts for
- * both median bias and skewness of the bootstrap distribution using a jackknife acceleration
- * factor. Generally the most accurate of the three methods.
+ *   distribution around the observed statistic. Defined as twice the observed statistic minus the
+ *   opposite-tail quantile of the bootstrap distribution.
+ * @property bca the bias-corrected and accelerated (BCa) confidence interval. Adjusts for both
+ *   median bias and skewness of the bootstrap distribution using a jackknife acceleration factor.
+ *   Generally the most accurate of the three methods.
  * @property observedStatistic the value of the statistic computed on the original data.
  * @property nResamples the number of bootstrap resamples that were generated.
  * @property confidenceLevel the confidence level used to compute the intervals.
@@ -50,13 +50,13 @@ public data class BootstrapCIResult(
 )
 
 /**
- * Computes bootstrap confidence intervals for a statistic using three methods: percentile,
- * basic (pivotal), and BCa (bias-corrected and accelerated).
+ * Computes bootstrap confidence intervals for a statistic using three methods: percentile, basic
+ * (pivotal), and BCa (bias-corrected and accelerated).
  *
- * The bootstrap works by repeatedly resampling the data with replacement, computing the
- * statistic on each resample, and using the distribution of those values to estimate the
- * uncertainty of the statistic. The BCa method additionally uses a jackknife (leave-one-out)
- * procedure to correct for bias and skewness.
+ * The bootstrap works by repeatedly resampling the data with replacement, computing the statistic
+ * on each resample, and using the distribution of those values to estimate the uncertainty of the
+ * statistic. The BCa method additionally uses a jackknife (leave-one-out) procedure to correct for
+ * bias and skewness.
  *
  * ### Example:
  * ```kotlin
@@ -68,15 +68,15 @@ public data class BootstrapCIResult(
  * ```
  *
  * @param data the observed data to bootstrap from.
- * @param nResamples the number of bootstrap resamples to generate. Defaults to `10_000`.
- * More resamples produce more stable intervals at the cost of computation time.
- * @param confidenceLevel the confidence level for the intervals, in (0, 1) exclusive.
- * Defaults to `0.95` (95%).
- * @param random the random number generator used for resampling. Defaults to [Random].
- * Pass a seeded instance (e.g. `Random(42)`) for reproducible results.
+ * @param nResamples the number of bootstrap resamples to generate. Defaults to `10_000`. More
+ *   resamples produce more stable intervals at the cost of computation time.
+ * @param confidenceLevel the confidence level for the intervals, in (0, 1) exclusive. Defaults to
+ *   `0.95` (95%).
+ * @param random the random number generator used for resampling. Defaults to [Random]. Pass a
+ *   seeded instance (e.g. `Random(42)`) for reproducible results.
  * @param statistic a function that computes the statistic of interest from a [DoubleArray].
- * @return a [BootstrapCIResult] containing all three confidence intervals, the observed
- * statistic, and metadata.
+ * @return a [BootstrapCIResult] containing all three confidence intervals, the observed statistic,
+ *   and metadata.
  */
 public fun bootstrapCI(
     data: DoubleArray,
@@ -86,10 +86,10 @@ public fun bootstrapCI(
     statistic: (DoubleArray) -> Double,
 ): BootstrapCIResult {
     if (data.isEmpty()) throw InsufficientDataException("data must not be empty")
-    if (nResamples < 1) throw InvalidParameterException("nResamples must be at least 1, got $nResamples")
-    if (confidenceLevel.isNaN() || confidenceLevel <= 0.0 || confidenceLevel >= 1.0) throw InvalidParameterException(
-        "confidenceLevel must be in (0, 1), got $confidenceLevel"
-    )
+    if (nResamples < 1)
+        throw InvalidParameterException("nResamples must be at least 1, got $nResamples")
+    if (confidenceLevel.isNaN() || confidenceLevel <= 0.0 || confidenceLevel >= 1.0)
+        throw InvalidParameterException("confidenceLevel must be in (0, 1), got $confidenceLevel")
 
     val n = data.size
     val observed = statistic(data)
@@ -120,12 +120,12 @@ public fun bootstrapCI(
 }
 
 /**
- * Computes bootstrap confidence intervals for a statistic on a list of arbitrary elements,
- * using three methods: percentile, basic (pivotal), and BCa (bias-corrected and accelerated).
+ * Computes bootstrap confidence intervals for a statistic on a list of arbitrary elements, using
+ * three methods: percentile, basic (pivotal), and BCa (bias-corrected and accelerated).
  *
  * This overload accepts any `List<T>`, making it suitable for bootstrapping statistics on
- * structured data (e.g. weighted measurements, records). The [statistic] function receives
- * a `List<T>` resample and must return a scalar `Double`.
+ * structured data (e.g. weighted measurements, records). The [statistic] function receives a
+ * `List<T>` resample and must return a scalar `Double`.
  *
  * ### Example:
  * ```kotlin
@@ -139,15 +139,15 @@ public fun bootstrapCI(
  *
  * @param T the element type of the data list.
  * @param data the observed data to bootstrap from.
- * @param nResamples the number of bootstrap resamples to generate. Defaults to `10_000`.
- * More resamples produce more stable intervals at the cost of computation time.
- * @param confidenceLevel the confidence level for the intervals, in (0, 1) exclusive.
- * Defaults to `0.95` (95%).
- * @param random the random number generator used for resampling. Defaults to [Random].
- * Pass a seeded instance (e.g. `Random(42)`) for reproducible results.
+ * @param nResamples the number of bootstrap resamples to generate. Defaults to `10_000`. More
+ *   resamples produce more stable intervals at the cost of computation time.
+ * @param confidenceLevel the confidence level for the intervals, in (0, 1) exclusive. Defaults to
+ *   `0.95` (95%).
+ * @param random the random number generator used for resampling. Defaults to [Random]. Pass a
+ *   seeded instance (e.g. `Random(42)`) for reproducible results.
  * @param statistic a function that computes the statistic of interest from a `List<T>`.
- * @return a [BootstrapCIResult] containing all three confidence intervals, the observed
- * statistic, and metadata.
+ * @return a [BootstrapCIResult] containing all three confidence intervals, the observed statistic,
+ *   and metadata.
  */
 public fun <T> bootstrapCI(
     data: List<T>,
@@ -157,10 +157,10 @@ public fun <T> bootstrapCI(
     statistic: (List<T>) -> Double,
 ): BootstrapCIResult {
     if (data.isEmpty()) throw InsufficientDataException("data must not be empty")
-    if (nResamples < 1) throw InvalidParameterException("nResamples must be at least 1, got $nResamples")
-    if (confidenceLevel.isNaN() || confidenceLevel <= 0.0 || confidenceLevel >= 1.0) throw InvalidParameterException(
-        "confidenceLevel must be in (0, 1), got $confidenceLevel"
-    )
+    if (nResamples < 1)
+        throw InvalidParameterException("nResamples must be at least 1, got $nResamples")
+    if (confidenceLevel.isNaN() || confidenceLevel <= 0.0 || confidenceLevel >= 1.0)
+        throw InvalidParameterException("confidenceLevel must be in (0, 1), got $confidenceLevel")
 
     val n = data.size
     val observed = statistic(data)
@@ -265,11 +265,14 @@ private fun computeBca(
         val diffCu = diffSq * diff
 
         var t = sumSquared + diffSq
-        compSquared += if (abs(sumSquared) >= abs(diffSq)) (sumSquared - t) + diffSq else (diffSq - t) + sumSquared
+        compSquared +=
+            if (abs(sumSquared) >= abs(diffSq)) (sumSquared - t) + diffSq
+            else (diffSq - t) + sumSquared
         sumSquared = t
 
         t = sumCubed + diffCu
-        compCubed += if (abs(sumCubed) >= abs(diffCu)) (sumCubed - t) + diffCu else (diffCu - t) + sumCubed
+        compCubed +=
+            if (abs(sumCubed) >= abs(diffCu)) (sumCubed - t) + diffCu else (diffCu - t) + sumCubed
         sumCubed = t
     }
     sumSquared = neumaierTotal(sumSquared, compSquared)

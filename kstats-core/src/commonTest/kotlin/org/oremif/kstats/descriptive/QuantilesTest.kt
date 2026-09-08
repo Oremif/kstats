@@ -1,11 +1,11 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 internal class QuantilesTest {
 
@@ -67,9 +67,17 @@ internal class QuantilesTest {
         assertEquals(2.0, data5.quantile(0.1, QuantileMethod.CLOSEST_OBSERVATION), tol)
         assertEquals(2.0, data5.quantile(0.25, QuantileMethod.CLOSEST_OBSERVATION), tol)
         assertEquals(4.0, data5.quantile(0.3, QuantileMethod.CLOSEST_OBSERVATION), tol)
-        assertEquals(4.0, data5.quantile(0.5, QuantileMethod.CLOSEST_OBSERVATION), tol) // h=2.5 -> round=2 (even)
+        assertEquals(
+            4.0,
+            data5.quantile(0.5, QuantileMethod.CLOSEST_OBSERVATION),
+            tol,
+        ) // h=2.5 -> round=2 (even)
         assertEquals(8.0, data5.quantile(0.75, QuantileMethod.CLOSEST_OBSERVATION), tol)
-        assertEquals(8.0, data5.quantile(0.9, QuantileMethod.CLOSEST_OBSERVATION), tol) // h=4.5 -> round=4 (even)
+        assertEquals(
+            8.0,
+            data5.quantile(0.9, QuantileMethod.CLOSEST_OBSERVATION),
+            tol,
+        ) // h=4.5 -> round=4 (even)
         assertEquals(10.0, data5.quantile(1.0, QuantileMethod.CLOSEST_OBSERVATION), tol)
     }
 
@@ -338,7 +346,7 @@ internal class QuantilesTest {
                 data.quantile(p / 100.0, QuantileMethod.LINEAR),
                 data.percentile(p, QuantileMethod.LINEAR),
                 tol,
-                "percentile($p) should equal quantile(${p / 100.0})"
+                "percentile($p) should equal quantile(${p / 100.0})",
             )
         }
     }
@@ -451,7 +459,7 @@ internal class QuantilesTest {
             assertEquals(
                 data.quantileSelect(p / 100.0, QuantileMethod.NEAREST),
                 data.percentileSelect(p, QuantileMethod.NEAREST),
-                "percentileSelect($p) should equal quantileSelect(${p / 100.0})"
+                "percentileSelect($p) should equal quantileSelect(${p / 100.0})",
             )
         }
     }
@@ -475,7 +483,7 @@ internal class QuantilesTest {
                     arr.quantile(q, method),
                     list.quantile(q, method),
                     tol,
-                    "Iterable.quantile($q, $method) should equal DoubleArray.quantile"
+                    "Iterable.quantile($q, $method) should equal DoubleArray.quantile",
                 )
             }
         }
@@ -490,7 +498,7 @@ internal class QuantilesTest {
                 arr.quantile(q, QuantileMethod.LINEAR),
                 seq.quantile(q, QuantileMethod.LINEAR),
                 tol,
-                "Sequence.quantile($q) should equal DoubleArray.quantile"
+                "Sequence.quantile($q) should equal DoubleArray.quantile",
             )
         }
     }
@@ -504,7 +512,7 @@ internal class QuantilesTest {
                 arr.percentile(p, QuantileMethod.LINEAR),
                 seq.percentile(p, QuantileMethod.LINEAR),
                 tol,
-                "Sequence.percentile($p) should equal DoubleArray.percentile"
+                "Sequence.percentile($p) should equal DoubleArray.percentile",
             )
         }
     }
@@ -547,20 +555,21 @@ internal class QuantilesTest {
     fun testQuantileBoundaryQ0Q1() {
         val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         // Most methods return min at q=0 and max at q=1
-        val methodsReturningMinMax = listOf(
-            QuantileMethod.INVERTED_CDF,
-            QuantileMethod.CLOSEST_OBSERVATION,
-            QuantileMethod.INTERPOLATED_INVERTED_CDF,
-            QuantileMethod.HAZEN,
-            QuantileMethod.WEIBULL,
-            QuantileMethod.LINEAR,
-            QuantileMethod.MEDIAN_UNBIASED,
-            QuantileMethod.NORMAL_UNBIASED,
-            QuantileMethod.LOWER,
-            QuantileMethod.HIGHER,
-            QuantileMethod.NEAREST,
-            QuantileMethod.MIDPOINT,
-        )
+        val methodsReturningMinMax =
+            listOf(
+                QuantileMethod.INVERTED_CDF,
+                QuantileMethod.CLOSEST_OBSERVATION,
+                QuantileMethod.INTERPOLATED_INVERTED_CDF,
+                QuantileMethod.HAZEN,
+                QuantileMethod.WEIBULL,
+                QuantileMethod.LINEAR,
+                QuantileMethod.MEDIAN_UNBIASED,
+                QuantileMethod.NORMAL_UNBIASED,
+                QuantileMethod.LOWER,
+                QuantileMethod.HIGHER,
+                QuantileMethod.NEAREST,
+                QuantileMethod.MIDPOINT,
+            )
         for (method in methodsReturningMinMax) {
             assertEquals(1.0, data.quantile(0.0, method), tol, "quantile(0, $method) should be min")
             assertEquals(5.0, data.quantile(1.0, method), tol, "quantile(1, $method) should be max")
@@ -584,8 +593,10 @@ internal class QuantilesTest {
         for (method in QuantileMethod.entries) {
             for (q in listOf(0.0, 0.25, 0.5, 0.75, 1.0)) {
                 assertEquals(
-                    42.0, data.quantile(q, method), tol,
-                    "Single element quantile($q, $method) should be 42.0"
+                    42.0,
+                    data.quantile(q, method),
+                    tol,
+                    "Single element quantile($q, $method) should be 42.0",
                 )
             }
         }
@@ -595,21 +606,31 @@ internal class QuantilesTest {
     fun testPercentileSingleElement() {
         val data = doubleArrayOf(42.0)
         for (p in listOf(0.0, 25.0, 50.0, 75.0, 100.0)) {
-            assertEquals(42.0, data.percentile(p), tol, "Single element percentile($p) should be 42.0")
+            assertEquals(
+                42.0,
+                data.percentile(p),
+                tol,
+                "Single element percentile($p) should be 42.0",
+            )
         }
     }
 
     @Test
     fun testQuantileSelectSingleElement() {
         val data = listOf(99)
-        for (method in listOf(
-            QuantileMethod.LOWER, QuantileMethod.HIGHER, QuantileMethod.NEAREST,
-            QuantileMethod.INVERTED_CDF, QuantileMethod.CLOSEST_OBSERVATION
-        )) {
+        for (method in
+            listOf(
+                QuantileMethod.LOWER,
+                QuantileMethod.HIGHER,
+                QuantileMethod.NEAREST,
+                QuantileMethod.INVERTED_CDF,
+                QuantileMethod.CLOSEST_OBSERVATION,
+            )) {
             for (q in listOf(0.0, 0.5, 1.0)) {
                 assertEquals(
-                    99, data.quantileSelect(q, method),
-                    "Single element quantileSelect($q, $method)"
+                    99,
+                    data.quantileSelect(q, method),
+                    "Single element quantileSelect($q, $method)",
                 )
             }
         }
@@ -673,7 +694,7 @@ internal class QuantilesTest {
                     sortedData.quantile(q, method),
                     unsortedData.quantile(q, method),
                     tol,
-                    "Unsorted data quantile($q, $method) should equal sorted"
+                    "Unsorted data quantile($q, $method) should equal sorted",
                 )
             }
         }
@@ -695,51 +716,37 @@ internal class QuantilesTest {
 
     @Test
     fun testQuantileEmptyArray() {
-        assertFailsWith<InsufficientDataException> {
-            doubleArrayOf().quantile(0.5)
-        }
+        assertFailsWith<InsufficientDataException> { doubleArrayOf().quantile(0.5) }
     }
 
     @Test
     fun testQuantileEmptyIterable() {
-        assertFailsWith<InsufficientDataException> {
-            emptyList<Double>().quantile(0.5)
-        }
+        assertFailsWith<InsufficientDataException> { emptyList<Double>().quantile(0.5) }
     }
 
     @Test
     fun testPercentileEmptyArray() {
-        assertFailsWith<InsufficientDataException> {
-            doubleArrayOf().percentile(50.0)
-        }
+        assertFailsWith<InsufficientDataException> { doubleArrayOf().percentile(50.0) }
     }
 
     @Test
     fun testQuartilesEmptyArray() {
-        assertFailsWith<InsufficientDataException> {
-            doubleArrayOf().quartiles()
-        }
+        assertFailsWith<InsufficientDataException> { doubleArrayOf().quartiles() }
     }
 
     @Test
     fun testQuartilesEmptyIterable() {
-        assertFailsWith<InsufficientDataException> {
-            emptyList<Double>().quartiles()
-        }
+        assertFailsWith<InsufficientDataException> { emptyList<Double>().quartiles() }
     }
 
     @Test
     fun testQuantileSelectEmptyList() {
-        assertFailsWith<InsufficientDataException> {
-            emptyList<Int>().quantileSelect(0.5)
-        }
+        assertFailsWith<InsufficientDataException> { emptyList<Int>().quantileSelect(0.5) }
     }
 
     @Test
     fun testPercentileSelectEmptyList() {
-        assertFailsWith<InsufficientDataException> {
-            emptyList<String>().percentileSelect(50.0)
-        }
+        assertFailsWith<InsufficientDataException> { emptyList<String>().percentileSelect(50.0) }
     }
 
     // ── Degenerate: invalid quantile/percentile parameter ──────────────────────
@@ -747,60 +754,44 @@ internal class QuantilesTest {
     @Test
     fun testQuantileOutOfRangeLow() {
         val data = doubleArrayOf(1.0, 2.0, 3.0)
-        assertFailsWith<InvalidParameterException> {
-            data.quantile(-0.1)
-        }
+        assertFailsWith<InvalidParameterException> { data.quantile(-0.1) }
     }
 
     @Test
     fun testQuantileOutOfRangeHigh() {
         val data = doubleArrayOf(1.0, 2.0, 3.0)
-        assertFailsWith<InvalidParameterException> {
-            data.quantile(1.1)
-        }
+        assertFailsWith<InvalidParameterException> { data.quantile(1.1) }
     }
 
     @Test
     fun testPercentileOutOfRangeLow() {
         val data = doubleArrayOf(1.0, 2.0, 3.0)
-        assertFailsWith<InvalidParameterException> {
-            data.percentile(-1.0)
-        }
+        assertFailsWith<InvalidParameterException> { data.percentile(-1.0) }
     }
 
     @Test
     fun testPercentileOutOfRangeHigh() {
         val data = doubleArrayOf(1.0, 2.0, 3.0)
-        assertFailsWith<InvalidParameterException> {
-            data.percentile(101.0)
-        }
+        assertFailsWith<InvalidParameterException> { data.percentile(101.0) }
     }
 
     @Test
     fun testQuantileSelectOutOfRangeLow() {
         val data = listOf(1, 2, 3)
-        assertFailsWith<InvalidParameterException> {
-            data.quantileSelect(-0.01)
-        }
+        assertFailsWith<InvalidParameterException> { data.quantileSelect(-0.01) }
     }
 
     @Test
     fun testQuantileSelectOutOfRangeHigh() {
         val data = listOf(1, 2, 3)
-        assertFailsWith<InvalidParameterException> {
-            data.quantileSelect(1.01)
-        }
+        assertFailsWith<InvalidParameterException> { data.quantileSelect(1.01) }
     }
 
     @Test
     fun testPercentileSelectOutOfRange() {
         val data = listOf(1, 2, 3)
-        assertFailsWith<InvalidParameterException> {
-            data.percentileSelect(-0.01)
-        }
-        assertFailsWith<InvalidParameterException> {
-            data.percentileSelect(100.01)
-        }
+        assertFailsWith<InvalidParameterException> { data.percentileSelect(-0.01) }
+        assertFailsWith<InvalidParameterException> { data.percentileSelect(100.01) }
     }
 
     // ── Degenerate: interpolating method passed to quantileSelect ──────────────
@@ -808,16 +799,17 @@ internal class QuantilesTest {
     @Test
     fun testQuantileSelectRejectsInterpolatingMethods() {
         val data = listOf(1, 2, 3, 4, 5)
-        val interpolating = listOf(
-            QuantileMethod.AVERAGED_INVERTED_CDF,
-            QuantileMethod.INTERPOLATED_INVERTED_CDF,
-            QuantileMethod.HAZEN,
-            QuantileMethod.WEIBULL,
-            QuantileMethod.LINEAR,
-            QuantileMethod.MEDIAN_UNBIASED,
-            QuantileMethod.NORMAL_UNBIASED,
-            QuantileMethod.MIDPOINT,
-        )
+        val interpolating =
+            listOf(
+                QuantileMethod.AVERAGED_INVERTED_CDF,
+                QuantileMethod.INTERPOLATED_INVERTED_CDF,
+                QuantileMethod.HAZEN,
+                QuantileMethod.WEIBULL,
+                QuantileMethod.LINEAR,
+                QuantileMethod.MEDIAN_UNBIASED,
+                QuantileMethod.NORMAL_UNBIASED,
+                QuantileMethod.MIDPOINT,
+            )
         for (method in interpolating) {
             assertFailsWith<InvalidParameterException>("Should reject $method") {
                 data.quantileSelect(0.5, method)
@@ -833,8 +825,10 @@ internal class QuantilesTest {
         for (method in QuantileMethod.entries) {
             for (q in listOf(0.0, 0.25, 0.5, 0.75, 1.0)) {
                 assertEquals(
-                    7.0, data.quantile(q, method), tol,
-                    "Constant data quantile($q, $method) should be 7.0"
+                    7.0,
+                    data.quantile(q, method),
+                    tol,
+                    "Constant data quantile($q, $method) should be 7.0",
                 )
             }
         }
@@ -912,18 +906,14 @@ internal class QuantilesTest {
     fun testQuantileNaNParameter() {
         val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         // NaN is not in [0, 1] per IEEE 754 (NaN !in 0.0..1.0 is true)
-        assertFailsWith<InvalidParameterException> {
-            data.quantile(Double.NaN)
-        }
+        assertFailsWith<InvalidParameterException> { data.quantile(Double.NaN) }
     }
 
     @Test
     fun testPercentileNaNParameter() {
         val data = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
         // NaN is not in [0, 100]
-        assertFailsWith<InvalidParameterException> {
-            data.percentile(Double.NaN)
-        }
+        assertFailsWith<InvalidParameterException> { data.percentile(Double.NaN) }
     }
 
     @Test
@@ -935,7 +925,7 @@ internal class QuantilesTest {
             // Just verify no exception is thrown.
             assertTrue(
                 result.isNaN() || result.isFinite(),
-                "quantile(0.5, $method) with NaN should not crash"
+                "quantile(0.5, $method) with NaN should not crash",
             )
         }
     }
@@ -959,17 +949,13 @@ internal class QuantilesTest {
     @Test
     fun testQuantileSelectNaNParameter() {
         val data = listOf(1, 2, 3)
-        assertFailsWith<InvalidParameterException> {
-            data.quantileSelect(Double.NaN)
-        }
+        assertFailsWith<InvalidParameterException> { data.quantileSelect(Double.NaN) }
     }
 
     @Test
     fun testPercentileSelectNaNParameter() {
         val data = listOf(1, 2, 3)
-        assertFailsWith<InvalidParameterException> {
-            data.percentileSelect(Double.NaN)
-        }
+        assertFailsWith<InvalidParameterException> { data.percentileSelect(Double.NaN) }
     }
 
     // ── Property: quantile monotonicity ────────────────────────────────────────
@@ -983,7 +969,7 @@ internal class QuantilesTest {
             for (i in 0 until values.size - 1) {
                 assertTrue(
                     values[i] <= values[i + 1],
-                    "Monotonicity violated: quantile(${qs[i]}, $method)=${values[i]} > quantile(${qs[i + 1]}, $method)=${values[i + 1]}"
+                    "Monotonicity violated: quantile(${qs[i]}, $method)=${values[i]} > quantile(${qs[i + 1]}, $method)=${values[i + 1]}",
                 )
             }
         }
@@ -999,8 +985,14 @@ internal class QuantilesTest {
         for (method in QuantileMethod.entries) {
             for (q in listOf(0.0, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0)) {
                 val result = data.quantile(q, method)
-                assertTrue(result >= minVal, "quantile($q, $method) = $result should be >= min=$minVal")
-                assertTrue(result <= maxVal, "quantile($q, $method) = $result should be <= max=$maxVal")
+                assertTrue(
+                    result >= minVal,
+                    "quantile($q, $method) = $result should be >= min=$minVal",
+                )
+                assertTrue(
+                    result <= maxVal,
+                    "quantile($q, $method) = $result should be <= max=$maxVal",
+                )
             }
         }
     }
@@ -1016,12 +1008,16 @@ internal class QuantilesTest {
         val methods = QuantileMethod.entries.filter { it != QuantileMethod.AVERAGED_INVERTED_CDF }
         for (method in methods) {
             assertEquals(
-                minVal, data.quantile(0.0, method), tol,
-                "quantile(0, $method) should be min"
+                minVal,
+                data.quantile(0.0, method),
+                tol,
+                "quantile(0, $method) should be min",
             )
             assertEquals(
-                maxVal, data.quantile(1.0, method), tol,
-                "quantile(1, $method) should be max"
+                maxVal,
+                data.quantile(1.0, method),
+                tol,
+                "quantile(1, $method) should be max",
             )
         }
     }
@@ -1037,11 +1033,11 @@ internal class QuantilesTest {
             val higher = data.quantile(q, QuantileMethod.HIGHER)
             assertTrue(
                 lower <= linear,
-                "LOWER($q)=$lower should be <= LINEAR($q)=$linear"
+                "LOWER($q)=$lower should be <= LINEAR($q)=$linear",
             )
             assertTrue(
                 linear <= higher,
-                "LINEAR($q)=$linear should be <= HIGHER($q)=$higher"
+                "LINEAR($q)=$linear should be <= HIGHER($q)=$higher",
             )
         }
     }
@@ -1056,8 +1052,10 @@ internal class QuantilesTest {
             val higher = data.quantile(q, QuantileMethod.HIGHER)
             val midpoint = data.quantile(q, QuantileMethod.MIDPOINT)
             assertEquals(
-                (lower + higher) / 2.0, midpoint, tol,
-                "MIDPOINT($q) should be (LOWER+HIGHER)/2"
+                (lower + higher) / 2.0,
+                midpoint,
+                tol,
+                "MIDPOINT($q) should be (LOWER+HIGHER)/2",
             )
         }
     }
@@ -1094,13 +1092,14 @@ internal class QuantilesTest {
     fun testDiscreteMethodsReturnDataElements() {
         val data = doubleArrayOf(3.0, 1.0, 4.0, 1.0, 5.0, 9.0, 2.0, 6.0)
         val sortedData = data.sorted()
-        val discreteMethods = listOf(
-            QuantileMethod.INVERTED_CDF,
-            QuantileMethod.CLOSEST_OBSERVATION,
-            QuantileMethod.LOWER,
-            QuantileMethod.HIGHER,
-            QuantileMethod.NEAREST,
-        )
+        val discreteMethods =
+            listOf(
+                QuantileMethod.INVERTED_CDF,
+                QuantileMethod.CLOSEST_OBSERVATION,
+                QuantileMethod.LOWER,
+                QuantileMethod.HIGHER,
+                QuantileMethod.NEAREST,
+            )
         for (method in discreteMethods) {
             for (q in listOf(0.0, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0)) {
                 val result = data.quantile(q, method)
@@ -1116,21 +1115,24 @@ internal class QuantilesTest {
         // Symmetric data: quantile(q) + quantile(1-q) should be constant for interpolation methods
         val data = doubleArrayOf(1.0, 3.0, 5.0, 7.0, 9.0)
         val center = 5.0
-        val symmetricMethods = listOf(
-            QuantileMethod.LINEAR,
-            QuantileMethod.HAZEN,
-            QuantileMethod.WEIBULL,
-            QuantileMethod.MEDIAN_UNBIASED,
-            QuantileMethod.NORMAL_UNBIASED,
-            QuantileMethod.MIDPOINT,
-        )
+        val symmetricMethods =
+            listOf(
+                QuantileMethod.LINEAR,
+                QuantileMethod.HAZEN,
+                QuantileMethod.WEIBULL,
+                QuantileMethod.MEDIAN_UNBIASED,
+                QuantileMethod.NORMAL_UNBIASED,
+                QuantileMethod.MIDPOINT,
+            )
         for (method in symmetricMethods) {
             for (q in listOf(0.1, 0.25, 0.4)) {
                 val low = data.quantile(q, method)
                 val high = data.quantile(1.0 - q, method)
                 assertEquals(
-                    2 * center, low + high, tol,
-                    "For symmetric data, quantile($q) + quantile(${1 - q}) = ${2 * center} using $method"
+                    2 * center,
+                    low + high,
+                    tol,
+                    "For symmetric data, quantile($q) + quantile(${1 - q}) = ${2 * center} using $method",
                 )
             }
         }
@@ -1142,17 +1144,21 @@ internal class QuantilesTest {
     fun testQuantileSelectConsistentWithDoubleQuantile() {
         val doubleData = doubleArrayOf(10.0, 30.0, 50.0, 70.0, 90.0)
         val intData = listOf(10, 30, 50, 70, 90)
-        val nonInterpMethods = listOf(
-            QuantileMethod.LOWER, QuantileMethod.HIGHER, QuantileMethod.NEAREST,
-            QuantileMethod.INVERTED_CDF, QuantileMethod.CLOSEST_OBSERVATION,
-        )
+        val nonInterpMethods =
+            listOf(
+                QuantileMethod.LOWER,
+                QuantileMethod.HIGHER,
+                QuantileMethod.NEAREST,
+                QuantileMethod.INVERTED_CDF,
+                QuantileMethod.CLOSEST_OBSERVATION,
+            )
         for (method in nonInterpMethods) {
             for (q in listOf(0.0, 0.25, 0.5, 0.75, 1.0)) {
                 assertEquals(
                     doubleData.quantile(q, method),
                     intData.quantileSelect(q, method).toDouble(),
                     tol,
-                    "quantileSelect($q, $method) should be consistent with Double quantile"
+                    "quantileSelect($q, $method) should be consistent with Double quantile",
                 )
             }
         }
@@ -1169,7 +1175,7 @@ internal class QuantilesTest {
                     data.quantile(p / 100.0, method),
                     data.percentile(p, method),
                     tol,
-                    "percentile($p, $method) = quantile(${p / 100.0}, $method)"
+                    "percentile($p, $method) = quantile(${p / 100.0}, $method)",
                 )
             }
         }
@@ -1180,16 +1186,20 @@ internal class QuantilesTest {
     @Test
     fun testPercentileSelectQuantileSelectRelation() {
         val data = listOf("a", "b", "c", "d", "e")
-        val nonInterpMethods = listOf(
-            QuantileMethod.LOWER, QuantileMethod.HIGHER, QuantileMethod.NEAREST,
-            QuantileMethod.INVERTED_CDF, QuantileMethod.CLOSEST_OBSERVATION,
-        )
+        val nonInterpMethods =
+            listOf(
+                QuantileMethod.LOWER,
+                QuantileMethod.HIGHER,
+                QuantileMethod.NEAREST,
+                QuantileMethod.INVERTED_CDF,
+                QuantileMethod.CLOSEST_OBSERVATION,
+            )
         for (method in nonInterpMethods) {
             for (p in listOf(0.0, 25.0, 50.0, 75.0, 100.0)) {
                 assertEquals(
                     data.quantileSelect(p / 100.0, method),
                     data.percentileSelect(p, method),
-                    "percentileSelect($p, $method) = quantileSelect(${p / 100.0}, $method)"
+                    "percentileSelect($p, $method) = quantileSelect(${p / 100.0}, $method)",
                 )
             }
         }
@@ -1203,16 +1213,22 @@ internal class QuantilesTest {
         for (method in QuantileMethod.entries) {
             val (q1, q2, q3) = data.quartiles(method)
             assertEquals(
-                data.quantile(0.25, method), q1, tol,
-                "quartiles.$method Q1 should equal quantile(0.25)"
+                data.quantile(0.25, method),
+                q1,
+                tol,
+                "quartiles.$method Q1 should equal quantile(0.25)",
             )
             assertEquals(
-                data.quantile(0.50, method), q2, tol,
-                "quartiles.$method Q2 should equal quantile(0.50)"
+                data.quantile(0.50, method),
+                q2,
+                tol,
+                "quartiles.$method Q2 should equal quantile(0.50)",
             )
             assertEquals(
-                data.quantile(0.75, method), q3, tol,
-                "quartiles.$method Q3 should equal quantile(0.75)"
+                data.quantile(0.75, method),
+                q3,
+                tol,
+                "quartiles.$method Q3 should equal quantile(0.75)",
             )
         }
     }
@@ -1238,13 +1254,26 @@ internal class QuantilesTest {
         // Golden values: np.quantile([15,20,35,40,50], q, method='linear')
         val data = doubleArrayOf(15.0, 20.0, 35.0, 40.0, 50.0)
         val qs = doubleArrayOf(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
-        val expected = doubleArrayOf(
-            15.0, 17.0, 19.0, 23.0, 29.0, 35.0, 37.0, 39.0, 42.0, 46.0, 50.0
-        )
+        val expected =
+            doubleArrayOf(
+                15.0,
+                17.0,
+                19.0,
+                23.0,
+                29.0,
+                35.0,
+                37.0,
+                39.0,
+                42.0,
+                46.0,
+                50.0,
+            )
         for (i in qs.indices) {
             assertEquals(
-                expected[i], data.quantile(qs[i], QuantileMethod.LINEAR), tol,
-                "LINEAR quantile(${qs[i]})"
+                expected[i],
+                data.quantile(qs[i], QuantileMethod.LINEAR),
+                tol,
+                "LINEAR quantile(${qs[i]})",
             )
         }
     }
@@ -1258,27 +1287,27 @@ internal class QuantilesTest {
         assertEquals(
             data.quantile(0.25, QuantileMethod.LINEAR),
             data.quantile(0.25, QuantileInterpolation.LINEAR),
-            tol
+            tol,
         )
         assertEquals(
             data.quantile(0.25, QuantileMethod.LOWER),
             data.quantile(0.25, QuantileInterpolation.LOWER),
-            tol
+            tol,
         )
         assertEquals(
             data.quantile(0.25, QuantileMethod.HIGHER),
             data.quantile(0.25, QuantileInterpolation.HIGHER),
-            tol
+            tol,
         )
         assertEquals(
             data.quantile(0.25, QuantileMethod.NEAREST),
             data.quantile(0.25, QuantileInterpolation.NEAREST),
-            tol
+            tol,
         )
         assertEquals(
             data.quantile(0.25, QuantileMethod.MIDPOINT),
             data.quantile(0.25, QuantileInterpolation.MIDPOINT),
-            tol
+            tol,
         )
     }
 
@@ -1289,12 +1318,12 @@ internal class QuantilesTest {
         assertEquals(
             data.percentile(25.0, QuantileMethod.LOWER),
             data.percentile(25.0, QuantileInterpolation.LOWER),
-            tol
+            tol,
         )
         assertEquals(
             data.percentile(25.0, QuantileMethod.HIGHER),
             data.percentile(25.0, QuantileInterpolation.HIGHER),
-            tol
+            tol,
         )
     }
 
@@ -1305,7 +1334,7 @@ internal class QuantilesTest {
         assertEquals(
             data.percentile(25.0, QuantileMethod.LINEAR),
             data.percentile(25.0, QuantileInterpolation.LINEAR),
-            tol
+            tol,
         )
     }
 
@@ -1317,7 +1346,7 @@ internal class QuantilesTest {
         assertEquals(
             list.quantile(0.5, QuantileMethod.LINEAR),
             data.quantile(0.5, QuantileInterpolation.LINEAR),
-            tol
+            tol,
         )
     }
 }

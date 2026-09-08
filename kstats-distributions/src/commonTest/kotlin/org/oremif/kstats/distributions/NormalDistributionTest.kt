@@ -1,15 +1,16 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.PI
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class NormalDistributionTest : ContinuousDistributionPropertyTests() {
     override fun createDistribution() = NormalDistribution(5.0, 2.0)
+
     override val testPoints = listOf(-1.0, 1.0, 3.0, 5.0, 7.0, 9.0, 11.0)
 
     private val std = NormalDistribution.STANDARD
@@ -92,8 +93,12 @@ class NormalDistributionTest : ContinuousDistributionPropertyTests() {
         assertFailsWith<InvalidParameterException> { NormalDistribution(0.0, Double.NaN) }
         assertFailsWith<InvalidParameterException> { NormalDistribution(Double.NaN, 1.0) }
         assertFailsWith<InvalidParameterException> { NormalDistribution(Double.NaN, Double.NaN) }
-        assertFailsWith<InvalidParameterException> { NormalDistribution(Double.POSITIVE_INFINITY, 1.0) }
-        assertFailsWith<InvalidParameterException> { NormalDistribution(Double.NEGATIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> {
+            NormalDistribution(Double.POSITIVE_INFINITY, 1.0)
+        }
+        assertFailsWith<InvalidParameterException> {
+            NormalDistribution(Double.NEGATIVE_INFINITY, 1.0)
+        }
     }
 
     @Test

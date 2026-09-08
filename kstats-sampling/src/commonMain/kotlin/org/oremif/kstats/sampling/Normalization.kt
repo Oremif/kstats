@@ -7,19 +7,18 @@ import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.descriptive.standardDeviation
 
 /**
- * Threshold below which the standard deviation is considered effectively zero.
- * Chosen to be well above machine epsilon (~2.2e-16) to avoid division
- * by near-zero values that would produce unreliable z-scores.
+ * Threshold below which the standard deviation is considered effectively zero. Chosen to be well
+ * above machine epsilon (~2.2e-16) to avoid division by near-zero values that would produce
+ * unreliable z-scores.
  */
 private const val NEAR_ZERO_SD_THRESHOLD = 1e-15
 
 /**
  * Computes the z-score (standard score) of each element.
  *
- * The z-score expresses how many standard deviations an element is from the mean.
- * Each value is transformed by subtracting the sample mean and dividing by the
- * sample standard deviation. The resulting array has a mean of approximately 0
- * and a standard deviation of approximately 1.
+ * The z-score expresses how many standard deviations an element is from the mean. Each value is
+ * transformed by subtracting the sample mean and dividing by the sample standard deviation. The
+ * resulting array has a mean of approximately 0 and a standard deviation of approximately 1.
  *
  * ### Example:
  * ```kotlin
@@ -39,15 +38,16 @@ public fun DoubleArray.zScore(): DoubleArray {
     }
     val m = mean()
     val sd = standardDeviation()
-    if (sd < NEAR_ZERO_SD_THRESHOLD) throw DegenerateDataException("Standard deviation is near-zero, cannot compute z-scores")
+    if (sd < NEAR_ZERO_SD_THRESHOLD)
+        throw DegenerateDataException("Standard deviation is near-zero, cannot compute z-scores")
     return DoubleArray(size) { (this[it] - m) / sd }
 }
 
 /**
  * Computes the z-score (standard score) of each element in this iterable.
  *
- * This is a convenience overload that accepts any [Iterable]. The collection is
- * materialized to a [DoubleArray] internally.
+ * This is a convenience overload that accepts any [Iterable]. The collection is materialized to a
+ * [DoubleArray] internally.
  *
  * ### Example:
  * ```kotlin
@@ -61,15 +61,13 @@ public fun DoubleArray.zScore(): DoubleArray {
  * @throws DegenerateDataException if the standard deviation is zero (all values are identical).
  * @see DoubleArray.zScore
  */
-public fun Iterable<Double>.zScore(): List<Double> =
-    toList().toDoubleArray().zScore().toList()
+public fun Iterable<Double>.zScore(): List<Double> = toList().toDoubleArray().zScore().toList()
 
 /**
  * Scales each element to the range [0, 1] using min-max normalization.
  *
- * The minimum value maps to 0 and the maximum maps to 1, with all other values
- * linearly interpolated between them. If all values are identical (range is zero),
- * every element maps to 0.
+ * The minimum value maps to 0 and the maximum maps to 1, with all other values linearly
+ * interpolated between them. If all values are identical (range is zero), every element maps to 0.
  *
  * ### Example:
  * ```kotlin
@@ -96,9 +94,9 @@ public fun DoubleArray.minMaxNormalize(): DoubleArray {
 /**
  * Scales each element to the range [[newMin], [newMax]] using min-max normalization.
  *
- * The minimum value maps to [newMin] and the maximum maps to [newMax], with all other
- * values linearly interpolated between them. If all values are identical (range is zero),
- * every element maps to [newMin].
+ * The minimum value maps to [newMin] and the maximum maps to [newMax], with all other values
+ * linearly interpolated between them. If all values are identical (range is zero), every element
+ * maps to [newMin].
  *
  * ### Example:
  * ```kotlin
@@ -109,8 +107,8 @@ public fun DoubleArray.minMaxNormalize(): DoubleArray {
  * @param newMax the upper bound of the target range. Must be finite and greater than [newMin].
  * @return an array of normalized values in [[newMin], [newMax]].
  * @throws InsufficientDataException if the array is empty.
- * @throws InvalidParameterException if [newMin] >= [newMax], parameters are non-finite,
- * or the array contains NaN or Infinity.
+ * @throws InvalidParameterException if [newMin] >= [newMax], parameters are non-finite, or the
+ *   array contains NaN or Infinity.
  */
 public fun DoubleArray.minMaxNormalize(newMin: Double, newMax: Double): DoubleArray {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
@@ -131,8 +129,8 @@ public fun DoubleArray.minMaxNormalize(newMin: Double, newMax: Double): DoubleAr
 /**
  * Scales each element to the range [0, 1] using min-max normalization.
  *
- * This is a convenience overload that accepts any [Iterable]. The collection is
- * materialized to a [DoubleArray] internally.
+ * This is a convenience overload that accepts any [Iterable]. The collection is materialized to a
+ * [DoubleArray] internally.
  *
  * @return a list of normalized values in [0, 1].
  * @throws InsufficientDataException if the collection is empty.
@@ -145,15 +143,15 @@ public fun Iterable<Double>.minMaxNormalize(): List<Double> =
 /**
  * Scales each element to the range [[newMin], [newMax]] using min-max normalization.
  *
- * This is a convenience overload that accepts any [Iterable]. The collection is
- * materialized to a [DoubleArray] internally.
+ * This is a convenience overload that accepts any [Iterable]. The collection is materialized to a
+ * [DoubleArray] internally.
  *
  * @param newMin the lower bound of the target range. Must be finite.
  * @param newMax the upper bound of the target range. Must be finite and greater than [newMin].
  * @return a list of normalized values in [[newMin], [newMax]].
  * @throws InsufficientDataException if the collection is empty.
- * @throws InvalidParameterException if [newMin] >= [newMax], parameters are non-finite,
- * or the collection contains NaN or Infinity.
+ * @throws InvalidParameterException if [newMin] >= [newMax], parameters are non-finite, or the
+ *   collection contains NaN or Infinity.
  * @see DoubleArray.minMaxNormalize
  */
 public fun Iterable<Double>.minMaxNormalize(newMin: Double, newMax: Double): List<Double> =

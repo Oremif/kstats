@@ -1,16 +1,16 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.*
 import kotlin.random.Random
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 /**
  * The logistic distribution, defined by its location [mu] and [scale] parameter.
  *
- * The logistic distribution is a symmetric, bell-shaped continuous distribution similar
- * to the normal distribution but with heavier tails. It is widely used in logistic
- * regression, modeling growth curves, and as the distribution of the log-odds in
- * binary classification. Its CDF is the sigmoid function.
+ * The logistic distribution is a symmetric, bell-shaped continuous distribution similar to the
+ * normal distribution but with heavier tails. It is widely used in logistic regression, modeling
+ * growth curves, and as the distribution of the log-odds in binary classification. Its CDF is the
+ * sigmoid function.
  *
  * ### Example:
  * ```kotlin
@@ -30,7 +30,8 @@ public class LogisticDistribution(
 
     init {
         if (!mu.isFinite()) throw InvalidParameterException("mu must be finite, got $mu")
-        if (!scale.isFinite() || scale <= 0.0) throw InvalidParameterException("scale must be finite and positive, got $scale")
+        if (!scale.isFinite() || scale <= 0.0)
+            throw InvalidParameterException("scale must be finite and positive, got $scale")
     }
 
     public companion object {
@@ -41,8 +42,8 @@ public class LogisticDistribution(
     /**
      * Returns the probability density at [x] for this logistic distribution.
      *
-     * Uses the absolute-value form of the standardized variable to avoid overflow
-     * from large exponentials.
+     * Uses the absolute-value form of the standardized variable to avoid overflow from large
+     * exponentials.
      *
      * @param x the point at which to evaluate the density.
      * @return the probability density at [x]. Always non-negative.
@@ -55,7 +56,8 @@ public class LogisticDistribution(
     }
 
     /**
-     * Returns the natural logarithm of the probability density at [x] for this logistic distribution.
+     * Returns the natural logarithm of the probability density at [x] for this logistic
+     * distribution.
      *
      * Computed directly in log-space for improved numerical precision with extreme values.
      *
@@ -70,9 +72,8 @@ public class LogisticDistribution(
     /**
      * Returns the cumulative distribution function value at [x] for this logistic distribution.
      *
-     * The CDF is the standard sigmoid function applied to the standardized variable.
-     * Uses a two-branch formulation to avoid overflow for both large positive and
-     * large negative inputs.
+     * The CDF is the standard sigmoid function applied to the standardized variable. Uses a
+     * two-branch formulation to avoid overflow for both large positive and large negative inputs.
      *
      * @param x the point at which to evaluate the cumulative probability.
      * @return the probability that a value is less than or equal to [x], in the range `[0, 1]`.
@@ -85,8 +86,8 @@ public class LogisticDistribution(
     /**
      * Returns the survival function value at [x] for this logistic distribution.
      *
-     * Computed as the complement of [cdf] using a numerically stable two-branch formula
-     * that avoids catastrophic cancellation.
+     * Computed as the complement of [cdf] using a numerically stable two-branch formula that avoids
+     * catastrophic cancellation.
      *
      * @param x the point at which to evaluate the survival probability.
      * @return the probability that a value is greater than [x], in the range `[0, 1]`.
@@ -99,8 +100,8 @@ public class LogisticDistribution(
     /**
      * Returns the quantile (inverse CDF) for the given probability [p].
      *
-     * The quantile is computed as the log-odds of [p], scaled and shifted by the
-     * distribution parameters. Returns negative infinity for p=0 and positive infinity for p=1.
+     * The quantile is computed as the log-odds of [p], scaled and shifted by the distribution
+     * parameters. Returns negative infinity for p=0 and positive infinity for p=1.
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
      * @return the value x at which `cdf(x) = p`.
@@ -113,19 +114,24 @@ public class LogisticDistribution(
     }
 
     /** The mean of this distribution, equal to [mu]. */
-    override val mean: Double get() = mu
+    override val mean: Double
+        get() = mu
 
     /** The variance of this distribution, equal to (pi * scale)^2 / 3. */
-    override val variance: Double get() = PI * PI * scale * scale / 3.0
+    override val variance: Double
+        get() = PI * PI * scale * scale / 3.0
 
     /** The standard deviation of this distribution, equal to pi * scale / sqrt(3). */
-    override val standardDeviation: Double get() = PI * scale / sqrt(3.0)
+    override val standardDeviation: Double
+        get() = PI * scale / sqrt(3.0)
 
     /** The skewness of this distribution, always zero (symmetric). */
-    override val skewness: Double get() = 0.0
+    override val skewness: Double
+        get() = 0.0
 
     /** The excess kurtosis of this distribution, always 6/5 = 1.2. */
-    override val kurtosis: Double get() = 1.2
+    override val kurtosis: Double
+        get() = 1.2
 
     /** The Shannon entropy of this distribution in nats, equal to ln(scale) + 2. */
     override val entropy: Double = ln(scale) + 2.0

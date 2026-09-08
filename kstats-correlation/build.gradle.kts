@@ -1,6 +1,4 @@
-plugins {
-    id("kstats.kmp-library")
-}
+plugins { id("kstats.kmp-library") }
 
 kotlin {
     sourceSets {
@@ -8,8 +6,6 @@ kotlin {
             api(project(":kstats-distributions"))
             implementation(project(":kstats-sampling"))
         }
-        commonTest.dependencies {
-            implementation(project(":kstats-hypothesis"))
-        }
+        commonTest.dependencies { implementation(project(":kstats-hypothesis")) }
     }
 }

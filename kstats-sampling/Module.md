@@ -10,12 +10,12 @@ Ranking, normalization, binning, and weighted random sampling utilities.
 ```kotlin
 val data = doubleArrayOf(3.0, 1.0, 4.0, 1.0, 5.0)
 
-data.rank()              // [3.0, 1.5, 4.0, 1.5, 5.0] (average ties)
-data.zScore()            // standardized to mean=0, sd=1
-data.minMaxNormalize()   // scaled to [0.0, 1.0]
+data.rank() // [3.0, 1.5, 4.0, 1.5, 5.0] (average ties)
+data.zScore() // standardized to mean=0, sd=1
+data.minMaxNormalize() // scaled to [0.0, 1.0]
 
 val die = WeightedDice(mapOf("A" to 0.7, "B" to 0.2, "C" to 0.1), Random(42))
-die.roll()               // "A" (most likely)
+die.roll() // "A" (most likely)
 ```
 
 <!---END-->

@@ -1,15 +1,17 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class TriangularDistributionTest : ContinuousDistributionPropertyTests() {
 
-    override fun createDistribution(): ContinuousDistribution = TriangularDistribution(0.0, 1.0, 0.5)
+    override fun createDistribution(): ContinuousDistribution =
+        TriangularDistribution(0.0, 1.0, 0.5)
+
     override val testPoints = listOf(0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0)
 
     // Config 1: Symmetric — a=0, b=1, c=0.5

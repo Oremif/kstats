@@ -1,27 +1,26 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.neumaierTotal
-import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 import kotlin.math.abs
-import kotlin.math.sqrt
 import kotlin.math.max as kMax
 import kotlin.math.min as kMin
+import kotlin.math.sqrt
+import org.oremif.kstats.core.neumaierTotal
+import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 
 /**
  * A streaming one-pass accumulator for descriptive statistics.
  *
- * Computes mean, variance, standard deviation, skewness, and kurtosis without
- * storing individual data points. Uses the Terriberry (2008) extension of Welford's
- * online algorithm for numerically stable single-pass updates of central moments
- * M2, M3, and M4.
+ * Computes mean, variance, standard deviation, skewness, and kurtosis without storing individual
+ * data points. Uses the Terriberry (2008) extension of Welford's online algorithm for numerically
+ * stable single-pass updates of central moments M2, M3, and M4.
  *
  * This is analogous to Apache Commons Math `SummaryStatistics`.
  *
- * **Non-finite values:** NaN values propagate through all statistics (IEEE 754 semantics).
- * Infinite values are handled correctly for [mean], [sum], [min], and [max] (which use
- * compensated summation). However, [variance], [standardDeviation], [skewness], and [kurtosis]
- * return NaN when infinite values are present, since the Welford algorithm used for higher
- * moments computes differences of running means, producing NaN from Inf - Inf.
+ * **Non-finite values:** NaN values propagate through all statistics (IEEE 754 semantics). Infinite
+ * values are handled correctly for [mean], [sum], [min], and [max] (which use compensated
+ * summation). However, [variance], [standardDeviation], [skewness], and [kurtosis] return NaN when
+ * infinite values are present, since the Welford algorithm used for higher moments computes
+ * differences of running means, producing NaN from Inf - Inf.
  *
  * ### Example:
  * ```kotlin
@@ -49,9 +48,9 @@ public class OnlineStatistics {
     /**
      * Adds a single observation to the accumulator.
      *
-     * Updates all internal moments using the Terriberry (2008) single-pass algorithm.
-     * The update order is critical: M4 → M3 → M2 → mean, as each formula uses the
-     * previous values of the lower moments.
+     * Updates all internal moments using the Terriberry (2008) single-pass algorithm. The update
+     * order is critical: M4 → M3 → M2 → mean, as each formula uses the previous values of the lower
+     * moments.
      *
      * @param x the value to add.
      */
@@ -101,15 +100,15 @@ public class OnlineStatistics {
      *
      * Uses [Long] to support streams with more than 2^31 values.
      */
-    public val count: Long get() = n
+    public val count: Long
+        get() = n
 
     /**
      * The arithmetic mean of all observations, or [Double.NaN] if no observations have been added.
      *
-     * Uses compensated summation for improved numerical precision with finite data.
-     * When infinite values are present, falls back to the uncompensated sum (which
-     * correctly handles Inf) since the Neumaier compensation term produces NaN from
-     * Inf - Inf arithmetic.
+     * Uses compensated summation for improved numerical precision with finite data. When infinite
+     * values are present, falls back to the uncompensated sum (which correctly handles Inf) since
+     * the Neumaier compensation term produces NaN from Inf - Inf arithmetic.
      */
     public val mean: Double
         get() {
@@ -121,8 +120,8 @@ public class OnlineStatistics {
     /**
      * The sum of all observations, or [Double.NaN] if no observations have been added.
      *
-     * Uses Neumaier compensated summation for improved numerical precision with finite data.
-     * When infinite values are present, falls back to the uncompensated sum.
+     * Uses Neumaier compensated summation for improved numerical precision with finite data. When
+     * infinite values are present, falls back to the uncompensated sum.
      */
     public val sum: Double
         get() {
@@ -131,20 +130,18 @@ public class OnlineStatistics {
         }
 
     /**
-     * Returns the compensated sum, falling back to the raw sum when
-     * the compensation term is corrupted by non-finite arithmetic (Inf - Inf = NaN).
+     * Returns the compensated sum, falling back to the raw sum when the compensation term is
+     * corrupted by non-finite arithmetic (Inf - Inf = NaN).
      */
     private fun compensatedTotal(): Double = neumaierTotal(sumVal, sumCompensation)
 
-    /**
-     * The minimum observed value, or [Double.NaN] if no observations have been added.
-     */
-    public val min: Double get() = minVal
+    /** The minimum observed value, or [Double.NaN] if no observations have been added. */
+    public val min: Double
+        get() = minVal
 
-    /**
-     * The maximum observed value, or [Double.NaN] if no observations have been added.
-     */
-    public val max: Double get() = maxVal
+    /** The maximum observed value, or [Double.NaN] if no observations have been added. */
+    public val max: Double
+        get() = maxVal
 
     /**
      * Computes the variance of all observations.
@@ -153,7 +150,7 @@ public class OnlineStatistics {
      * [PopulationKind.SAMPLE], at least 1 for [PopulationKind.POPULATION]).
      *
      * @param kind whether to compute sample variance (divides by n-1) or population variance
-     * (divides by n). Defaults to [PopulationKind.SAMPLE].
+     *   (divides by n). Defaults to [PopulationKind.SAMPLE].
      * @return the variance, or [Double.NaN] if insufficient data.
      */
     public fun variance(kind: PopulationKind = SAMPLE): Double {
@@ -170,8 +167,8 @@ public class OnlineStatistics {
      *
      * This is the square root of [variance].
      *
-     * @param kind whether to compute sample or population standard deviation.
-     * Defaults to [PopulationKind.SAMPLE].
+     * @param kind whether to compute sample or population standard deviation. Defaults to
+     *   [PopulationKind.SAMPLE].
      * @return the standard deviation, or [Double.NaN] if insufficient data.
      */
     public fun standardDeviation(kind: PopulationKind = SAMPLE): Double = sqrt(variance(kind))
@@ -179,11 +176,11 @@ public class OnlineStatistics {
     /**
      * Computes the skewness of all observations.
      *
-     * Returns [Double.NaN] if fewer than 3 observations have been added.
-     * Returns 0.0 if the variance is zero (constant data).
+     * Returns [Double.NaN] if fewer than 3 observations have been added. Returns 0.0 if the
+     * variance is zero (constant data).
      *
      * @param kind whether to compute sample-adjusted (Fisher-Pearson) or population skewness.
-     * Defaults to [PopulationKind.SAMPLE].
+     *   Defaults to [PopulationKind.SAMPLE].
      * @return the skewness, or [Double.NaN] if insufficient data.
      */
     public fun skewness(kind: PopulationKind = SAMPLE): Double {
@@ -201,13 +198,13 @@ public class OnlineStatistics {
     /**
      * Computes the kurtosis of all observations.
      *
-     * Returns [Double.NaN] if fewer than 4 observations have been added.
-     * Returns -3.0 (excess) or 0.0 (non-excess) if the variance is zero (constant data).
+     * Returns [Double.NaN] if fewer than 4 observations have been added. Returns -3.0 (excess) or
+     * 0.0 (non-excess) if the variance is zero (constant data).
      *
-     * @param kind whether to compute sample-adjusted or population kurtosis.
-     * Defaults to [PopulationKind.SAMPLE].
-     * @param excess whether to subtract 3 (the kurtosis of a normal distribution).
-     * Defaults to `true`.
+     * @param kind whether to compute sample-adjusted or population kurtosis. Defaults to
+     *   [PopulationKind.SAMPLE].
+     * @param excess whether to subtract 3 (the kurtosis of a normal distribution). Defaults to
+     *   `true`.
      * @return the kurtosis, or [Double.NaN] if insufficient data.
      */
     public fun kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean = true): Double {
@@ -223,9 +220,7 @@ public class OnlineStatistics {
         }
     }
 
-    /**
-     * Resets the accumulator to its initial empty state.
-     */
+    /** Resets the accumulator to its initial empty state. */
     public fun clear() {
         n = 0L
         m1 = 0.0

@@ -1,11 +1,11 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.ConfidenceInterval
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.ConfidenceInterval
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 internal class ContingencyMeasuresTest {
 
@@ -156,15 +156,11 @@ internal class ContingencyMeasuresTest {
         assertFailsWith<InvalidParameterException> {
             oddsRatio(arrayOf(intArrayOf(1, 2, 3), intArrayOf(4, 5, 6)))
         }
-        assertFailsWith<InvalidParameterException> {
-            oddsRatio(arrayOf(intArrayOf(1, 2)))
-        }
+        assertFailsWith<InvalidParameterException> { oddsRatio(arrayOf(intArrayOf(1, 2))) }
         assertFailsWith<InvalidParameterException> {
             oddsRatio(arrayOf(intArrayOf(1, 2), intArrayOf(3, 4), intArrayOf(5, 6)))
         }
-        assertFailsWith<InvalidParameterException> {
-            oddsRatio(emptyArray())
-        }
+        assertFailsWith<InvalidParameterException> { oddsRatio(emptyArray()) }
     }
 
     @Test
@@ -180,18 +176,10 @@ internal class ContingencyMeasuresTest {
     @Test
     fun testOddsRatioInvalidConfidenceLevel() {
         val table = arrayOf(intArrayOf(10, 5), intArrayOf(3, 12))
-        assertFailsWith<InvalidParameterException> {
-            oddsRatio(table, confidenceLevel = 0.0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            oddsRatio(table, confidenceLevel = 1.0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            oddsRatio(table, confidenceLevel = -0.5)
-        }
-        assertFailsWith<InvalidParameterException> {
-            oddsRatio(table, confidenceLevel = 1.5)
-        }
+        assertFailsWith<InvalidParameterException> { oddsRatio(table, confidenceLevel = 0.0) }
+        assertFailsWith<InvalidParameterException> { oddsRatio(table, confidenceLevel = 1.0) }
+        assertFailsWith<InvalidParameterException> { oddsRatio(table, confidenceLevel = -0.5) }
+        assertFailsWith<InvalidParameterException> { oddsRatio(table, confidenceLevel = 1.5) }
     }
 
     // ===== oddsRatio: Extreme parameters =====
@@ -237,18 +225,19 @@ internal class ContingencyMeasuresTest {
     @Test
     fun testOddsRatioCIContainsEstimate() {
         // For tables with all cells > 0, the CI should contain the point estimate
-        val tables = listOf(
-            arrayOf(intArrayOf(10, 5), intArrayOf(3, 12)),
-            arrayOf(intArrayOf(20, 10), intArrayOf(15, 25)),
-            arrayOf(intArrayOf(30, 70), intArrayOf(40, 60)),
-            arrayOf(intArrayOf(100, 50), intArrayOf(25, 75)),
-            arrayOf(intArrayOf(10, 10), intArrayOf(10, 10)),
-        )
+        val tables =
+            listOf(
+                arrayOf(intArrayOf(10, 5), intArrayOf(3, 12)),
+                arrayOf(intArrayOf(20, 10), intArrayOf(15, 25)),
+                arrayOf(intArrayOf(30, 70), intArrayOf(40, 60)),
+                arrayOf(intArrayOf(100, 50), intArrayOf(25, 75)),
+                arrayOf(intArrayOf(10, 10), intArrayOf(10, 10)),
+            )
         for (table in tables) {
             val r = oddsRatio(table)
             assertTrue(
                 r.ci.lower <= r.estimate && r.estimate <= r.ci.upper,
-                "CI should contain OR for ${table.map { it.toList() }}"
+                "CI should contain OR for ${table.map { it.toList() }}",
             )
         }
     }
@@ -276,12 +265,13 @@ internal class ContingencyMeasuresTest {
     @Test
     fun testOddsRatioEstimateNonNegative() {
         // OR is always >= 0 for non-negative input
-        val tables = listOf(
-            arrayOf(intArrayOf(10, 5), intArrayOf(3, 12)),
-            arrayOf(intArrayOf(1, 1), intArrayOf(1, 1)),
-            arrayOf(intArrayOf(0, 5), intArrayOf(5, 0)),
-            arrayOf(intArrayOf(100, 1), intArrayOf(1, 100)),
-        )
+        val tables =
+            listOf(
+                arrayOf(intArrayOf(10, 5), intArrayOf(3, 12)),
+                arrayOf(intArrayOf(1, 1), intArrayOf(1, 1)),
+                arrayOf(intArrayOf(0, 5), intArrayOf(5, 0)),
+                arrayOf(intArrayOf(100, 1), intArrayOf(1, 100)),
+            )
         for (table in tables) {
             val r = oddsRatio(table)
             assertTrue(r.estimate >= 0.0 || r.estimate.isNaN(), "OR should be >= 0")
@@ -432,15 +422,11 @@ internal class ContingencyMeasuresTest {
         assertFailsWith<InvalidParameterException> {
             relativeRisk(arrayOf(intArrayOf(1, 2, 3), intArrayOf(4, 5, 6)))
         }
-        assertFailsWith<InvalidParameterException> {
-            relativeRisk(arrayOf(intArrayOf(1, 2)))
-        }
+        assertFailsWith<InvalidParameterException> { relativeRisk(arrayOf(intArrayOf(1, 2))) }
         assertFailsWith<InvalidParameterException> {
             relativeRisk(arrayOf(intArrayOf(1, 2), intArrayOf(3, 4), intArrayOf(5, 6)))
         }
-        assertFailsWith<InvalidParameterException> {
-            relativeRisk(emptyArray())
-        }
+        assertFailsWith<InvalidParameterException> { relativeRisk(emptyArray()) }
     }
 
     @Test
@@ -456,18 +442,10 @@ internal class ContingencyMeasuresTest {
     @Test
     fun testRelativeRiskInvalidConfidenceLevel() {
         val table = arrayOf(intArrayOf(10, 5), intArrayOf(3, 12))
-        assertFailsWith<InvalidParameterException> {
-            relativeRisk(table, confidenceLevel = 0.0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            relativeRisk(table, confidenceLevel = 1.0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            relativeRisk(table, confidenceLevel = -0.5)
-        }
-        assertFailsWith<InvalidParameterException> {
-            relativeRisk(table, confidenceLevel = 1.5)
-        }
+        assertFailsWith<InvalidParameterException> { relativeRisk(table, confidenceLevel = 0.0) }
+        assertFailsWith<InvalidParameterException> { relativeRisk(table, confidenceLevel = 1.0) }
+        assertFailsWith<InvalidParameterException> { relativeRisk(table, confidenceLevel = -0.5) }
+        assertFailsWith<InvalidParameterException> { relativeRisk(table, confidenceLevel = 1.5) }
     }
 
     // ===== relativeRisk: Extreme parameters =====
@@ -511,18 +489,19 @@ internal class ContingencyMeasuresTest {
 
     @Test
     fun testRelativeRiskCIContainsEstimate() {
-        val tables = listOf(
-            arrayOf(intArrayOf(10, 5), intArrayOf(3, 12)),
-            arrayOf(intArrayOf(20, 10), intArrayOf(15, 25)),
-            arrayOf(intArrayOf(30, 70), intArrayOf(40, 60)),
-            arrayOf(intArrayOf(100, 50), intArrayOf(25, 75)),
-            arrayOf(intArrayOf(10, 10), intArrayOf(10, 10)),
-        )
+        val tables =
+            listOf(
+                arrayOf(intArrayOf(10, 5), intArrayOf(3, 12)),
+                arrayOf(intArrayOf(20, 10), intArrayOf(15, 25)),
+                arrayOf(intArrayOf(30, 70), intArrayOf(40, 60)),
+                arrayOf(intArrayOf(100, 50), intArrayOf(25, 75)),
+                arrayOf(intArrayOf(10, 10), intArrayOf(10, 10)),
+            )
         for (table in tables) {
             val r = relativeRisk(table)
             assertTrue(
                 r.ci.lower <= r.estimate && r.estimate <= r.ci.upper,
-                "CI should contain RR for ${table.map { it.toList() }}"
+                "CI should contain RR for ${table.map { it.toList() }}",
             )
         }
     }
@@ -546,12 +525,13 @@ internal class ContingencyMeasuresTest {
 
     @Test
     fun testRelativeRiskEstimateNonNegative() {
-        val tables = listOf(
-            arrayOf(intArrayOf(10, 5), intArrayOf(3, 12)),
-            arrayOf(intArrayOf(1, 1), intArrayOf(1, 1)),
-            arrayOf(intArrayOf(0, 10), intArrayOf(5, 5)),
-            arrayOf(intArrayOf(100, 1), intArrayOf(1, 100)),
-        )
+        val tables =
+            listOf(
+                arrayOf(intArrayOf(10, 5), intArrayOf(3, 12)),
+                arrayOf(intArrayOf(1, 1), intArrayOf(1, 1)),
+                arrayOf(intArrayOf(0, 10), intArrayOf(5, 5)),
+                arrayOf(intArrayOf(100, 1), intArrayOf(1, 100)),
+            )
         for (table in tables) {
             val r = relativeRisk(table)
             assertTrue(r.estimate >= 0.0 || r.estimate.isNaN(), "RR should be >= 0")
@@ -571,15 +551,18 @@ internal class ContingencyMeasuresTest {
 
     @Test
     fun testRiskEstimateDataClassEquality() {
-        val r1 = RiskEstimate(estimate = 2.0, ci = ConfidenceInterval(1.0, 3.0), confidenceLevel = 0.95)
-        val r2 = RiskEstimate(estimate = 2.0, ci = ConfidenceInterval(1.0, 3.0), confidenceLevel = 0.95)
+        val r1 =
+            RiskEstimate(estimate = 2.0, ci = ConfidenceInterval(1.0, 3.0), confidenceLevel = 0.95)
+        val r2 =
+            RiskEstimate(estimate = 2.0, ci = ConfidenceInterval(1.0, 3.0), confidenceLevel = 0.95)
         assertEquals(r1, r2)
         assertEquals(r1.hashCode(), r2.hashCode())
     }
 
     @Test
     fun testRiskEstimateFields() {
-        val r = RiskEstimate(estimate = 5.0, ci = ConfidenceInterval(2.0, 10.0), confidenceLevel = 0.99)
+        val r =
+            RiskEstimate(estimate = 5.0, ci = ConfidenceInterval(2.0, 10.0), confidenceLevel = 0.99)
         assertEquals(5.0, r.estimate, 0.0)
         assertEquals(2.0, r.ci.lower, 0.0)
         assertEquals(10.0, r.ci.upper, 0.0)
@@ -588,7 +571,8 @@ internal class ContingencyMeasuresTest {
 
     @Test
     fun testRiskEstimateCopy() {
-        val r1 = RiskEstimate(estimate = 3.0, ci = ConfidenceInterval(1.0, 5.0), confidenceLevel = 0.95)
+        val r1 =
+            RiskEstimate(estimate = 3.0, ci = ConfidenceInterval(1.0, 5.0), confidenceLevel = 0.95)
         val r2 = r1.copy(estimate = 4.0)
         assertEquals(4.0, r2.estimate, 0.0)
         assertEquals(r1.ci, r2.ci)

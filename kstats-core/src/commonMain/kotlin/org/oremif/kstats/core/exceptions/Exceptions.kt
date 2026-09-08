@@ -3,9 +3,8 @@ package org.oremif.kstats.core.exceptions
 /**
  * Base exception for all errors thrown by the kstats library.
  *
- * All kstats exceptions extend this class, so catching [KStatsException] will handle any
- * error originating from the library. The optional [cause] allows chaining with an underlying
- * throwable.
+ * All kstats exceptions extend this class, so catching [KStatsException] will handle any error
+ * originating from the library. The optional [cause] allows chaining with an underlying throwable.
  *
  * ### Example:
  * ```kotlin
@@ -19,14 +18,14 @@ package org.oremif.kstats.core.exceptions
  * @param message a description of what went wrong.
  * @param cause an optional underlying throwable that caused this exception.
  */
-public open class KStatsException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+public open class KStatsException(message: String, cause: Throwable? = null) :
+    RuntimeException(message, cause)
 
 /**
  * Thrown when the input data does not contain enough elements for the requested operation.
  *
- * For example, computing variance requires at least two values, and some hypothesis tests
- * require a minimum sample size. The [message] indicates the required minimum and the actual
- * size received.
+ * For example, computing variance requires at least two values, and some hypothesis tests require a
+ * minimum sample size. The [message] indicates the required minimum and the actual size received.
  *
  * ### Example:
  * ```kotlin
@@ -44,9 +43,9 @@ public class InsufficientDataException(message: String) : KStatsException(messag
 /**
  * Thrown when a parameter value is outside the valid range for the requested operation.
  *
- * This covers cases such as a negative standard deviation for a distribution, a probability
- * outside [0, 1], or mismatched array sizes. The [message] describes which parameter was
- * invalid and what value was received.
+ * This covers cases such as a negative standard deviation for a distribution, a probability outside
+ * [0, 1], or mismatched array sizes. The [message] describes which parameter was invalid and what
+ * value was received.
  *
  * ### Example:
  * ```kotlin
@@ -65,9 +64,9 @@ public class InvalidParameterException(message: String) : KStatsException(messag
  * Thrown when an iterative numerical algorithm fails to converge within its iteration limit.
  *
  * Some computations in kstats rely on iterative methods (e.g. quantile functions for certain
- * distributions, regularized incomplete gamma/beta functions). If the algorithm does not reach
- * the required precision within the allowed number of iterations, this exception is thrown
- * with diagnostic information to help identify the problem.
+ * distributions, regularized incomplete gamma/beta functions). If the algorithm does not reach the
+ * required precision within the allowed number of iterations, this exception is thrown with
+ * diagnostic information to help identify the problem.
  *
  * ### Example:
  * ```kotlin
@@ -91,9 +90,9 @@ public class ConvergenceException(
 /**
  * Thrown when the input data is mathematically degenerate for the requested operation.
  *
- * This differs from [InsufficientDataException] in that the data has enough elements but
- * lacks the variation needed for a meaningful result. For example, computing a linear regression
- * when all x-values are identical makes the slope undefined.
+ * This differs from [InsufficientDataException] in that the data has enough elements but lacks the
+ * variation needed for a meaningful result. For example, computing a linear regression when all
+ * x-values are identical makes the slope undefined.
  *
  * ### Example:
  * ```kotlin

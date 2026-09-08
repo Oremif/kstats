@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class GeometricDistributionTest : DiscreteDistributionPropertyTests() {
 
     override fun createDistribution() = GeometricDistribution(0.3)
+
     override val testKRange = -1..15
 
     // --- Basic correctness (scipy 15-digit refs, using nbinom(1, p)) ---
@@ -152,5 +153,4 @@ class GeometricDistributionTest : DiscreteDistributionPropertyTests() {
         // pmf(10) = 0.999 * 0.001^10 ≈ 9.99e-31
         assertTrue(d2.pmf(10) > 0.0 && d2.pmf(10) < 1e-29)
     }
-
 }

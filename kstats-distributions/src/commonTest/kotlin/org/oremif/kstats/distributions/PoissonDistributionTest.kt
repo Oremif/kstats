@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class PoissonDistributionTest : DiscreteDistributionPropertyTests() {
 
     override fun createDistribution() = PoissonDistribution(3.0)
+
     override val testKRange = -1..15
 
     // --- Basic correctness (scipy 15-digit refs) ---
@@ -120,12 +121,18 @@ class PoissonDistributionTest : DiscreteDistributionPropertyTests() {
         // λ=500: previously triggered ConvergenceException, now handled by dynamic iteration limit
         val d500 = PoissonDistribution(500.0)
         val cdf500 = d500.cdf(500)
-        assertTrue(cdf500 > 0.4 && cdf500 < 0.6, "Poisson(500).cdf(500) should be near 0.5, got $cdf500")
+        assertTrue(
+            cdf500 > 0.4 && cdf500 < 0.6,
+            "Poisson(500).cdf(500) should be near 0.5, got $cdf500",
+        )
 
         // λ=1000: large parameter
         val d1000 = PoissonDistribution(1000.0)
         val cdf1000 = d1000.cdf(1000)
-        assertTrue(cdf1000 > 0.4 && cdf1000 < 0.6, "Poisson(1000).cdf(1000) should be near 0.5, got $cdf1000")
+        assertTrue(
+            cdf1000 > 0.4 && cdf1000 < 0.6,
+            "Poisson(1000).cdf(1000) should be near 0.5, got $cdf1000",
+        )
 
         // λ=100: moderately large parameter
         val d1 = PoissonDistribution(100.0)
@@ -139,5 +146,4 @@ class PoissonDistributionTest : DiscreteDistributionPropertyTests() {
         // scipy: sf(0) ≈ 1e-10
         assertEquals(1e-10, d2.sf(0), 1e-15)
     }
-
 }

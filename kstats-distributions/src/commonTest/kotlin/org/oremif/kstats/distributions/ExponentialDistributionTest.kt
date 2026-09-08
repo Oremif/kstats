@@ -7,6 +7,7 @@ import kotlin.test.assertEquals
 
 class ExponentialDistributionTest : ContinuousDistributionPropertyTests() {
     override fun createDistribution() = ExponentialDistribution(2.0)
+
     override val testPoints = listOf(0.0, 0.5, 1.0, 2.0, 5.0)
 
     private val tol = 1e-10
@@ -66,5 +67,4 @@ class ExponentialDistributionTest : ContinuousDistributionPropertyTests() {
         val d3 = ExponentialDistribution(1.0)
         assertEquals(exp(-40.0), d3.sf(40.0), 1e-28)
     }
-
 }

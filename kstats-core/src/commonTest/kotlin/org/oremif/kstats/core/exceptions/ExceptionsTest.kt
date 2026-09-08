@@ -1,13 +1,13 @@
 package org.oremif.kstats.core.exceptions
 
-import org.oremif.kstats.core.checkConvergence
-import org.oremif.kstats.core.lnGamma
-import org.oremif.kstats.descriptive.coefficientOfVariation
-import org.oremif.kstats.descriptive.mean
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import org.oremif.kstats.core.checkConvergence
+import org.oremif.kstats.core.lnGamma
+import org.oremif.kstats.descriptive.coefficientOfVariation
+import org.oremif.kstats.descriptive.mean
 
 class ExceptionsTest {
 
@@ -64,16 +64,12 @@ class ExceptionsTest {
 
     @Test
     fun testInsufficientDataIntegration() {
-        assertFailsWith<InsufficientDataException> {
-            emptyList<Double>().mean()
-        }
+        assertFailsWith<InsufficientDataException> { emptyList<Double>().mean() }
     }
 
     @Test
     fun testInvalidParameterIntegration() {
-        assertFailsWith<InvalidParameterException> {
-            lnGamma(0.0)
-        }
+        assertFailsWith<InvalidParameterException> { lnGamma(0.0) }
     }
 
     @Test

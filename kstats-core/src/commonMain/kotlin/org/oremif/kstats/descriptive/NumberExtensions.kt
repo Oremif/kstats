@@ -27,8 +27,7 @@ private fun Iterable<Int>.toStatArray(): DoubleArray {
  *
  * @return the arithmetic mean of the Int values as a Double.
  */
-@JvmName("meanOfInt")
-public fun Iterable<Int>.mean(): Double = toStatArray().mean()
+@JvmName("meanOfInt") public fun Iterable<Int>.mean(): Double = toStatArray().mean()
 
 /**
  * Computes the median of the Int values.
@@ -42,8 +41,7 @@ public fun Iterable<Int>.mean(): Double = toStatArray().mean()
  *
  * @return the median of the Int values as a Double.
  */
-@JvmName("medianOfInt")
-public fun Iterable<Int>.median(): Double = toStatArray().median()
+@JvmName("medianOfInt") public fun Iterable<Int>.median(): Double = toStatArray().median()
 
 /**
  * Computes the variance of the Int values.
@@ -55,7 +53,8 @@ public fun Iterable<Int>.median(): Double = toStatArray().median()
  * listOf(2, 4, 4, 4, 5, 5, 7, 9).variance() // 4.5714...
  * ```
  *
- * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample or population variance. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the variance of the Int values as a Double.
  */
 @JvmName("varianceOfInt")
@@ -72,7 +71,8 @@ public fun Iterable<Int>.variance(kind: PopulationKind = PopulationKind.SAMPLE):
  * listOf(2, 4, 4, 4, 5, 5, 7, 9).standardDeviation() // 2.1380...
  * ```
  *
- * @param kind whether to compute sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample or population standard deviation. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the standard deviation of the Int values as a Double.
  */
 @JvmName("standardDeviationOfInt")
@@ -151,7 +151,8 @@ public fun Iterable<Int>.describe(): DescriptiveStatistics = toStatArray().descr
  * @param lsl the lower specification limit. Must be less than [usl].
  * @param usl the upper specification limit. Must be greater than [lsl].
  * @return a [ProcessCapabilityResult] containing Cp, Cpk, Pp, and Ppk.
- * @throws org.oremif.kstats.core.exceptions.DegenerateDataException if all values are identical (standard deviation is zero).
+ * @throws org.oremif.kstats.core.exceptions.DegenerateDataException if all values are identical
+ *   (standard deviation is zero).
  */
 @JvmName("processCapabilityOfInt")
 public fun Iterable<Int>.processCapability(lsl: Double, usl: Double): ProcessCapabilityResult =

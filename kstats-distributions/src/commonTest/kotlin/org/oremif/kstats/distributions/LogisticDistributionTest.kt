@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class LogisticDistributionTest : ContinuousDistributionPropertyTests() {
 
     override fun createDistribution(): ContinuousDistribution = LogisticDistribution(2.0, 3.0)
+
     override val testPoints = listOf(-10.0, -5.0, -1.0, 0.0, 1.0, 2.0, 5.0, 10.0)
 
     private val std = LogisticDistribution.STANDARD
@@ -239,8 +240,12 @@ class LogisticDistributionTest : ContinuousDistributionPropertyTests() {
 
     @Test
     fun testInvalidMuInfinity() {
-        assertFailsWith<InvalidParameterException> { LogisticDistribution(Double.POSITIVE_INFINITY, 1.0) }
-        assertFailsWith<InvalidParameterException> { LogisticDistribution(Double.NEGATIVE_INFINITY, 1.0) }
+        assertFailsWith<InvalidParameterException> {
+            LogisticDistribution(Double.POSITIVE_INFINITY, 1.0)
+        }
+        assertFailsWith<InvalidParameterException> {
+            LogisticDistribution(Double.NEGATIVE_INFINITY, 1.0)
+        }
     }
 
     @Test

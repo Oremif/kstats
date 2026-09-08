@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class BinomialDistributionTest : DiscreteDistributionPropertyTests() {
 
     override fun createDistribution() = BinomialDistribution(10, 0.3)
+
     override val testKRange = -1..11
 
     // --- Basic correctness (scipy 15-digit refs) ---
@@ -180,7 +181,12 @@ class BinomialDistributionTest : DiscreteDistributionPropertyTests() {
         val sampleMean = doubles.average()
         assertEquals(d.mean, sampleMean, 0.3, "sample mean ≈ ${d.mean}")
         val sampleVar = doubles.sumOf { (it - sampleMean) * (it - sampleMean) } / (doubles.size - 1)
-        assertEquals(d.variance, sampleVar, maxOf(d.variance * 0.1, 0.5), "sample variance ≈ ${d.variance}")
+        assertEquals(
+            d.variance,
+            sampleVar,
+            maxOf(d.variance * 0.1, 0.5),
+            "sample variance ≈ ${d.variance}",
+        )
     }
 
     @Test
@@ -200,5 +206,4 @@ class BinomialDistributionTest : DiscreteDistributionPropertyTests() {
         // scipy: pmf(10) = 0.125173
         assertEquals(0.125172636650239, d2.pmf(10), 1e-3)
     }
-
 }

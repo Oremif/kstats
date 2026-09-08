@@ -1,17 +1,17 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 
 /**
  * Base class for variance homogeneity tests (Bartlett, Levene, Fligner-Killeen).
  *
- * Provides shared tests for input validation, NaN/Infinity propagation,
- * degenerate cases, and property-based checks. Subclasses supply the
- * [runTest] function and their own scipy golden-value tests.
+ * Provides shared tests for input validation, NaN/Infinity propagation, degenerate cases, and
+ * property-based checks. Subclasses supply the [runTest] function and their own scipy golden-value
+ * tests.
  */
 abstract class AbstractVarianceTestTest {
 
@@ -25,17 +25,12 @@ abstract class AbstractVarianceTestTest {
 
     @Test
     fun fewerThan2Groups() {
-        assertFailsWith<InsufficientDataException> {
-            runTest(doubleArrayOf(1.0, 2.0))
-        }
+        assertFailsWith<InsufficientDataException> { runTest(doubleArrayOf(1.0, 2.0)) }
     }
 
     @Test
     fun zeroGroups() {
-        assertFailsWith<InsufficientDataException> {
-            @Suppress("SpreadOperator")
-            runTest()
-        }
+        assertFailsWith<InsufficientDataException> { @Suppress("SpreadOperator") runTest() }
     }
 
     @Test
@@ -110,7 +105,8 @@ abstract class AbstractVarianceTestTest {
 
     @Test
     fun threeGroupsEqualVariance() {
-        val result = runTest(TestData.SEQUENTIAL_1_5, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
+        val result =
+            runTest(TestData.SEQUENTIAL_1_5, TestData.SEQUENTIAL_6_10, TestData.SEQUENTIAL_11_15)
         assertEquals(0.0, result.statistic, 1e-6)
         assertEquals(1.0, result.pValue, tolP)
     }

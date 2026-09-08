@@ -1,8 +1,8 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.random.Random
 import kotlin.test.*
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 
 class CentralTendencyTest {
 
@@ -169,8 +169,16 @@ class CentralTendencyTest {
 
     @Test
     fun medianInfinity() {
-        assertEquals(2.0, doubleArrayOf(Double.NEGATIVE_INFINITY, 2.0, Double.POSITIVE_INFINITY).median(), 0.0)
-        assertEquals(0.5, doubleArrayOf(Double.NEGATIVE_INFINITY, 0.0, 1.0, Double.POSITIVE_INFINITY).median(), 0.0)
+        assertEquals(
+            2.0,
+            doubleArrayOf(Double.NEGATIVE_INFINITY, 2.0, Double.POSITIVE_INFINITY).median(),
+            0.0,
+        )
+        assertEquals(
+            0.5,
+            doubleArrayOf(Double.NEGATIVE_INFINITY, 0.0, 1.0, Double.POSITIVE_INFINITY).median(),
+            0.0,
+        )
     }
 
     @Test
@@ -186,7 +194,8 @@ class CentralTendencyTest {
             val data = DoubleArray(rng.nextInt(1, 200)) { rng.nextDouble(-100.0, 100.0) }
             val sorted = data.sortedArray()
             val n = sorted.size
-            val expected = if (n % 2 == 1) sorted[n / 2] else (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0
+            val expected =
+                if (n % 2 == 1) sorted[n / 2] else (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0
             assertEquals(expected, data.median(), 1e-15, "Failed for size=$n")
         }
     }
@@ -196,7 +205,8 @@ class CentralTendencyTest {
     @Test
     fun testGeometricMeanPreservesInfinity() {
         // ln(inf) = inf, so the compensated log-sum overflows and its compensation term becomes
-        // NaN; the fallback keeps the result infinite. numpy: exp(np.mean(np.log([1, 2, inf]))) = inf
+        // NaN; the fallback keeps the result infinite. numpy: exp(np.mean(np.log([1, 2, inf]))) =
+        // inf
         val data = doubleArrayOf(1.0, 2.0, Double.POSITIVE_INFINITY)
         assertEquals(Double.POSITIVE_INFINITY, data.geometricMean())
         assertEquals(Double.POSITIVE_INFINITY, data.toList().geometricMean())
@@ -221,5 +231,4 @@ class CentralTendencyTest {
         assertEquals(0.0, values.weightedMean(weights))
         assertEquals(0.0, values.toList().weightedMean(weights.toList()))
     }
-
 }

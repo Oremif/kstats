@@ -1,20 +1,20 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.abs
+import kotlin.math.sqrt
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.descriptive.standardDeviation
 import org.oremif.kstats.distributions.StudentTDistribution
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 /**
  * The result of an iterative Grubbs' test for multiple outlier detection.
  *
- * Contains the indices of all detected outliers (in the original array), the remaining
- * data after outlier removal, and the [TestResult] from each iteration. The iteration
- * list always has at least one entry — the final entry is the test that was not significant
- * (or that had too few observations to continue).
+ * Contains the indices of all detected outliers (in the original array), the remaining data after
+ * outlier removal, and the [TestResult] from each iteration. The iteration list always has at least
+ * one entry — the final entry is the test that was not significant (or that had too few
+ * observations to continue).
  *
  * ### Example:
  * ```kotlin
@@ -24,15 +24,15 @@ import kotlin.math.sqrt
  * result.iterations     // TestResult for each round
  * ```
  *
- * @property outlierIndices the zero-based indices of the detected outliers in the original
- * input array, in the order they were removed.
+ * @property outlierIndices the zero-based indices of the detected outliers in the original input
+ *   array, in the order they were removed.
  * @property cleanedData the remaining observations after all detected outliers have been removed.
  * @property iterations the [TestResult] produced by each round of the iterative procedure.
  */
 public data class GrubbsIterativeResult(
     val outlierIndices: List<Int>,
     val cleanedData: DoubleArray,
-    val iterations: List<TestResult>
+    val iterations: List<TestResult>,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -53,15 +53,14 @@ public data class GrubbsIterativeResult(
 /**
  * Performs Grubbs' test for detecting a single outlier in a univariate dataset.
  *
- * Grubbs' test (also called the extreme studentized deviate test) checks whether the
- * observation farthest from the sample mean is a statistically significant outlier,
- * assuming the data are normally distributed. The test statistic G is the ratio of the
- * maximum absolute deviation from the mean to the sample standard deviation. The p-value
- * is computed by converting G to a t-statistic and applying a Bonferroni correction for
- * testing all N observations.
+ * Grubbs' test (also called the extreme studentized deviate test) checks whether the observation
+ * farthest from the sample mean is a statistically significant outlier, assuming the data are
+ * normally distributed. The test statistic G is the ratio of the maximum absolute deviation from
+ * the mean to the sample standard deviation. The p-value is computed by converting G to a
+ * t-statistic and applying a Bonferroni correction for testing all N observations.
  *
- * If all values are identical (zero standard deviation), returns G = 0 and p-value = 1.
- * If any value is non-finite (NaN or Infinity), returns NaN for both statistic and p-value.
+ * If all values are identical (zero standard deviation), returns G = 0 and p-value = 1. If any
+ * value is non-finite (NaN or Infinity), returns NaN for both statistic and p-value.
  *
  * ### Example:
  * ```kotlin
@@ -75,20 +74,21 @@ public data class GrubbsIterativeResult(
  * ```
  *
  * @param sample the observed values. Must have at least 3 elements.
- * @param alternative the direction of the alternative hypothesis. [Alternative.TWO_SIDED]
- * tests the value with the largest absolute deviation; [Alternative.GREATER] tests the maximum;
- * [Alternative.LESS] tests the minimum. Defaults to [Alternative.TWO_SIDED].
- * @return a [TestResult] containing the G statistic, Bonferroni-corrected p-value,
- * degrees of freedom (n − 2), and additional info with "outlierIndex" and "outlierValue".
+ * @param alternative the direction of the alternative hypothesis. [Alternative.TWO_SIDED] tests the
+ *   value with the largest absolute deviation; [Alternative.GREATER] tests the maximum;
+ *   [Alternative.LESS] tests the minimum. Defaults to [Alternative.TWO_SIDED].
+ * @return a [TestResult] containing the G statistic, Bonferroni-corrected p-value, degrees of
+ *   freedom (n − 2), and additional info with "outlierIndex" and "outlierValue".
  * @see grubbsTestIterative
  */
 public fun grubbsTest(
     sample: DoubleArray,
-    alternative: Alternative = Alternative.TWO_SIDED
+    alternative: Alternative = Alternative.TWO_SIDED,
 ): TestResult {
-    if (sample.size < 3) throw InsufficientDataException(
-        "Grubbs' test requires at least 3 elements, got ${sample.size}"
-    )
+    if (sample.size < 3)
+        throw InsufficientDataException(
+            "Grubbs' test requires at least 3 elements, got ${sample.size}"
+        )
 
     if (sample.any { !it.isFinite() }) {
         return TestResult(
@@ -96,7 +96,7 @@ public fun grubbsTest(
             statistic = Double.NaN,
             pValue = Double.NaN,
             alternative = alternative,
-            additionalInfo = mapOf("outlierIndex" to Double.NaN, "outlierValue" to Double.NaN)
+            additionalInfo = mapOf("outlierIndex" to Double.NaN, "outlierValue" to Double.NaN),
         )
     }
 
@@ -112,7 +112,7 @@ public fun grubbsTest(
             pValue = 1.0,
             degreesOfFreedom = (n - 2).toDouble(),
             alternative = alternative,
-            additionalInfo = mapOf("outlierIndex" to 0.0, "outlierValue" to sample[0])
+            additionalInfo = mapOf("outlierIndex" to 0.0, "outlierValue" to sample[0]),
         )
     }
 
@@ -166,19 +166,20 @@ public fun grubbsTest(
     val nDbl = n.toDouble()
     val denom = (nDbl - 1.0) * (nDbl - 1.0) - gSq * nDbl
 
-    val pValue: Double = if (denom <= 0.0) {
-        0.0
-    } else {
-        val tSq = gSq * nDbl * (nDbl - 2.0) / denom
-        val tVal = sqrt(tSq)
-        val tDist = StudentTDistribution((n - 2).toDouble())
-        val pTail = tDist.sf(tVal)
+    val pValue: Double =
+        if (denom <= 0.0) {
+            0.0
+        } else {
+            val tSq = gSq * nDbl * (nDbl - 2.0) / denom
+            val tVal = sqrt(tSq)
+            val tDist = StudentTDistribution((n - 2).toDouble())
+            val pTail = tDist.sf(tVal)
 
-        when (alternative) {
-            Alternative.TWO_SIDED -> (2.0 * nDbl * pTail).coerceIn(0.0, 1.0)
-            else -> (nDbl * pTail).coerceIn(0.0, 1.0)
+            when (alternative) {
+                Alternative.TWO_SIDED -> (2.0 * nDbl * pTail).coerceIn(0.0, 1.0)
+                else -> (nDbl * pTail).coerceIn(0.0, 1.0)
+            }
         }
-    }
 
     return TestResult(
         testName = "Grubbs' Test",
@@ -186,19 +187,20 @@ public fun grubbsTest(
         pValue = pValue,
         degreesOfFreedom = (n - 2).toDouble(),
         alternative = alternative,
-        additionalInfo = mapOf(
-            "outlierIndex" to outlierIndex.toDouble(),
-            "outlierValue" to sample[outlierIndex]
-        )
+        additionalInfo =
+            mapOf(
+                "outlierIndex" to outlierIndex.toDouble(),
+                "outlierValue" to sample[outlierIndex],
+            ),
     )
 }
 
 /**
  * Performs iterative Grubbs' test to detect multiple outliers.
  *
- * Repeatedly applies [grubbsTest] to the data: when an outlier is found significant at
- * level [alpha], it is removed and the test is rerun on the remaining data. The procedure
- * stops when no further outlier is significant or fewer than 3 observations remain.
+ * Repeatedly applies [grubbsTest] to the data: when an outlier is found significant at level
+ * [alpha], it is removed and the test is rerun on the remaining data. The procedure stops when no
+ * further outlier is significant or fewer than 3 observations remain.
  *
  * ### Example:
  * ```kotlin
@@ -211,22 +213,22 @@ public fun grubbsTest(
  *
  * @param sample the observed values. Must have at least 3 elements.
  * @param alpha the significance level for each iteration. Must be in (0, 1). Defaults to `0.05`.
- * @param alternative the direction of the alternative hypothesis, passed to each
- * [grubbsTest] call. Defaults to [Alternative.TWO_SIDED].
+ * @param alternative the direction of the alternative hypothesis, passed to each [grubbsTest] call.
+ *   Defaults to [Alternative.TWO_SIDED].
  * @return a [GrubbsIterativeResult] with outlier indices, cleaned data, and per-iteration results.
  * @see grubbsTest
  */
 public fun grubbsTestIterative(
     sample: DoubleArray,
     alpha: Double = 0.05,
-    alternative: Alternative = Alternative.TWO_SIDED
+    alternative: Alternative = Alternative.TWO_SIDED,
 ): GrubbsIterativeResult {
-    if (sample.size < 3) throw InsufficientDataException(
-        "Grubbs' test requires at least 3 elements, got ${sample.size}"
-    )
-    if (alpha <= 0.0 || alpha >= 1.0) throw InvalidParameterException(
-        "Significance level alpha must be in (0, 1), got $alpha"
-    )
+    if (sample.size < 3)
+        throw InsufficientDataException(
+            "Grubbs' test requires at least 3 elements, got ${sample.size}"
+        )
+    if (alpha <= 0.0 || alpha >= 1.0)
+        throw InvalidParameterException("Significance level alpha must be in (0, 1), got $alpha")
 
     val outlierIndices = mutableListOf<Int>()
     val iterations = mutableListOf<TestResult>()
@@ -255,6 +257,6 @@ public fun grubbsTestIterative(
     return GrubbsIterativeResult(
         outlierIndices = outlierIndices,
         cleanedData = currentData,
-        iterations = iterations
+        iterations = iterations,
     )
 }

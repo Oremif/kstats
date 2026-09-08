@@ -1,13 +1,13 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class TrimmedStatisticsTest {
 
@@ -113,7 +113,7 @@ class TrimmedStatisticsTest {
         assertEquals(
             data.toList().variance(PopulationKind.POPULATION),
             data.trimmedVariance(0.0, PopulationKind.POPULATION),
-            1e-10
+            1e-10,
         )
     }
 
@@ -134,7 +134,9 @@ class TrimmedStatisticsTest {
     fun testTrimmedVarianceSingleRemainingElementSampleThrows() {
         // 3 elements, proportion=0.4 → k=1, m=1: sample variance requires ≥2
         val arr = doubleArrayOf(1.0, 5.0, 9.0)
-        assertFailsWith<InsufficientDataException> { arr.trimmedVariance(0.4, PopulationKind.SAMPLE) }
+        assertFailsWith<InsufficientDataException> {
+            arr.trimmedVariance(0.4, PopulationKind.SAMPLE)
+        }
     }
 
     @Test
@@ -220,5 +222,4 @@ class TrimmedStatisticsTest {
         val data = DoubleArray(8) { 1e308 }
         assertEquals(Double.POSITIVE_INFINITY, data.trimmedMean(0.25))
     }
-
 }

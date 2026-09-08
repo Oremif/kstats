@@ -15,24 +15,24 @@ description: "18 stetige und 10 diskrete Wahrscheinlichkeitsverteilungen mit ein
 val normal = NormalDistribution(mu = 0.0, sigma = 1.0)
 
 // Statistical properties
-normal.mean                  // 0.0
-normal.variance              // 1.0
-normal.standardDeviation     // 1.0
-normal.skewness              // 0.0
-normal.kurtosis              // 0.0
-normal.entropy               // 1.4189
+normal.mean // 0.0
+normal.variance // 1.0
+normal.standardDeviation // 1.0
+normal.skewness // 0.0
+normal.kurtosis // 0.0
+normal.entropy // 1.4189
 
 // Evaluate
-normal.pdf(0.0)              // 0.3989 — density at x = 0
-normal.cdf(1.96)             // 0.9750 — P(X ≤ 1.96)
-normal.sf(1.96)              // 0.0250 — P(X > 1.96) = 1 - cdf
+normal.pdf(0.0) // 0.3989 — density at x = 0
+normal.cdf(1.96) // 0.9750 — P(X ≤ 1.96)
+normal.sf(1.96) // 0.0250 — P(X > 1.96) = 1 - cdf
 
 // Invert
-normal.quantile(0.975)       // 1.9600 — value at the 97.5th percentile
+normal.quantile(0.975) // 1.9600 — value at the 97.5th percentile
 
 // Sample
-normal.sample(Random(42))           // single random draw
-normal.sample(5, Random(42))        // 5 random draws
+normal.sample(Random(42)) // single random draw
+normal.sample(5, Random(42)) // 5 random draws
 ```
 
 {/*---END--*/}
@@ -71,7 +71,7 @@ Konstruktoren validieren Parameter sofort. Ungültige Werte (negative Standardab
 
 ```kotlin
 val d = NormalDistribution(mu = 100.0, sigma = 15.0)
-d.mean       // 100.0
+d.mean // 100.0
 d.cdf(115.0) // 0.8413
 d.quantile(0.975) // 129.3994
 ```
@@ -90,7 +90,7 @@ d.quantile(0.975) // 129.3994
 
 ```kotlin
 val d = StudentTDistribution(degreesOfFreedom = 10.0)
-d.mean       // 0.0
+d.mean // 0.0
 d.cdf(2.228) // ≈ 0.975
 d.quantile(0.975) // 2.2281
 ```
@@ -109,9 +109,9 @@ d.quantile(0.975) // 2.2281
 
 ```kotlin
 val d = LogisticDistribution(mu = 0.0, scale = 1.0)
-d.mean       // 0.0
-d.cdf(0.0)   // 0.5
-d.pdf(0.0)   // 0.25
+d.mean // 0.0
+d.cdf(0.0) // 0.5
+d.pdf(0.0) // 0.25
 ```
 
 {/*---END--*/}
@@ -128,9 +128,9 @@ d.pdf(0.0)   // 0.25
 
 ```kotlin
 val d = CauchyDistribution(location = 0.0, scale = 1.0)
-d.pdf(0.0)        // 0.3183
-d.cdf(0.0)        // 0.5
-d.quantile(0.75)  // 1.0
+d.pdf(0.0) // 0.3183
+d.cdf(0.0) // 0.5
+d.quantile(0.75) // 1.0
 ```
 
 {/*---END--*/}
@@ -147,9 +147,9 @@ d.quantile(0.75)  // 1.0
 
 ```kotlin
 val d = LaplaceDistribution(mu = 0.0, scale = 1.0)
-d.mean       // 0.0
-d.variance   // 2.0
-d.pdf(0.0)   // 0.5
+d.mean // 0.0
+d.variance // 2.0
+d.pdf(0.0) // 0.5
 ```
 
 {/*---END--*/}
@@ -170,8 +170,8 @@ d.pdf(0.0)   // 0.5
 
 ```kotlin
 val d = ExponentialDistribution(rate = 2.0)
-d.mean       // 0.5
-d.cdf(1.0)   // 0.8647
+d.mean // 0.5
+d.cdf(1.0) // 0.8647
 d.quantile(0.5) // 0.3466
 ```
 
@@ -189,9 +189,9 @@ d.quantile(0.5) // 0.3466
 
 ```kotlin
 val d = GammaDistribution(shape = 2.0, rate = 0.5)
-d.mean       // 4.0
-d.variance   // 8.0
-d.cdf(4.0)   // 0.5940
+d.mean // 4.0
+d.variance // 8.0
+d.cdf(4.0) // 0.5940
 ```
 
 {/*---END--*/}
@@ -208,8 +208,8 @@ d.cdf(4.0)   // 0.5940
 
 ```kotlin
 val d = WeibullDistribution(shape = 1.5, scale = 1.0)
-d.mean       // 0.9027
-d.cdf(1.0)   // 0.6321
+d.mean // 0.9027
+d.cdf(1.0) // 0.6321
 ```
 
 {/*---END--*/}
@@ -226,9 +226,9 @@ d.cdf(1.0)   // 0.6321
 
 ```kotlin
 val d = LogNormalDistribution(mu = 0.0, sigma = 1.0)
-d.mean          // 1.6487
+d.mean // 1.6487
 d.quantile(0.5) // 1.0
-d.cdf(1.0)      // 0.5
+d.cdf(1.0) // 0.5
 ```
 
 {/*---END--*/}
@@ -245,8 +245,8 @@ d.cdf(1.0)      // 0.5
 
 ```kotlin
 val d = NakagamiDistribution(mu = 1.0, omega = 1.0)
-d.mean       // 0.8862
-d.variance   // 0.2146
+d.mean // 0.8862
+d.variance // 0.2146
 ```
 
 {/*---END--*/}
@@ -263,8 +263,8 @@ d.variance   // 0.2146
 
 ```kotlin
 val d = LevyDistribution(mu = 0.0, c = 1.0)
-d.cdf(1.0)   // 0.3173
-d.sf(1.0)    // 0.6827
+d.cdf(1.0) // 0.3173
+d.sf(1.0) // 0.6827
 ```
 
 {/*---END--*/}
@@ -285,9 +285,9 @@ d.sf(1.0)    // 0.6827
 
 ```kotlin
 val d = BetaDistribution(alpha = 2.0, beta = 5.0)
-d.mean       // 0.2857
-d.cdf(0.3)   // 0.5798
-d.pdf(0.2)   // 2.4576
+d.mean // 0.2857
+d.cdf(0.3) // 0.5798
+d.pdf(0.2) // 2.4576
 ```
 
 {/*---END--*/}
@@ -304,9 +304,9 @@ d.pdf(0.2)   // 2.4576
 
 ```kotlin
 val d = UniformDistribution(min = 0.0, max = 10.0)
-d.mean       // 5.0
-d.variance   // 8.3333
-d.cdf(3.0)   // 0.3
+d.mean // 5.0
+d.variance // 8.3333
+d.cdf(3.0) // 0.3
 ```
 
 {/*---END--*/}
@@ -323,8 +323,8 @@ d.cdf(3.0)   // 0.3
 
 ```kotlin
 val d = TriangularDistribution(a = 0.0, b = 10.0, c = 3.0)
-d.mean       // 4.3333
-d.cdf(3.0)   // 0.3
+d.mean // 4.3333
+d.cdf(3.0) // 0.3
 ```
 
 {/*---END--*/}
@@ -345,8 +345,8 @@ d.cdf(3.0)   // 0.3
 
 ```kotlin
 val d = ParetoDistribution(shape = 2.0, scale = 1.0)
-d.mean       // 2.0
-d.cdf(2.0)   // 0.75
+d.mean // 2.0
+d.cdf(2.0) // 0.75
 ```
 
 {/*---END--*/}
@@ -363,8 +363,8 @@ d.cdf(2.0)   // 0.75
 
 ```kotlin
 val d = GumbelDistribution(mu = 0.0, beta = 1.0)
-d.mean       // 0.5772
-d.cdf(0.0)   // 0.3679
+d.mean // 0.5772
+d.cdf(0.0) // 0.3679
 ```
 
 {/*---END--*/}
@@ -381,8 +381,8 @@ d.cdf(0.0)   // 0.3679
 
 ```kotlin
 val d = ChiSquaredDistribution(degreesOfFreedom = 5.0)
-d.mean       // 5.0
-d.variance   // 10.0
+d.mean // 5.0
+d.variance // 10.0
 d.cdf(11.07) // ≈ 0.95
 ```
 
@@ -400,8 +400,8 @@ d.cdf(11.07) // ≈ 0.95
 
 ```kotlin
 val d = FDistribution(dfNumerator = 5.0, dfDenominator = 10.0)
-d.mean       // 1.25
-d.cdf(3.33)  // ≈ 0.95
+d.mean // 1.25
+d.cdf(3.33) // ≈ 0.95
 ```
 
 {/*---END--*/}
@@ -426,9 +426,9 @@ d.cdf(3.33)  // ≈ 0.95
 
 ```kotlin
 val d = PoissonDistribution(rate = 3.0)
-d.mean          // 3.0
-d.pmf(5)        // 0.1008
-d.cdf(5)        // 0.9161
+d.mean // 3.0
+d.pmf(5) // 0.1008
+d.cdf(5) // 0.9161
 d.quantileInt(0.95) // 6
 ```
 
@@ -446,9 +446,9 @@ d.quantileInt(0.95) // 6
 
 ```kotlin
 val d = BinomialDistribution(trials = 10, probability = 0.3)
-d.mean          // 3.0
-d.pmf(3)        // 0.2668
-d.cdf(3)        // 0.6496
+d.mean // 3.0
+d.pmf(3) // 0.2668
+d.cdf(3) // 0.6496
 d.quantileInt(0.5) // 3
 ```
 
@@ -466,9 +466,9 @@ d.quantileInt(0.5) // 3
 
 ```kotlin
 val d = NegativeBinomialDistribution(successes = 5, probability = 0.5)
-d.mean          // 5.0
-d.variance      // 10.0
-d.pmf(3)        // probability of exactly 3 failures before 5 successes
+d.mean // 5.0
+d.variance // 10.0
+d.pmf(3) // probability of exactly 3 failures before 5 successes
 ```
 
 {/*---END--*/}
@@ -485,9 +485,9 @@ d.pmf(3)        // probability of exactly 3 failures before 5 successes
 
 ```kotlin
 val d = GeometricDistribution(probability = 0.3)
-d.mean          // 3.3333
-d.pmf(1)        // 0.3
-d.cdf(3)        // 0.657
+d.mean // 3.3333
+d.pmf(1) // 0.3
+d.cdf(3) // 0.657
 ```
 
 {/*---END--*/}
@@ -508,8 +508,8 @@ d.cdf(3)        // 0.657
 
 ```kotlin
 val d = HypergeometricDistribution(population = 50, successes = 10, draws = 5)
-d.mean          // 1.0
-d.pmf(2)        // probability of exactly 2 successes in 5 draws
+d.mean // 1.0
+d.pmf(2) // probability of exactly 2 successes in 5 draws
 ```
 
 {/*---END--*/}
@@ -526,8 +526,8 @@ d.pmf(2)        // probability of exactly 2 successes in 5 draws
 
 ```kotlin
 val d = BetaBinomialDistribution(trials = 10, alpha = 2.0, beta = 3.0)
-d.mean          // 4.0
-d.pmf(4)        // probability of exactly 4 successes
+d.mean // 4.0
+d.pmf(4) // probability of exactly 4 successes
 ```
 
 {/*---END--*/}
@@ -548,9 +548,9 @@ d.pmf(4)        // probability of exactly 4 successes
 
 ```kotlin
 val d = BernoulliDistribution(probability = 0.7)
-d.mean          // 0.7
-d.pmf(1)        // 0.7
-d.pmf(0)        // 0.3
+d.mean // 0.7
+d.pmf(1) // 0.7
+d.pmf(0) // 0.3
 ```
 
 {/*---END--*/}
@@ -567,9 +567,9 @@ d.pmf(0)        // 0.3
 
 ```kotlin
 val d = UniformDiscreteDistribution(min = 1, max = 6)
-d.mean          // 3.5
-d.pmf(3)        // 0.1667
-d.cdf(3)        // 0.5
+d.mean // 3.5
+d.pmf(3) // 0.1667
+d.cdf(3) // 0.5
 ```
 
 {/*---END--*/}
@@ -590,8 +590,8 @@ d.cdf(3)        // 0.5
 
 ```kotlin
 val d = ZipfDistribution(numberOfElements = 100, exponent = 1.0)
-d.pmf(1)        // probability of rank 1 (the most common)
-d.pmf(100)      // probability of rank 100 (the least common)
+d.pmf(1) // probability of rank 1 (the most common)
+d.pmf(100) // probability of rank 100 (the least common)
 ```
 
 {/*---END--*/}
@@ -608,9 +608,9 @@ d.pmf(100)      // probability of rank 100 (the least common)
 
 ```kotlin
 val d = LogarithmicDistribution(probability = 0.5)
-d.mean          // 1.4427
-d.pmf(1)        // 0.7213
-d.pmf(2)        // 0.1803
+d.mean // 1.4427
+d.pmf(1) // 0.7213
+d.pmf(2) // 0.1803
 ```
 
 {/*---END--*/}

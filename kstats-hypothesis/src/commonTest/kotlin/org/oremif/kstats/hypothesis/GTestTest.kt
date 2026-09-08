@@ -1,8 +1,8 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.test.*
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.test.*
 
 class GTestTest {
 
@@ -64,11 +64,12 @@ class GTestTest {
     fun independence3x3() {
         // scipy: chi2_contingency([[10,20,30],[40,50,60],[70,80,90]], lambda_='log-likelihood')
         //   → (4.91730890573126, 0.295887836892569, df=4)
-        val table = arrayOf(
-            intArrayOf(10, 20, 30),
-            intArrayOf(40, 50, 60),
-            intArrayOf(70, 80, 90)
-        )
+        val table =
+            arrayOf(
+                intArrayOf(10, 20, 30),
+                intArrayOf(40, 50, 60),
+                intArrayOf(70, 80, 90),
+            )
         val result = gIndependenceTest(table)
         assertEquals(4.91730890573126, result.statistic, tolStat)
         assertEquals(0.295887836892569, result.pValue, tolP)
@@ -79,10 +80,11 @@ class GTestTest {
     fun independence2x3() {
         // scipy: chi2_contingency([[5,10,15],[20,25,30]], lambda_='log-likelihood')
         //   → (1.45134607849345, 0.483998709182811, df=2)
-        val table = arrayOf(
-            intArrayOf(5, 10, 15),
-            intArrayOf(20, 25, 30)
-        )
+        val table =
+            arrayOf(
+                intArrayOf(5, 10, 15),
+                intArrayOf(20, 25, 30),
+            )
         val result = gIndependenceTest(table)
         assertEquals(1.45134607849345, result.statistic, tolStat)
         assertEquals(0.483998709182811, result.pValue, tolP)
@@ -197,7 +199,8 @@ class GTestTest {
 
     @Test
     fun independenceLargeCounts() {
-        // scipy: chi2_contingency([[1000,2000],[3000,4000]], lambda_='log-likelihood', correction=False)
+        // scipy: chi2_contingency([[1000,2000],[3000,4000]], lambda_='log-likelihood',
+        // correction=False)
         //   → (80.4348646096483, 3.00447077210396e-19, df=1)
         val table = arrayOf(intArrayOf(1000, 2000), intArrayOf(3000, 4000))
         val result = gIndependenceTest(table)
@@ -212,18 +215,14 @@ class GTestTest {
         val observed = intArrayOf(10, 20, 30)
         val expected = doubleArrayOf(20.0, Double.NaN, 20.0)
         // NaN is not positive, so validation rejects it
-        assertFailsWith<InvalidParameterException> {
-            gTest(observed, expected)
-        }
+        assertFailsWith<InvalidParameterException> { gTest(observed, expected) }
     }
 
     // ── 6. Input validation ─────────────────────────────────────────────
 
     @Test
     fun gofFewerThan2Categories() {
-        assertFailsWith<InsufficientDataException> {
-            gTest(intArrayOf(10))
-        }
+        assertFailsWith<InsufficientDataException> { gTest(intArrayOf(10)) }
     }
 
     @Test

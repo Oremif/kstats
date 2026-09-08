@@ -34,6 +34,11 @@ kstats is a Kotlin Multiplatform statistics library published to Maven Central (
 ./gradlew :benchmark:benchmark          # full run
 ./gradlew :benchmark:smokeBenchmark     # quick smoke run
 
+# Formatting (ktfmt, kotlinlang style)
+./gradlew ktfmtFormat                   # reformat every module
+./gradlew ktfmtCheck                    # verify formatting, runs in CI
+./gradlew :kstats-core:ktfmtFormat      # single module
+
 # Binary compatibility (kotlinx.binary-compatibility-validator)
 ./gradlew apiCheck                      # verify API hasn't changed unexpectedly
 ./gradlew apiDump                       # regenerate .api files after intentional changes
@@ -60,6 +65,8 @@ Shared Gradle config lives in `build-logic/src/main/kotlin/` — the `kstats.kmp
 
 ## Key conventions
 
+- **Formatting is done by ktfmt** (kotlinlang style, `kstats.ktfmt` convention plugin) — run
+  `./gradlew ktfmtFormat` instead of hand-aligning code; CI fails on unformatted sources.
 - **`explicitApi()`** is enabled — all public declarations must have explicit visibility modifiers.
 - **No external dependencies in library modules** — math is implemented from scratch. Check `core/MathUtils.kt` before reimplementing special functions (gamma, beta, erf, digamma, etc.).
 - **Typed exceptions** (`KStatsException` hierarchy in `core/exceptions/Exceptions.kt`) — use instead of `require()` / `check()` for all user-facing errors. Validation helpers in `core/Validation.kt`.
@@ -119,7 +126,7 @@ New statistical methods must cite their mathematical reference and be validated 
 
 ## CI/CD
 
-- **Build CI** runs `jvmTest linuxX64Test wasmJsNodeTest` only (not all 20+ targets).
+- **Build CI** runs `ktfmtCheck`, `apiCheck`, then `jvmTest linuxX64Test wasmJsNodeTest` only (not all 20+ targets).
 - **Publish** uses macOS-latest (needed for Apple native), `--max-workers=2`.
 - **Renovate** — patch updates auto-merge, Kotlin deps grouped into one PR.
 - User documentation: Mintlify in `docs/`, config in `docs/docs.json` (English + German).

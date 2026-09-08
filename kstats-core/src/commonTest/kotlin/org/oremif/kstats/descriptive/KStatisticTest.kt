@@ -1,11 +1,11 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class KStatisticTest {
 
@@ -156,7 +156,10 @@ class KStatisticTest {
         val data = doubleArrayOf(1e15 + 1.0, 1e15 + 2.0, 1e15 + 3.0, 1e15 + 4.0, 1e15 + 5.0)
         for (order in 1..4) {
             val result = data.kStatistic(order)
-            assertTrue(result.isFinite(), "kStatistic($order) must be finite for large-offset data, got $result")
+            assertTrue(
+                result.isFinite(),
+                "kStatistic($order) must be finite for large-offset data, got $result",
+            )
         }
     }
 
@@ -177,12 +180,16 @@ class KStatisticTest {
         for (order in 1..4) {
             val expected = data1.kStatistic(order)
             assertEquals(
-                expected, list.kStatistic(order), 1e-15,
-                "Iterable overload differs at order $order"
+                expected,
+                list.kStatistic(order),
+                1e-15,
+                "Iterable overload differs at order $order",
             )
             assertEquals(
-                expected, seq.kStatistic(order), 1e-15,
-                "Sequence overload differs at order $order"
+                expected,
+                seq.kStatistic(order),
+                1e-15,
+                "Sequence overload differs at order $order",
             )
         }
     }

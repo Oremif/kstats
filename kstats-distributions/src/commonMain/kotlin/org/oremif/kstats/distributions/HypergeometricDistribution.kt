@@ -1,12 +1,12 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.core.lnCombination
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 import kotlin.random.Random
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.core.lnCombination
 
 /**
  * Represents the hypergeometric distribution, which models the number of successes when drawing
@@ -18,17 +18,16 @@ import kotlin.random.Random
  * balls among the drawn items.
  *
  * Unlike the binomial distribution, the hypergeometric distribution accounts for the changing
- * composition of the population as items are drawn. This makes it the correct model when
- * sampling without replacement, such as quality control inspections from a finite lot, card
- * games (e.g., the probability of being dealt a certain number of aces), or Fisher's exact test
- * in statistics.
+ * composition of the population as items are drawn. This makes it the correct model when sampling
+ * without replacement, such as quality control inspections from a finite lot, card games (e.g., the
+ * probability of being dealt a certain number of aces), or Fisher's exact test in statistics.
  *
  * The support is `{max(0, draws + successes - population), ..., min(draws, successes)}`, which
- * reflects the physical constraint that you cannot draw more success balls than exist or more
- * than the total number of draws.
+ * reflects the physical constraint that you cannot draw more success balls than exist or more than
+ * the total number of draws.
  *
- * The CDF and survival function are computed using a numerically stable log-sum-exp technique
- * over the PMF values. Sampling uses direct simulation of the drawing process.
+ * The CDF and survival function are computed using a numerically stable log-sum-exp technique over
+ * the PMF values. Sampling uses direct simulation of the drawing process.
  *
  * ### Example:
  * ```kotlin
@@ -48,13 +47,16 @@ import kotlin.random.Random
 public class HypergeometricDistribution(
     public val population: Int,
     public val successes: Int,
-    public val draws: Int
+    public val draws: Int,
 ) : DiscreteDistribution {
 
     init {
-        if (population < 0) throw InvalidParameterException("population must be non-negative, got $population")
-        if (successes !in 0..population) throw InvalidParameterException("successes must be in [0, population], got $successes")
-        if (draws !in 0..population) throw InvalidParameterException("draws must be in [0, population], got $draws")
+        if (population < 0)
+            throw InvalidParameterException("population must be non-negative, got $population")
+        if (successes !in 0..population)
+            throw InvalidParameterException("successes must be in [0, population], got $successes")
+        if (draws !in 0..population)
+            throw InvalidParameterException("draws must be in [0, population], got $draws")
     }
 
     private val bigN = population
@@ -82,7 +84,7 @@ public class HypergeometricDistribution(
      *
      * @param k the number of success items in the draw.
      * @return the natural log of the probability mass at [k]. Returns [Double.NEGATIVE_INFINITY]
-     * when [k] is outside the support.
+     *   when [k] is outside the support.
      */
     override fun logPmf(k: Int): Double {
         if (k !in kMin..kMax) return Double.NEGATIVE_INFINITY
@@ -124,8 +126,8 @@ public class HypergeometricDistribution(
     /**
      * Returns the survival function value at [k].
      *
-     * Computed directly by summing PMF values above [k] using the log-sum-exp technique,
-     * rather than `1 - cdf(k)`, for better numerical accuracy.
+     * Computed directly by summing PMF values above [k] using the log-sum-exp technique, rather
+     * than `1 - cdf(k)`, for better numerical accuracy.
      *
      * @param k the integer point at which to evaluate the survival probability.
      * @return the probability of drawing strictly more than [k] success items.
@@ -173,8 +175,8 @@ public class HypergeometricDistribution(
         }
 
     /**
-     * The skewness of this distribution. Returns [Double.NaN] when [population] is less than 3
-     * or the distribution is degenerate (single point support).
+     * The skewness of this distribution. Returns [Double.NaN] when [population] is less than 3 or
+     * the distribution is degenerate (single point support).
      */
     override val skewness: Double
         get() {
@@ -187,8 +189,8 @@ public class HypergeometricDistribution(
         }
 
     /**
-     * The excess kurtosis of this distribution. Returns [Double.NaN] when [population] is less than 4
-     * or the distribution is degenerate (single point support).
+     * The excess kurtosis of this distribution. Returns [Double.NaN] when [population] is less than
+     * 4 or the distribution is degenerate (single point support).
      */
     override val kurtosis: Double
         get() {
@@ -197,13 +199,21 @@ public class HypergeometricDistribution(
             val bigKd = bigK.toDouble()
             val nd = n.toDouble()
             val num =
-                (bigNd - 1.0) * bigNd * bigNd * (bigNd * (bigNd + 1.0) - 6.0 * bigKd * (bigNd - bigKd) - 6.0 * nd * (bigNd - nd)) +
+                (bigNd - 1.0) *
+                    bigNd *
+                    bigNd *
+                    (bigNd * (bigNd + 1.0) -
+                        6.0 * bigKd * (bigNd - bigKd) -
+                        6.0 * nd * (bigNd - nd)) +
                     6.0 * nd * bigKd * (bigNd - bigKd) * (bigNd - nd) * (5.0 * bigNd - 6.0)
             val den = nd * bigKd * (bigNd - bigKd) * (bigNd - nd) * (bigNd - 2.0) * (bigNd - 3.0)
             return num / den
         }
 
-    /** The Shannon entropy of this distribution in nats, computed by summing over the entire support. */
+    /**
+     * The Shannon entropy of this distribution in nats, computed by summing over the entire
+     * support.
+     */
     override val entropy: Double
         get() {
             var h = 0.0
@@ -217,9 +227,9 @@ public class HypergeometricDistribution(
     /**
      * Draws a single random value from this hypergeometric distribution.
      *
-     * For small draws (< 25) or when the normal approximation is unreliable, uses direct
-     * simulation of the drawing process. For large draws with sufficient variance, uses a
-     * normal approximation for O(1) sampling instead of O(draws).
+     * For small draws (< 25) or when the normal approximation is unreliable, uses direct simulation
+     * of the drawing process. For large draws with sufficient variance, uses a normal approximation
+     * for O(1) sampling instead of O(draws).
      *
      * @param random the source of randomness.
      * @return a random integer representing the number of success items drawn.

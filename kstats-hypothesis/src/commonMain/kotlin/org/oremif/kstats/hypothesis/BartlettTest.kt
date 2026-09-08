@@ -1,19 +1,18 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.ln
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.distributions.ChiSquaredDistribution
-import kotlin.math.ln
 
 /**
  * Performs Bartlett's test for equality of variances across two or more groups.
  *
- * The null hypothesis is that all groups have equal variances (homoscedasticity).
- * The test compares the pooled variance to the individual group variances using a
- * log-likelihood ratio with a correction factor for small samples. The test statistic
- * follows a chi-squared distribution with k - 1 degrees of freedom. Assumes that the
- * data in each group are normally distributed. For non-normal data, consider using
- * [leveneTest] or [flignerKilleenTest] instead, which are more robust to departures
- * from normality.
+ * The null hypothesis is that all groups have equal variances (homoscedasticity). The test compares
+ * the pooled variance to the individual group variances using a log-likelihood ratio with a
+ * correction factor for small samples. The test statistic follows a chi-squared distribution with
+ * k - 1 degrees of freedom. Assumes that the data in each group are normally distributed. For
+ * non-normal data, consider using [leveneTest] or [flignerKilleenTest] instead, which are more
+ * robust to departures from normality.
  *
  * ### Example:
  * ```kotlin
@@ -27,17 +26,19 @@ import kotlin.math.ln
  * ```
  *
  * @param groups two or more groups of observations, each with at least 2 elements.
- * @return a [TestResult] containing the test statistic, p-value, degrees of freedom (k - 1),
- * and additional info with "pooledVariance".
+ * @return a [TestResult] containing the test statistic, p-value, degrees of freedom (k - 1), and
+ *   additional info with "pooledVariance".
  */
 public fun bartlettTest(vararg groups: DoubleArray): TestResult {
-    if (groups.size < 2) throw InsufficientDataException(
-        "Bartlett's test requires at least 2 groups, got ${groups.size}"
-    )
-    for (i in groups.indices) {
-        if (groups[i].size < 2) throw InsufficientDataException(
-            "Each group must have at least 2 elements, group $i has ${groups[i].size}"
+    if (groups.size < 2)
+        throw InsufficientDataException(
+            "Bartlett's test requires at least 2 groups, got ${groups.size}"
         )
+    for (i in groups.indices) {
+        if (groups[i].size < 2)
+            throw InsufficientDataException(
+                "Each group must have at least 2 elements, group $i has ${groups[i].size}"
+            )
     }
 
     val k = groups.size
@@ -48,19 +49,20 @@ public fun bartlettTest(vararg groups: DoubleArray): TestResult {
     val totalN = sizes.sum()
 
     // Compute group sample variances (Bessel-corrected)
-    val variances = DoubleArray(k) { i ->
-        val group = groups[i]
-        val n = group.size
-        var sum = 0.0
-        for (j in 0 until n) sum += group[j]
-        val mean = sum / n
-        var ss = 0.0
-        for (j in 0 until n) {
-            val diff = group[j] - mean
-            ss += diff * diff
+    val variances =
+        DoubleArray(k) { i ->
+            val group = groups[i]
+            val n = group.size
+            var sum = 0.0
+            for (j in 0 until n) sum += group[j]
+            val mean = sum / n
+            var ss = 0.0
+            for (j in 0 until n) {
+                val diff = group[j] - mean
+                ss += diff * diff
+            }
+            ss / (n - 1)
         }
-        ss / (n - 1)
-    }
 
     // Degenerate case: all variances are zero (all groups constant)
     if (variances.all { it == 0.0 }) {
@@ -69,7 +71,7 @@ public fun bartlettTest(vararg groups: DoubleArray): TestResult {
             statistic = 0.0,
             pValue = 1.0,
             degreesOfFreedom = df.toDouble(),
-            additionalInfo = mapOf("pooledVariance" to 0.0)
+            additionalInfo = mapOf("pooledVariance" to 0.0),
         )
     }
 
@@ -82,7 +84,7 @@ public fun bartlettTest(vararg groups: DoubleArray): TestResult {
             statistic = Double.POSITIVE_INFINITY,
             pValue = 0.0,
             degreesOfFreedom = df.toDouble(),
-            additionalInfo = mapOf("pooledVariance" to pooledNum / (totalN - k))
+            additionalInfo = mapOf("pooledVariance" to pooledNum / (totalN - k)),
         )
     }
 
@@ -117,7 +119,7 @@ public fun bartlettTest(vararg groups: DoubleArray): TestResult {
             statistic = t,
             pValue = if (t.isInfinite() && t > 0) 0.0 else Double.NaN,
             degreesOfFreedom = df.toDouble(),
-            additionalInfo = mapOf("pooledVariance" to pooledVariance)
+            additionalInfo = mapOf("pooledVariance" to pooledVariance),
         )
     }
 
@@ -129,6 +131,6 @@ public fun bartlettTest(vararg groups: DoubleArray): TestResult {
         statistic = t,
         pValue = pValue.coerceIn(0.0, 1.0),
         degreesOfFreedom = df.toDouble(),
-        additionalInfo = mapOf("pooledVariance" to pooledVariance)
+        additionalInfo = mapOf("pooledVariance" to pooledVariance),
     )
 }

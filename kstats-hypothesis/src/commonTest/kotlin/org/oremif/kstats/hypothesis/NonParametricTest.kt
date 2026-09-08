@@ -1,10 +1,10 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.abs
+import kotlin.test.*
 import org.oremif.kstats.core.exceptions.DegenerateDataException
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.math.abs
-import kotlin.test.*
 
 class NonParametricTest {
 
@@ -70,7 +70,8 @@ class NonParametricTest {
 
     @Test
     fun testMannWhitneyUScipyDisjoint() {
-        // scipy.stats.mannwhitneyu([1,2,3,4,5], [6,7,8,9,10], alternative='two-sided', use_continuity=True)
+        // scipy.stats.mannwhitneyu([1,2,3,4,5], [6,7,8,9,10], alternative='two-sided',
+        // use_continuity=True)
         // Statistic is now U1 (for sample1), matching scipy convention
         // R1=1+2+3+4+5=15, U1=15-15=0.0
         val s1 = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
@@ -80,14 +81,15 @@ class NonParametricTest {
         // With continuity correction, p-value is slightly larger than without
         assertTrue(
             result.pValue < 0.02,
-            "p-value for disjoint samples should be small, actual=${result.pValue}"
+            "p-value for disjoint samples should be small, actual=${result.pValue}",
         )
         assertTrue(result.isSignificant(), "Disjoint samples should be significant at alpha=0.05")
     }
 
     @Test
     fun testMannWhitneyUScipyInterleaved() {
-        // scipy.stats.mannwhitneyu([1,3,5,7,9], [2,4,6,8,10], alternative='two-sided', use_continuity=True)
+        // scipy.stats.mannwhitneyu([1,3,5,7,9], [2,4,6,8,10], alternative='two-sided',
+        // use_continuity=True)
         // Statistic is now U1: R1=1+3+5+7+9=25, U1=25-15=10
         val s1 = doubleArrayOf(1.0, 3.0, 5.0, 7.0, 9.0)
         val s2 = doubleArrayOf(2.0, 4.0, 6.0, 8.0, 10.0)
@@ -147,7 +149,7 @@ class NonParametricTest {
         assertFailsWith<DegenerateDataException> {
             wilcoxonSignedRankTest(
                 doubleArrayOf(5.0, 5.0, 5.0),
-                doubleArrayOf(5.0, 5.0, 5.0)
+                doubleArrayOf(5.0, 5.0, 5.0),
             )
         }
     }
@@ -174,12 +176,12 @@ class NonParametricTest {
         // z is the uncorrected z-score, continuity correction is applied in p-value
         assertTrue(
             abs(result.additionalInfo["z"]!! - 2.0226) < 0.05,
-            "z-score: expected~2.0226, actual=${result.additionalInfo["z"]}"
+            "z-score: expected~2.0226, actual=${result.additionalInfo["z"]}",
         )
         // p-value with continuity correction is slightly larger than without
         assertTrue(
             result.pValue < 0.07,
-            "p-value with correction: expected < 0.07, actual=${result.pValue}"
+            "p-value with correction: expected < 0.07, actual=${result.pValue}",
         )
     }
 

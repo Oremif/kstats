@@ -1,12 +1,12 @@
 package org.oremif.kstats.correlation
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.descriptive.PopulationKind
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.descriptive.PopulationKind
 
 class CorrelationMatrixTest {
 
@@ -84,7 +84,7 @@ class CorrelationMatrixTest {
         assertFailsWith<InvalidParameterException> {
             correlationMatrix(
                 doubleArrayOf(1.0, 2.0, 3.0),
-                doubleArrayOf(4.0, 5.0)
+                doubleArrayOf(4.0, 5.0),
             )
         }
     }
@@ -94,7 +94,7 @@ class CorrelationMatrixTest {
         assertFailsWith<InsufficientDataException> {
             correlationMatrix(
                 doubleArrayOf(1.0, 2.0),
-                doubleArrayOf(3.0, 4.0)
+                doubleArrayOf(3.0, 4.0),
             )
         }
     }
@@ -157,7 +157,7 @@ class CorrelationMatrixTest {
         assertFailsWith<InsufficientDataException> {
             covarianceMatrix(
                 doubleArrayOf(1.0),
-                doubleArrayOf(2.0)
+                doubleArrayOf(2.0),
             )
         }
     }
@@ -167,7 +167,7 @@ class CorrelationMatrixTest {
         assertFailsWith<InvalidParameterException> {
             covarianceMatrix(
                 doubleArrayOf(1.0, 2.0, 3.0),
-                doubleArrayOf(4.0, 5.0)
+                doubleArrayOf(4.0, 5.0),
             )
         }
     }

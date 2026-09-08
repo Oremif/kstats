@@ -1,10 +1,10 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 
 class AndersonDarlingTest {
 
@@ -31,9 +31,8 @@ class AndersonDarlingTest {
 
     @Test
     fun testN10Normal() {
-        val result = andersonDarlingTest(
-            doubleArrayOf(-1.5, -1.0, -0.7, -0.3, 0.0, 0.2, 0.5, 0.8, 1.1, 1.5)
-        )
+        val result =
+            andersonDarlingTest(doubleArrayOf(-1.5, -1.0, -0.7, -0.3, 0.0, 0.2, 0.5, 0.8, 1.1, 1.5))
         assertEquals(0.104221649214109, result.statistic, tolA2, "A² n=10")
         assertTrue(result.pValue > 0.15, "Normal data should not reject")
     }
@@ -66,7 +65,10 @@ class AndersonDarlingTest {
     fun testExponentialDataRejects() {
         val result = andersonDarlingTest(TestData.EXPONENTIAL_N30)
         assertEquals(2.26816288595751, result.statistic, tolA2, "A² n=30 exponential")
-        assertTrue(result.pValue < 0.001, "Exponential data should strongly reject normality, p=${result.pValue}")
+        assertTrue(
+            result.pValue < 0.001,
+            "Exponential data should strongly reject normality, p=${result.pValue}",
+        )
     }
 
     // ===== Edge cases =====
@@ -82,7 +84,10 @@ class AndersonDarlingTest {
     fun testModifiedStatisticInAdditionalInfo() {
         val result = andersonDarlingTest(doubleArrayOf(-1.0, 0.0, 1.0, 2.0, 3.0))
         val a2Star = result.additionalInfo["modifiedStatistic"]
-        assertTrue(a2Star != null && a2Star > result.statistic, "Modified A²* should be larger than raw A²")
+        assertTrue(
+            a2Star != null && a2Star > result.statistic,
+            "Modified A²* should be larger than raw A²",
+        )
     }
 
     // ===== Degenerate input =====
@@ -147,9 +152,8 @@ class AndersonDarlingTest {
 
     @Test
     fun testIsSignificant() {
-        val normalResult = andersonDarlingTest(
-            doubleArrayOf(-1.5, -1.0, -0.7, -0.3, 0.0, 0.2, 0.5, 0.8, 1.1, 1.5)
-        )
+        val normalResult =
+            andersonDarlingTest(doubleArrayOf(-1.5, -1.0, -0.7, -0.3, 0.0, 0.2, 0.5, 0.8, 1.1, 1.5))
         TestAssertions.assertIsSignificantConsistency(normalResult)
 
         val expResult = andersonDarlingTest(TestData.EXPONENTIAL_N30)

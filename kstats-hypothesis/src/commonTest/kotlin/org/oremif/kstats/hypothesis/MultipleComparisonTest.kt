@@ -1,11 +1,11 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 internal class MultipleComparisonTest {
 
@@ -239,23 +239,17 @@ internal class MultipleComparisonTest {
 
     @Test
     fun testBonferroniEmptyArray() {
-        assertFailsWith<InsufficientDataException> {
-            bonferroniCorrection(doubleArrayOf())
-        }
+        assertFailsWith<InsufficientDataException> { bonferroniCorrection(doubleArrayOf()) }
     }
 
     @Test
     fun testHolmEmptyArray() {
-        assertFailsWith<InsufficientDataException> {
-            holmBonferroniCorrection(doubleArrayOf())
-        }
+        assertFailsWith<InsufficientDataException> { holmBonferroniCorrection(doubleArrayOf()) }
     }
 
     @Test
     fun testBenjaminiHochbergEmptyArray() {
-        assertFailsWith<InsufficientDataException> {
-            benjaminiHochbergCorrection(doubleArrayOf())
-        }
+        assertFailsWith<InsufficientDataException> { benjaminiHochbergCorrection(doubleArrayOf()) }
     }
 
     // ===== Degenerate input: invalid p-values =====
@@ -470,7 +464,7 @@ internal class MultipleComparisonTest {
         for (i in pValues.indices) {
             assertTrue(
                 result[i] >= pValues[i],
-                "Bonferroni adjusted p[$i]=${result[i]} should be >= original ${pValues[i]}"
+                "Bonferroni adjusted p[$i]=${result[i]} should be >= original ${pValues[i]}",
             )
         }
     }
@@ -482,7 +476,7 @@ internal class MultipleComparisonTest {
         for (i in pValues.indices) {
             assertTrue(
                 result[i] >= pValues[i],
-                "Holm adjusted p[$i]=${result[i]} should be >= original ${pValues[i]}"
+                "Holm adjusted p[$i]=${result[i]} should be >= original ${pValues[i]}",
             )
         }
     }
@@ -494,7 +488,7 @@ internal class MultipleComparisonTest {
         for (i in pValues.indices) {
             assertTrue(
                 result[i] >= pValues[i],
-                "BH adjusted p[$i]=${result[i]} should be >= original ${pValues[i]}"
+                "BH adjusted p[$i]=${result[i]} should be >= original ${pValues[i]}",
             )
         }
     }
@@ -506,7 +500,10 @@ internal class MultipleComparisonTest {
         val pValues = doubleArrayOf(0.001, 0.01, 0.05, 0.1, 0.5, 0.99)
         val result = bonferroniCorrection(pValues)
         for (i in result.indices) {
-            assertTrue(result[i] in 0.0..1.0, "Bonferroni result[$i]=${result[i]} should be in [0,1]")
+            assertTrue(
+                result[i] in 0.0..1.0,
+                "Bonferroni result[$i]=${result[i]} should be in [0,1]",
+            )
         }
     }
 
@@ -550,7 +547,7 @@ internal class MultipleComparisonTest {
         for (i in pValues.indices) {
             assertTrue(
                 holm[i] <= bonf[i] + 1e-14,
-                "Holm p[$i]=${holm[i]} should be <= Bonferroni p[$i]=${bonf[i]}"
+                "Holm p[$i]=${holm[i]} should be <= Bonferroni p[$i]=${bonf[i]}",
             )
         }
     }
@@ -565,7 +562,7 @@ internal class MultipleComparisonTest {
         for (i in pValues.indices) {
             assertTrue(
                 bh[i] <= holm[i] + 1e-14,
-                "BH p[$i]=${bh[i]} should be <= Holm p[$i]=${holm[i]}"
+                "BH p[$i]=${bh[i]} should be <= Holm p[$i]=${holm[i]}",
             )
         }
     }
@@ -580,8 +577,10 @@ internal class MultipleComparisonTest {
         val m = pValues.size
         for (i in pValues.indices) {
             assertEquals(
-                (pValues[i] * m).coerceAtMost(1.0), result[i], tol,
-                "Bonferroni result[$i] should be p[$i]*m"
+                (pValues[i] * m).coerceAtMost(1.0),
+                result[i],
+                tol,
+                "Bonferroni result[$i] should be p[$i]*m",
             )
         }
     }
@@ -590,7 +589,8 @@ internal class MultipleComparisonTest {
     fun testCorrectionResultsInOriginalOrder() {
         // Holm and BH: verify the result maps back to original positions
         // For reverse-sorted input, the results should be in the original order
-        // statsmodels: multipletests([0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.001], method='holm')
+        // statsmodels: multipletests([0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.001],
+        // method='holm')
         val pValues = doubleArrayOf(0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.001)
         val holm = holmBonferroniCorrection(pValues)
         assertEquals(0.5, holm[0], tol, "holm reverse[0]")
@@ -605,7 +605,8 @@ internal class MultipleComparisonTest {
 
     @Test
     fun testBenjaminiHochbergReverseSorted() {
-        // statsmodels: multipletests([0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.001], method='fdr_bh')
+        // statsmodels: multipletests([0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.001],
+        // method='fdr_bh')
         val pValues = doubleArrayOf(0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.001)
         val bh = benjaminiHochbergCorrection(pValues)
         assertEquals(0.5, bh[0], tol, "bh reverse[0]")
@@ -664,7 +665,7 @@ internal class MultipleComparisonTest {
             val next = result[sortedIndices[i + 1]]
             assertTrue(
                 curr <= next + 1e-14,
-                "Holm monotonicity: adjusted[rank $i]=$curr should be <= adjusted[rank ${i + 1}]=$next"
+                "Holm monotonicity: adjusted[rank $i]=$curr should be <= adjusted[rank ${i + 1}]=$next",
             )
         }
     }
@@ -681,7 +682,7 @@ internal class MultipleComparisonTest {
             val next = result[sortedIndices[i + 1]]
             assertTrue(
                 curr <= next + 1e-14,
-                "BH monotonicity: adjusted[rank $i]=$curr should be <= adjusted[rank ${i + 1}]=$next"
+                "BH monotonicity: adjusted[rank $i]=$curr should be <= adjusted[rank ${i + 1}]=$next",
             )
         }
     }
@@ -691,15 +692,32 @@ internal class MultipleComparisonTest {
     @Test
     fun testBonferroniGoldenValues() {
         // statsmodels: sorted random p-values (seed=42), method='bonferroni'
-        val pValues = doubleArrayOf(
-            0.0580836121681995, 0.155994520336203, 0.156018640442437,
-            0.374540118847362, 0.598658484197037, 0.601115011743209,
-            0.708072577796045, 0.731993941811405, 0.866176145774935,
-            0.950714306409916
-        )
-        val expected = doubleArrayOf(
-            0.580836121681995, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
-        )
+        val pValues =
+            doubleArrayOf(
+                0.0580836121681995,
+                0.155994520336203,
+                0.156018640442437,
+                0.374540118847362,
+                0.598658484197037,
+                0.601115011743209,
+                0.708072577796045,
+                0.731993941811405,
+                0.866176145774935,
+                0.950714306409916,
+            )
+        val expected =
+            doubleArrayOf(
+                0.580836121681995,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+            )
         val result = bonferroniCorrection(pValues)
         for (i in pValues.indices) {
             assertEquals(expected[i], result[i], tol, "bonferroni golden[$i]")
@@ -709,15 +727,32 @@ internal class MultipleComparisonTest {
     @Test
     fun testHolmGoldenValues() {
         // statsmodels: sorted random p-values (seed=42), method='holm'
-        val pValues = doubleArrayOf(
-            0.0580836121681995, 0.155994520336203, 0.156018640442437,
-            0.374540118847362, 0.598658484197037, 0.601115011743209,
-            0.708072577796045, 0.731993941811405, 0.866176145774935,
-            0.950714306409916
-        )
-        val expected = doubleArrayOf(
-            0.580836121681995, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
-        )
+        val pValues =
+            doubleArrayOf(
+                0.0580836121681995,
+                0.155994520336203,
+                0.156018640442437,
+                0.374540118847362,
+                0.598658484197037,
+                0.601115011743209,
+                0.708072577796045,
+                0.731993941811405,
+                0.866176145774935,
+                0.950714306409916,
+            )
+        val expected =
+            doubleArrayOf(
+                0.580836121681995,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+            )
         val result = holmBonferroniCorrection(pValues)
         for (i in pValues.indices) {
             assertEquals(expected[i], result[i], tol, "holm golden[$i]")
@@ -727,18 +762,32 @@ internal class MultipleComparisonTest {
     @Test
     fun testBenjaminiHochbergGoldenValues() {
         // statsmodels: sorted random p-values (seed=42), method='fdr_bh'
-        val pValues = doubleArrayOf(
-            0.0580836121681995, 0.155994520336203, 0.156018640442437,
-            0.374540118847362, 0.598658484197037, 0.601115011743209,
-            0.708072577796045, 0.731993941811405, 0.866176145774935,
-            0.950714306409916
-        )
-        val expected = doubleArrayOf(
-            0.520062134808122, 0.520062134808122, 0.520062134808122,
-            0.914992427264256, 0.914992427264256, 0.914992427264256,
-            0.914992427264256, 0.914992427264256, 0.950714306409916,
-            0.950714306409916
-        )
+        val pValues =
+            doubleArrayOf(
+                0.0580836121681995,
+                0.155994520336203,
+                0.156018640442437,
+                0.374540118847362,
+                0.598658484197037,
+                0.601115011743209,
+                0.708072577796045,
+                0.731993941811405,
+                0.866176145774935,
+                0.950714306409916,
+            )
+        val expected =
+            doubleArrayOf(
+                0.520062134808122,
+                0.520062134808122,
+                0.520062134808122,
+                0.914992427264256,
+                0.914992427264256,
+                0.914992427264256,
+                0.914992427264256,
+                0.914992427264256,
+                0.950714306409916,
+                0.950714306409916,
+            )
         val result = benjaminiHochbergCorrection(pValues)
         for (i in pValues.indices) {
             assertEquals(expected[i], result[i], tol, "bh golden[$i]")
@@ -749,7 +798,8 @@ internal class MultipleComparisonTest {
 
     @Test
     fun testHolmSortedAscendingKnownValues() {
-        // statsmodels: multipletests([0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5], method='holm')
+        // statsmodels: multipletests([0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5],
+        // method='holm')
         val pValues = doubleArrayOf(0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5)
         val result = holmBonferroniCorrection(pValues)
         assertEquals(0.008, result[0], tol, "holm sorted[0]")
@@ -764,7 +814,8 @@ internal class MultipleComparisonTest {
 
     @Test
     fun testBenjaminiHochbergSortedAscendingKnownValues() {
-        // statsmodels: multipletests([0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5], method='fdr_bh')
+        // statsmodels: multipletests([0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5],
+        // method='fdr_bh')
         val pValues = doubleArrayOf(0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5)
         val result = benjaminiHochbergCorrection(pValues)
         assertEquals(0.008, result[0], tol, "bh sorted[0]")

@@ -1,19 +1,18 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.ln
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.distributions.ChiSquaredDistribution
-import kotlin.math.ln
 
 /**
  * Performs a G-test (log-likelihood ratio test) for goodness-of-fit.
  *
- * The G-test is an alternative to the chi-squared test that uses a log-likelihood ratio
- * statistic. It computes twice the sum of each observed count times the log of the ratio
- * of observed to expected. Categories with zero observed counts contribute nothing to the
- * statistic. The G-test is asymptotically equivalent to the chi-squared test but can be
- * more accurate for small samples. Under the null hypothesis, the test statistic follows
- * a chi-squared distribution.
+ * The G-test is an alternative to the chi-squared test that uses a log-likelihood ratio statistic.
+ * It computes twice the sum of each observed count times the log of the ratio of observed to
+ * expected. Categories with zero observed counts contribute nothing to the statistic. The G-test is
+ * asymptotically equivalent to the chi-squared test but can be more accurate for small samples.
+ * Under the null hypothesis, the test statistic follows a chi-squared distribution.
  *
  * ### Example:
  * ```kotlin
@@ -28,24 +27,28 @@ import kotlin.math.ln
  *
  * @param observed the observed frequency counts for each category. Must have at least 2 categories.
  * @param expected the expected frequency counts for each category. If `null`, assumes a uniform
- * distribution where each category has the same expected count (total / number of categories).
- * Defaults to `null`.
- * @return a [TestResult] containing the G statistic, p-value, and degrees of freedom
- * (number of categories minus one).
+ *   distribution where each category has the same expected count (total / number of categories).
+ *   Defaults to `null`.
+ * @return a [TestResult] containing the G statistic, p-value, and degrees of freedom (number of
+ *   categories minus one).
  */
 public fun gTest(
     observed: IntArray,
-    expected: DoubleArray? = null
+    expected: DoubleArray? = null,
 ): TestResult {
     if (observed.size < 2) throw InsufficientDataException("Need at least 2 categories")
 
     val n = observed.size
-    val exp = expected ?: run {
-        val total = observed.sum().toDouble()
-        DoubleArray(n) { total / n }
-    }
-    if (observed.size != exp.size) throw InvalidParameterException("Observed and expected must have the same size")
-    if (!exp.all { it > 0.0 }) throw InvalidParameterException("All expected values must be positive")
+    val exp =
+        expected
+            ?: run {
+                val total = observed.sum().toDouble()
+                DoubleArray(n) { total / n }
+            }
+    if (observed.size != exp.size)
+        throw InvalidParameterException("Observed and expected must have the same size")
+    if (!exp.all { it > 0.0 })
+        throw InvalidParameterException("All expected values must be positive")
 
     var g = 0.0
     for (i in observed.indices) {
@@ -64,16 +67,16 @@ public fun gTest(
         testName = "G-Test",
         statistic = g,
         pValue = pValue.coerceIn(0.0, 1.0),
-        degreesOfFreedom = df
+        degreesOfFreedom = df,
     )
 }
 
 /**
  * Performs a G-test (log-likelihood ratio test) of independence for a contingency table.
  *
- * The null hypothesis is that the row and column variables are independent — that is,
- * knowing the row category does not help predict the column category. This test uses
- * a log-likelihood ratio statistic as an alternative to the chi-squared test of independence.
+ * The null hypothesis is that the row and column variables are independent — that is, knowing the
+ * row category does not help predict the column category. This test uses a log-likelihood ratio
+ * statistic as an alternative to the chi-squared test of independence.
  *
  * ### Example:
  * ```kotlin
@@ -89,23 +92,24 @@ public fun gTest(
  * ```
  *
  * @param contingencyTable a matrix of observed frequency counts with at least 2 rows and 2 columns.
- * All rows must have the same number of columns.
- * @return a [TestResult] containing the G statistic, p-value, and degrees of freedom
- * ((rows - 1) * (columns - 1)).
+ *   All rows must have the same number of columns.
+ * @return a [TestResult] containing the G statistic, p-value, and degrees of freedom ((rows - 1) *
+ *   (columns - 1)).
  */
-public fun gIndependenceTest(
-    contingencyTable: Array<IntArray>
-): TestResult {
+public fun gIndependenceTest(contingencyTable: Array<IntArray>): TestResult {
     val rows = contingencyTable.size
     if (rows < 2) throw InsufficientDataException("Table must have at least 2 rows")
     val cols = contingencyTable[0].size
     if (cols < 2) throw InsufficientDataException("Table must have at least 2 columns")
-    if (!contingencyTable.all { it.size == cols }) throw InvalidParameterException("All rows must have the same number of columns")
+    if (!contingencyTable.all { it.size == cols })
+        throw InvalidParameterException("All rows must have the same number of columns")
 
     val rowTotals = IntArray(rows) { r -> contingencyTable[r].sum() }
     val colTotals = IntArray(cols) { c -> contingencyTable.sumOf { it[c] } }
-    if (rowTotals.any { it == 0 }) throw InvalidParameterException("All row totals must be positive")
-    if (colTotals.any { it == 0 }) throw InvalidParameterException("All column totals must be positive")
+    if (rowTotals.any { it == 0 })
+        throw InvalidParameterException("All row totals must be positive")
+    if (colTotals.any { it == 0 })
+        throw InvalidParameterException("All column totals must be positive")
     val total = rowTotals.sum().toDouble()
 
     var g = 0.0
@@ -128,6 +132,6 @@ public fun gIndependenceTest(
         testName = "G-Test of Independence",
         statistic = g,
         pValue = pValue.coerceIn(0.0, 1.0),
-        degreesOfFreedom = df
+        degreesOfFreedom = df,
     )
 }

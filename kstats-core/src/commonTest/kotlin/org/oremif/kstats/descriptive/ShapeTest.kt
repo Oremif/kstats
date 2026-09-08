@@ -31,14 +31,20 @@ class ShapeTest {
     fun testSkewnessNoOverflow() {
         val data = doubleArrayOf(1e154, 1.5e154, 2e154, 2.5e154, 3e154, 3.5e154, 4e154)
         val result = data.skewness()
-        assertTrue(result.isFinite(), "Skewness must be finite for large-magnitude data, got $result")
+        assertTrue(
+            result.isFinite(),
+            "Skewness must be finite for large-magnitude data, got $result",
+        )
     }
 
     @Test
     fun testKurtosisNoOverflow() {
         val data = doubleArrayOf(1e100, 2e100, 3e100, 4e100, 5e100, 6e100, 7e100)
         val result = data.kurtosis()
-        assertTrue(result.isFinite(), "Kurtosis must be finite for large-magnitude data, got $result")
+        assertTrue(
+            result.isFinite(),
+            "Kurtosis must be finite for large-magnitude data, got $result",
+        )
     }
 
     @Test
@@ -75,7 +81,11 @@ class ShapeTest {
         val array = doubleArrayOf(1.0, 3.0, 5.0, 2.0, 8.0, 4.0)
         val list = array.toList()
         assertEquals(list.skewness(), array.skewness(), 1e-15)
-        assertEquals(list.skewness(PopulationKind.POPULATION), array.skewness(PopulationKind.POPULATION), 1e-15)
+        assertEquals(
+            list.skewness(PopulationKind.POPULATION),
+            array.skewness(PopulationKind.POPULATION),
+            1e-15,
+        )
     }
 
     @Test
@@ -83,6 +93,10 @@ class ShapeTest {
         val array = doubleArrayOf(1.0, 3.0, 5.0, 2.0, 8.0, 4.0)
         val list = array.toList()
         assertEquals(list.kurtosis(), array.kurtosis(), 1e-15)
-        assertEquals(list.kurtosis(PopulationKind.POPULATION), array.kurtosis(PopulationKind.POPULATION), 1e-15)
+        assertEquals(
+            list.kurtosis(PopulationKind.POPULATION),
+            array.kurtosis(PopulationKind.POPULATION),
+            1e-15,
+        )
     }
 }

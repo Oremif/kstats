@@ -3,11 +3,11 @@ package org.oremif.kstats.core
 /**
  * Rearranges elements in-place so that the k-th smallest value is at index [k].
  *
- * After this call, `this[k]` holds the k-th order statistic, all elements before index k are
- * less than or equal to `this[k]`, and all elements after are greater than or equal. Uses
- * introselect (quickselect with median-of-three pivot and heapsort fallback when recursion
- * depth exceeds 2 * floor(log2(n))). Expected O(n) time, worst-case O(n log n), O(1) extra
- * memory. NaN values sort last, consistent with [Double.compareTo] total order.
+ * After this call, `this[k]` holds the k-th order statistic, all elements before index k are less
+ * than or equal to `this[k]`, and all elements after are greater than or equal. Uses introselect
+ * (quickselect with median-of-three pivot and heapsort fallback when recursion depth exceeds 2 *
+ * floor(log2(n))). Expected O(n) time, worst-case O(n log n), O(1) extra memory. NaN values sort
+ * last, consistent with [Double.compareTo] total order.
  */
 internal fun DoubleArray.introSelect(k: Int) {
     val n = size
@@ -19,8 +19,8 @@ internal fun DoubleArray.introSelect(k: Int) {
 /**
  * Rearranges elements in-place so that the k-th smallest value within [lo]..[hi] is at index [k].
  *
- * This subrange variant is used by trimmed statistics to partition within a previously
- * narrowed range, avoiding a full sort.
+ * This subrange variant is used by trimmed statistics to partition within a previously narrowed
+ * range, avoiding a full sort.
  */
 internal fun DoubleArray.introSelect(k: Int, lo: Int, hi: Int) {
     if (lo >= hi) return
@@ -46,9 +46,7 @@ private fun DoubleArray.introSelectRange(k: Int, lo: Int, hi: Int, depthLimit: I
     }
 }
 
-/**
- * Sorts `arr[lo]`, `arr[mid]`, `arr[hi]` and places the median at `arr[hi]` as pivot.
- */
+/** Sorts `arr[lo]`, `arr[mid]`, `arr[hi]` and places the median at `arr[hi]` as pivot. */
 private fun DoubleArray.medianOfThree(lo: Int, hi: Int) {
     val mid = lo + (hi - lo) / 2
     // Sort the three elements: lo <= mid <= hi (using compareTo for NaN safety)
@@ -59,10 +57,7 @@ private fun DoubleArray.medianOfThree(lo: Int, hi: Int) {
     swap(mid, hi)
 }
 
-/**
- * Lomuto partition around pivot at arr[hi].
- * Returns the final index of the pivot.
- */
+/** Lomuto partition around pivot at arr[hi]. Returns the final index of the pivot. */
 private fun DoubleArray.lomutoPartition(lo: Int, hi: Int): Int {
     val pivot = this[hi]
     var i = lo
@@ -76,9 +71,7 @@ private fun DoubleArray.lomutoPartition(lo: Int, hi: Int): Int {
     return i
 }
 
-/**
- * In-place heapsort of subarray `[lo..hi]`.
- */
+/** In-place heapsort of the subarray `lo..hi`. */
 private fun DoubleArray.heapSort(lo: Int, hi: Int) {
     val n = hi - lo + 1
     // Build max-heap
@@ -92,9 +85,7 @@ private fun DoubleArray.heapSort(lo: Int, hi: Int) {
     }
 }
 
-/**
- * Max-heap sift down for subarray starting at [base].
- */
+/** Max-heap sift down for subarray starting at [base]. */
 private fun DoubleArray.siftDown(base: Int, heapSize: Int, i: Int) {
     var parent = i
     while (true) {

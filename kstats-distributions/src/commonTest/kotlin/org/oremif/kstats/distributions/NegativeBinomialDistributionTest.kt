@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class NegativeBinomialDistributionTest : DiscreteDistributionPropertyTests() {
 
     override fun createDistribution() = NegativeBinomialDistribution(5, 0.4)
+
     override val testKRange = -1..20
 
     // --- Basic correctness (scipy 15-digit refs) ---
@@ -190,5 +191,4 @@ class NegativeBinomialDistributionTest : DiscreteDistributionPropertyTests() {
         assertTrue(d.cdf(k50) >= 0.5)
         if (k50 > 0) assertTrue(d.cdf(k50 - 1) < 0.5)
     }
-
 }

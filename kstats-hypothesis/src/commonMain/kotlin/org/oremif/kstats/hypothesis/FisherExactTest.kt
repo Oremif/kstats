@@ -1,17 +1,16 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.exp
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.lnFactorial
-import kotlin.math.exp
 
 /**
  * Performs Fisher's exact test for a 2x2 contingency table.
  *
- * The null hypothesis is that the row and column variables are independent.
- * Unlike the chi-squared test, Fisher's exact test computes the exact p-value using
- * the hypergeometric distribution, making it appropriate for small sample sizes where
- * the chi-squared approximation may be unreliable. The test statistic reported is the
- * odds ratio.
+ * The null hypothesis is that the row and column variables are independent. Unlike the chi-squared
+ * test, Fisher's exact test computes the exact p-value using the hypergeometric distribution,
+ * making it appropriate for small sample sizes where the chi-squared approximation may be
+ * unreliable. The test statistic reported is the odds ratio.
  *
  * ### Example:
  * ```kotlin
@@ -26,18 +25,20 @@ import kotlin.math.exp
  * ```
  *
  * @param table a 2x2 contingency table with non-negative integer counts.
- * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED].
- * [Alternative.LESS] tests if the odds ratio is less than 1, [Alternative.GREATER] tests
- * if it is greater than 1.
- * @return a [TestResult] containing the odds ratio as the statistic, the exact p-value,
- * and additional info with the "oddsRatio" entry.
+ * @param alternative the direction of the alternative hypothesis. Defaults to
+ *   [Alternative.TWO_SIDED]. [Alternative.LESS] tests if the odds ratio is less than 1,
+ *   [Alternative.GREATER] tests if it is greater than 1.
+ * @return a [TestResult] containing the odds ratio as the statistic, the exact p-value, and
+ *   additional info with the "oddsRatio" entry.
  */
 public fun fisherExactTest(
     table: Array<IntArray>,
-    alternative: Alternative = Alternative.TWO_SIDED
+    alternative: Alternative = Alternative.TWO_SIDED,
 ): TestResult {
-    if (!(table.size == 2 && table.all { it.size == 2 })) throw InvalidParameterException("Table must be 2×2")
-    if (!table.all { row -> row.all { it >= 0 } }) throw InvalidParameterException("All values must be non-negative")
+    if (!(table.size == 2 && table.all { it.size == 2 }))
+        throw InvalidParameterException("Table must be 2×2")
+    if (!table.all { row -> row.all { it >= 0 } })
+        throw InvalidParameterException("All values must be non-negative")
 
     val a = table[0][0]
     val b = table[0][1]
@@ -50,45 +51,47 @@ public fun fisherExactTest(
     val minA = maxOf(0, (a + b) + (a + c) - n)
     val maxA = minOf(a + b, a + c)
 
-    val pValue = when (alternative) {
-        Alternative.TWO_SIDED -> {
-            // Compare in log-space to avoid precision loss for very small probabilities
-            var p = 0.0
-            for (i in minA..maxA) {
-                val logPi = hypergeometricLogPmf(i, a + b, a + c, n)
-                if (logPi <= logPObserved + 1e-7) {
-                    p += exp(logPi)
+    val pValue =
+        when (alternative) {
+            Alternative.TWO_SIDED -> {
+                // Compare in log-space to avoid precision loss for very small probabilities
+                var p = 0.0
+                for (i in minA..maxA) {
+                    val logPi = hypergeometricLogPmf(i, a + b, a + c, n)
+                    if (logPi <= logPObserved + 1e-7) {
+                        p += exp(logPi)
+                    }
                 }
+                p
             }
-            p
-        }
 
-        Alternative.LESS -> {
-            var p = 0.0
-            for (i in minA..a) {
-                p += exp(hypergeometricLogPmf(i, a + b, a + c, n))
+            Alternative.LESS -> {
+                var p = 0.0
+                for (i in minA..a) {
+                    p += exp(hypergeometricLogPmf(i, a + b, a + c, n))
+                }
+                p
             }
-            p
-        }
 
-        Alternative.GREATER -> {
-            var p = 0.0
-            for (i in a..maxA) {
-                p += exp(hypergeometricLogPmf(i, a + b, a + c, n))
+            Alternative.GREATER -> {
+                var p = 0.0
+                for (i in a..maxA) {
+                    p += exp(hypergeometricLogPmf(i, a + b, a + c, n))
+                }
+                p
             }
-            p
         }
-    }
 
     // Odds ratio
-    val oddsRatio = if (b > 0 && c > 0) (a.toDouble() * d) / (b.toDouble() * c) else Double.POSITIVE_INFINITY
+    val oddsRatio =
+        if (b > 0 && c > 0) (a.toDouble() * d) / (b.toDouble() * c) else Double.POSITIVE_INFINITY
 
     return TestResult(
         testName = "Fisher's Exact Test",
         statistic = oddsRatio,
         pValue = pValue.coerceIn(0.0, 1.0),
         alternative = alternative,
-        additionalInfo = mapOf("oddsRatio" to oddsRatio)
+        additionalInfo = mapOf("oddsRatio" to oddsRatio),
     )
 }
 
@@ -103,8 +106,13 @@ public fun fisherExactTest(
  * @param total grand total of the table (a + b + c + d)
  */
 private fun hypergeometricLogPmf(k: Int, rowSum: Int, colSum: Int, total: Int): Double {
-    return lnFactorial(rowSum) + lnFactorial(total - rowSum) +
-        lnFactorial(colSum) + lnFactorial(total - colSum) -
-        lnFactorial(total) - lnFactorial(k) - lnFactorial(rowSum - k) -
-        lnFactorial(colSum - k) - lnFactorial(total - rowSum - colSum + k)
+    return lnFactorial(rowSum) +
+        lnFactorial(total - rowSum) +
+        lnFactorial(colSum) +
+        lnFactorial(total - colSum) -
+        lnFactorial(total) -
+        lnFactorial(k) -
+        lnFactorial(rowSum - k) -
+        lnFactorial(colSum - k) -
+        lnFactorial(total - rowSum - colSum + k)
 }

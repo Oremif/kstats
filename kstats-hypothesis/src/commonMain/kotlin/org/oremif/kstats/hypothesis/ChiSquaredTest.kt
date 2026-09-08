@@ -7,9 +7,9 @@ import org.oremif.kstats.distributions.ChiSquaredDistribution
 /**
  * Performs a chi-squared goodness-of-fit test.
  *
- * The null hypothesis is that the observed frequency counts follow the expected distribution.
- * This test compares how well observed category counts match the expected counts by computing
- * the sum of squared differences between observed and expected, each divided by the expected count.
+ * The null hypothesis is that the observed frequency counts follow the expected distribution. This
+ * test compares how well observed category counts match the expected counts by computing the sum of
+ * squared differences between observed and expected, each divided by the expected count.
  *
  * ### Example:
  * ```kotlin
@@ -24,24 +24,28 @@ import org.oremif.kstats.distributions.ChiSquaredDistribution
  *
  * @param observed the observed frequency counts for each category. Must have at least 2 categories.
  * @param expected the expected frequency counts for each category. If `null`, assumes a uniform
- * distribution where each category has the same expected count (total / number of categories).
- * Defaults to `null`.
+ *   distribution where each category has the same expected count (total / number of categories).
+ *   Defaults to `null`.
  * @return a [TestResult] containing the chi-squared statistic, p-value, and degrees of freedom
- * (number of categories minus one).
+ *   (number of categories minus one).
  */
 public fun chiSquaredTest(
     observed: IntArray,
-    expected: DoubleArray? = null
+    expected: DoubleArray? = null,
 ): TestResult {
     if (observed.size < 2) throw InsufficientDataException("Need at least 2 categories")
 
     val n = observed.size
-    val exp = expected ?: run {
-        val total = observed.sum().toDouble()
-        DoubleArray(n) { total / n }
-    }
-    if (observed.size != exp.size) throw InvalidParameterException("Observed and expected must have the same size")
-    if (!exp.all { it > 0.0 }) throw InvalidParameterException("All expected values must be positive")
+    val exp =
+        expected
+            ?: run {
+                val total = observed.sum().toDouble()
+                DoubleArray(n) { total / n }
+            }
+    if (observed.size != exp.size)
+        throw InvalidParameterException("Observed and expected must have the same size")
+    if (!exp.all { it > 0.0 })
+        throw InvalidParameterException("All expected values must be positive")
 
     var chi2 = 0.0
     for (i in observed.indices) {
@@ -57,16 +61,16 @@ public fun chiSquaredTest(
         testName = "Chi-Squared Goodness-of-Fit Test",
         statistic = chi2,
         pValue = pValue.coerceIn(0.0, 1.0),
-        degreesOfFreedom = df
+        degreesOfFreedom = df,
     )
 }
 
 /**
  * Performs a chi-squared test of independence for a contingency table.
  *
- * The null hypothesis is that the row and column variables are independent — that is,
- * knowing the row category does not help predict the column category. The test compares
- * the observed cell counts to the counts expected under independence.
+ * The null hypothesis is that the row and column variables are independent — that is, knowing the
+ * row category does not help predict the column category. The test compares the observed cell
+ * counts to the counts expected under independence.
  *
  * ### Example:
  * ```kotlin
@@ -82,23 +86,24 @@ public fun chiSquaredTest(
  * ```
  *
  * @param contingencyTable a matrix of observed frequency counts with at least 2 rows and 2 columns.
- * All rows must have the same number of columns.
+ *   All rows must have the same number of columns.
  * @return a [TestResult] containing the chi-squared statistic, p-value, and degrees of freedom
- * ((rows - 1) * (columns - 1)).
+ *   ((rows - 1) * (columns - 1)).
  */
-public fun chiSquaredIndependenceTest(
-    contingencyTable: Array<IntArray>
-): TestResult {
+public fun chiSquaredIndependenceTest(contingencyTable: Array<IntArray>): TestResult {
     val rows = contingencyTable.size
     if (rows < 2) throw InsufficientDataException("Table must have at least 2 rows")
     val cols = contingencyTable[0].size
     if (cols < 2) throw InsufficientDataException("Table must have at least 2 columns")
-    if (!contingencyTable.all { it.size == cols }) throw InvalidParameterException("All rows must have the same number of columns")
+    if (!contingencyTable.all { it.size == cols })
+        throw InvalidParameterException("All rows must have the same number of columns")
 
     val rowTotals = IntArray(rows) { r -> contingencyTable[r].sum() }
     val colTotals = IntArray(cols) { c -> contingencyTable.sumOf { it[c] } }
-    if (rowTotals.any { it == 0 }) throw InvalidParameterException("All row totals must be positive")
-    if (colTotals.any { it == 0 }) throw InvalidParameterException("All column totals must be positive")
+    if (rowTotals.any { it == 0 })
+        throw InvalidParameterException("All row totals must be positive")
+    if (colTotals.any { it == 0 })
+        throw InvalidParameterException("All column totals must be positive")
     val total = rowTotals.sum().toDouble()
 
     var chi2 = 0.0
@@ -118,6 +123,6 @@ public fun chiSquaredIndependenceTest(
         testName = "Chi-Squared Test of Independence",
         statistic = chi2,
         pValue = pValue.coerceIn(0.0, 1.0),
-        degreesOfFreedom = df
+        degreesOfFreedom = df,
     )
 }

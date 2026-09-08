@@ -1,16 +1,16 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.*
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.distributions.ContinuousDistribution
-import kotlin.math.*
 
 /**
  * Performs a one-sample Kolmogorov-Smirnov test against a reference distribution.
  *
- * The null hypothesis is that [sample] was drawn from [distribution]. The test computes the
- * maximum absolute difference between the empirical cumulative distribution function (ECDF)
- * of the sample and the theoretical CDF of the reference distribution. Uses Kolmogorov's
- * asymptotic formula for the p-value approximation.
+ * The null hypothesis is that [sample] was drawn from [distribution]. The test computes the maximum
+ * absolute difference between the empirical cumulative distribution function (ECDF) of the sample
+ * and the theoretical CDF of the reference distribution. Uses Kolmogorov's asymptotic formula for
+ * the p-value approximation.
  *
  * ### Example:
  * ```kotlin
@@ -24,12 +24,12 @@ import kotlin.math.*
  *
  * @param sample the observed values. Must not be empty.
  * @param distribution the reference continuous distribution to test against.
- * @return a [TestResult] containing the D statistic, p-value, and additional info
- * with "dPlus" and "dMinus".
+ * @return a [TestResult] containing the D statistic, p-value, and additional info with "dPlus" and
+ *   "dMinus".
  */
 public fun kolmogorovSmirnovTest(
     sample: DoubleArray,
-    distribution: ContinuousDistribution
+    distribution: ContinuousDistribution,
 ): TestResult {
     if (sample.isEmpty()) throw InsufficientDataException("Sample must not be empty")
 
@@ -38,7 +38,7 @@ public fun kolmogorovSmirnovTest(
             testName = "Kolmogorov-Smirnov Test (One-Sample)",
             statistic = Double.NaN,
             pValue = Double.NaN,
-            additionalInfo = mapOf("dPlus" to Double.NaN, "dMinus" to Double.NaN)
+            additionalInfo = mapOf("dPlus" to Double.NaN, "dMinus" to Double.NaN),
         )
     }
 
@@ -62,17 +62,17 @@ public fun kolmogorovSmirnovTest(
         testName = "Kolmogorov-Smirnov Test (One-Sample)",
         statistic = d,
         pValue = pValue.coerceIn(0.0, 1.0),
-        additionalInfo = mapOf("dPlus" to dPlus, "dMinus" to dMinus)
+        additionalInfo = mapOf("dPlus" to dPlus, "dMinus" to dMinus),
     )
 }
 
 /**
  * Performs a two-sample Kolmogorov-Smirnov test.
  *
- * The null hypothesis is that [sample1] and [sample2] are drawn from the same distribution.
- * The test computes the maximum absolute difference between the two empirical cumulative
- * distribution functions. Uses Kolmogorov's asymptotic formula for the p-value approximation
- * with an effective sample size derived from both sample sizes.
+ * The null hypothesis is that [sample1] and [sample2] are drawn from the same distribution. The
+ * test computes the maximum absolute difference between the two empirical cumulative distribution
+ * functions. Uses Kolmogorov's asymptotic formula for the p-value approximation with an effective
+ * sample size derived from both sample sizes.
  *
  * ### Example:
  * ```kotlin
@@ -89,15 +89,16 @@ public fun kolmogorovSmirnovTest(
  */
 public fun kolmogorovSmirnovTest(
     sample1: DoubleArray,
-    sample2: DoubleArray
+    sample2: DoubleArray,
 ): TestResult {
-    if (sample1.isEmpty() || sample2.isEmpty()) throw InsufficientDataException("Samples must not be empty")
+    if (sample1.isEmpty() || sample2.isEmpty())
+        throw InsufficientDataException("Samples must not be empty")
 
     if (sample1.any { !it.isFinite() } || sample2.any { !it.isFinite() }) {
         return TestResult(
             testName = "Kolmogorov-Smirnov Test (Two-Sample)",
             statistic = Double.NaN,
-            pValue = Double.NaN
+            pValue = Double.NaN,
         )
     }
 
@@ -125,15 +126,15 @@ public fun kolmogorovSmirnovTest(
     return TestResult(
         testName = "Kolmogorov-Smirnov Test (Two-Sample)",
         statistic = d,
-        pValue = pValue.coerceIn(0.0, 1.0)
+        pValue = pValue.coerceIn(0.0, 1.0),
     )
 }
 
 /**
  * Approximates the Kolmogorov-Smirnov p-value using Kolmogorov's asymptotic series.
  *
- * Applies a continuity correction to the D statistic and evaluates the alternating
- * series until convergence (term < 1e-12) or 100 terms.
+ * Applies a continuity correction to the D statistic and evaluates the alternating series until
+ * convergence (term < 1e-12) or 100 terms.
  */
 private fun kolmogorovSmirnovPValue(d: Double, n: Double): Double {
     val sqrtN = sqrt(n)

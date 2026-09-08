@@ -1,10 +1,10 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 internal class PowerAnalysisTest {
 
@@ -123,15 +123,9 @@ internal class PowerAnalysisTest {
 
     @Test
     fun testTTestPowerInvalidN() {
-        assertFailsWith<InvalidParameterException> {
-            tTestPower(effectSize = 0.5, n = 1)
-        }
-        assertFailsWith<InvalidParameterException> {
-            tTestPower(effectSize = 0.5, n = 0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            tTestPower(effectSize = 0.5, n = -5)
-        }
+        assertFailsWith<InvalidParameterException> { tTestPower(effectSize = 0.5, n = 1) }
+        assertFailsWith<InvalidParameterException> { tTestPower(effectSize = 0.5, n = 0) }
+        assertFailsWith<InvalidParameterException> { tTestPower(effectSize = 0.5, n = -5) }
     }
 
     @Test
@@ -207,9 +201,15 @@ internal class PowerAnalysisTest {
     @Test
     fun testTTestPowerRange() {
         // Power should always be in [0, 1]
-        val params = listOf(
-            0.1 to 20, 0.2 to 50, 0.5 to 64, 0.8 to 30, 1.0 to 10, 2.0 to 5,
-        )
+        val params =
+            listOf(
+                0.1 to 20,
+                0.2 to 50,
+                0.5 to 64,
+                0.8 to 30,
+                1.0 to 10,
+                2.0 to 5,
+            )
         for ((d, n) in params) {
             val power = tTestPower(effectSize = d, n = n)
             assertTrue(power in 0.0..1.0, "power($d, $n) = $power should be in [0, 1]")
@@ -325,35 +325,23 @@ internal class PowerAnalysisTest {
 
     @Test
     fun testTTestRequiredNZeroEffectSize() {
-        assertFailsWith<InvalidParameterException> {
-            tTestRequiredN(effectSize = 0.0)
-        }
+        assertFailsWith<InvalidParameterException> { tTestRequiredN(effectSize = 0.0) }
     }
 
     @Test
     fun testTTestRequiredNInvalidPower() {
-        assertFailsWith<InvalidParameterException> {
-            tTestRequiredN(effectSize = 0.5, power = 0.0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            tTestRequiredN(effectSize = 0.5, power = 1.0)
-        }
+        assertFailsWith<InvalidParameterException> { tTestRequiredN(effectSize = 0.5, power = 0.0) }
+        assertFailsWith<InvalidParameterException> { tTestRequiredN(effectSize = 0.5, power = 1.0) }
         assertFailsWith<InvalidParameterException> {
             tTestRequiredN(effectSize = 0.5, power = -0.1)
         }
-        assertFailsWith<InvalidParameterException> {
-            tTestRequiredN(effectSize = 0.5, power = 1.5)
-        }
+        assertFailsWith<InvalidParameterException> { tTestRequiredN(effectSize = 0.5, power = 1.5) }
     }
 
     @Test
     fun testTTestRequiredNInvalidAlpha() {
-        assertFailsWith<InvalidParameterException> {
-            tTestRequiredN(effectSize = 0.5, alpha = 0.0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            tTestRequiredN(effectSize = 0.5, alpha = 1.0)
-        }
+        assertFailsWith<InvalidParameterException> { tTestRequiredN(effectSize = 0.5, alpha = 0.0) }
+        assertFailsWith<InvalidParameterException> { tTestRequiredN(effectSize = 0.5, alpha = 1.0) }
     }
 
     // ===== tTestRequiredN: Extreme parameters =====
@@ -376,9 +364,7 @@ internal class PowerAnalysisTest {
 
     @Test
     fun testTTestRequiredNNaNEffectSize() {
-        assertFailsWith<InvalidParameterException> {
-            tTestRequiredN(effectSize = Double.NaN)
-        }
+        assertFailsWith<InvalidParameterException> { tTestRequiredN(effectSize = Double.NaN) }
     }
 
     @Test
@@ -512,35 +498,21 @@ internal class PowerAnalysisTest {
 
     @Test
     fun testTTestMinimumEffectInvalidN() {
-        assertFailsWith<InvalidParameterException> {
-            tTestMinimumEffect(n = 1)
-        }
-        assertFailsWith<InvalidParameterException> {
-            tTestMinimumEffect(n = 0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            tTestMinimumEffect(n = -1)
-        }
+        assertFailsWith<InvalidParameterException> { tTestMinimumEffect(n = 1) }
+        assertFailsWith<InvalidParameterException> { tTestMinimumEffect(n = 0) }
+        assertFailsWith<InvalidParameterException> { tTestMinimumEffect(n = -1) }
     }
 
     @Test
     fun testTTestMinimumEffectInvalidPower() {
-        assertFailsWith<InvalidParameterException> {
-            tTestMinimumEffect(n = 64, power = 0.0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            tTestMinimumEffect(n = 64, power = 1.0)
-        }
+        assertFailsWith<InvalidParameterException> { tTestMinimumEffect(n = 64, power = 0.0) }
+        assertFailsWith<InvalidParameterException> { tTestMinimumEffect(n = 64, power = 1.0) }
     }
 
     @Test
     fun testTTestMinimumEffectInvalidAlpha() {
-        assertFailsWith<InvalidParameterException> {
-            tTestMinimumEffect(n = 64, alpha = 0.0)
-        }
-        assertFailsWith<InvalidParameterException> {
-            tTestMinimumEffect(n = 64, alpha = 1.0)
-        }
+        assertFailsWith<InvalidParameterException> { tTestMinimumEffect(n = 64, alpha = 0.0) }
+        assertFailsWith<InvalidParameterException> { tTestMinimumEffect(n = 64, alpha = 1.0) }
     }
 
     // ===== tTestMinimumEffect: Extreme parameters =====
@@ -706,12 +678,8 @@ internal class PowerAnalysisTest {
 
     @Test
     fun testProportionZTestPowerInvalidN() {
-        assertFailsWith<InvalidParameterException> {
-            proportionZTestPower(effectSize = 0.5, n = 1)
-        }
-        assertFailsWith<InvalidParameterException> {
-            proportionZTestPower(effectSize = 0.5, n = 0)
-        }
+        assertFailsWith<InvalidParameterException> { proportionZTestPower(effectSize = 0.5, n = 1) }
+        assertFailsWith<InvalidParameterException> { proportionZTestPower(effectSize = 0.5, n = 0) }
     }
 
     @Test
@@ -801,7 +769,9 @@ internal class PowerAnalysisTest {
                 val tPower = tTestPower(effectSize = d, n = n, type = TTestType.TWO_SAMPLE)
                 val propPower = proportionZTestPower(effectSize = d, n = n, twoSample = true)
                 assertEquals(
-                    tPower, propPower, tol,
+                    tPower,
+                    propPower,
+                    tol,
                     "tTest TWO_SAMPLE and proportionZTest twoSample should give same power for d=$d, n=$n",
                 )
             }
@@ -855,9 +825,7 @@ internal class PowerAnalysisTest {
 
     @Test
     fun testProportionZTestRequiredNZeroEffectSize() {
-        assertFailsWith<InvalidParameterException> {
-            proportionZTestRequiredN(effectSize = 0.0)
-        }
+        assertFailsWith<InvalidParameterException> { proportionZTestRequiredN(effectSize = 0.0) }
     }
 
     @Test
@@ -981,12 +949,8 @@ internal class PowerAnalysisTest {
 
     @Test
     fun testProportionZTestMinimumEffectInvalidN() {
-        assertFailsWith<InvalidParameterException> {
-            proportionZTestMinimumEffect(n = 1)
-        }
-        assertFailsWith<InvalidParameterException> {
-            proportionZTestMinimumEffect(n = 0)
-        }
+        assertFailsWith<InvalidParameterException> { proportionZTestMinimumEffect(n = 1) }
+        assertFailsWith<InvalidParameterException> { proportionZTestMinimumEffect(n = 0) }
     }
 
     @Test
@@ -1056,7 +1020,9 @@ internal class PowerAnalysisTest {
             val tEffect = tTestMinimumEffect(n = n, type = TTestType.TWO_SAMPLE)
             val pEffect = proportionZTestMinimumEffect(n = n, twoSample = true)
             assertEquals(
-                tEffect, pEffect, tol,
+                tEffect,
+                pEffect,
+                tol,
                 "tTest and proportionZTest minimum effect should match for n=$n",
             )
         }
@@ -1069,7 +1035,8 @@ internal class PowerAnalysisTest {
         // The three functions form a triangle: any two should predict the third
         // Given d=0.5, power=0.8 -> n=63
         // Given d=0.5, n=63 -> power should be >= 0.8
-        // Given n=63, power=0.8 -> d should be <= 0.5 (because n=63 achieves exactly 0.8 for d slightly < 0.5)
+        // Given n=63, power=0.8 -> d should be <= 0.5 (because n=63 achieves exactly 0.8 for d
+        // slightly < 0.5)
         val targetD = 0.5
         val targetPower = 0.8
         val n = tTestRequiredN(effectSize = targetD, power = targetPower)
@@ -1081,7 +1048,8 @@ internal class PowerAnalysisTest {
             "Power at n=$n should be >= $targetPower",
         )
 
-        // Minimum effect at n should be <= targetD (since n achieves slightly more than target power)
+        // Minimum effect at n should be <= targetD (since n achieves slightly more than target
+        // power)
         val minEffect = tTestMinimumEffect(n = n, power = targetPower)
         assertTrue(
             minEffect <= targetD + 1e-10,

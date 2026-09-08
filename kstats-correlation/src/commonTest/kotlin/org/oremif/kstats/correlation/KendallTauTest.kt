@@ -1,11 +1,11 @@
 package org.oremif.kstats.correlation
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class KendallTauTest {
 
@@ -40,14 +40,50 @@ class KendallTauTest {
     @Test
     fun testLiteratureDataset() {
         // n=19 dataset with repeated y values
-        val x = doubleArrayOf(
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
-            11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0
-        )
-        val y = doubleArrayOf(
-            12.0, 14.0, 14.0, 17.0, 13.0, 9.0, 8.0, 10.0, 15.0, 6.0,
-            11.0, 5.0, 2.0, 16.0, 7.0, 1.0, 3.0, 4.0, 18.0
-        )
+        val x =
+            doubleArrayOf(
+                1.0,
+                2.0,
+                3.0,
+                4.0,
+                5.0,
+                6.0,
+                7.0,
+                8.0,
+                9.0,
+                10.0,
+                11.0,
+                12.0,
+                13.0,
+                14.0,
+                15.0,
+                16.0,
+                17.0,
+                18.0,
+                19.0,
+            )
+        val y =
+            doubleArrayOf(
+                12.0,
+                14.0,
+                14.0,
+                17.0,
+                13.0,
+                9.0,
+                8.0,
+                10.0,
+                15.0,
+                6.0,
+                11.0,
+                5.0,
+                2.0,
+                16.0,
+                7.0,
+                1.0,
+                3.0,
+                4.0,
+                18.0,
+            )
         val result = kendallTau(x, y)
         // Verify tau is negative (inversely correlated) and roughly in expected range
         assertTrue(result.coefficient < 0.0)
@@ -262,7 +298,9 @@ class KendallTauTest {
         val y = DoubleArray(n) { it.toDouble() }
         // Swap adjacent pairs for first 20 elements
         for (i in 0 until 20 step 2) {
-            val tmp = y[i]; y[i] = y[i + 1]; y[i + 1] = tmp
+            val tmp = y[i]
+            y[i] = y[i + 1]
+            y[i + 1] = tmp
         }
         val result = kendallTau(x, y)
         assertTrue(result.coefficient > 0.5, "Expected strong positive correlation")
@@ -324,16 +362,15 @@ class KendallTauTest {
                 val xd = x[i].compareTo(x[j])
                 val yd = y[i].compareTo(y[j])
                 if (xd == 0 && yd == 0) {
-                    tx++; ty++
+                    tx++
+                    ty++
                 } else if (xd == 0) tx++
-                else if (yd == 0) ty++
-                else if (xd * yd > 0) con++
-                else disc++
+                else if (yd == 0) ty++ else if (xd * yd > 0) con++ else disc++
             }
         }
         val n0 = n.toLong() * (n - 1) / 2
-        val bruteTau = (con - disc).toDouble() /
-            kotlin.math.sqrt((n0 - tx).toDouble() * (n0 - ty).toDouble())
+        val bruteTau =
+            (con - disc).toDouble() / kotlin.math.sqrt((n0 - tx).toDouble() * (n0 - ty).toDouble())
         assertEquals(bruteTau, result.coefficient, 1e-10)
     }
 }

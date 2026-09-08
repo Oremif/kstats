@@ -1,12 +1,17 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.test.*
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
-import kotlin.test.*
 
 class TTestTest {
 
-    private fun assertP(expected: Double, actual: Double, tol: Double = 1e-6, message: String = "") {
+    private fun assertP(
+        expected: Double,
+        actual: Double,
+        tol: Double = 1e-6,
+        message: String = "",
+    ) {
         TestAssertions.assertPValue(expected, actual, tol, message)
     }
 
@@ -215,8 +220,17 @@ class TTestTest {
         // All values = 5.0, mu = 3.0: se=0, diff>0 → t=+Inf, p=0 (two-sided)
         val sample = doubleArrayOf(5.0, 5.0, 5.0, 5.0, 5.0)
         val result = tTest(sample, mu = 3.0)
-        assertEquals(Double.POSITIVE_INFINITY, result.statistic, "t should be +Inf when mean > mu and se=0")
-        assertEquals(0.0, result.pValue, 1e-15, "p should be 0 for two-sided when mean != mu and se=0")
+        assertEquals(
+            Double.POSITIVE_INFINITY,
+            result.statistic,
+            "t should be +Inf when mean > mu and se=0",
+        )
+        assertEquals(
+            0.0,
+            result.pValue,
+            1e-15,
+            "p should be 0 for two-sided when mean != mu and se=0",
+        )
     }
 
     @Test
@@ -224,8 +238,17 @@ class TTestTest {
         // All values = 2.0, mu = 5.0: se=0, diff<0 → t=-Inf, p=0 (two-sided)
         val sample = doubleArrayOf(2.0, 2.0, 2.0, 2.0)
         val result = tTest(sample, mu = 5.0)
-        assertEquals(Double.NEGATIVE_INFINITY, result.statistic, "t should be -Inf when mean < mu and se=0")
-        assertEquals(0.0, result.pValue, 1e-15, "p should be 0 for two-sided when mean != mu and se=0")
+        assertEquals(
+            Double.NEGATIVE_INFINITY,
+            result.statistic,
+            "t should be -Inf when mean < mu and se=0",
+        )
+        assertEquals(
+            0.0,
+            result.pValue,
+            1e-15,
+            "p should be 0 for two-sided when mean != mu and se=0",
+        )
     }
 
     @Test
@@ -257,7 +280,11 @@ class TTestTest {
         val s1 = doubleArrayOf(10.0, 10.0, 10.0)
         val s2 = doubleArrayOf(5.0, 5.0, 5.0)
         val result = tTest(s1, s2)
-        assertEquals(Double.POSITIVE_INFINITY, result.statistic, "t should be +Inf when mean1 > mean2 and se=0")
+        assertEquals(
+            Double.POSITIVE_INFINITY,
+            result.statistic,
+            "t should be +Inf when mean1 > mean2 and se=0",
+        )
         assertEquals(0.0, result.pValue, 1e-15, "p should be 0 when means differ and se=0")
         val ci = result.confidenceInterval!!
         assertEquals(5.0, ci.lower, 1e-10, "CI should be a point at the difference")
@@ -280,7 +307,12 @@ class TTestTest {
         val s2 = doubleArrayOf(5.0, 5.0, 5.0)
         // mean1 > mean2, so GREATER → p=0, LESS → p=1
         val greater = tTest(s1, s2, alternative = Alternative.GREATER)
-        assertEquals(0.0, greater.pValue, 1e-15, "GREATER p should be 0 when mean1 > mean2 and se=0")
+        assertEquals(
+            0.0,
+            greater.pValue,
+            1e-15,
+            "GREATER p should be 0 when mean1 > mean2 and se=0",
+        )
         val less = tTest(s1, s2, alternative = Alternative.LESS)
         assertEquals(1.0, less.pValue, 1e-15, "LESS p should be 1 when mean1 > mean2 and se=0")
     }

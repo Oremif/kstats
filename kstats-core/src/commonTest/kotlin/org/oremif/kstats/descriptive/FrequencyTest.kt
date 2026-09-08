@@ -1,10 +1,10 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class FrequencyTest {
 
@@ -37,9 +37,9 @@ class FrequencyTest {
         val freq = Frequency<String>()
         freq.addAll(listOf("a", "a", "b", "b", "b", "c"))
 
-        assertEquals(2L, freq.cumulativeCount("a"))  // a=2
-        assertEquals(5L, freq.cumulativeCount("b"))  // a=2 + b=3
-        assertEquals(6L, freq.cumulativeCount("c"))  // a=2 + b=3 + c=1
+        assertEquals(2L, freq.cumulativeCount("a")) // a=2
+        assertEquals(5L, freq.cumulativeCount("b")) // a=2 + b=3
+        assertEquals(6L, freq.cumulativeCount("c")) // a=2 + b=3 + c=1
     }
 
     @Test
@@ -289,8 +289,8 @@ class FrequencyTest {
         freq.addAll(listOf(1, 1, 3, 3, 3, 5))
 
         // value 2 is not present, but cumulative should include keys ≤ 2
-        assertEquals(2L, freq.cumulativeCount(2))  // only 1's
-        assertEquals(5L, freq.cumulativeCount(4))  // 1's + 3's
+        assertEquals(2L, freq.cumulativeCount(2)) // only 1's
+        assertEquals(5L, freq.cumulativeCount(4)) // 1's + 3's
     }
 
     @Test

@@ -1,9 +1,9 @@
 package org.oremif.kstats.sampling
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs
 import kotlin.random.Random
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 /**
  * A biased coin that lands heads (true) with the given [probability].
@@ -21,7 +21,8 @@ import kotlin.random.Random
  */
 public class WeightedCoin(public val probability: Double, private val random: Random = Random) {
     init {
-        if (probability !in 0.0..1.0) throw InvalidParameterException("probability must be in [0, 1], got $probability")
+        if (probability !in 0.0..1.0)
+            throw InvalidParameterException("probability must be in [0, 1], got $probability")
     }
 
     /**
@@ -35,8 +36,8 @@ public class WeightedCoin(public val probability: Double, private val random: Ra
 /**
  * A weighted die that produces outcomes with probabilities proportional to their weights.
  *
- * Weights are normalized internally so they do not need to sum to 1. Uses a cumulative
- * weight lookup with binary search for O(log n) roll time, where n is the number of outcomes.
+ * Weights are normalized internally so they do not need to sum to 1. Uses a cumulative weight
+ * lookup with binary search for O(log n) roll time, where n is the number of outcomes.
  *
  * ### Example:
  * ```kotlin
@@ -45,14 +46,13 @@ public class WeightedCoin(public val probability: Double, private val random: Ra
  * ```
  *
  * @param T the type of outcomes.
- * @param weights a map from each outcome to its non-negative finite weight. At least one
- * weight must be positive. The iteration order of the map determines the internal ordering
- * of outcomes; use an insertion-ordered map (e.g. `linkedMapOf`) for reproducible results
- * with a seeded [random].
+ * @param weights a map from each outcome to its non-negative finite weight. At least one weight
+ *   must be positive. The iteration order of the map determines the internal ordering of outcomes;
+ *   use an insertion-ordered map (e.g. `linkedMapOf`) for reproducible results with a seeded
+ *   [random].
  * @param random the random number generator. Defaults to [Random].
  * @throws InsufficientDataException if [weights] is empty.
- * @throws InvalidParameterException if any weight is negative, non-finite, or all weights
- * are zero.
+ * @throws InvalidParameterException if any weight is negative, non-finite, or all weights are zero.
  */
 public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random = Random) {
     private val outcomes: List<T>
@@ -67,7 +67,8 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
             if (!w.isFinite()) throw InvalidParameterException("weights must be finite")
             if (w < 0.0) throw InvalidParameterException("weights must be non-negative")
             val t = totalWeight + w
-            compensation += if (abs(totalWeight) >= abs(w)) (totalWeight - t) + w else (w - t) + totalWeight
+            compensation +=
+                if (abs(totalWeight) >= abs(w)) (totalWeight - t) + w else (w - t) + totalWeight
             totalWeight = t
         }
         totalWeight += compensation
@@ -86,8 +87,7 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
     }
 
     /**
-     * Rolls the die and returns one outcome, selected with probability proportional
-     * to its weight.
+     * Rolls the die and returns one outcome, selected with probability proportional to its weight.
      *
      * @return a randomly selected outcome of type [T].
      */
@@ -99,9 +99,8 @@ public class WeightedDice<T>(weights: Map<T, Double>, private val random: Random
 }
 
 /**
- * Finds the leftmost index in a sorted [array] where `array[index] > value`.
- * Uses strict `>` so that zero-weight outcomes (whose cumulative weight equals
- * the previous one) are never selected.
+ * Finds the leftmost index in a sorted [array] where `array[index] > value`. Uses strict `>` so
+ * that zero-weight outcomes (whose cumulative weight equals the previous one) are never selected.
  */
 private fun cumulativeBinarySearch(array: DoubleArray, value: Double): Int {
     var low = 0
@@ -120,9 +119,8 @@ private fun cumulativeBinarySearch(array: DoubleArray, value: Double): Int {
 /**
  * Draws a random sample of [n] elements without replacement.
  *
- * Uses a partial Fisher-Yates shuffle to select [n] elements in O(n) time.
- * Each element can appear at most once in the result. The collection is materialized
- * to a mutable list internally.
+ * Uses a partial Fisher-Yates shuffle to select [n] elements in O(n) time. Each element can appear
+ * at most once in the result. The collection is materialized to a mutable list internally.
  *
  * ### Example:
  * ```kotlin
@@ -137,7 +135,8 @@ private fun cumulativeBinarySearch(array: DoubleArray, value: Double): Int {
 public fun <T> Iterable<T>.randomSample(n: Int, random: Random = Random): List<T> {
     val list = toMutableList()
     if (n < 0) throw InvalidParameterException("n must be non-negative")
-    if (n > list.size) throw InvalidParameterException("n ($n) cannot exceed collection size (${list.size})")
+    if (n > list.size)
+        throw InvalidParameterException("n ($n) cannot exceed collection size (${list.size})")
 
     // Fisher-Yates shuffle for first n elements
     for (i in 0 until n) {
@@ -152,9 +151,9 @@ public fun <T> Iterable<T>.randomSample(n: Int, random: Random = Random): List<T
 /**
  * Draws a bootstrap sample of [n] elements with replacement.
  *
- * Bootstrap sampling randomly picks elements from the list, allowing the same element
- * to be chosen multiple times. This is commonly used for estimating the sampling
- * distribution of a statistic (bootstrap method).
+ * Bootstrap sampling randomly picks elements from the list, allowing the same element to be chosen
+ * multiple times. This is commonly used for estimating the sampling distribution of a statistic
+ * (bootstrap method).
  *
  * ### Example:
  * ```kotlin
@@ -175,8 +174,8 @@ public fun <T> List<T>.bootstrapSample(n: Int, random: Random = Random): List<T>
 /**
  * Draws a bootstrap sample of [n] elements with replacement.
  *
- * This is a convenience overload that accepts any [Iterable]. The collection is
- * materialized to a list internally.
+ * This is a convenience overload that accepts any [Iterable]. The collection is materialized to a
+ * list internally.
  *
  * @param T the type of elements.
  * @param n the number of elements to draw. Must be non-negative.

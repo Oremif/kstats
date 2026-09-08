@@ -1,9 +1,9 @@
 package org.oremif.kstats.benchmark.distributions
 
 import kotlinx.benchmark.*
-import org.oremif.kstats.distributions.LogNormalDistribution
 import org.apache.commons.math3.distribution.LogNormalDistribution as CommonsLogNormal
 import org.openjdk.jmh.annotations.State as JmhState
+import org.oremif.kstats.distributions.LogNormalDistribution
 
 @JmhState(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
@@ -18,22 +18,19 @@ class LogNormalBenchmark {
 
     // ===== PDF =====
 
-    @Benchmark
-    fun kstatsLogNormalPdf(): Double = kDist.pdf(xValue)
-    @Benchmark
-    fun commonsLogNormalPdf(): Double = cDist.density(xValue)
+    @Benchmark fun kstatsLogNormalPdf(): Double = kDist.pdf(xValue)
+
+    @Benchmark fun commonsLogNormalPdf(): Double = cDist.density(xValue)
 
     // ===== CDF =====
 
-    @Benchmark
-    fun kstatsLogNormalCdf(): Double = kDist.cdf(xValue)
-    @Benchmark
-    fun commonsLogNormalCdf(): Double = cDist.cumulativeProbability(xValue)
+    @Benchmark fun kstatsLogNormalCdf(): Double = kDist.cdf(xValue)
+
+    @Benchmark fun commonsLogNormalCdf(): Double = cDist.cumulativeProbability(xValue)
 
     // ===== Quantile =====
 
-    @Benchmark
-    fun kstatsLogNormalQuantile(): Double = kDist.quantile(pValue)
-    @Benchmark
-    fun commonsLogNormalQuantile(): Double = cDist.inverseCumulativeProbability(pValue)
+    @Benchmark fun kstatsLogNormalQuantile(): Double = kDist.quantile(pValue)
+
+    @Benchmark fun commonsLogNormalQuantile(): Double = cDist.inverseCumulativeProbability(pValue)
 }

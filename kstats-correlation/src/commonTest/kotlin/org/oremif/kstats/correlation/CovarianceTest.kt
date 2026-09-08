@@ -1,12 +1,12 @@
 package org.oremif.kstats.correlation
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.descriptive.PopulationKind
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.descriptive.PopulationKind
 
 class CovarianceTest {
 
@@ -156,7 +156,10 @@ class CovarianceTest {
         val x = doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0)
         val y = doubleArrayOf(2.0, 4.0, 6.0)
         val result = covariance(x, y)
-        assertTrue(result.isNaN() || result.isInfinite(), "Inf input should produce non-finite result")
+        assertTrue(
+            result.isNaN() || result.isInfinite(),
+            "Inf input should produce non-finite result",
+        )
     }
 
     // ── Validation ─────────────────────────────────────────────────────

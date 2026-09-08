@@ -1,21 +1,20 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.abs
+import kotlin.math.sqrt
 import org.oremif.kstats.core.exceptions.DegenerateDataException
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.distributions.NormalDistribution
 import org.oremif.kstats.sampling.TieMethod
 import org.oremif.kstats.sampling.rank
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 /**
  * Performs the Mann-Whitney U test (also known as the Wilcoxon rank-sum test).
  *
- * The null hypothesis is that the two samples are drawn from the same distribution.
- * This is a non-parametric test that does not assume normality — it compares the ranks
- * of the combined samples rather than the raw values. Uses a normal approximation for
- * computing the p-value.
+ * The null hypothesis is that the two samples are drawn from the same distribution. This is a
+ * non-parametric test that does not assume normality — it compares the ranks of the combined
+ * samples rather than the raw values. Uses a normal approximation for computing the p-value.
  *
  * ### Example:
  * ```kotlin
@@ -31,16 +30,18 @@ import kotlin.math.sqrt
  *
  * @param sample1 the first sample. Must not be empty.
  * @param sample2 the second sample. Must not be empty.
- * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED].
- * @return a [TestResult] containing the U statistic (minimum of U1 and U2), p-value,
- * and additional info with "U1", "U2", and "z".
+ * @param alternative the direction of the alternative hypothesis. Defaults to
+ *   [Alternative.TWO_SIDED].
+ * @return a [TestResult] containing the U statistic (minimum of U1 and U2), p-value, and additional
+ *   info with "U1", "U2", and "z".
  */
 public fun mannWhitneyUTest(
     sample1: DoubleArray,
     sample2: DoubleArray,
-    alternative: Alternative = Alternative.TWO_SIDED
+    alternative: Alternative = Alternative.TWO_SIDED,
 ): TestResult {
-    if (sample1.isEmpty() || sample2.isEmpty()) throw InsufficientDataException("Samples must not be empty")
+    if (sample1.isEmpty() || sample2.isEmpty())
+        throw InsufficientDataException("Samples must not be empty")
 
     val n1 = sample1.size
     val n2 = sample2.size
@@ -71,45 +72,47 @@ public fun mannWhitneyUTest(
         tieCorrection += t * t * t - t
         ti = tj
     }
-    val sigma = sqrt(n1.toDouble() * n2 / 12.0 * ((n + 1) - tieCorrection / (n.toDouble() * (n - 1))))
+    val sigma =
+        sqrt(n1.toDouble() * n2 / 12.0 * ((n + 1) - tieCorrection / (n.toDouble() * (n - 1))))
     val z = if (sigma == 0.0) 0.0 else (u1 - mu) / sigma
 
     // Continuity correction (matches scipy default use_continuity=True)
     val normal = NormalDistribution.STANDARD
-    val pValue = when (alternative) {
-        Alternative.TWO_SIDED -> {
-            val zc = if (sigma == 0.0) 0.0 else (abs(u1 - mu) - 0.5).coerceAtLeast(0.0) / sigma
-            2.0 * normal.sf(zc)
+    val pValue =
+        when (alternative) {
+            Alternative.TWO_SIDED -> {
+                val zc = if (sigma == 0.0) 0.0 else (abs(u1 - mu) - 0.5).coerceAtLeast(0.0) / sigma
+                2.0 * normal.sf(zc)
+            }
+            Alternative.LESS -> {
+                val zc = if (sigma == 0.0) 0.0 else (u1 - mu + 0.5) / sigma
+                normal.cdf(zc)
+            }
+            Alternative.GREATER -> {
+                val zc = if (sigma == 0.0) 0.0 else (u1 - mu - 0.5) / sigma
+                normal.sf(zc)
+            }
         }
-        Alternative.LESS -> {
-            val zc = if (sigma == 0.0) 0.0 else (u1 - mu + 0.5) / sigma
-            normal.cdf(zc)
-        }
-        Alternative.GREATER -> {
-            val zc = if (sigma == 0.0) 0.0 else (u1 - mu - 0.5) / sigma
-            normal.sf(zc)
-        }
-    }
 
     return TestResult(
         testName = "Mann-Whitney U Test",
         statistic = u1,
         pValue = pValue.coerceIn(0.0, 1.0),
         alternative = alternative,
-        additionalInfo = mapOf("U1" to u1, "U2" to u2, "z" to z)
+        additionalInfo = mapOf("U1" to u1, "U2" to u2, "z" to z),
     )
 }
 
 /**
  * Performs the Wilcoxon signed-rank test.
  *
- * In one-sample mode (when [sample2] is `null`), tests whether the median of [sample1]
- * differs from zero. In paired mode (when [sample2] is provided), tests whether the median
- * of the paired differences is zero. This is a non-parametric alternative to the paired
- * t-test that does not assume normality. Uses a normal approximation for computing the p-value.
+ * In one-sample mode (when [sample2] is `null`), tests whether the median of [sample1] differs from
+ * zero. In paired mode (when [sample2] is provided), tests whether the median of the paired
+ * differences is zero. This is a non-parametric alternative to the paired t-test that does not
+ * assume normality. Uses a normal approximation for computing the p-value.
  *
- * Zero differences are removed before ranking. The test statistic W is the sum of positive
- * signed ranks.
+ * Zero differences are removed before ranking. The test statistic W is the sum of positive signed
+ * ranks.
  *
  * ### Example:
  * ```kotlin
@@ -124,24 +127,27 @@ public fun mannWhitneyUTest(
  * ```
  *
  * @param sample1 the first sample, or the only sample in one-sample mode.
- * @param sample2 the second sample for paired mode. Must have the same size as [sample1]
- * if provided. Defaults to `null` (one-sample mode).
- * @param alternative the direction of the alternative hypothesis. Defaults to [Alternative.TWO_SIDED].
- * @return a [TestResult] containing the W+ statistic, p-value, and additional info
- * with "wPlus", "wMinus", and "z".
+ * @param sample2 the second sample for paired mode. Must have the same size as [sample1] if
+ *   provided. Defaults to `null` (one-sample mode).
+ * @param alternative the direction of the alternative hypothesis. Defaults to
+ *   [Alternative.TWO_SIDED].
+ * @return a [TestResult] containing the W+ statistic, p-value, and additional info with "wPlus",
+ *   "wMinus", and "z".
  * @throws DegenerateDataException if all differences are zero after pairing or in one-sample mode.
  */
 public fun wilcoxonSignedRankTest(
     sample1: DoubleArray,
     sample2: DoubleArray? = null,
-    alternative: Alternative = Alternative.TWO_SIDED
+    alternative: Alternative = Alternative.TWO_SIDED,
 ): TestResult {
-    val diffs = if (sample2 != null) {
-        if (sample1.size != sample2.size) throw InvalidParameterException("Samples must have the same size")
-        DoubleArray(sample1.size) { sample1[it] - sample2[it] }
-    } else {
-        sample1
-    }
+    val diffs =
+        if (sample2 != null) {
+            if (sample1.size != sample2.size)
+                throw InvalidParameterException("Samples must have the same size")
+            DoubleArray(sample1.size) { sample1[it] - sample2[it] }
+        } else {
+            sample1
+        }
 
     // Remove zeros and extract absolute values + signs in one pass
     var nonZeroCount = 0
@@ -193,26 +199,27 @@ public fun wilcoxonSignedRankTest(
 
     // Continuity correction (matches scipy default correction=True)
     val normal = NormalDistribution.STANDARD
-    val pValue = when (alternative) {
-        Alternative.TWO_SIDED -> {
-            val zc = if (sigma == 0.0) 0.0 else (abs(w - mu) - 0.5).coerceAtLeast(0.0) / sigma
-            2.0 * normal.sf(zc)
+    val pValue =
+        when (alternative) {
+            Alternative.TWO_SIDED -> {
+                val zc = if (sigma == 0.0) 0.0 else (abs(w - mu) - 0.5).coerceAtLeast(0.0) / sigma
+                2.0 * normal.sf(zc)
+            }
+            Alternative.LESS -> {
+                val zc = if (sigma == 0.0) 0.0 else (w - mu + 0.5) / sigma
+                normal.cdf(zc)
+            }
+            Alternative.GREATER -> {
+                val zc = if (sigma == 0.0) 0.0 else (w - mu - 0.5) / sigma
+                normal.sf(zc)
+            }
         }
-        Alternative.LESS -> {
-            val zc = if (sigma == 0.0) 0.0 else (w - mu + 0.5) / sigma
-            normal.cdf(zc)
-        }
-        Alternative.GREATER -> {
-            val zc = if (sigma == 0.0) 0.0 else (w - mu - 0.5) / sigma
-            normal.sf(zc)
-        }
-    }
 
     return TestResult(
         testName = "Wilcoxon Signed-Rank Test",
         statistic = w,
         pValue = pValue.coerceIn(0.0, 1.0),
         alternative = alternative,
-        additionalInfo = mapOf("wPlus" to wPlus, "wMinus" to wMinus, "z" to z)
+        additionalInfo = mapOf("wPlus" to wPlus, "wMinus" to wMinus, "z" to z),
     )
 }

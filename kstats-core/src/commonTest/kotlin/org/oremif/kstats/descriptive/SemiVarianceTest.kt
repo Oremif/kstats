@@ -1,14 +1,15 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 
 class SemiVarianceTest {
 
     private val data = doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
+
     // mean = 5.0
     // Below mean: diffs = -3,-1,-1,-1 → sum of squares = 12
     // Above mean: diffs = +2,+4 → sum of squares = 20
@@ -17,7 +18,11 @@ class SemiVarianceTest {
 
     @Test
     fun testDownsideSampleVariance() {
-        assertEquals(12.0 / 7.0, data.semiVariance(direction = SemiVarianceDirection.DOWNSIDE), 1e-10)
+        assertEquals(
+            12.0 / 7.0,
+            data.semiVariance(direction = SemiVarianceDirection.DOWNSIDE),
+            1e-10,
+        )
     }
 
     @Test
@@ -29,8 +34,11 @@ class SemiVarianceTest {
     fun testDownsidePopulationVariance() {
         assertEquals(
             12.0 / 8.0,
-            data.semiVariance(direction = SemiVarianceDirection.DOWNSIDE, kind = PopulationKind.POPULATION),
-            1e-10
+            data.semiVariance(
+                direction = SemiVarianceDirection.DOWNSIDE,
+                kind = PopulationKind.POPULATION,
+            ),
+            1e-10,
         )
     }
 
@@ -38,8 +46,11 @@ class SemiVarianceTest {
     fun testUpsidePopulationVariance() {
         assertEquals(
             20.0 / 8.0,
-            data.semiVariance(direction = SemiVarianceDirection.UPSIDE, kind = PopulationKind.POPULATION),
-            1e-10
+            data.semiVariance(
+                direction = SemiVarianceDirection.UPSIDE,
+                kind = PopulationKind.POPULATION,
+            ),
+            1e-10,
         )
     }
 
@@ -54,8 +65,16 @@ class SemiVarianceTest {
 
     @Test
     fun testSumPropertyPopulation() {
-        val down = data.semiVariance(direction = SemiVarianceDirection.DOWNSIDE, kind = PopulationKind.POPULATION)
-        val up = data.semiVariance(direction = SemiVarianceDirection.UPSIDE, kind = PopulationKind.POPULATION)
+        val down =
+            data.semiVariance(
+                direction = SemiVarianceDirection.DOWNSIDE,
+                kind = PopulationKind.POPULATION,
+            )
+        val up =
+            data.semiVariance(
+                direction = SemiVarianceDirection.UPSIDE,
+                kind = PopulationKind.POPULATION,
+            )
         assertEquals(data.toList().variance(PopulationKind.POPULATION), down + up, 1e-10)
     }
 
@@ -65,14 +84,22 @@ class SemiVarianceTest {
     fun testCustomThresholdDownside() {
         // [1,2,3,4,5], threshold=3.0: below diffs = -2,-1 → sum of squares = 5
         val arr = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
-        assertEquals(5.0 / 4.0, arr.semiVariance(threshold = 3.0, direction = SemiVarianceDirection.DOWNSIDE), 1e-10)
+        assertEquals(
+            5.0 / 4.0,
+            arr.semiVariance(threshold = 3.0, direction = SemiVarianceDirection.DOWNSIDE),
+            1e-10,
+        )
     }
 
     @Test
     fun testCustomThresholdUpside() {
         // [1,2,3,4,5], threshold=3.0: above diffs = +1,+2 → sum of squares = 5
         val arr = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
-        assertEquals(5.0 / 4.0, arr.semiVariance(threshold = 3.0, direction = SemiVarianceDirection.UPSIDE), 1e-10)
+        assertEquals(
+            5.0 / 4.0,
+            arr.semiVariance(threshold = 3.0, direction = SemiVarianceDirection.UPSIDE),
+            1e-10,
+        )
     }
 
     // ── edge cases ──────────────────────────────────────────────────────────
@@ -104,14 +131,22 @@ class SemiVarianceTest {
     fun testAllOnOneSideDownside() {
         // All values below threshold → upside is 0
         val arr = doubleArrayOf(1.0, 2.0, 3.0)
-        assertEquals(0.0, arr.semiVariance(threshold = 10.0, direction = SemiVarianceDirection.UPSIDE), 1e-10)
+        assertEquals(
+            0.0,
+            arr.semiVariance(threshold = 10.0, direction = SemiVarianceDirection.UPSIDE),
+            1e-10,
+        )
     }
 
     @Test
     fun testAllOnOneSideUpside() {
         // All values above threshold → downside is 0
         val arr = doubleArrayOf(10.0, 20.0, 30.0)
-        assertEquals(0.0, arr.semiVariance(threshold = 0.0, direction = SemiVarianceDirection.DOWNSIDE), 1e-10)
+        assertEquals(
+            0.0,
+            arr.semiVariance(threshold = 0.0, direction = SemiVarianceDirection.DOWNSIDE),
+            1e-10,
+        )
     }
 
     // ── default parameters ──────────────────────────────────────────────────
@@ -119,10 +154,11 @@ class SemiVarianceTest {
     @Test
     fun testDefaultParameters() {
         val defaultResult = data.semiVariance()
-        val explicitResult = data.semiVariance(
-            threshold = data.mean(),
-            direction = SemiVarianceDirection.DOWNSIDE
-        )
+        val explicitResult =
+            data.semiVariance(
+                threshold = data.mean(),
+                direction = SemiVarianceDirection.DOWNSIDE,
+            )
         assertEquals(explicitResult, defaultResult, 1e-15)
     }
 
@@ -156,12 +192,12 @@ class SemiVarianceTest {
         assertEquals(
             data.semiVariance(direction = SemiVarianceDirection.DOWNSIDE),
             list.semiVariance(direction = SemiVarianceDirection.DOWNSIDE),
-            1e-15
+            1e-15,
         )
         assertEquals(
             data.semiVariance(direction = SemiVarianceDirection.UPSIDE),
             list.semiVariance(direction = SemiVarianceDirection.UPSIDE),
-            1e-15
+            1e-15,
         )
     }
 
@@ -170,12 +206,12 @@ class SemiVarianceTest {
         assertEquals(
             data.semiVariance(direction = SemiVarianceDirection.DOWNSIDE),
             data.asSequence().semiVariance(direction = SemiVarianceDirection.DOWNSIDE),
-            1e-15
+            1e-15,
         )
         assertEquals(
             data.semiVariance(direction = SemiVarianceDirection.UPSIDE),
             data.asSequence().semiVariance(direction = SemiVarianceDirection.UPSIDE),
-            1e-15
+            1e-15,
         )
     }
 
@@ -185,8 +221,7 @@ class SemiVarianceTest {
         val data = doubleArrayOf(1e200, -1e200)
         assertEquals(
             Double.POSITIVE_INFINITY,
-            data.semiVariance(threshold = 0.0, direction = SemiVarianceDirection.DOWNSIDE)
+            data.semiVariance(threshold = 0.0, direction = SemiVarianceDirection.DOWNSIDE),
         )
     }
-
 }

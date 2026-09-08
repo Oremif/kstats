@@ -6,8 +6,8 @@ import org.oremif.kstats.distributions.FDistribution
 /**
  * The result of a one-way ANOVA test.
  *
- * Contains the F-statistic, p-value, and the full ANOVA decomposition into between-group
- * and within-group components.
+ * Contains the F-statistic, p-value, and the full ANOVA decomposition into between-group and
+ * within-group components.
  *
  * ### Example:
  * ```kotlin
@@ -19,15 +19,16 @@ import org.oremif.kstats.distributions.FDistribution
  * ```
  *
  * @property fStatistic the F-statistic, computed as the ratio of between-group variance to
- * within-group variance. Larger values indicate greater differences between groups.
- * @property pValue the probability of observing an F-statistic at least as extreme as the
- * computed value, assuming all group means are equal. Smaller values indicate stronger
- * evidence that at least one group mean differs.
- * @property dfBetween the between-group degrees of freedom, equal to the number of groups minus one.
- * @property dfWithin the within-group degrees of freedom, equal to the total number of
- * observations minus the number of groups.
- * @property ssBetween the sum of squares between groups, measuring the variation due to
- * differences between group means.
+ *   within-group variance. Larger values indicate greater differences between groups.
+ * @property pValue the probability of observing an F-statistic at least as extreme as the computed
+ *   value, assuming all group means are equal. Smaller values indicate stronger evidence that at
+ *   least one group mean differs.
+ * @property dfBetween the between-group degrees of freedom, equal to the number of groups minus
+ *   one.
+ * @property dfWithin the within-group degrees of freedom, equal to the total number of observations
+ *   minus the number of groups.
+ * @property ssBetween the sum of squares between groups, measuring the variation due to differences
+ *   between group means.
  * @property ssWithin the sum of squares within groups, measuring the variation within each group.
  * @property msBetween the mean square between groups (ssBetween / dfBetween).
  * @property msWithin the mean square within groups (ssWithin / dfWithin).
@@ -40,16 +41,16 @@ public data class AnovaResult(
     val ssBetween: Double,
     val ssWithin: Double,
     val msBetween: Double,
-    val msWithin: Double
+    val msWithin: Double,
 )
 
 /**
  * Performs a one-way analysis of variance (ANOVA) test.
  *
- * The null hypothesis is that all group means are equal. ANOVA partitions the total
- * variation in the data into variation between groups and variation within groups,
- * then compares these using an F-test. A significant result indicates that at least
- * one group mean differs from the others, but does not identify which one.
+ * The null hypothesis is that all group means are equal. ANOVA partitions the total variation in
+ * the data into variation between groups and variation within groups, then compares these using an
+ * F-test. A significant result indicates that at least one group mean differs from the others, but
+ * does not identify which one.
  *
  * ### Example:
  * ```kotlin
@@ -65,11 +66,12 @@ public data class AnovaResult(
  *
  * @param groups two or more groups of observations, each with at least 2 elements.
  * @return an [AnovaResult] containing the F-statistic, p-value, and the full ANOVA table
- * decomposition (degrees of freedom, sums of squares, mean squares).
+ *   decomposition (degrees of freedom, sums of squares, mean squares).
  */
 public fun oneWayAnova(vararg groups: DoubleArray): AnovaResult {
     if (groups.size < 2) throw InsufficientDataException("ANOVA requires at least 2 groups")
-    if (!groups.all { it.size >= 2 }) throw InsufficientDataException("Each group must have at least 2 elements")
+    if (!groups.all { it.size >= 2 })
+        throw InsufficientDataException("Each group must have at least 2 elements")
 
     val k = groups.size
     val groupMeans = groups.map { it.average() }
@@ -108,7 +110,7 @@ public fun oneWayAnova(vararg groups: DoubleArray): AnovaResult {
             ssBetween = ssBetween,
             ssWithin = ssWithin,
             msBetween = msBetween,
-            msWithin = msWithin
+            msWithin = msWithin,
         )
     }
 
@@ -125,6 +127,6 @@ public fun oneWayAnova(vararg groups: DoubleArray): AnovaResult {
         ssBetween = ssBetween,
         ssWithin = ssWithin,
         msBetween = msBetween,
-        msWithin = msWithin
+        msWithin = msWithin,
     )
 }

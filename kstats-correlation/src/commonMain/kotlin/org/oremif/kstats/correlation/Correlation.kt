@@ -1,5 +1,7 @@
 package org.oremif.kstats.correlation
 
+import kotlin.math.abs
+import kotlin.math.sqrt
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.descriptive.PopulationKind
@@ -8,8 +10,6 @@ import org.oremif.kstats.distributions.NormalDistribution
 import org.oremif.kstats.distributions.StudentTDistribution
 import org.oremif.kstats.sampling.TieMethod
 import org.oremif.kstats.sampling.rank
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 /**
  * The result of a correlation computation.
@@ -23,35 +23,35 @@ import kotlin.math.sqrt
  * ```
  *
  * @property coefficient the correlation coefficient, ranging from -1.0 (perfect negative
- * correlation) through 0.0 (no correlation) to 1.0 (perfect positive correlation). Returns
- * [Double.NaN] when the correlation is undefined (e.g. constant input).
- * @property pValue the two-sided p-value for testing the null hypothesis that the true
- * correlation is zero. Smaller values indicate stronger evidence of a real association.
- * Returns [Double.NaN] when the p-value cannot be computed.
+ *   correlation) through 0.0 (no correlation) to 1.0 (perfect positive correlation). Returns
+ *   [Double.NaN] when the correlation is undefined (e.g. constant input).
+ * @property pValue the two-sided p-value for testing the null hypothesis that the true correlation
+ *   is zero. Smaller values indicate stronger evidence of a real association. Returns [Double.NaN]
+ *   when the p-value cannot be computed.
  * @property n the number of observations used in the computation.
  */
 @ConsistentCopyVisibility
 public data class CorrelationResult
-@PublishedApi internal constructor(
+@PublishedApi
+internal constructor(
     val coefficient: Double,
     val pValue: Double,
-    val n: Int
+    val n: Int,
 )
 
 /**
  * Computes the Pearson product-moment correlation coefficient between two arrays.
  *
- * The Pearson correlation measures the strength and direction of the linear relationship
- * between two variables. A value of 1.0 indicates a perfect positive linear relationship,
- * -1.0 indicates a perfect negative linear relationship, and 0.0 indicates no linear
- * relationship.
+ * The Pearson correlation measures the strength and direction of the linear relationship between
+ * two variables. A value of 1.0 indicates a perfect positive linear relationship, -1.0 indicates a
+ * perfect negative linear relationship, and 0.0 indicates no linear relationship.
  *
  * The p-value is computed using a two-sided t-test for the null hypothesis that the true
- * correlation is zero. Uses the numerically stable form (1-r)(1+r) instead of (1-r²) to
- * avoid catastrophic cancellation when r is close to ±1.
+ * correlation is zero. Uses the numerically stable form (1-r)(1+r) instead of (1-r²) to avoid
+ * catastrophic cancellation when r is close to ±1.
  *
- * Returns [Double.NaN] for both coefficient and p-value when either array has zero variance
- * (all values identical).
+ * Returns [Double.NaN] for both coefficient and p-value when either array has zero variance (all
+ * values identical).
  *
  * ### Example:
  * ```kotlin
@@ -115,12 +115,12 @@ public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult
 /**
  * Computes the Spearman rank correlation coefficient between two arrays.
  *
- * The Spearman correlation is a non-parametric measure of the monotonic relationship between
- * two variables. Unlike Pearson, it does not assume linearity — it detects whether the
- * variables tend to increase or decrease together, regardless of the rate.
+ * The Spearman correlation is a non-parametric measure of the monotonic relationship between two
+ * variables. Unlike Pearson, it does not assume linearity — it detects whether the variables tend
+ * to increase or decrease together, regardless of the rate.
  *
- * Computed by applying the Pearson correlation to the average-method ranks of the input
- * arrays. Tied values receive the average of the ranks they would occupy.
+ * Computed by applying the Pearson correlation to the average-method ranks of the input arrays.
+ * Tied values receive the average of the ranks they would occupy.
  *
  * ### Example:
  * ```kotlin
@@ -130,8 +130,8 @@ public fun pearsonCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult
  * result.coefficient // 1.0 (perfect monotonic relationship)
  * ```
  *
- * Returns [Double.NaN] for both coefficient and p-value when either array contains NaN,
- * or when either array has zero variance (all values identical after ranking).
+ * Returns [Double.NaN] for both coefficient and p-value when either array contains NaN, or when
+ * either array has zero variance (all values identical after ranking).
  *
  * @param x the first array of observations.
  * @param y the second array of observations, must have the same size as [x].
@@ -158,17 +158,17 @@ public fun spearmanCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResul
 /**
  * Computes Kendall's tau-b rank correlation coefficient between two arrays.
  *
- * Kendall's tau-b measures the ordinal association between two variables. It counts the
- * number of concordant pairs (both values increase together) versus discordant pairs
- * (one increases while the other decreases), with an adjustment for ties. Values range
- * from -1.0 (all pairs discordant) to 1.0 (all pairs concordant).
+ * Kendall's tau-b measures the ordinal association between two variables. It counts the number of
+ * concordant pairs (both values increase together) versus discordant pairs (one increases while the
+ * other decreases), with an adjustment for ties. Values range from -1.0 (all pairs discordant) to
+ * 1.0 (all pairs concordant).
  *
- * Uses an O(n log n) merge-sort algorithm (Knight, 1966) for counting discordant pairs,
- * rather than the naive O(n²) approach. The p-value is computed using a normal approximation
- * with the ties-adjusted variance formula (Kendall, 1970).
+ * Uses an O(n log n) merge-sort algorithm (Knight, 1966) for counting discordant pairs, rather than
+ * the naive O(n²) approach. The p-value is computed using a normal approximation with the
+ * ties-adjusted variance formula (Kendall, 1970).
  *
- * Returns [Double.NaN] for both coefficient and p-value when all values in either array
- * are identical (denominator becomes zero).
+ * Returns [Double.NaN] for both coefficient and p-value when all values in either array are
+ * identical (denominator becomes zero).
  *
  * ### Example:
  * ```kotlin
@@ -279,9 +279,10 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
     val nD = n.toDouble()
     val v0 = nD * (nD - 1.0) * (2.0 * nD + 5.0)
     // n >= 3 is guaranteed by the guard at the top, so all terms are always computed
-    val varS = (v0 - vt - vu) / 18.0 +
-        v1x * v1y / (2.0 * nD * (nD - 1.0)) +
-        v2x * v2y / (9.0 * nD * (nD - 1.0) * (nD - 2.0))
+    val varS =
+        (v0 - vt - vu) / 18.0 +
+            v1x * v1y / (2.0 * nD * (nD - 1.0)) +
+            v2x * v2y / (9.0 * nD * (nD - 1.0) * (nD - 2.0))
 
     if (varS <= 0.0) {
         return CorrelationResult(tau, if (tau == 0.0) 1.0 else 0.0, n)
@@ -296,18 +297,17 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
 /**
  * Computes the point-biserial correlation between a binary variable and a continuous variable.
  *
- * The point-biserial correlation measures the strength and direction of the association
- * between a dichotomous (two-category) variable and a continuous variable. It is
- * mathematically equivalent to the Pearson correlation when the binary variable is coded
- * as 0 and 1. The binary variable [x] may use any two distinct finite values — they are
- * automatically remapped so that the smaller value becomes 0 and the larger becomes 1,
- * ensuring a consistent sign convention.
+ * The point-biserial correlation measures the strength and direction of the association between a
+ * dichotomous (two-category) variable and a continuous variable. It is mathematically equivalent to
+ * the Pearson correlation when the binary variable is coded as 0 and 1. The binary variable [x] may
+ * use any two distinct finite values — they are automatically remapped so that the smaller value
+ * becomes 0 and the larger becomes 1, ensuring a consistent sign convention.
  *
- * Delegates to [pearsonCorrelation] after remapping, so the p-value is computed using the
- * same numerically stable t-test with (1-r)(1+r) cancellation avoidance.
+ * Delegates to [pearsonCorrelation] after remapping, so the p-value is computed using the same
+ * numerically stable t-test with (1-r)(1+r) cancellation avoidance.
  *
- * Returns [Double.NaN] for both coefficient and p-value when the continuous variable has
- * zero variance (all values identical).
+ * Returns [Double.NaN] for both coefficient and p-value when the continuous variable has zero
+ * variance (all values identical).
  *
  * ### Example:
  * ```kotlin
@@ -319,13 +319,14 @@ public fun kendallTau(x: DoubleArray, y: DoubleArray): CorrelationResult {
  * result.n           // 6
  * ```
  *
- * @param x the binary variable. Must contain exactly 2 distinct finite values.
- * Non-finite values (NaN, Inf) are skipped during the distinct-value scan but
- * passed through to Pearson, where they propagate as NaN.
+ * @param x the binary variable. Must contain exactly 2 distinct finite values. Non-finite values
+ *   (NaN, Inf) are skipped during the distinct-value scan but passed through to Pearson, where they
+ *   propagate as NaN.
  * @param y the continuous variable, must have the same size as [x].
- * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample size.
- * @throws InvalidParameterException if [x] and [y] have different sizes, or if [x] does not
- * contain exactly 2 distinct finite values.
+ * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample
+ *   size.
+ * @throws InvalidParameterException if [x] and [y] have different sizes, or if [x] does not contain
+ *   exactly 2 distinct finite values.
  * @throws InsufficientDataException if there are fewer than 3 observations.
  */
 public fun pointBiserialCorrelation(x: DoubleArray, y: DoubleArray): CorrelationResult {
@@ -357,13 +358,13 @@ public fun pointBiserialCorrelation(x: DoubleArray, y: DoubleArray): Correlation
 /**
  * Computes the point-biserial correlation between a boolean variable and a continuous variable.
  *
- * The point-biserial correlation measures the strength and direction of the association
- * between a dichotomous (two-category) variable and a continuous variable. This overload
- * accepts a [BooleanArray] where `false` is mapped to 0.0 and `true` to 1.0, then delegates
- * to [pearsonCorrelation].
+ * The point-biserial correlation measures the strength and direction of the association between a
+ * dichotomous (two-category) variable and a continuous variable. This overload accepts a
+ * [BooleanArray] where `false` is mapped to 0.0 and `true` to 1.0, then delegates to
+ * [pearsonCorrelation].
  *
- * When all boolean values are the same (all `true` or all `false`), the binary variable has
- * zero variance, and both coefficient and p-value are [Double.NaN].
+ * When all boolean values are the same (all `true` or all `false`), the binary variable has zero
+ * variance, and both coefficient and p-value are [Double.NaN].
  *
  * ### Example:
  * ```kotlin
@@ -376,7 +377,8 @@ public fun pointBiserialCorrelation(x: DoubleArray, y: DoubleArray): Correlation
  *
  * @param x the binary variable as booleans (`false` = 0, `true` = 1).
  * @param y the continuous variable, must have the same size as [x].
- * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample size.
+ * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample
+ *   size.
  * @throws InvalidParameterException if [x] and [y] have different sizes.
  * @throws InsufficientDataException if there are fewer than 3 observations.
  */
@@ -389,13 +391,13 @@ public fun pointBiserialCorrelation(x: BooleanArray, y: DoubleArray): Correlatio
 }
 
 /**
- * Computes the point-biserial correlation between an integer-coded binary variable and a continuous variable.
+ * Computes the point-biserial correlation between an integer-coded binary variable and a continuous
+ * variable.
  *
- * The point-biserial correlation measures the strength and direction of the association
- * between a dichotomous (two-category) variable and a continuous variable. This overload
- * accepts an [IntArray] whose values are converted to Double and then validated as binary
- * (must contain exactly 2 distinct finite values). The smaller value is mapped to 0 and
- * the larger to 1.
+ * The point-biserial correlation measures the strength and direction of the association between a
+ * dichotomous (two-category) variable and a continuous variable. This overload accepts an
+ * [IntArray] whose values are converted to Double and then validated as binary (must contain
+ * exactly 2 distinct finite values). The smaller value is mapped to 0 and the larger to 1.
  *
  * ### Example:
  * ```kotlin
@@ -408,9 +410,10 @@ public fun pointBiserialCorrelation(x: BooleanArray, y: DoubleArray): Correlatio
  *
  * @param x the binary variable as integers. Must contain exactly 2 distinct values.
  * @param y the continuous variable, must have the same size as [x].
- * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample size.
- * @throws InvalidParameterException if [x] and [y] have different sizes, or if [x] does not
- * contain exactly 2 distinct values.
+ * @return a [CorrelationResult] containing the point-biserial r, two-sided p-value, and sample
+ *   size.
+ * @throws InvalidParameterException if [x] and [y] have different sizes, or if [x] does not contain
+ *   exactly 2 distinct values.
  * @throws InsufficientDataException if there are fewer than 3 observations.
  */
 public fun pointBiserialCorrelation(x: IntArray, y: DoubleArray): CorrelationResult {
@@ -424,19 +427,18 @@ public fun pointBiserialCorrelation(x: IntArray, y: DoubleArray): CorrelationRes
  * Computes the partial correlation between two variables while controlling for one or more
  * confounding variables.
  *
- * Partial correlation measures the linear association between [x] and [y] after removing
- * the effect of the [controls] variables. This is useful for determining whether an apparent
- * relationship between two variables is genuine or is explained by shared dependence on a
- * third variable.
+ * Partial correlation measures the linear association between [x] and [y] after removing the effect
+ * of the [controls] variables. This is useful for determining whether an apparent relationship
+ * between two variables is genuine or is explained by shared dependence on a third variable.
  *
- * Uses the precision matrix (inverse correlation matrix) method: builds the Pearson
- * correlation matrix of all variables, inverts it via Gaussian elimination with partial
- * pivoting, and extracts the partial correlation from the precision matrix elements.
+ * Uses the precision matrix (inverse correlation matrix) method: builds the Pearson correlation
+ * matrix of all variables, inverts it via Gaussian elimination with partial pivoting, and extracts
+ * the partial correlation from the precision matrix elements.
  *
  * When [controls] is empty, delegates directly to [pearsonCorrelation].
  *
- * Returns [Double.NaN] for both coefficient and p-value when the correlation matrix is
- * singular (e.g., collinear controls, constant variable, or degenerate input).
+ * Returns [Double.NaN] for both coefficient and p-value when the correlation matrix is singular
+ * (e.g., collinear controls, constant variable, or degenerate input).
  *
  * ### Example:
  * ```kotlin
@@ -451,15 +453,15 @@ public fun pointBiserialCorrelation(x: IntArray, y: DoubleArray): CorrelationRes
  *
  * @param x the first array of observations.
  * @param y the second array of observations, must have the same size as [x].
- * @param controls one or more control variables to partial out. Each must have the same size as [x].
- * If empty, returns the Pearson correlation between [x] and [y].
+ * @param controls one or more control variables to partial out. Each must have the same size as
+ *   [x]. If empty, returns the Pearson correlation between [x] and [y].
  * @return a [CorrelationResult] containing the partial correlation coefficient, two-sided p-value,
- * and sample size.
+ *   and sample size.
  */
 public fun partialCorrelation(
     x: DoubleArray,
     y: DoubleArray,
-    vararg controls: DoubleArray
+    vararg controls: DoubleArray,
 ): CorrelationResult {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
     for (c in controls) {
@@ -472,18 +474,20 @@ public fun partialCorrelation(
     if (k == 0) return pearsonCorrelation(x, y)
 
     // Need df >= 1 → n >= k + 3
-    if (n < k + 3) throw InsufficientDataException(
-        "Need at least ${k + 3} observations for $k control variable${if (k > 1) "s" else ""}, got $n"
-    )
+    if (n < k + 3)
+        throw InsufficientDataException(
+            "Need at least ${k + 3} observations for $k control variable${if (k > 1) "s" else ""}, got $n"
+        )
 
     // Build correlation matrix of [x, y, z1, ..., zk]
-    val allVars = Array(k + 2) { i ->
-        when (i) {
-            0 -> x
-            1 -> y
-            else -> controls[i - 2]
+    val allVars =
+        Array(k + 2) { i ->
+            when (i) {
+                0 -> x
+                1 -> y
+                else -> controls[i - 2]
+            }
         }
-    }
     val corrMatrix = correlationMatrix(*allVars)
 
     // Check for NaN in correlation matrix
@@ -494,8 +498,8 @@ public fun partialCorrelation(
     }
 
     // Invert correlation matrix → precision matrix
-    val precision = invertMatrix(corrMatrix)
-        ?: return CorrelationResult(Double.NaN, Double.NaN, n) // singular
+    val precision =
+        invertMatrix(corrMatrix) ?: return CorrelationResult(Double.NaN, Double.NaN, n) // singular
 
     // Extract partial correlation: r = -P[0][1] / sqrt(P[0][0] * P[1][1])
     val denom = precision[0][0] * precision[1][1]
@@ -526,11 +530,10 @@ public fun partialCorrelation(
 private fun invertMatrix(matrix: Array<DoubleArray>): Array<DoubleArray>? {
     val m = matrix.size
     // Build augmented matrix [A | I]
-    val aug = Array(m) { i ->
-        DoubleArray(2 * m) { j ->
-            if (j < m) matrix[i][j] else if (j - m == i) 1.0 else 0.0
+    val aug =
+        Array(m) { i ->
+            DoubleArray(2 * m) { j -> if (j < m) matrix[i][j] else if (j - m == i) 1.0 else 0.0 }
         }
-    }
 
     for (col in 0 until m) {
         // Partial pivoting: find row with largest absolute value in column
@@ -573,16 +576,14 @@ private fun invertMatrix(matrix: Array<DoubleArray>): Array<DoubleArray>? {
     }
 
     // Extract inverse from right half
-    return Array(m) { i ->
-        DoubleArray(m) { j -> aug[i][j + m] }
-    }
+    return Array(m) { i -> DoubleArray(m) { j -> aug[i][j + m] } }
 }
 
 /**
  * Counts discordant pairs (inversions) in [arr] via merge sort.
  *
- * Sorts [arr] in-place as a side effect. Uses [temp] as scratch space for merging.
- * Returns the count as Long to avoid overflow for large n (up to ~2 billion pairs).
+ * Sorts [arr] in-place as a side effect. Uses [temp] as scratch space for merging. Returns the
+ * count as Long to avoid overflow for large n (up to ~2 billion pairs).
  */
 private fun countDiscordant(arr: DoubleArray, temp: DoubleArray, left: Int, right: Int): Long {
     if (left >= right) return 0L
@@ -617,10 +618,10 @@ private fun countDiscordant(arr: DoubleArray, temp: DoubleArray, left: Int, righ
 /**
  * Computes the covariance between two arrays.
  *
- * Covariance measures how two variables change together. A positive value means they tend
- * to increase together, a negative value means one tends to increase when the other decreases,
- * and a value near zero means no linear association. Unlike correlation, the magnitude of
- * covariance depends on the scale of the variables.
+ * Covariance measures how two variables change together. A positive value means they tend to
+ * increase together, a negative value means one tends to increase when the other decreases, and a
+ * value near zero means no linear association. Unlike correlation, the magnitude of covariance
+ * depends on the scale of the variables.
  *
  * ### Example:
  * ```kotlin
@@ -631,8 +632,9 @@ private fun countDiscordant(arr: DoubleArray, temp: DoubleArray, left: Int, righ
  *
  * @param x the first array of observations.
  * @param y the second array of observations, must have the same size as [x].
- * @param kind whether to compute sample or population covariance. Defaults to [PopulationKind.SAMPLE],
- * which divides by n-1 (Bessel's correction) to produce an unbiased estimate.
+ * @param kind whether to compute sample or population covariance. Defaults to
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) to produce an unbiased
+ *   estimate.
  * @return the covariance between [x] and [y].
  * @throws InvalidParameterException if [x] and [y] have different sizes.
  * @throws InsufficientDataException if there are fewer than 2 observations.
@@ -640,7 +642,7 @@ private fun countDiscordant(arr: DoubleArray, temp: DoubleArray, left: Int, righ
 public fun covariance(
     x: DoubleArray,
     y: DoubleArray,
-    kind: PopulationKind = PopulationKind.SAMPLE
+    kind: PopulationKind = PopulationKind.SAMPLE,
 ): Double {
     if (x.size != y.size) throw InvalidParameterException("Arrays must have the same size")
     val n = x.size
@@ -664,9 +666,8 @@ public fun covariance(
 /**
  * Computes the Pearson correlation matrix for multiple variables.
  *
- * Returns a symmetric k×k matrix where element (i, j) is the Pearson correlation between
- * variables i and j. Diagonal elements are always 1.0 (a variable is perfectly correlated
- * with itself).
+ * Returns a symmetric k×k matrix where element (i, j) is the Pearson correlation between variables
+ * i and j. Diagonal elements are always 1.0 (a variable is perfectly correlated with itself).
  *
  * ### Example:
  * ```kotlin
@@ -678,19 +679,21 @@ public fun covariance(
  * matrix[1][0] // same as matrix[0][1] (symmetric)
  * ```
  *
- * **Note:** requires at least 3 observations (unlike [covarianceMatrix] which requires 2),
- * because the underlying Pearson computation needs n ≥ 3 for a defined t-statistic.
+ * **Note:** requires at least 3 observations (unlike [covarianceMatrix] which requires 2), because
+ * the underlying Pearson computation needs n ≥ 3 for a defined t-statistic.
  *
  * @param variables two or more arrays of observations, all with the same size.
  * @return a k×k array of Pearson correlation coefficients.
  * @throws InvalidParameterException if the arrays have different sizes.
- * @throws InsufficientDataException if there are fewer than 2 variables or fewer than 3 observations.
+ * @throws InsufficientDataException if there are fewer than 2 variables or fewer than 3
+ *   observations.
  */
 public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> {
     val k = variables.size
     if (k < 2) throw InsufficientDataException("Need at least 2 variables")
     val n = variables[0].size
-    if (!variables.all { it.size == n }) throw InvalidParameterException("All variables must have the same size")
+    if (!variables.all { it.size == n })
+        throw InvalidParameterException("All variables must have the same size")
     if (n < 3) throw InsufficientDataException("Need at least 3 observations")
 
     // Pass 1: compute means
@@ -706,7 +709,8 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
             for (j in i until k) {
                 val prod = devs[i] * devs[j]
                 val t = cp[i][j] + prod
-                cpComp[i][j] += if (abs(cp[i][j]) >= abs(prod)) (cp[i][j] - t) + prod else (prod - t) + cp[i][j]
+                cpComp[i][j] +=
+                    if (abs(cp[i][j]) >= abs(prod)) (cp[i][j] - t) + prod else (prod - t) + cp[i][j]
                 cp[i][j] = t
             }
         }
@@ -739,8 +743,8 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
 /**
  * Computes the covariance matrix for multiple variables.
  *
- * Returns a symmetric k×k matrix where element (i, j) is the covariance between variables
- * i and j. Diagonal elements are the variances of each variable.
+ * Returns a symmetric k×k matrix where element (i, j) is the covariance between variables i and j.
+ * Diagonal elements are the variances of each variable.
  *
  * ### Example:
  * ```kotlin
@@ -752,20 +756,23 @@ public fun correlationMatrix(vararg variables: DoubleArray): Array<DoubleArray> 
  * ```
  *
  * @param variables two or more arrays of observations, all with the same size.
- * @param kind whether to compute sample or population covariance. Defaults to [PopulationKind.SAMPLE],
- * which divides by n-1 (Bessel's correction) to produce an unbiased estimate.
+ * @param kind whether to compute sample or population covariance. Defaults to
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) to produce an unbiased
+ *   estimate.
  * @return a k×k array of covariance values.
  * @throws InvalidParameterException if the arrays have different sizes.
- * @throws InsufficientDataException if there are fewer than 2 variables or fewer than 2 observations.
+ * @throws InsufficientDataException if there are fewer than 2 variables or fewer than 2
+ *   observations.
  */
 public fun covarianceMatrix(
     vararg variables: DoubleArray,
-    kind: PopulationKind = PopulationKind.SAMPLE
+    kind: PopulationKind = PopulationKind.SAMPLE,
 ): Array<DoubleArray> {
     val k = variables.size
     if (k < 2) throw InsufficientDataException("Need at least 2 variables")
     val n = variables[0].size
-    if (!variables.all { it.size == n }) throw InvalidParameterException("All variables must have the same size")
+    if (!variables.all { it.size == n })
+        throw InvalidParameterException("All variables must have the same size")
     if (n < 2) throw InsufficientDataException("Need at least 2 observations")
 
     // Pass 1: compute means

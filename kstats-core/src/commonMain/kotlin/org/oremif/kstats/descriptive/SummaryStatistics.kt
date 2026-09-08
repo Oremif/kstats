@@ -1,16 +1,16 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
 import kotlin.math.abs
 import kotlin.math.sqrt
+import org.oremif.kstats.core.exceptions.InsufficientDataException
 
 /**
  * A snapshot of common descriptive statistics for a dataset.
  *
- * Returned by the [describe] function. Contains measures of central tendency, dispersion,
- * shape, and position. Fields that require a minimum number of data points are set to
- * [Double.NaN] when there is insufficient data (e.g. variance needs at least 2, skewness
- * needs at least 3, kurtosis needs at least 4).
+ * Returned by the [describe] function. Contains measures of central tendency, dispersion, shape,
+ * and position. Fields that require a minimum number of data points are set to [Double.NaN] when
+ * there is insufficient data (e.g. variance needs at least 2, skewness needs at least 3, kurtosis
+ * needs at least 4).
  *
  * ### Example:
  * ```kotlin
@@ -51,15 +51,15 @@ public data class DescriptiveStatistics(
     val sum: Double,
     val range: Double,
     val interquartileRange: Double,
-    val standardError: Double
+    val standardError: Double,
 )
 
 /**
  * Computes a comprehensive descriptive statistics summary of the values in this iterable.
  *
- * Performs a single sort for order statistics (min, max, quartiles, median) and a single
- * Welford pass for mean, variance, skewness, and kurtosis. This is more efficient than
- * computing each statistic individually.
+ * Performs a single sort for order statistics (min, max, quartiles, median) and a single Welford
+ * pass for mean, variance, skewness, and kurtosis. This is more efficient than computing each
+ * statistic individually.
  *
  * ### Example:
  * ```kotlin
@@ -71,15 +71,14 @@ public data class DescriptiveStatistics(
  *
  * @return a [DescriptiveStatistics] containing all computed statistics.
  */
-public fun Iterable<Double>.describe(): DescriptiveStatistics =
-    toList().toDoubleArray().describe()
+public fun Iterable<Double>.describe(): DescriptiveStatistics = toList().toDoubleArray().describe()
 
 /**
  * Computes a comprehensive descriptive statistics summary of the values in this array.
  *
- * Performs a single sort for order statistics (min, max, quartiles, median) and a single
- * Welford pass for mean, variance, skewness, and kurtosis. This is more efficient than
- * computing each statistic individually.
+ * Performs a single sort for order statistics (min, max, quartiles, median) and a single Welford
+ * pass for mean, variance, skewness, and kurtosis. This is more efficient than computing each
+ * statistic individually.
  *
  * ### Example:
  * ```kotlin
@@ -169,6 +168,6 @@ public fun DoubleArray.describe(): DescriptiveStatistics {
         sum = sum,
         range = maxVal - minVal,
         interquartileRange = q3 - q1,
-        standardError = se
+        standardError = se,
     )
 }

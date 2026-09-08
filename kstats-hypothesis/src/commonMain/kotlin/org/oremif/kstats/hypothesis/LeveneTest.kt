@@ -1,37 +1,37 @@
 package org.oremif.kstats.hypothesis
 
+import kotlin.math.abs
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.descriptive.mean
 import org.oremif.kstats.descriptive.median
 import org.oremif.kstats.distributions.FDistribution
-import kotlin.math.abs
 
 /**
  * Specifies which center statistic to use when computing deviations in [leveneTest].
  *
  * The choice of center affects the test's sensitivity to non-normality:
  * - [MEAN] gives the classic Levene's test, which is more powerful under normality.
- * - [MEDIAN] gives the Brown-Forsythe variant, which is more robust to non-normal data
- *   and is the recommended default (matching scipy's default).
+ * - [MEDIAN] gives the Brown-Forsythe variant, which is more robust to non-normal data and is the
+ *   recommended default (matching scipy's default).
  */
 public enum class LeveneCenter {
     /** Classic Levene's test: deviations from the group mean. */
     MEAN,
 
     /** Brown-Forsythe variant: deviations from the group median (more robust). */
-    MEDIAN
+    MEDIAN,
 }
 
 /**
  * Performs Levene's test for equality of variances across two or more groups.
  *
- * The null hypothesis is that all groups have equal variances (homoscedasticity).
- * The test transforms each observation to its absolute deviation from the group center
- * (mean or median), then performs a one-way ANOVA on the transformed values.
+ * The null hypothesis is that all groups have equal variances (homoscedasticity). The test
+ * transforms each observation to its absolute deviation from the group center (mean or median),
+ * then performs a one-way ANOVA on the transformed values.
  *
- * When [center] is [LeveneCenter.MEDIAN], this is the Brown-Forsythe variant, which is
- * more robust against non-normal data. When [center] is [LeveneCenter.MEAN], this is
- * the classic Levene's test, which is more powerful under normality.
+ * When [center] is [LeveneCenter.MEDIAN], this is the Brown-Forsythe variant, which is more robust
+ * against non-normal data. When [center] is [LeveneCenter.MEAN], this is the classic Levene's test,
+ * which is more powerful under normality.
  *
  * ### Example:
  * ```kotlin
@@ -45,35 +45,39 @@ public enum class LeveneCenter {
  * ```
  *
  * @param groups two or more groups of observations, each with at least 2 elements.
- * @param center the group center statistic used for computing deviations.
- * Defaults to [LeveneCenter.MEDIAN] (Brown-Forsythe variant).
- * @return a [TestResult] containing the W statistic, p-value, and additional info
- * with "dfBetween" and "dfWithin".
+ * @param center the group center statistic used for computing deviations. Defaults to
+ *   [LeveneCenter.MEDIAN] (Brown-Forsythe variant).
+ * @return a [TestResult] containing the W statistic, p-value, and additional info with "dfBetween"
+ *   and "dfWithin".
  */
 public fun leveneTest(
     vararg groups: DoubleArray,
-    center: LeveneCenter = LeveneCenter.MEDIAN
+    center: LeveneCenter = LeveneCenter.MEDIAN,
 ): TestResult {
-    if (groups.size < 2) throw InsufficientDataException(
-        "Levene's test requires at least 2 groups, got ${groups.size}"
-    )
-    for (i in groups.indices) {
-        if (groups[i].size < 2) throw InsufficientDataException(
-            "Each group must have at least 2 elements, group $i has ${groups[i].size}"
+    if (groups.size < 2)
+        throw InsufficientDataException(
+            "Levene's test requires at least 2 groups, got ${groups.size}"
         )
+    for (i in groups.indices) {
+        if (groups[i].size < 2)
+            throw InsufficientDataException(
+                "Each group must have at least 2 elements, group $i has ${groups[i].size}"
+            )
     }
 
     val k = groups.size
 
     // Step 1: Transform to absolute deviations from group center
-    val z = Array(k) { i ->
-        val group = groups[i]
-        val c = when (center) {
-            LeveneCenter.MEAN -> group.mean()
-            LeveneCenter.MEDIAN -> group.median()
+    val z =
+        Array(k) { i ->
+            val group = groups[i]
+            val c =
+                when (center) {
+                    LeveneCenter.MEAN -> group.mean()
+                    LeveneCenter.MEDIAN -> group.median()
+                }
+            DoubleArray(group.size) { j -> abs(group[j] - c) }
         }
-        DoubleArray(group.size) { j -> abs(group[j] - c) }
-    }
 
     // Step 2: Compute ANOVA on transformed values
     val groupSizes = IntArray(k) { z[it].size }
@@ -118,10 +122,11 @@ public fun leveneTest(
             statistic = 0.0,
             pValue = 1.0,
             degreesOfFreedom = dfBetween.toDouble(),
-            additionalInfo = mapOf(
-                "dfBetween" to dfBetween.toDouble(),
-                "dfWithin" to dfWithin.toDouble()
-            )
+            additionalInfo =
+                mapOf(
+                    "dfBetween" to dfBetween.toDouble(),
+                    "dfWithin" to dfWithin.toDouble(),
+                ),
         )
     }
 
@@ -134,10 +139,11 @@ public fun leveneTest(
             statistic = w,
             pValue = if (w.isInfinite() && w > 0) 0.0 else Double.NaN,
             degreesOfFreedom = dfBetween.toDouble(),
-            additionalInfo = mapOf(
-                "dfBetween" to dfBetween.toDouble(),
-                "dfWithin" to dfWithin.toDouble()
-            )
+            additionalInfo =
+                mapOf(
+                    "dfBetween" to dfBetween.toDouble(),
+                    "dfWithin" to dfWithin.toDouble(),
+                ),
         )
     }
 
@@ -148,9 +154,10 @@ public fun leveneTest(
         statistic = w,
         pValue = pValue.coerceIn(0.0, 1.0),
         degreesOfFreedom = dfBetween.toDouble(),
-        additionalInfo = mapOf(
-            "dfBetween" to dfBetween.toDouble(),
-            "dfWithin" to dfWithin.toDouble()
-        )
+        additionalInfo =
+            mapOf(
+                "dfBetween" to dfBetween.toDouble(),
+                "dfWithin" to dfWithin.toDouble(),
+            ),
     )
 }

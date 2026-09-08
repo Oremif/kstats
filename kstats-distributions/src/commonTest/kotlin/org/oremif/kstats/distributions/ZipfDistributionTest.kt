@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class ZipfDistributionTest : DiscreteDistributionPropertyTests() {
 
     override fun createDistribution() = ZipfDistribution(10, 1.0)
+
     override val testKRange = 0..11
     override val supportMin = 1
 
@@ -231,8 +232,11 @@ class ZipfDistributionTest : DiscreteDistributionPropertyTests() {
         assertFailsWith<InvalidParameterException> { ZipfDistribution(10, 0.0) }
         assertFailsWith<InvalidParameterException> { ZipfDistribution(10, -1.0) }
         assertFailsWith<InvalidParameterException> { ZipfDistribution(10, Double.NaN) }
-        assertFailsWith<InvalidParameterException> { ZipfDistribution(10, Double.POSITIVE_INFINITY) }
-        assertFailsWith<InvalidParameterException> { ZipfDistribution(10, Double.NEGATIVE_INFINITY) }
+        assertFailsWith<InvalidParameterException> {
+            ZipfDistribution(10, Double.POSITIVE_INFINITY)
+        }
+        assertFailsWith<InvalidParameterException> {
+            ZipfDistribution(10, Double.NEGATIVE_INFINITY)
+        }
     }
-
 }

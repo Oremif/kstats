@@ -1,5 +1,6 @@
 package org.oremif.kstats.hypothesis.samples
 
+import kotlin.test.Test
 import org.oremif.kstats.core.ConfidenceInterval
 import org.oremif.kstats.descriptive.DescriptiveStatistics
 import org.oremif.kstats.descriptive.describe
@@ -7,7 +8,6 @@ import org.oremif.kstats.hypothesis.leveneTest
 import org.oremif.kstats.hypothesis.mannWhitneyUTest
 import org.oremif.kstats.hypothesis.shapiroWilkTest
 import org.oremif.kstats.hypothesis.tTest
-import kotlin.test.Test
 
 class PipelineSamples {
 
@@ -16,28 +16,28 @@ class PipelineSamples {
         val normalityPValue: Double,
         val isNormal: Boolean,
         val varianceEqualityPValue: Double,
-        val isVarianceEqual: Boolean
+        val isVarianceEqual: Boolean,
     )
 
     private data class GroupComparison(
         val testName: String,
         val pValue: Double,
         val isSignificant: Boolean,
-        val confidenceInterval: ConfidenceInterval?
+        val confidenceInterval: ConfidenceInterval?,
     )
 
     private data class AnalysisReport(
         val controlSummary: DescriptiveStatistics,
         val treatmentSummary: DescriptiveStatistics,
         val assumptions: AssumptionCheck,
-        val comparison: GroupComparison
+        val comparison: GroupComparison,
     )
 
     // Private helper functions
     private fun checkAssumptions(
         control: DoubleArray,
         treatment: DoubleArray,
-        alpha: Double = 0.05
+        alpha: Double = 0.05,
     ): AssumptionCheck {
         val controlNormality = shapiroWilkTest(control)
         val treatmentNormality = shapiroWilkTest(treatment)
@@ -49,7 +49,7 @@ class PipelineSamples {
             normalityPValue = normality,
             isNormal = normality >= alpha,
             varianceEqualityPValue = variance.pValue,
-            isVarianceEqual = variance.pValue >= alpha
+            isVarianceEqual = variance.pValue >= alpha,
         )
     }
 
@@ -57,26 +57,27 @@ class PipelineSamples {
         control: DoubleArray,
         treatment: DoubleArray,
         assumptions: AssumptionCheck,
-        alpha: Double = 0.05
+        alpha: Double = 0.05,
     ): GroupComparison {
-        val result = if (assumptions.isNormal) {
-            tTest(control, treatment, equalVariances = assumptions.isVarianceEqual)
-        } else {
-            mannWhitneyUTest(control, treatment)
-        }
+        val result =
+            if (assumptions.isNormal) {
+                tTest(control, treatment, equalVariances = assumptions.isVarianceEqual)
+            } else {
+                mannWhitneyUTest(control, treatment)
+            }
 
         return GroupComparison(
             testName = result.testName,
             pValue = result.pValue,
             isSignificant = result.isSignificant(alpha),
-            confidenceInterval = result.confidenceInterval
+            confidenceInterval = result.confidenceInterval,
         )
     }
 
     private fun analyze(
         control: DoubleArray,
         treatment: DoubleArray,
-        alpha: Double = 0.05
+        alpha: Double = 0.05,
     ): AnalysisReport {
         val assumptions = checkAssumptions(control, treatment, alpha)
         val comparison = compareGroups(control, treatment, assumptions, alpha)
@@ -85,7 +86,7 @@ class PipelineSamples {
             controlSummary = control.describe(),
             treatmentSummary = treatment.describe(),
             assumptions = assumptions,
-            comparison = comparison
+            comparison = comparison,
         )
     }
 
@@ -100,21 +101,21 @@ class PipelineSamples {
             val normalityPValue: Double,
             val isNormal: Boolean,
             val varianceEqualityPValue: Double,
-            val isVarianceEqual: Boolean
+            val isVarianceEqual: Boolean,
         )
 
         data class GroupComparison(
             val testName: String,
             val pValue: Double,
             val isSignificant: Boolean,
-            val confidenceInterval: ConfidenceInterval?
+            val confidenceInterval: ConfidenceInterval?,
         )
 
         data class AnalysisReport(
             val controlSummary: DescriptiveStatistics,
             val treatmentSummary: DescriptiveStatistics,
             val assumptions: AssumptionCheck,
-            val comparison: GroupComparison
+            val comparison: GroupComparison,
         )
         // SampleEnd
     }
@@ -129,7 +130,7 @@ class PipelineSamples {
         fun checkAssumptions(
             control: DoubleArray,
             treatment: DoubleArray,
-            alpha: Double = 0.05
+            alpha: Double = 0.05,
         ): AssumptionCheck {
             val controlNormality = shapiroWilkTest(control)
             val treatmentNormality = shapiroWilkTest(treatment)
@@ -141,7 +142,7 @@ class PipelineSamples {
                 normalityPValue = normality,
                 isNormal = normality >= alpha,
                 varianceEqualityPValue = variance.pValue,
-                isVarianceEqual = variance.pValue >= alpha
+                isVarianceEqual = variance.pValue >= alpha,
             )
         }
         // SampleEnd
@@ -158,19 +159,20 @@ class PipelineSamples {
             control: DoubleArray,
             treatment: DoubleArray,
             assumptions: AssumptionCheck,
-            alpha: Double = 0.05
+            alpha: Double = 0.05,
         ): GroupComparison {
-            val result = if (assumptions.isNormal) {
-                tTest(control, treatment, equalVariances = assumptions.isVarianceEqual)
-            } else {
-                mannWhitneyUTest(control, treatment)
-            }
+            val result =
+                if (assumptions.isNormal) {
+                    tTest(control, treatment, equalVariances = assumptions.isVarianceEqual)
+                } else {
+                    mannWhitneyUTest(control, treatment)
+                }
 
             return GroupComparison(
                 testName = result.testName,
                 pValue = result.pValue,
                 isSignificant = result.isSignificant(alpha),
-                confidenceInterval = result.confidenceInterval
+                confidenceInterval = result.confidenceInterval,
             )
         }
         // SampleEnd
@@ -186,7 +188,7 @@ class PipelineSamples {
         fun analyze(
             control: DoubleArray,
             treatment: DoubleArray,
-            alpha: Double = 0.05
+            alpha: Double = 0.05,
         ): AnalysisReport {
             val assumptions = checkAssumptions(control, treatment, alpha)
             val comparison = compareGroups(control, treatment, assumptions, alpha)
@@ -195,7 +197,7 @@ class PipelineSamples {
                 controlSummary = control.describe(),
                 treatmentSummary = treatment.describe(),
                 assumptions = assumptions,
-                comparison = comparison
+                comparison = comparison,
             )
         }
         // SampleEnd
@@ -208,14 +210,52 @@ class PipelineSamples {
     @Test
     fun pipelineUsage() {
         // SampleStart
-        val pageLoadControl = doubleArrayOf(
-            1.23, 1.45, 1.31, 1.52, 1.38, 1.41, 1.29, 1.47, 1.35, 1.44,
-            1.33, 1.50, 1.27, 1.42, 1.36, 1.48, 1.30, 1.46, 1.39, 1.43
-        )
-        val pageLoadTreatment = doubleArrayOf(
-            1.10, 1.25, 1.18, 1.32, 1.15, 1.22, 1.12, 1.28, 1.19, 1.26,
-            1.14, 1.30, 1.11, 1.24, 1.17, 1.29, 1.13, 1.27, 1.20, 1.23
-        )
+        val pageLoadControl =
+            doubleArrayOf(
+                1.23,
+                1.45,
+                1.31,
+                1.52,
+                1.38,
+                1.41,
+                1.29,
+                1.47,
+                1.35,
+                1.44,
+                1.33,
+                1.50,
+                1.27,
+                1.42,
+                1.36,
+                1.48,
+                1.30,
+                1.46,
+                1.39,
+                1.43,
+            )
+        val pageLoadTreatment =
+            doubleArrayOf(
+                1.10,
+                1.25,
+                1.18,
+                1.32,
+                1.15,
+                1.22,
+                1.12,
+                1.28,
+                1.19,
+                1.26,
+                1.14,
+                1.30,
+                1.11,
+                1.24,
+                1.17,
+                1.29,
+                1.13,
+                1.27,
+                1.20,
+                1.23,
+            )
 
         val report = analyze(pageLoadControl, pageLoadTreatment)
 

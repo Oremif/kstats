@@ -1,16 +1,17 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class ChiSquaredDistributionTest : ContinuousDistributionPropertyTests() {
 
     override fun createDistribution(): ContinuousDistribution = ChiSquaredDistribution(10.0)
+
     override val testPoints = listOf(0.5, 1.0, 2.0, 5.0, 10.0, 20.0)
     override val pValues = listOf(0.1, 0.25, 0.5, 0.75, 0.9)
     override val roundTripTol = 1e-8
@@ -206,5 +207,4 @@ class ChiSquaredDistributionTest : ContinuousDistributionPropertyTests() {
         // scipy: cdf(0.01) ≈ 0.787966
         assertEquals(0.787965781308072, d2.cdf(0.01), 1e-4)
     }
-
 }

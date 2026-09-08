@@ -1,12 +1,12 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 internal class ControlChartTest {
 
@@ -88,37 +88,27 @@ internal class ControlChartTest {
 
     @Test
     fun testSpcConstantsN0() {
-        assertFailsWith<InvalidParameterException> {
-            spcConstants(0)
-        }
+        assertFailsWith<InvalidParameterException> { spcConstants(0) }
     }
 
     @Test
     fun testSpcConstantsN1() {
-        assertFailsWith<InvalidParameterException> {
-            spcConstants(1)
-        }
+        assertFailsWith<InvalidParameterException> { spcConstants(1) }
     }
 
     @Test
     fun testSpcConstantsN26() {
-        assertFailsWith<InvalidParameterException> {
-            spcConstants(26)
-        }
+        assertFailsWith<InvalidParameterException> { spcConstants(26) }
     }
 
     @Test
     fun testSpcConstantsNegative() {
-        assertFailsWith<InvalidParameterException> {
-            spcConstants(-1)
-        }
+        assertFailsWith<InvalidParameterException> { spcConstants(-1) }
     }
 
     @Test
     fun testSpcConstantsLargeN() {
-        assertFailsWith<InvalidParameterException> {
-            spcConstants(100)
-        }
+        assertFailsWith<InvalidParameterException> { spcConstants(100) }
     }
 
     // ===== spcConstants: Property-based =====
@@ -131,7 +121,7 @@ internal class ControlChartTest {
             val next = spcConstants(n + 1)
             assertTrue(
                 current.a2 >= next.a2,
-                "A2 should decrease: A2($n)=${current.a2} >= A2(${n + 1})=${next.a2}"
+                "A2 should decrease: A2($n)=${current.a2} >= A2(${n + 1})=${next.a2}",
             )
         }
     }
@@ -144,7 +134,7 @@ internal class ControlChartTest {
             val next = spcConstants(n + 1)
             assertTrue(
                 current.c4 <= next.c4,
-                "c4 should increase: c4($n)=${current.c4} <= c4(${n + 1})=${next.c4}"
+                "c4 should increase: c4($n)=${current.c4} <= c4(${n + 1})=${next.c4}",
             )
         }
     }
@@ -157,7 +147,7 @@ internal class ControlChartTest {
             val next = spcConstants(n + 1)
             assertTrue(
                 current.d4 >= next.d4,
-                "D4 should decrease: D4($n)=${current.d4} >= D4(${n + 1})=${next.d4}"
+                "D4 should decrease: D4($n)=${current.d4} >= D4(${n + 1})=${next.d4}",
             )
         }
     }
@@ -201,13 +191,14 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartKnownValues() {
         // numpy: 5 subgroups of size 4
-        val subgroups = listOf(
-            doubleArrayOf(72.0, 84.0, 79.0, 49.0),
-            doubleArrayOf(56.0, 87.0, 33.0, 42.0),
-            doubleArrayOf(55.0, 73.0, 22.0, 60.0),
-            doubleArrayOf(44.0, 80.0, 54.0, 74.0),
-            doubleArrayOf(97.0, 26.0, 48.0, 58.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(72.0, 84.0, 79.0, 49.0),
+                doubleArrayOf(56.0, 87.0, 33.0, 42.0),
+                doubleArrayOf(55.0, 73.0, 22.0, 60.0),
+                doubleArrayOf(44.0, 80.0, 54.0, 74.0),
+                doubleArrayOf(97.0, 26.0, 48.0, 58.0),
+            )
         val result = xBarRChart(subgroups)
 
         // numpy: xbar_bar = mean([71, 54.5, 52.5, 63, 57.25]) = 59.65
@@ -229,11 +220,12 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartSimpleValues() {
         // numpy: 3 subgroups of size 5
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 12.0, 11.0, 13.0, 9.0),
-            doubleArrayOf(11.0, 10.0, 12.0, 11.0, 14.0),
-            doubleArrayOf(9.0, 13.0, 10.0, 12.0, 11.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 12.0, 11.0, 13.0, 9.0),
+                doubleArrayOf(11.0, 10.0, 12.0, 11.0, 14.0),
+                doubleArrayOf(9.0, 13.0, 10.0, 12.0, 11.0),
+            )
         val result = xBarRChart(subgroups)
 
         // numpy: xbar_bar = mean([11.0, 11.6, 11.0]) = 11.2
@@ -255,10 +247,11 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartMinimumSubgroups() {
         // Minimum: 2 subgroups
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 20.0),
-            doubleArrayOf(15.0, 25.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 20.0),
+                doubleArrayOf(15.0, 25.0),
+            )
         val result = xBarRChart(subgroups)
         assertTrue(result.centerLine.isFinite(), "centerLine should be finite")
         assertTrue(result.ucl.isFinite(), "ucl should be finite")
@@ -268,11 +261,12 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartMinimumSubgroupSize() {
         // Minimum subgroup size: n=2
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 20.0),
-            doubleArrayOf(15.0, 25.0),
-            doubleArrayOf(12.0, 18.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 20.0),
+                doubleArrayOf(15.0, 25.0),
+                doubleArrayOf(12.0, 18.0),
+            )
         val result = xBarRChart(subgroups)
 
         // numpy: means=[15, 20, 15], xbar_bar=16.667
@@ -287,10 +281,11 @@ internal class ControlChartTest {
     fun testXBarRChartMaxSubgroupSize() {
         // Maximum subgroup size: n=25
         // Use reproducible data
-        val subgroups = listOf(
-            DoubleArray(25) { 100.0 + it.toDouble() },
-            DoubleArray(25) { 105.0 + it.toDouble() },
-        )
+        val subgroups =
+            listOf(
+                DoubleArray(25) { 100.0 + it.toDouble() },
+                DoubleArray(25) { 105.0 + it.toDouble() },
+            )
         val result = xBarRChart(subgroups)
         assertTrue(result.centerLine.isFinite(), "centerLine should be finite for n=25")
         assertTrue(result.ucl > result.centerLine, "ucl > centerLine")
@@ -300,10 +295,11 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartConstantSubgroups() {
         // All subgroups have the same values => range = 0, std = 0
-        val subgroups = listOf(
-            doubleArrayOf(5.0, 5.0, 5.0),
-            doubleArrayOf(5.0, 5.0, 5.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(5.0, 5.0, 5.0),
+                doubleArrayOf(5.0, 5.0, 5.0),
+            )
         val result = xBarRChart(subgroups)
 
         assertEquals(5.0, result.centerLine, tol, "centerLine")
@@ -319,9 +315,7 @@ internal class ControlChartTest {
 
     @Test
     fun testXBarRChartEmptyList() {
-        assertFailsWith<InsufficientDataException> {
-            xBarRChart(emptyList())
-        }
+        assertFailsWith<InsufficientDataException> { xBarRChart(emptyList()) }
     }
 
     @Test
@@ -376,11 +370,12 @@ internal class ControlChartTest {
     fun testXBarRChartLargeOffsetData() {
         // Test numerical stability with large offset data
         val offset = 1e12
-        val subgroups = listOf(
-            doubleArrayOf(offset + 1.0, offset + 2.0, offset + 3.0),
-            doubleArrayOf(offset + 2.0, offset + 3.0, offset + 4.0),
-            doubleArrayOf(offset + 1.5, offset + 2.5, offset + 3.5),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(offset + 1.0, offset + 2.0, offset + 3.0),
+                doubleArrayOf(offset + 2.0, offset + 3.0, offset + 4.0),
+                doubleArrayOf(offset + 1.5, offset + 2.5, offset + 3.5),
+            )
         val result = xBarRChart(subgroups)
 
         // numpy: xbar_bar = 1e12 + 2.5
@@ -394,10 +389,11 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartLargeValues() {
         // Very large measurement values
-        val subgroups = listOf(
-            doubleArrayOf(1e10, 1.1e10, 0.9e10),
-            doubleArrayOf(1.05e10, 0.95e10, 1.0e10),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(1e10, 1.1e10, 0.9e10),
+                doubleArrayOf(1.05e10, 0.95e10, 1.0e10),
+            )
         val result = xBarRChart(subgroups)
         assertTrue(result.centerLine.isFinite(), "centerLine should be finite for large values")
         assertTrue(result.ucl > result.lcl, "ucl > lcl for large values")
@@ -407,10 +403,11 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartVerySmallValues() {
         // Very small measurement values
-        val subgroups = listOf(
-            doubleArrayOf(1e-10, 2e-10, 3e-10),
-            doubleArrayOf(1.5e-10, 2.5e-10, 3.5e-10),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(1e-10, 2e-10, 3e-10),
+                doubleArrayOf(1.5e-10, 2.5e-10, 3.5e-10),
+            )
         val result = xBarRChart(subgroups)
         assertTrue(result.centerLine.isFinite(), "centerLine should be finite for small values")
         assertTrue(result.ucl > result.lcl, "ucl > lcl for small values")
@@ -419,7 +416,8 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartManySubgroups() {
         // Many subgroups (stress test for mean computation)
-        val subgroups = List(100) { doubleArrayOf(10.0 + it * 0.01, 11.0 + it * 0.01, 12.0 + it * 0.01) }
+        val subgroups =
+            List(100) { doubleArrayOf(10.0 + it * 0.01, 11.0 + it * 0.01, 12.0 + it * 0.01) }
         val result = xBarRChart(subgroups)
         assertTrue(result.centerLine.isFinite(), "centerLine should be finite for many subgroups")
         assertTrue(result.rChart.centerLine > 0.0, "R-chart centerLine > 0 for many subgroups")
@@ -430,10 +428,11 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartNaNInData() {
         // NaN in data should propagate through mean and range
-        val subgroups = listOf(
-            doubleArrayOf(1.0, Double.NaN, 3.0),
-            doubleArrayOf(4.0, 5.0, 6.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(1.0, Double.NaN, 3.0),
+                doubleArrayOf(4.0, 5.0, 6.0),
+            )
         val result = xBarRChart(subgroups)
         assertTrue(result.centerLine.isNaN(), "centerLine should be NaN when data contains NaN")
         assertTrue(result.ucl.isNaN(), "ucl should be NaN when data contains NaN")
@@ -442,29 +441,31 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartInfinityInData() {
         // Infinity in data
-        val subgroups = listOf(
-            doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0),
-            doubleArrayOf(4.0, 5.0, 6.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0),
+                doubleArrayOf(4.0, 5.0, 6.0),
+            )
         val result = xBarRChart(subgroups)
         // mean with infinity -> infinity, range with infinity -> infinity
         // Various NaN/Infinity propagation patterns are acceptable
         assertTrue(
             !result.centerLine.isFinite() || result.centerLine.isNaN(),
-            "centerLine should be non-finite when data contains Infinity"
+            "centerLine should be non-finite when data contains Infinity",
         )
     }
 
     @Test
     fun testXBarRChartNegativeInfinityInData() {
-        val subgroups = listOf(
-            doubleArrayOf(Double.NEGATIVE_INFINITY, 5.0, 6.0),
-            doubleArrayOf(4.0, 5.0, 6.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(Double.NEGATIVE_INFINITY, 5.0, 6.0),
+                doubleArrayOf(4.0, 5.0, 6.0),
+            )
         val result = xBarRChart(subgroups)
         assertTrue(
             !result.centerLine.isFinite() || result.centerLine.isNaN(),
-            "centerLine should be non-finite when data contains -Infinity"
+            "centerLine should be non-finite when data contains -Infinity",
         )
     }
 
@@ -473,15 +474,16 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartUclGtLcl() {
         // UCL should always be >= LCL (equals when r_bar = 0)
-        val datasets = listOf(
-            listOf(doubleArrayOf(1.0, 2.0, 3.0), doubleArrayOf(2.0, 3.0, 4.0)),
-            listOf(doubleArrayOf(10.0, 20.0), doubleArrayOf(15.0, 25.0)),
+        val datasets =
             listOf(
-                doubleArrayOf(100.0, 101.0, 102.0, 103.0, 104.0),
-                doubleArrayOf(99.0, 100.0, 101.0, 102.0, 103.0),
-                doubleArrayOf(100.5, 101.5, 102.5, 103.5, 104.5),
-            ),
-        )
+                listOf(doubleArrayOf(1.0, 2.0, 3.0), doubleArrayOf(2.0, 3.0, 4.0)),
+                listOf(doubleArrayOf(10.0, 20.0), doubleArrayOf(15.0, 25.0)),
+                listOf(
+                    doubleArrayOf(100.0, 101.0, 102.0, 103.0, 104.0),
+                    doubleArrayOf(99.0, 100.0, 101.0, 102.0, 103.0),
+                    doubleArrayOf(100.5, 101.5, 102.5, 103.5, 104.5),
+                ),
+            )
         for ((i, subgroups) in datasets.withIndex()) {
             val result = xBarRChart(subgroups)
             assertTrue(result.ucl >= result.lcl, "ucl >= lcl for dataset $i")
@@ -491,29 +493,31 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartCenterLineBetweenLimits() {
         // Center line should be between LCL and UCL
-        val subgroups = listOf(
-            doubleArrayOf(72.0, 84.0, 79.0, 49.0),
-            doubleArrayOf(56.0, 87.0, 33.0, 42.0),
-            doubleArrayOf(55.0, 73.0, 22.0, 60.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(72.0, 84.0, 79.0, 49.0),
+                doubleArrayOf(56.0, 87.0, 33.0, 42.0),
+                doubleArrayOf(55.0, 73.0, 22.0, 60.0),
+            )
         val result = xBarRChart(subgroups)
         assertTrue(
             result.centerLine >= result.lcl,
-            "centerLine (${result.centerLine}) >= lcl (${result.lcl})"
+            "centerLine (${result.centerLine}) >= lcl (${result.lcl})",
         )
         assertTrue(
             result.centerLine <= result.ucl,
-            "centerLine (${result.centerLine}) <= ucl (${result.ucl})"
+            "centerLine (${result.centerLine}) <= ucl (${result.ucl})",
         )
     }
 
     @Test
     fun testXBarRChartSymmetricLimits() {
         // UCL - centerLine should equal centerLine - LCL
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 12.0, 11.0, 13.0, 9.0),
-            doubleArrayOf(11.0, 10.0, 12.0, 11.0, 14.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 12.0, 11.0, 13.0, 9.0),
+                doubleArrayOf(11.0, 10.0, 12.0, 11.0, 14.0),
+            )
         val result = xBarRChart(subgroups)
         val upperSpread = result.ucl - result.centerLine
         val lowerSpread = result.centerLine - result.lcl
@@ -523,57 +527,71 @@ internal class ControlChartTest {
     @Test
     fun testXBarRChartRChartLclNonNegative() {
         // R-chart LCL should be non-negative (ranges are non-negative)
-        val subgroups = listOf(
-            doubleArrayOf(1.0, 100.0, 50.0),
-            doubleArrayOf(10.0, 90.0, 45.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(1.0, 100.0, 50.0),
+                doubleArrayOf(10.0, 90.0, 45.0),
+            )
         val result = xBarRChart(subgroups)
         assertTrue(
             result.rChart.lcl >= 0.0,
-            "R-chart lcl should be non-negative, got ${result.rChart.lcl}"
+            "R-chart lcl should be non-negative, got ${result.rChart.lcl}",
         )
     }
 
     @Test
     fun testXBarRChartRChartCenterLineNonNegative() {
         // R-chart center line (mean of ranges) should be non-negative
-        val subgroups = listOf(
-            doubleArrayOf(1.0, 2.0, 3.0),
-            doubleArrayOf(4.0, 5.0, 6.0),
-            doubleArrayOf(7.0, 8.0, 9.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                doubleArrayOf(4.0, 5.0, 6.0),
+                doubleArrayOf(7.0, 8.0, 9.0),
+            )
         val result = xBarRChart(subgroups)
         assertTrue(
             result.rChart.centerLine >= 0.0,
-            "R-chart centerLine should be non-negative"
+            "R-chart centerLine should be non-negative",
         )
     }
 
     @Test
     fun testXBarRChartScaleInvariance() {
         // Multiplying all data by a constant c should scale limits by c
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 12.0, 11.0),
-            doubleArrayOf(11.0, 10.0, 13.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 12.0, 11.0),
+                doubleArrayOf(11.0, 10.0, 13.0),
+            )
         val scaled = subgroups.map { sg -> DoubleArray(sg.size) { sg[it] * 3.0 } }
 
         val result1 = xBarRChart(subgroups)
         val result2 = xBarRChart(scaled)
 
-        assertEquals(result1.centerLine * 3.0, result2.centerLine, tol, "centerLine scales linearly")
+        assertEquals(
+            result1.centerLine * 3.0,
+            result2.centerLine,
+            tol,
+            "centerLine scales linearly",
+        )
         assertEquals(result1.ucl * 3.0, result2.ucl, tol, "ucl scales linearly")
         assertEquals(result1.lcl * 3.0, result2.lcl, tol, "lcl scales linearly")
-        assertEquals(result1.rChart.centerLine * 3.0, result2.rChart.centerLine, tol, "R-chart centerLine scales linearly")
+        assertEquals(
+            result1.rChart.centerLine * 3.0,
+            result2.rChart.centerLine,
+            tol,
+            "R-chart centerLine scales linearly",
+        )
     }
 
     @Test
     fun testXBarRChartTranslationInvariance() {
         // Shifting all data by constant c: centerLine shifts by c, rChart unchanged
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 12.0, 11.0),
-            doubleArrayOf(11.0, 10.0, 13.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 12.0, 11.0),
+                doubleArrayOf(11.0, 10.0, 13.0),
+            )
         val c = 1000.0
         val shifted = subgroups.map { sg -> DoubleArray(sg.size) { sg[it] + c } }
 
@@ -581,16 +599,22 @@ internal class ControlChartTest {
         val result2 = xBarRChart(shifted)
 
         assertEquals(result1.centerLine + c, result2.centerLine, tol, "centerLine shifts by c")
-        assertEquals(result1.rChart.centerLine, result2.rChart.centerLine, tol, "R-chart centerLine unchanged by shift")
+        assertEquals(
+            result1.rChart.centerLine,
+            result2.rChart.centerLine,
+            tol,
+            "R-chart centerLine unchanged by shift",
+        )
         assertEquals(result1.rChart.ucl, result2.rChart.ucl, tol, "R-chart ucl unchanged by shift")
     }
 
     @Test
     fun testXBarRChartDataClassEquality() {
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 12.0, 11.0),
-            doubleArrayOf(11.0, 10.0, 13.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 12.0, 11.0),
+                doubleArrayOf(11.0, 10.0, 13.0),
+            )
         val r1 = xBarRChart(subgroups)
         val r2 = xBarRChart(subgroups)
         assertEquals(r1, r2, "Same input should produce equal XBarRChartResult")
@@ -601,13 +625,14 @@ internal class ControlChartTest {
     @Test
     fun testXBarSChartKnownValues() {
         // numpy: 5 subgroups of size 4
-        val subgroups = listOf(
-            doubleArrayOf(72.0, 84.0, 79.0, 49.0),
-            doubleArrayOf(56.0, 87.0, 33.0, 42.0),
-            doubleArrayOf(55.0, 73.0, 22.0, 60.0),
-            doubleArrayOf(44.0, 80.0, 54.0, 74.0),
-            doubleArrayOf(97.0, 26.0, 48.0, 58.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(72.0, 84.0, 79.0, 49.0),
+                doubleArrayOf(56.0, 87.0, 33.0, 42.0),
+                doubleArrayOf(55.0, 73.0, 22.0, 60.0),
+                doubleArrayOf(44.0, 80.0, 54.0, 74.0),
+                doubleArrayOf(97.0, 26.0, 48.0, 58.0),
+            )
         val result = xBarSChart(subgroups)
 
         // numpy: xbar_bar = 59.65
@@ -627,11 +652,12 @@ internal class ControlChartTest {
     @Test
     fun testXBarSChartSimpleValues() {
         // numpy: 3 subgroups of size 5
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 12.0, 11.0, 13.0, 9.0),
-            doubleArrayOf(11.0, 10.0, 12.0, 11.0, 14.0),
-            doubleArrayOf(9.0, 13.0, 10.0, 12.0, 11.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 12.0, 11.0, 13.0, 9.0),
+                doubleArrayOf(11.0, 10.0, 12.0, 11.0, 14.0),
+                doubleArrayOf(9.0, 13.0, 10.0, 12.0, 11.0),
+            )
         val result = xBarSChart(subgroups)
 
         // numpy: xbar_bar = 11.2
@@ -649,10 +675,11 @@ internal class ControlChartTest {
     @Test
     fun testXBarSChartMinimumSubgroups() {
         // Minimum: 2 subgroups
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 20.0),
-            doubleArrayOf(15.0, 25.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 20.0),
+                doubleArrayOf(15.0, 25.0),
+            )
         val result = xBarSChart(subgroups)
         assertTrue(result.centerLine.isFinite(), "centerLine should be finite")
         assertTrue(result.ucl.isFinite(), "ucl should be finite")
@@ -662,11 +689,12 @@ internal class ControlChartTest {
     @Test
     fun testXBarSChartMinimumSubgroupSize() {
         // Minimum subgroup size: n=2
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 20.0),
-            doubleArrayOf(15.0, 25.0),
-            doubleArrayOf(12.0, 18.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 20.0),
+                doubleArrayOf(15.0, 25.0),
+                doubleArrayOf(12.0, 18.0),
+            )
         val result = xBarSChart(subgroups)
 
         assertEquals(50.0 / 3.0, result.centerLine, tol, "centerLine")
@@ -676,10 +704,11 @@ internal class ControlChartTest {
     @Test
     fun testXBarSChartConstantSubgroups() {
         // All subgroups have the same values => std = 0
-        val subgroups = listOf(
-            doubleArrayOf(5.0, 5.0, 5.0),
-            doubleArrayOf(5.0, 5.0, 5.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(5.0, 5.0, 5.0),
+                doubleArrayOf(5.0, 5.0, 5.0),
+            )
         val result = xBarSChart(subgroups)
 
         assertEquals(5.0, result.centerLine, tol, "centerLine")
@@ -694,9 +723,7 @@ internal class ControlChartTest {
 
     @Test
     fun testXBarSChartEmptyList() {
-        assertFailsWith<InsufficientDataException> {
-            xBarSChart(emptyList())
-        }
+        assertFailsWith<InsufficientDataException> { xBarSChart(emptyList()) }
     }
 
     @Test
@@ -737,11 +764,12 @@ internal class ControlChartTest {
     @Test
     fun testXBarSChartLargeOffsetData() {
         val offset = 1e12
-        val subgroups = listOf(
-            doubleArrayOf(offset + 1.0, offset + 2.0, offset + 3.0),
-            doubleArrayOf(offset + 2.0, offset + 3.0, offset + 4.0),
-            doubleArrayOf(offset + 1.5, offset + 2.5, offset + 3.5),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(offset + 1.0, offset + 2.0, offset + 3.0),
+                doubleArrayOf(offset + 2.0, offset + 3.0, offset + 4.0),
+                doubleArrayOf(offset + 1.5, offset + 2.5, offset + 3.5),
+            )
         val result = xBarSChart(subgroups)
 
         assertEquals(offset + 2.5, result.centerLine, 1e-2, "centerLine with large offset")
@@ -752,10 +780,11 @@ internal class ControlChartTest {
 
     @Test
     fun testXBarSChartVerySmallValues() {
-        val subgroups = listOf(
-            doubleArrayOf(1e-10, 2e-10, 3e-10),
-            doubleArrayOf(1.5e-10, 2.5e-10, 3.5e-10),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(1e-10, 2e-10, 3e-10),
+                doubleArrayOf(1.5e-10, 2.5e-10, 3.5e-10),
+            )
         val result = xBarSChart(subgroups)
         assertTrue(result.centerLine.isFinite(), "centerLine should be finite for small values")
         assertTrue(result.ucl > result.lcl, "ucl > lcl for small values")
@@ -765,10 +794,11 @@ internal class ControlChartTest {
 
     @Test
     fun testXBarSChartNaNInData() {
-        val subgroups = listOf(
-            doubleArrayOf(1.0, Double.NaN, 3.0),
-            doubleArrayOf(4.0, 5.0, 6.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(1.0, Double.NaN, 3.0),
+                doubleArrayOf(4.0, 5.0, 6.0),
+            )
         val result = xBarSChart(subgroups)
         assertTrue(result.centerLine.isNaN(), "centerLine should be NaN when data contains NaN")
         assertTrue(result.ucl.isNaN(), "ucl should be NaN when data contains NaN")
@@ -776,14 +806,15 @@ internal class ControlChartTest {
 
     @Test
     fun testXBarSChartInfinityInData() {
-        val subgroups = listOf(
-            doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0),
-            doubleArrayOf(4.0, 5.0, 6.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(1.0, Double.POSITIVE_INFINITY, 3.0),
+                doubleArrayOf(4.0, 5.0, 6.0),
+            )
         val result = xBarSChart(subgroups)
         assertTrue(
             !result.centerLine.isFinite() || result.centerLine.isNaN(),
-            "centerLine should be non-finite when data contains Infinity"
+            "centerLine should be non-finite when data contains Infinity",
         )
     }
 
@@ -791,14 +822,15 @@ internal class ControlChartTest {
 
     @Test
     fun testXBarSChartUclGtLcl() {
-        val datasets = listOf(
-            listOf(doubleArrayOf(1.0, 2.0, 3.0), doubleArrayOf(2.0, 3.0, 4.0)),
-            listOf(doubleArrayOf(10.0, 20.0), doubleArrayOf(15.0, 25.0)),
+        val datasets =
             listOf(
-                doubleArrayOf(100.0, 101.0, 102.0, 103.0, 104.0),
-                doubleArrayOf(99.0, 100.0, 101.0, 102.0, 103.0),
-            ),
-        )
+                listOf(doubleArrayOf(1.0, 2.0, 3.0), doubleArrayOf(2.0, 3.0, 4.0)),
+                listOf(doubleArrayOf(10.0, 20.0), doubleArrayOf(15.0, 25.0)),
+                listOf(
+                    doubleArrayOf(100.0, 101.0, 102.0, 103.0, 104.0),
+                    doubleArrayOf(99.0, 100.0, 101.0, 102.0, 103.0),
+                ),
+            )
         for ((i, subgroups) in datasets.withIndex()) {
             val result = xBarSChart(subgroups)
             assertTrue(result.ucl >= result.lcl, "ucl >= lcl for dataset $i")
@@ -807,28 +839,30 @@ internal class ControlChartTest {
 
     @Test
     fun testXBarSChartCenterLineBetweenLimits() {
-        val subgroups = listOf(
-            doubleArrayOf(72.0, 84.0, 79.0, 49.0),
-            doubleArrayOf(56.0, 87.0, 33.0, 42.0),
-            doubleArrayOf(55.0, 73.0, 22.0, 60.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(72.0, 84.0, 79.0, 49.0),
+                doubleArrayOf(56.0, 87.0, 33.0, 42.0),
+                doubleArrayOf(55.0, 73.0, 22.0, 60.0),
+            )
         val result = xBarSChart(subgroups)
         assertTrue(
             result.centerLine >= result.lcl,
-            "centerLine (${result.centerLine}) >= lcl (${result.lcl})"
+            "centerLine (${result.centerLine}) >= lcl (${result.lcl})",
         )
         assertTrue(
             result.centerLine <= result.ucl,
-            "centerLine (${result.centerLine}) <= ucl (${result.ucl})"
+            "centerLine (${result.centerLine}) <= ucl (${result.ucl})",
         )
     }
 
     @Test
     fun testXBarSChartSymmetricLimits() {
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 12.0, 11.0, 13.0, 9.0),
-            doubleArrayOf(11.0, 10.0, 12.0, 11.0, 14.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 12.0, 11.0, 13.0, 9.0),
+                doubleArrayOf(11.0, 10.0, 12.0, 11.0, 14.0),
+            )
         val result = xBarSChart(subgroups)
         val upperSpread = result.ucl - result.centerLine
         val lowerSpread = result.centerLine - result.lcl
@@ -837,39 +871,52 @@ internal class ControlChartTest {
 
     @Test
     fun testXBarSChartSChartLclNonNegative() {
-        val subgroups = listOf(
-            doubleArrayOf(1.0, 100.0, 50.0),
-            doubleArrayOf(10.0, 90.0, 45.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(1.0, 100.0, 50.0),
+                doubleArrayOf(10.0, 90.0, 45.0),
+            )
         val result = xBarSChart(subgroups)
         assertTrue(
             result.sChart.lcl >= 0.0,
-            "S-chart lcl should be non-negative, got ${result.sChart.lcl}"
+            "S-chart lcl should be non-negative, got ${result.sChart.lcl}",
         )
     }
 
     @Test
     fun testXBarSChartScaleInvariance() {
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 12.0, 11.0),
-            doubleArrayOf(11.0, 10.0, 13.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 12.0, 11.0),
+                doubleArrayOf(11.0, 10.0, 13.0),
+            )
         val factor = 5.0
         val scaled = subgroups.map { sg -> DoubleArray(sg.size) { sg[it] * factor } }
 
         val result1 = xBarSChart(subgroups)
         val result2 = xBarSChart(scaled)
 
-        assertEquals(result1.centerLine * factor, result2.centerLine, tol, "centerLine scales linearly")
-        assertEquals(result1.sChart.centerLine * factor, result2.sChart.centerLine, 1e-6, "S-chart centerLine scales linearly")
+        assertEquals(
+            result1.centerLine * factor,
+            result2.centerLine,
+            tol,
+            "centerLine scales linearly",
+        )
+        assertEquals(
+            result1.sChart.centerLine * factor,
+            result2.sChart.centerLine,
+            1e-6,
+            "S-chart centerLine scales linearly",
+        )
     }
 
     @Test
     fun testXBarSChartTranslationInvariance() {
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 12.0, 11.0),
-            doubleArrayOf(11.0, 10.0, 13.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 12.0, 11.0),
+                doubleArrayOf(11.0, 10.0, 13.0),
+            )
         val c = 500.0
         val shifted = subgroups.map { sg -> DoubleArray(sg.size) { sg[it] + c } }
 
@@ -877,15 +924,21 @@ internal class ControlChartTest {
         val result2 = xBarSChart(shifted)
 
         assertEquals(result1.centerLine + c, result2.centerLine, tol, "centerLine shifts by c")
-        assertEquals(result1.sChart.centerLine, result2.sChart.centerLine, 1e-6, "S-chart centerLine unchanged by shift")
+        assertEquals(
+            result1.sChart.centerLine,
+            result2.sChart.centerLine,
+            1e-6,
+            "S-chart centerLine unchanged by shift",
+        )
     }
 
     @Test
     fun testXBarSChartDataClassEquality() {
-        val subgroups = listOf(
-            doubleArrayOf(10.0, 12.0, 11.0),
-            doubleArrayOf(11.0, 10.0, 13.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(10.0, 12.0, 11.0),
+                doubleArrayOf(11.0, 10.0, 13.0),
+            )
         val r1 = xBarSChart(subgroups)
         val r2 = xBarSChart(subgroups)
         assertEquals(r1, r2, "Same input should produce equal XBarSChartResult")
@@ -896,11 +949,12 @@ internal class ControlChartTest {
     @Test
     fun testXBarRAndXBarSShareCenterLine() {
         // Both charts should have the same x-bar center line (grand mean)
-        val subgroups = listOf(
-            doubleArrayOf(72.0, 84.0, 79.0, 49.0),
-            doubleArrayOf(56.0, 87.0, 33.0, 42.0),
-            doubleArrayOf(55.0, 73.0, 22.0, 60.0),
-        )
+        val subgroups =
+            listOf(
+                doubleArrayOf(72.0, 84.0, 79.0, 49.0),
+                doubleArrayOf(56.0, 87.0, 33.0, 42.0),
+                doubleArrayOf(55.0, 73.0, 22.0, 60.0),
+            )
         val rResult = xBarRChart(subgroups)
         val sResult = xBarSChart(subgroups)
 
@@ -908,7 +962,7 @@ internal class ControlChartTest {
             rResult.centerLine,
             sResult.centerLine,
             tol,
-            "X-bar center lines should be identical"
+            "X-bar center lines should be identical",
         )
     }
 
@@ -978,15 +1032,44 @@ internal class ControlChartTest {
 
     @Test
     fun testCusumMontgomeryTable92() {
-        // Montgomery "Introduction to Statistical Quality Control" (7th ed.), §9.1.1, Table 9.2, p.416
+        // Montgomery "Introduction to Statistical Quality Control" (7th ed.), §9.1.1, Table 9.2,
+        // p.416
         // 30 observations from a process with mu_0=10, sigma=1, monitored with K=0.5, H=5
         // The process shifts upward around observation 20; CUSUM detects the shift
         // numpy: canonical 30-observation Montgomery CUSUM example
-        val obs = doubleArrayOf(
-            9.45, 7.99, 9.29, 11.66, 12.16, 10.18, 8.04, 11.46, 9.20, 10.34,
-            9.03, 11.47, 10.51, 9.40, 10.08, 9.37, 10.62, 10.31, 8.52, 10.84,
-            10.90, 9.33, 12.29, 11.50, 10.60, 11.08, 10.38, 11.62, 11.31, 10.52
-        )
+        val obs =
+            doubleArrayOf(
+                9.45,
+                7.99,
+                9.29,
+                11.66,
+                12.16,
+                10.18,
+                8.04,
+                11.46,
+                9.20,
+                10.34,
+                9.03,
+                11.47,
+                10.51,
+                9.40,
+                10.08,
+                9.37,
+                10.62,
+                10.31,
+                8.52,
+                10.84,
+                10.90,
+                9.33,
+                12.29,
+                11.50,
+                10.60,
+                11.08,
+                10.38,
+                11.62,
+                11.31,
+                10.52,
+            )
         val result = cusum(obs, target = 10.0, k = 0.5, h = 5.0)
 
         // numpy: last values should be sPlus[29] ≈ 5.30, sMinus[29] ≈ 0
@@ -1363,8 +1446,18 @@ internal class ControlChartTest {
         val shifted = cusum(shiftedObs, target = 10.0 + shift, k = 0.25, h = 4.0)
 
         for (i in obs.indices) {
-            assertEquals(original.sPlus[i], shifted.sPlus[i], 1e-7, "sPlus[$i] translation invariance")
-            assertEquals(original.sMinus[i], shifted.sMinus[i], 1e-7, "sMinus[$i] translation invariance")
+            assertEquals(
+                original.sPlus[i],
+                shifted.sPlus[i],
+                1e-7,
+                "sPlus[$i] translation invariance",
+            )
+            assertEquals(
+                original.sMinus[i],
+                shifted.sMinus[i],
+                1e-7,
+                "sMinus[$i] translation invariance",
+            )
         }
         assertEquals(original.alarmIndex, shifted.alarmIndex, "alarmIndex unchanged by translation")
     }
@@ -1379,8 +1472,18 @@ internal class ControlChartTest {
         val negated = cusum(negObs, target = -10.0, k = 0.5, h = 3.0)
 
         for (i in obs.indices) {
-            assertEquals(original.sPlus[i], negated.sMinus[i], tol, "sPlus[$i] <-> sMinus[$i] under negation")
-            assertEquals(original.sMinus[i], negated.sPlus[i], tol, "sMinus[$i] <-> sPlus[$i] under negation")
+            assertEquals(
+                original.sPlus[i],
+                negated.sMinus[i],
+                tol,
+                "sPlus[$i] <-> sMinus[$i] under negation",
+            )
+            assertEquals(
+                original.sMinus[i],
+                negated.sPlus[i],
+                tol,
+                "sMinus[$i] <-> sPlus[$i] under negation",
+            )
         }
         assertEquals(original.alarmIndex, negated.alarmIndex, "alarmIndex unchanged by negation")
     }
@@ -1433,13 +1536,13 @@ internal class ControlChartTest {
         for (i in 0 until alarm) {
             assertTrue(
                 result.sPlus[i] <= 3.0 && result.sMinus[i] <= 3.0,
-                "Index $i before alarm: sPlus=${result.sPlus[i]}, sMinus=${result.sMinus[i]}"
+                "Index $i before alarm: sPlus=${result.sPlus[i]}, sMinus=${result.sMinus[i]}",
             )
         }
         // At the alarm index, at least one exceeds h
         assertTrue(
             result.sPlus[alarm] > 3.0 || result.sMinus[alarm] > 3.0,
-            "At alarm: sPlus=${result.sPlus[alarm]}, sMinus=${result.sMinus[alarm]}"
+            "At alarm: sPlus=${result.sPlus[alarm]}, sMinus=${result.sMinus[alarm]}",
         )
     }
 
@@ -1477,16 +1580,18 @@ internal class ControlChartTest {
     @Test
     fun testCusumResultEqualityDifferentInstances() {
         // equals uses contentEquals, so different array instances with same values are equal
-        val r1 = CusumResult(
-            sPlus = doubleArrayOf(0.0, 0.1, 0.3),
-            sMinus = doubleArrayOf(0.0, 0.0, 0.0),
-            alarmIndex = -1,
-        )
-        val r2 = CusumResult(
-            sPlus = doubleArrayOf(0.0, 0.1, 0.3),
-            sMinus = doubleArrayOf(0.0, 0.0, 0.0),
-            alarmIndex = -1,
-        )
+        val r1 =
+            CusumResult(
+                sPlus = doubleArrayOf(0.0, 0.1, 0.3),
+                sMinus = doubleArrayOf(0.0, 0.0, 0.0),
+                alarmIndex = -1,
+            )
+        val r2 =
+            CusumResult(
+                sPlus = doubleArrayOf(0.0, 0.1, 0.3),
+                sMinus = doubleArrayOf(0.0, 0.0, 0.0),
+                alarmIndex = -1,
+            )
         assertTrue(r1 !== r2, "Different instances")
         assertEquals(r1, r2, "Different array instances with same content should be equal")
         assertEquals(r1.hashCode(), r2.hashCode(), "hashCode consistent with equals")
@@ -1495,52 +1600,58 @@ internal class ControlChartTest {
     @Test
     fun testCusumResultInequality() {
         // Different alarmIndex => not equal
-        val r1 = CusumResult(
-            sPlus = doubleArrayOf(0.0, 0.1),
-            sMinus = doubleArrayOf(0.0, 0.0),
-            alarmIndex = -1,
-        )
-        val r2 = CusumResult(
-            sPlus = doubleArrayOf(0.0, 0.1),
-            sMinus = doubleArrayOf(0.0, 0.0),
-            alarmIndex = 1,
-        )
+        val r1 =
+            CusumResult(
+                sPlus = doubleArrayOf(0.0, 0.1),
+                sMinus = doubleArrayOf(0.0, 0.0),
+                alarmIndex = -1,
+            )
+        val r2 =
+            CusumResult(
+                sPlus = doubleArrayOf(0.0, 0.1),
+                sMinus = doubleArrayOf(0.0, 0.0),
+                alarmIndex = 1,
+            )
         assertTrue(r1 != r2, "Different alarmIndex => not equal")
 
         // Different sPlus contents => not equal
-        val r3 = CusumResult(
-            sPlus = doubleArrayOf(0.0, 0.2),
-            sMinus = doubleArrayOf(0.0, 0.0),
-            alarmIndex = -1,
-        )
+        val r3 =
+            CusumResult(
+                sPlus = doubleArrayOf(0.0, 0.2),
+                sMinus = doubleArrayOf(0.0, 0.0),
+                alarmIndex = -1,
+            )
         assertTrue(r1 != r3, "Different sPlus => not equal")
 
         // Different sMinus contents => not equal
-        val r4 = CusumResult(
-            sPlus = doubleArrayOf(0.0, 0.1),
-            sMinus = doubleArrayOf(0.1, 0.0),
-            alarmIndex = -1,
-        )
+        val r4 =
+            CusumResult(
+                sPlus = doubleArrayOf(0.0, 0.1),
+                sMinus = doubleArrayOf(0.1, 0.0),
+                alarmIndex = -1,
+            )
         assertTrue(r1 != r4, "Different sMinus => not equal")
     }
 
     @Test
     fun testCusumResultEqualsSelf() {
-        val r = CusumResult(
-            sPlus = doubleArrayOf(0.0, 0.1, 0.3),
-            sMinus = doubleArrayOf(0.0, 0.0, 0.0),
-            alarmIndex = -1,
-        )
+        val r =
+            CusumResult(
+                sPlus = doubleArrayOf(0.0, 0.1, 0.3),
+                sMinus = doubleArrayOf(0.0, 0.0, 0.0),
+                alarmIndex = -1,
+            )
         assertEquals(r, r, "equals with self")
     }
 
     @Test
     fun testCusumResultEqualsNonCusumResult() {
-        val r = CusumResult(
-            sPlus = doubleArrayOf(0.0),
-            sMinus = doubleArrayOf(0.0),
-            alarmIndex = -1,
-        )
+        val r =
+            CusumResult(
+                sPlus = doubleArrayOf(0.0),
+                sMinus = doubleArrayOf(0.0),
+                alarmIndex = -1,
+            )
         assertTrue(!r.equals("not a CusumResult"), "equals returns false for non-CusumResult")
         assertTrue(!r.equals(null), "equals returns false for null")
     }
@@ -1563,14 +1674,21 @@ internal class ControlChartTest {
         // data-class toString would print `[D@<hash>` which is useless for diagnostics.
         // Note: all test values have non-zero fractional parts so `Double.toString()`
         // matches on JVM and JS (on JS `(0.0).toString() == "0"`, not `"0.0"`).
-        val result = CusumResult(
-            sPlus = doubleArrayOf(0.1, 0.2, 0.3),
-            sMinus = doubleArrayOf(0.05, 0.15, 0.25),
-            alarmIndex = -1,
-        )
+        val result =
+            CusumResult(
+                sPlus = doubleArrayOf(0.1, 0.2, 0.3),
+                sMinus = doubleArrayOf(0.05, 0.15, 0.25),
+                alarmIndex = -1,
+            )
         val s = result.toString()
-        assertTrue(s.contains("sPlus=[0.1, 0.2, 0.3]"), "toString should render sPlus elements, got: $s")
-        assertTrue(s.contains("sMinus=[0.05, 0.15, 0.25]"), "toString should render sMinus elements, got: $s")
+        assertTrue(
+            s.contains("sPlus=[0.1, 0.2, 0.3]"),
+            "toString should render sPlus elements, got: $s",
+        )
+        assertTrue(
+            s.contains("sMinus=[0.05, 0.15, 0.25]"),
+            "toString should render sMinus elements, got: $s",
+        )
         assertTrue(s.contains("alarmIndex=-1"), "toString should render alarmIndex, got: $s")
         assertTrue(!s.contains("[D@"), "toString must not leak default array identity, got: $s")
     }
@@ -1642,11 +1760,39 @@ internal class ControlChartTest {
     fun testEwmaMontgomeryExample() {
         // Montgomery "Introduction to Statistical Quality Control" (7th ed.), §9.2
         // Same 30 observations as CUSUM example, target=10, sigma=1, lambda=0.1, L=2.7
-        val obs = doubleArrayOf(
-            9.45, 7.99, 9.29, 11.66, 12.16, 10.18, 8.04, 11.46, 9.20, 10.34,
-            9.03, 11.47, 10.51, 9.40, 10.08, 9.37, 10.62, 10.31, 8.52, 10.84,
-            10.90, 9.33, 12.29, 11.50, 10.60, 11.08, 10.38, 11.62, 11.31, 10.52
-        )
+        val obs =
+            doubleArrayOf(
+                9.45,
+                7.99,
+                9.29,
+                11.66,
+                12.16,
+                10.18,
+                8.04,
+                11.46,
+                9.20,
+                10.34,
+                9.03,
+                11.47,
+                10.51,
+                9.40,
+                10.08,
+                9.37,
+                10.62,
+                10.31,
+                8.52,
+                10.84,
+                10.90,
+                9.33,
+                12.29,
+                11.50,
+                10.60,
+                11.08,
+                10.38,
+                11.62,
+                11.31,
+                10.52,
+            )
         val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.1, controlLimitWidth = 2.7)
 
         // numpy: Z_0 = 0.1*9.45 + 0.9*10 = 9.945
@@ -1671,7 +1817,7 @@ internal class ControlChartTest {
         // numpy: Z_28=10.6468 > UCL_28=10.6187, Z_29=10.6341 > UCL_29=10.6189 => OOC at 28, 29
         assertTrue(
             result.outOfControl.contentEquals(intArrayOf(28, 29)),
-            "OOC indices should be [28, 29], got ${result.outOfControl.toList()}"
+            "OOC indices should be [28, 29], got ${result.outOfControl.toList()}",
         )
     }
 
@@ -1699,7 +1845,14 @@ internal class ControlChartTest {
         // Z_0 = 0.2*12 + 0.8*10 = 10.4
         // sigma_Z_1 = 1 * sqrt(0.2/1.8 * (1 - 0.64)) = sqrt(0.04) = 0.2
         // UCL = 10 + 3*0.2 = 10.6, LCL = 10 - 0.6 = 9.4
-        val result = ewma(doubleArrayOf(12.0), target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val result =
+            ewma(
+                doubleArrayOf(12.0),
+                target = 10.0,
+                sigma = 1.0,
+                lambda = 0.2,
+                controlLimitWidth = 3.0,
+            )
 
         assertEquals(1, result.smoothedValues.size, "smoothedValues.size")
         assertEquals(1, result.ucl.size, "ucl.size")
@@ -1715,7 +1868,14 @@ internal class ControlChartTest {
     fun testEwmaSingleObservationOutOfControl() {
         // With lambda=1, UCL=target+L*sigma immediately fires
         // Z_0 = 20 > UCL = 10 + 3 = 13
-        val result = ewma(doubleArrayOf(20.0), target = 10.0, sigma = 1.0, lambda = 1.0, controlLimitWidth = 3.0)
+        val result =
+            ewma(
+                doubleArrayOf(20.0),
+                target = 10.0,
+                sigma = 1.0,
+                lambda = 1.0,
+                controlLimitWidth = 3.0,
+            )
         assertEquals(20.0, result.smoothedValues[0], tol, "Z_0")
         assertEquals(13.0, result.ucl[0], tol, "UCL_0")
         assertEquals(7.0, result.lcl[0], tol, "LCL_0")
@@ -1788,11 +1948,11 @@ internal class ControlChartTest {
         for (i in 1 until obs.size) {
             assertTrue(
                 result.ucl[i] >= result.ucl[i - 1],
-                "UCL[$i]=${result.ucl[i]} >= UCL[${i - 1}]=${result.ucl[i - 1]}"
+                "UCL[$i]=${result.ucl[i]} >= UCL[${i - 1}]=${result.ucl[i - 1]}",
             )
             assertTrue(
                 result.lcl[i] <= result.lcl[i - 1],
-                "LCL[$i]=${result.lcl[i]} <= LCL[${i - 1}]=${result.lcl[i - 1]}"
+                "LCL[$i]=${result.lcl[i]} <= LCL[${i - 1}]=${result.lcl[i - 1]}",
             )
         }
         // numpy: Steady state UCL = 10 + 3 * sqrt(0.1/1.9) = 10.6887...
@@ -1824,7 +1984,7 @@ internal class ControlChartTest {
         // numpy: Indices where Z > UCL or Z < LCL => [0, 1, 2, 3, 6, 7]
         assertTrue(
             result.outOfControl.contentEquals(intArrayOf(0, 1, 2, 3, 6, 7)),
-            "two-sided OOC: ${result.outOfControl.toList()}"
+            "two-sided OOC: ${result.outOfControl.toList()}",
         )
     }
 
@@ -1865,70 +2025,131 @@ internal class ControlChartTest {
     @Test
     fun testEwmaSigmaZero() {
         assertFailsWith<InvalidParameterException> {
-            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 0.0, lambda = 0.2, controlLimitWidth = 3.0)
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = 0.0,
+                lambda = 0.2,
+                controlLimitWidth = 3.0,
+            )
         }
     }
 
     @Test
     fun testEwmaSigmaNegative() {
         assertFailsWith<InvalidParameterException> {
-            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = -0.5, lambda = 0.2, controlLimitWidth = 3.0)
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = -0.5,
+                lambda = 0.2,
+                controlLimitWidth = 3.0,
+            )
         }
     }
 
     @Test
     fun testEwmaLambdaZero() {
         assertFailsWith<InvalidParameterException> {
-            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 0.0, controlLimitWidth = 3.0)
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = 1.0,
+                lambda = 0.0,
+                controlLimitWidth = 3.0,
+            )
         }
     }
 
     @Test
     fun testEwmaLambdaNegative() {
         assertFailsWith<InvalidParameterException> {
-            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = -0.1, controlLimitWidth = 3.0)
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = 1.0,
+                lambda = -0.1,
+                controlLimitWidth = 3.0,
+            )
         }
     }
 
     @Test
     fun testEwmaLambdaGreaterThanOne() {
         assertFailsWith<InvalidParameterException> {
-            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 1.0001, controlLimitWidth = 3.0)
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = 1.0,
+                lambda = 1.0001,
+                controlLimitWidth = 3.0,
+            )
         }
     }
 
     @Test
     fun testEwmaLambdaExactlyOne() {
         // lambda=1 is the allowed boundary, should NOT throw
-        val result = ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 1.0, controlLimitWidth = 3.0)
+        val result =
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = 1.0,
+                lambda = 1.0,
+                controlLimitWidth = 3.0,
+            )
         assertEquals(3, result.smoothedValues.size, "lambda=1 is allowed")
     }
 
     @Test
     fun testEwmaControlLimitWidthZero() {
         assertFailsWith<InvalidParameterException> {
-            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 0.0)
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = 1.0,
+                lambda = 0.2,
+                controlLimitWidth = 0.0,
+            )
         }
     }
 
     @Test
     fun testEwmaControlLimitWidthNegative() {
         assertFailsWith<InvalidParameterException> {
-            ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = -1.0)
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = 1.0,
+                lambda = 0.2,
+                controlLimitWidth = -1.0,
+            )
         }
     }
 
     @Test
     fun testEwmaSigmaNegativeIterable() {
         assertFailsWith<InvalidParameterException> {
-            ewma(listOf(1.0, 2.0, 3.0), target = 0.0, sigma = -1.0, lambda = 0.2, controlLimitWidth = 3.0)
+            ewma(
+                listOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = -1.0,
+                lambda = 0.2,
+                controlLimitWidth = 3.0,
+            )
         }
     }
 
     @Test
     fun testEwmaLambdaOutOfRangeSequence() {
         assertFailsWith<InvalidParameterException> {
-            ewma(sequenceOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 1.5, controlLimitWidth = 3.0)
+            ewma(
+                sequenceOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = 1.0,
+                lambda = 1.5,
+                controlLimitWidth = 3.0,
+            )
         }
     }
 
@@ -1976,7 +2197,7 @@ internal class ControlChartTest {
         // UCL_0 = 10 + 3 * 1e-10 * 0.2 = 10 + 6e-11
         assertTrue(
             result.ucl[0] - 10.0 < 1e-9,
-            "UCL very close to target for tiny sigma, got ${result.ucl[0]}"
+            "UCL very close to target for tiny sigma, got ${result.ucl[0]}",
         )
         // deviation far exceeds UCL, so OOC
         assertTrue(result.outOfControl.isNotEmpty(), "tiny deviation > tiny UCL => OOC")
@@ -2065,7 +2286,14 @@ internal class ControlChartTest {
     @Test
     fun testEwmaNaNTargetDoesNotThrow() {
         // NaN parameters pass validation (NaN comparisons are false per IEEE 754)
-        val result = ewma(doubleArrayOf(1.0, 2.0, 3.0), target = Double.NaN, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val result =
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = Double.NaN,
+                sigma = 1.0,
+                lambda = 0.2,
+                controlLimitWidth = 3.0,
+            )
         for (i in 0 until 3) {
             assertTrue(result.smoothedValues[i].isNaN(), "Z[$i] NaN when target is NaN")
             assertTrue(result.ucl[i].isNaN(), "UCL[$i] NaN when target is NaN")
@@ -2077,7 +2305,14 @@ internal class ControlChartTest {
     @Test
     fun testEwmaNaNSigmaDoesNotThrow() {
         // NaN sigma: sigma <= 0 is false for NaN, validation passes; limits become NaN
-        val result = ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = Double.NaN, lambda = 0.2, controlLimitWidth = 3.0)
+        val result =
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = Double.NaN,
+                lambda = 0.2,
+                controlLimitWidth = 3.0,
+            )
         for (i in 0 until 3) {
             assertTrue(result.ucl[i].isNaN(), "UCL[$i] NaN when sigma is NaN")
             assertTrue(result.lcl[i].isNaN(), "LCL[$i] NaN when sigma is NaN")
@@ -2089,7 +2324,14 @@ internal class ControlChartTest {
     @Test
     fun testEwmaNaNLambdaDoesNotThrow() {
         // NaN lambda: lambda <= 0 and lambda > 1 are both false for NaN; results become NaN
-        val result = ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = Double.NaN, controlLimitWidth = 3.0)
+        val result =
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = 1.0,
+                lambda = Double.NaN,
+                controlLimitWidth = 3.0,
+            )
         for (i in 0 until 3) {
             assertTrue(result.smoothedValues[i].isNaN(), "Z[$i] NaN with NaN lambda")
         }
@@ -2098,7 +2340,14 @@ internal class ControlChartTest {
     @Test
     fun testEwmaNaNControlLimitWidthDoesNotThrow() {
         // NaN L: L <= 0 is false for NaN; limits become NaN
-        val result = ewma(doubleArrayOf(1.0, 2.0, 3.0), target = 0.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = Double.NaN)
+        val result =
+            ewma(
+                doubleArrayOf(1.0, 2.0, 3.0),
+                target = 0.0,
+                sigma = 1.0,
+                lambda = 0.2,
+                controlLimitWidth = Double.NaN,
+            )
         // Z unaffected by L
         assertEquals(0.2, result.smoothedValues[0], tol, "Z unaffected by L")
         for (i in 0 until 3) {
@@ -2115,7 +2364,8 @@ internal class ControlChartTest {
         val obs = doubleArrayOf(10.1, 10.3, 10.5, 10.8, 11.0, 11.3, 9.5, 9.2, 10.7, 11.5)
         val target = 10.0
         val lambda = 0.25
-        val result = ewma(obs, target = target, sigma = 1.0, lambda = lambda, controlLimitWidth = 3.0)
+        val result =
+            ewma(obs, target = target, sigma = 1.0, lambda = lambda, controlLimitWidth = 3.0)
 
         // Z_0 = lambda*x_0 + (1-lambda)*target
         val z0 = lambda * obs[0] + (1.0 - lambda) * target
@@ -2160,15 +2410,28 @@ internal class ControlChartTest {
         //                     = sigma^2 * lam^2
         // => UCL_0 - target = L * sigma * lambda
         for (lambda in listOf(0.05, 0.1, 0.2, 0.5, 0.9, 1.0)) {
-            val result = ewma(doubleArrayOf(0.0), target = 0.0, sigma = 1.0, lambda = lambda, controlLimitWidth = 3.0)
+            val result =
+                ewma(
+                    doubleArrayOf(0.0),
+                    target = 0.0,
+                    sigma = 1.0,
+                    lambda = lambda,
+                    controlLimitWidth = 3.0,
+                )
             val expectedUcl = 3.0 * lambda
-            assertEquals(expectedUcl, result.ucl[0], 1e-14, "UCL_0 - target = L*sigma*lambda for lambda=$lambda")
+            assertEquals(
+                expectedUcl,
+                result.ucl[0],
+                1e-14,
+                "UCL_0 - target = L*sigma*lambda for lambda=$lambda",
+            )
         }
     }
 
     @Test
     fun testEwmaControlLimitsMonotonicWidening() {
-        // For lambda < 1: |UCL_t - target| strictly increases with t (approaches steady state from below)
+        // For lambda < 1: |UCL_t - target| strictly increases with t (approaches steady state from
+        // below)
         val obs = DoubleArray(20) { 0.0 }
         val lambda = 0.15
         val result = ewma(obs, target = 0.0, sigma = 1.0, lambda = lambda, controlLimitWidth = 3.0)
@@ -2176,7 +2439,7 @@ internal class ControlChartTest {
         for (i in 1 until obs.size) {
             assertTrue(
                 result.ucl[i] > result.ucl[i - 1],
-                "UCL strictly widens: UCL[$i]=${result.ucl[i]} > UCL[${i - 1}]=${result.ucl[i - 1]}"
+                "UCL strictly widens: UCL[$i]=${result.ucl[i]} > UCL[${i - 1}]=${result.ucl[i - 1]}",
             )
         }
     }
@@ -2201,16 +2464,28 @@ internal class ControlChartTest {
         val shiftedObs = DoubleArray(obs.size) { obs[it] + shift }
 
         val original = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
-        val shifted = ewma(shiftedObs, target = 10.0 + shift, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
+        val shifted =
+            ewma(
+                shiftedObs,
+                target = 10.0 + shift,
+                sigma = 1.0,
+                lambda = 0.3,
+                controlLimitWidth = 3.0,
+            )
 
         for (i in obs.indices) {
-            assertEquals(original.smoothedValues[i] + shift, shifted.smoothedValues[i], 1e-7, "Z[$i] shifts by c")
+            assertEquals(
+                original.smoothedValues[i] + shift,
+                shifted.smoothedValues[i],
+                1e-7,
+                "Z[$i] shifts by c",
+            )
             assertEquals(original.ucl[i] + shift, shifted.ucl[i], 1e-7, "UCL[$i] shifts by c")
             assertEquals(original.lcl[i] + shift, shifted.lcl[i], 1e-7, "LCL[$i] shifts by c")
         }
         assertTrue(
             original.outOfControl.contentEquals(shifted.outOfControl),
-            "OOC indices unchanged by translation"
+            "OOC indices unchanged by translation",
         )
     }
 
@@ -2223,8 +2498,10 @@ internal class ControlChartTest {
         val c = 5.0
         val scaledObs = DoubleArray(obs.size) { target + c * (obs[it] - target) }
 
-        val original = ewma(obs, target = target, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
-        val scaled = ewma(scaledObs, target = target, sigma = c, lambda = 0.3, controlLimitWidth = 3.0)
+        val original =
+            ewma(obs, target = target, sigma = 1.0, lambda = 0.3, controlLimitWidth = 3.0)
+        val scaled =
+            ewma(scaledObs, target = target, sigma = c, lambda = 0.3, controlLimitWidth = 3.0)
 
         for (i in obs.indices) {
             val origOffset = original.smoothedValues[i] - target
@@ -2233,23 +2510,31 @@ internal class ControlChartTest {
 
             val origUclOffset = original.ucl[i] - target
             val scaledUclOffset = scaled.ucl[i] - target
-            assertEquals(c * origUclOffset, scaledUclOffset, 1e-10, "UCL offset scales by c at i=$i")
+            assertEquals(
+                c * origUclOffset,
+                scaledUclOffset,
+                1e-10,
+                "UCL offset scales by c at i=$i",
+            )
         }
         assertTrue(
             original.outOfControl.contentEquals(scaled.outOfControl),
-            "OOC indices unchanged by scale"
+            "OOC indices unchanged by scale",
         )
     }
 
     @Test
     fun testEwmaSymmetryByNegation() {
-        // Negating (obs - target) around target negates (Z - target) and swaps roles of UCL/LCL boundaries
+        // Negating (obs - target) around target negates (Z - target) and swaps roles of UCL/LCL
+        // boundaries
         val obs = doubleArrayOf(10.5, 11.0, 9.5, 10.3, 12.0, 8.5)
         val target = 10.0
         val negObs = DoubleArray(obs.size) { target - (obs[it] - target) }
 
-        val original = ewma(obs, target = target, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
-        val negated = ewma(negObs, target = target, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val original =
+            ewma(obs, target = target, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val negated =
+            ewma(negObs, target = target, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
 
         for (i in obs.indices) {
             // Z - target negates
@@ -2257,7 +2542,7 @@ internal class ControlChartTest {
                 (original.smoothedValues[i] - target),
                 -(negated.smoothedValues[i] - target),
                 1e-10,
-                "Z[$i] centered negates"
+                "Z[$i] centered negates",
             )
             // UCL/LCL boundaries at same magnitude from target
             assertEquals(original.ucl[i], negated.ucl[i], tol, "UCL[$i] symmetric")
@@ -2274,7 +2559,7 @@ internal class ControlChartTest {
         for (i in 1 until result.outOfControl.size) {
             assertTrue(
                 result.outOfControl[i] > result.outOfControl[i - 1],
-                "outOfControl[$i]=${result.outOfControl[i]} > outOfControl[${i - 1}]=${result.outOfControl[i - 1]}"
+                "outOfControl[$i]=${result.outOfControl[i]} > outOfControl[${i - 1}]=${result.outOfControl[i - 1]}",
             )
         }
     }
@@ -2295,7 +2580,7 @@ internal class ControlChartTest {
         assertTrue(
             result.outOfControl.contentEquals(expected.toIntArray()),
             "outOfControl should be exactly {i : z[i] ∉ [lcl[i], ucl[i]]}, " +
-                "expected $expected got ${result.outOfControl.toList()}"
+                "expected $expected got ${result.outOfControl.toList()}",
         )
     }
 
@@ -2306,7 +2591,8 @@ internal class ControlChartTest {
         // Iterable overload should give identical result to DoubleArray overload
         val array = doubleArrayOf(10.1, 10.3, 10.5, 10.8, 11.0, 11.3)
         val list: Iterable<Double> = array.toList()
-        val expected = ewma(array, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val expected =
+            ewma(array, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
         val actual = ewma(list, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
 
         assertEquals(expected, actual, "Iterable overload should match DoubleArray overload")
@@ -2317,7 +2603,8 @@ internal class ControlChartTest {
         // Sequence overload should give identical result to DoubleArray overload
         val array = doubleArrayOf(10.1, 10.3, 10.5, 10.8, 11.0, 11.3)
         val seq: Sequence<Double> = array.asSequence()
-        val expected = ewma(array, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
+        val expected =
+            ewma(array, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
         val actual = ewma(seq, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
 
         assertEquals(expected, actual, "Sequence overload should match DoubleArray overload")
@@ -2338,18 +2625,20 @@ internal class ControlChartTest {
     @Test
     fun testEwmaResultEqualityDifferentInstances() {
         // equals uses contentEquals, so different array instances with same values are equal
-        val r1 = EwmaResult(
-            smoothedValues = doubleArrayOf(10.0, 10.2, 10.4),
-            ucl = doubleArrayOf(10.6, 10.77, 10.86),
-            lcl = doubleArrayOf(9.4, 9.23, 9.14),
-            outOfControl = intArrayOf(),
-        )
-        val r2 = EwmaResult(
-            smoothedValues = doubleArrayOf(10.0, 10.2, 10.4),
-            ucl = doubleArrayOf(10.6, 10.77, 10.86),
-            lcl = doubleArrayOf(9.4, 9.23, 9.14),
-            outOfControl = intArrayOf(),
-        )
+        val r1 =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.0, 10.2, 10.4),
+                ucl = doubleArrayOf(10.6, 10.77, 10.86),
+                lcl = doubleArrayOf(9.4, 9.23, 9.14),
+                outOfControl = intArrayOf(),
+            )
+        val r2 =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.0, 10.2, 10.4),
+                ucl = doubleArrayOf(10.6, 10.77, 10.86),
+                lcl = doubleArrayOf(9.4, 9.23, 9.14),
+                outOfControl = intArrayOf(),
+            )
         assertTrue(r1 !== r2, "Different instances")
         assertEquals(r1, r2, "Different array instances with same content should be equal")
         assertEquals(r1.hashCode(), r2.hashCode(), "hashCode consistent with equals")
@@ -2357,69 +2646,76 @@ internal class ControlChartTest {
 
     @Test
     fun testEwmaResultInequality() {
-        val r1 = EwmaResult(
-            smoothedValues = doubleArrayOf(10.0, 10.2),
-            ucl = doubleArrayOf(10.6, 10.77),
-            lcl = doubleArrayOf(9.4, 9.23),
-            outOfControl = intArrayOf(),
-        )
+        val r1 =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.0, 10.2),
+                ucl = doubleArrayOf(10.6, 10.77),
+                lcl = doubleArrayOf(9.4, 9.23),
+                outOfControl = intArrayOf(),
+            )
 
         // Different smoothedValues
-        val r2 = EwmaResult(
-            smoothedValues = doubleArrayOf(10.1, 10.2),
-            ucl = doubleArrayOf(10.6, 10.77),
-            lcl = doubleArrayOf(9.4, 9.23),
-            outOfControl = intArrayOf(),
-        )
+        val r2 =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.1, 10.2),
+                ucl = doubleArrayOf(10.6, 10.77),
+                lcl = doubleArrayOf(9.4, 9.23),
+                outOfControl = intArrayOf(),
+            )
         assertTrue(r1 != r2, "Different smoothedValues => not equal")
 
         // Different ucl
-        val r3 = EwmaResult(
-            smoothedValues = doubleArrayOf(10.0, 10.2),
-            ucl = doubleArrayOf(10.7, 10.77),
-            lcl = doubleArrayOf(9.4, 9.23),
-            outOfControl = intArrayOf(),
-        )
+        val r3 =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.0, 10.2),
+                ucl = doubleArrayOf(10.7, 10.77),
+                lcl = doubleArrayOf(9.4, 9.23),
+                outOfControl = intArrayOf(),
+            )
         assertTrue(r1 != r3, "Different ucl => not equal")
 
         // Different lcl
-        val r4 = EwmaResult(
-            smoothedValues = doubleArrayOf(10.0, 10.2),
-            ucl = doubleArrayOf(10.6, 10.77),
-            lcl = doubleArrayOf(9.3, 9.23),
-            outOfControl = intArrayOf(),
-        )
+        val r4 =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.0, 10.2),
+                ucl = doubleArrayOf(10.6, 10.77),
+                lcl = doubleArrayOf(9.3, 9.23),
+                outOfControl = intArrayOf(),
+            )
         assertTrue(r1 != r4, "Different lcl => not equal")
 
         // Different outOfControl
-        val r5 = EwmaResult(
-            smoothedValues = doubleArrayOf(10.0, 10.2),
-            ucl = doubleArrayOf(10.6, 10.77),
-            lcl = doubleArrayOf(9.4, 9.23),
-            outOfControl = intArrayOf(1),
-        )
+        val r5 =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.0, 10.2),
+                ucl = doubleArrayOf(10.6, 10.77),
+                lcl = doubleArrayOf(9.4, 9.23),
+                outOfControl = intArrayOf(1),
+            )
         assertTrue(r1 != r5, "Different outOfControl => not equal")
     }
 
     @Test
     fun testEwmaResultEqualsSelf() {
-        val r = EwmaResult(
-            smoothedValues = doubleArrayOf(10.0),
-            ucl = doubleArrayOf(10.6),
-            lcl = doubleArrayOf(9.4),
-            outOfControl = intArrayOf(),
-        )
+        val r =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.0),
+                ucl = doubleArrayOf(10.6),
+                lcl = doubleArrayOf(9.4),
+                outOfControl = intArrayOf(),
+            )
         assertEquals(r, r, "equals with self")
     }
 
     @Test
     fun testEwmaResultEqualsNonEwmaResult() {
-        val r = EwmaResult(
-            smoothedValues = doubleArrayOf(10.0),
-            ucl = doubleArrayOf(10.6),
-            lcl = doubleArrayOf(9.4),
-            outOfControl = intArrayOf(),
-        )
+        val r =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.0),
+                ucl = doubleArrayOf(10.6),
+                lcl = doubleArrayOf(9.4),
+                outOfControl = intArrayOf(),
+            )
         assertTrue(!r.equals("not an EwmaResult"), "equals returns false for non-EwmaResult")
         assertTrue(!r.equals(null), "equals returns false for null")
     }
@@ -2431,7 +2727,11 @@ internal class ControlChartTest {
         val result = ewma(obs, target = 10.0, sigma = 1.0, lambda = 0.2, controlLimitWidth = 3.0)
         val (smoothedValues, ucl, lcl, outOfControl) = result
 
-        assertEquals(result.smoothedValues.size, smoothedValues.size, "smoothedValues via destructuring")
+        assertEquals(
+            result.smoothedValues.size,
+            smoothedValues.size,
+            "smoothedValues via destructuring",
+        )
         assertEquals(result.ucl.size, ucl.size, "ucl via destructuring")
         assertEquals(result.lcl.size, lcl.size, "lcl via destructuring")
         assertEquals(result.outOfControl.size, outOfControl.size, "outOfControl via destructuring")
@@ -2443,14 +2743,18 @@ internal class ControlChartTest {
         // data-class toString would print `[D@<hash>` which is useless for diagnostics.
         // Note: all double values have non-zero fractional parts so `Double.toString()`
         // matches on JVM and JS (on JS `(10.0).toString() == "10"`, not `"10.0"`).
-        val result = EwmaResult(
-            smoothedValues = doubleArrayOf(10.1, 10.2, 10.4),
-            ucl = doubleArrayOf(10.6, 10.77, 10.86),
-            lcl = doubleArrayOf(9.4, 9.23, 9.14),
-            outOfControl = intArrayOf(2),
-        )
+        val result =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.1, 10.2, 10.4),
+                ucl = doubleArrayOf(10.6, 10.77, 10.86),
+                lcl = doubleArrayOf(9.4, 9.23, 9.14),
+                outOfControl = intArrayOf(2),
+            )
         val s = result.toString()
-        assertTrue(s.contains("smoothedValues=[10.1, 10.2, 10.4]"), "toString should render smoothedValues, got: $s")
+        assertTrue(
+            s.contains("smoothedValues=[10.1, 10.2, 10.4]"),
+            "toString should render smoothedValues, got: $s",
+        )
         assertTrue(s.contains("ucl=[10.6, 10.77, 10.86]"), "toString should render ucl, got: $s")
         assertTrue(s.contains("lcl=[9.4, 9.23, 9.14]"), "toString should render lcl, got: $s")
         assertTrue(s.contains("outOfControl=[2]"), "toString should render outOfControl, got: $s")
@@ -2460,14 +2764,18 @@ internal class ControlChartTest {
 
     @Test
     fun testEwmaResultToStringEmptyOutOfControl() {
-        val result = EwmaResult(
-            smoothedValues = doubleArrayOf(10.0),
-            ucl = doubleArrayOf(10.6),
-            lcl = doubleArrayOf(9.4),
-            outOfControl = intArrayOf(),
-        )
+        val result =
+            EwmaResult(
+                smoothedValues = doubleArrayOf(10.0),
+                ucl = doubleArrayOf(10.6),
+                lcl = doubleArrayOf(9.4),
+                outOfControl = intArrayOf(),
+            )
         val s = result.toString()
-        assertTrue(s.contains("outOfControl=[]"), "toString should render empty outOfControl, got: $s")
+        assertTrue(
+            s.contains("outOfControl=[]"),
+            "toString should render empty outOfControl, got: $s",
+        )
     }
 
     // ===== westernElectricRules: Basic correctness =====
@@ -2477,7 +2785,10 @@ internal class ControlChartTest {
         // Reference: single point beyond +3σ triggers Rule 1.
         val obs = doubleArrayOf(0.1, 0.2, 0.0, 3.5, 0.1)
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
-        assertTrue(r.rule1.contentEquals(intArrayOf(3)), "rule1 should flag index 3, got ${r.rule1.contentToString()}")
+        assertTrue(
+            r.rule1.contentEquals(intArrayOf(3)),
+            "rule1 should flag index 3, got ${r.rule1.contentToString()}",
+        )
         assertTrue(r.rule2.isEmpty(), "rule2 should be empty, got ${r.rule2.contentToString()}")
         assertTrue(r.rule3.isEmpty(), "rule3 should be empty, got ${r.rule3.contentToString()}")
         assertTrue(r.rule4.isEmpty(), "rule4 should be empty, got ${r.rule4.contentToString()}")
@@ -2488,7 +2799,10 @@ internal class ControlChartTest {
         // Reference: single point beyond -3σ triggers Rule 1.
         val obs = doubleArrayOf(0.1, -3.5, 0.0, 0.2, 0.1)
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
-        assertTrue(r.rule1.contentEquals(intArrayOf(1)), "rule1 should flag index 1, got ${r.rule1.contentToString()}")
+        assertTrue(
+            r.rule1.contentEquals(intArrayOf(1)),
+            "rule1 should flag index 1, got ${r.rule1.contentToString()}",
+        )
         assertTrue(r.rule2.isEmpty())
         assertTrue(r.rule3.isEmpty())
         assertTrue(r.rule4.isEmpty())
@@ -2502,7 +2816,10 @@ internal class ControlChartTest {
         val obs = doubleArrayOf(0.1, 2.5, 0.0, 2.3, 0.1)
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
         assertTrue(r.rule1.isEmpty())
-        assertTrue(r.rule2.contentEquals(intArrayOf(3)), "rule2 should flag index 3, got ${r.rule2.contentToString()}")
+        assertTrue(
+            r.rule2.contentEquals(intArrayOf(3)),
+            "rule2 should flag index 3, got ${r.rule2.contentToString()}",
+        )
         assertTrue(r.rule3.isEmpty())
         assertTrue(r.rule4.isEmpty())
     }
@@ -2611,7 +2928,10 @@ internal class ControlChartTest {
         //   [0.5, 0.3, 0.6, 0.4, 0.0, 0.8, 0.7, 0.5, 0.6]: 0.0 at index 4 → no rule 4.
         val obs = doubleArrayOf(0.5, 0.3, 0.6, 0.4, 0.0, 0.8, 0.7, 0.5, 0.6)
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
-        assertTrue(r.rule4.isEmpty(), "Strict inequality: value at center breaks streak, got ${r.rule4.contentToString()}")
+        assertTrue(
+            r.rule4.isEmpty(),
+            "Strict inequality: value at center breaks streak, got ${r.rule4.contentToString()}",
+        )
     }
 
     @Test
@@ -2649,27 +2969,48 @@ internal class ControlChartTest {
     @Test
     fun testWesternElectricRulesAllFourRulesFire() {
         // Reference: comprehensive example where all four rules trigger.
-        //   Observations: 0.1, 0.2, 0.3, 0.1, 3.5, 2.5, 2.3, 1.5, 1.3, 0.0, 1.2, 1.4, 1.1, 1.2, 1.5, 1.3, 1.4, 1.6
+        //   Observations: 0.1, 0.2, 0.3, 0.1, 3.5, 2.5, 2.3, 1.5, 1.3, 0.0, 1.2, 1.4, 1.1, 1.2,
+        // 1.5, 1.3, 1.4, 1.6
         //   Expected (python reference):
         //     rule1 = [4]
         //     rule2 = [5, 6, 7]
         //     rule3 = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
         //     rule4 = [7, 8, 17]
-        val obs = doubleArrayOf(
-            0.1, 0.2, 0.3, 0.1,
-            3.5,
-            2.5, 2.3,
-            1.5, 1.3, 0.0, 1.2, 1.4,
-            1.1, 1.2, 1.5, 1.3, 1.4, 1.6,
-        )
+        val obs =
+            doubleArrayOf(
+                0.1,
+                0.2,
+                0.3,
+                0.1,
+                3.5,
+                2.5,
+                2.3,
+                1.5,
+                1.3,
+                0.0,
+                1.2,
+                1.4,
+                1.1,
+                1.2,
+                1.5,
+                1.3,
+                1.4,
+                1.6,
+            )
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
         assertTrue(r.rule1.contentEquals(intArrayOf(4)), "rule1: ${r.rule1.contentToString()}")
-        assertTrue(r.rule2.contentEquals(intArrayOf(5, 6, 7)), "rule2: ${r.rule2.contentToString()}")
+        assertTrue(
+            r.rule2.contentEquals(intArrayOf(5, 6, 7)),
+            "rule2: ${r.rule2.contentToString()}",
+        )
         assertTrue(
             r.rule3.contentEquals(intArrayOf(7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17)),
             "rule3: ${r.rule3.contentToString()}",
         )
-        assertTrue(r.rule4.contentEquals(intArrayOf(7, 8, 17)), "rule4: ${r.rule4.contentToString()}")
+        assertTrue(
+            r.rule4.contentEquals(intArrayOf(7, 8, 17)),
+            "rule4: ${r.rule4.contentToString()}",
+        )
     }
 
     @Test
@@ -2753,7 +3094,10 @@ internal class ControlChartTest {
         // Reference: 7 observations all above center cannot fire Rule 4 (needs 8).
         val obs = DoubleArray(7) { 0.5 }
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
-        assertTrue(r.rule4.isEmpty(), "Rule 4 needs 8 consecutive, got ${r.rule4.contentToString()}")
+        assertTrue(
+            r.rule4.isEmpty(),
+            "Rule 4 needs 8 consecutive, got ${r.rule4.contentToString()}",
+        )
     }
 
     @Test
@@ -2761,7 +3105,10 @@ internal class ControlChartTest {
         // Strict inequality: x = +3σ exactly does NOT trigger Rule 1.
         val obs = doubleArrayOf(3.0, 3.0)
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
-        assertTrue(r.rule1.isEmpty(), "Strict inequality at +3σ boundary: ${r.rule1.contentToString()}")
+        assertTrue(
+            r.rule1.isEmpty(),
+            "Strict inequality at +3σ boundary: ${r.rule1.contentToString()}",
+        )
     }
 
     @Test
@@ -2927,7 +3274,10 @@ internal class ControlChartTest {
         //   [0.5, 0.5, 0.5, 0.5, NaN, 0.5, 0.5, 0.5]: NaN at i=4 breaks the streak.
         val obs = doubleArrayOf(0.5, 0.5, 0.5, 0.5, Double.NaN, 0.5, 0.5, 0.5)
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
-        assertTrue(r.rule4.isEmpty(), "NaN must break rule 4 streak, got ${r.rule4.contentToString()}")
+        assertTrue(
+            r.rule4.isEmpty(),
+            "NaN must break rule 4 streak, got ${r.rule4.contentToString()}",
+        )
     }
 
     @Test
@@ -2967,7 +3317,8 @@ internal class ControlChartTest {
         assertTrue(r.rule1.isEmpty())
         assertTrue(r.rule2.isEmpty())
         assertTrue(r.rule3.isEmpty())
-        // Rule 4 operates on center (not sigma); with all obs > 0 and finite center=0, it still fires.
+        // Rule 4 operates on center (not sigma); with all obs > 0 and finite center=0, it still
+        // fires.
         // But here n=3 < 8, so rule4 is empty anyway.
         assertTrue(r.rule4.isEmpty())
     }
@@ -3022,13 +3373,29 @@ internal class ControlChartTest {
     @Test
     fun testWesternElectricRulesIndicesAreSortedAscending() {
         // Each rule array must be in strictly ascending order (indices reported in-order).
-        val obs = doubleArrayOf(
-            3.5, -3.5, 2.5, 2.3, 0.0, 1.5, 1.3, 1.2, 1.4, 1.6, 1.7, 1.8, 1.1,
-        )
+        val obs =
+            doubleArrayOf(
+                3.5,
+                -3.5,
+                2.5,
+                2.3,
+                0.0,
+                1.5,
+                1.3,
+                1.2,
+                1.4,
+                1.6,
+                1.7,
+                1.8,
+                1.1,
+            )
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
         for (arr in listOf(r.rule1, r.rule2, r.rule3, r.rule4)) {
             for (i in 1 until arr.size) {
-                assertTrue(arr[i] > arr[i - 1], "indices must be strictly ascending: ${arr.contentToString()}")
+                assertTrue(
+                    arr[i] > arr[i - 1],
+                    "indices must be strictly ascending: ${arr.contentToString()}",
+                )
             }
         }
     }
@@ -3036,9 +3403,21 @@ internal class ControlChartTest {
     @Test
     fun testWesternElectricRulesIndicesInRange() {
         // All reported indices must fall in [0, n).
-        val obs = doubleArrayOf(
-            3.5, 2.5, 2.3, 1.5, 1.3, 1.2, 1.4, 1.1, 0.9, 0.8, 0.7, -3.5,
-        )
+        val obs =
+            doubleArrayOf(
+                3.5,
+                2.5,
+                2.3,
+                1.5,
+                1.3,
+                1.2,
+                1.4,
+                1.1,
+                0.9,
+                0.8,
+                0.7,
+                -3.5,
+            )
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
         val n = obs.size
         for (arr in listOf(r.rule1, r.rule2, r.rule3, r.rule4)) {
@@ -3051,7 +3430,7 @@ internal class ControlChartTest {
     @Test
     fun testWesternElectricRulesRule2RequiresWindowOfThree() {
         // Rule 2 cannot fire at indices 0 or 1 (window of 3 not yet available).
-        val obs = doubleArrayOf(3.5, 3.5, 3.5, 3.5)  // all above +3σ
+        val obs = doubleArrayOf(3.5, 3.5, 3.5, 3.5) // all above +3σ
         val r = westernElectricRules(obs, center = 0.0, sigma = 1.0)
         for (idx in r.rule2) {
             assertTrue(idx >= 2, "Rule 2 index must be ≥ 2, got $idx")
@@ -3126,18 +3505,20 @@ internal class ControlChartTest {
     @Test
     fun testWesternElectricRulesResultEqualityDifferentInstances() {
         // equals uses contentEquals — different IntArray instances with same values are equal.
-        val r1 = WesternElectricRulesResult(
-            rule1 = intArrayOf(0),
-            rule2 = intArrayOf(2, 3),
-            rule3 = intArrayOf(),
-            rule4 = intArrayOf(7),
-        )
-        val r2 = WesternElectricRulesResult(
-            rule1 = intArrayOf(0),
-            rule2 = intArrayOf(2, 3),
-            rule3 = intArrayOf(),
-            rule4 = intArrayOf(7),
-        )
+        val r1 =
+            WesternElectricRulesResult(
+                rule1 = intArrayOf(0),
+                rule2 = intArrayOf(2, 3),
+                rule3 = intArrayOf(),
+                rule4 = intArrayOf(7),
+            )
+        val r2 =
+            WesternElectricRulesResult(
+                rule1 = intArrayOf(0),
+                rule2 = intArrayOf(2, 3),
+                rule3 = intArrayOf(),
+                rule4 = intArrayOf(7),
+            )
         assertTrue(r1 !== r2, "Different instances")
         assertEquals(r1, r2)
         assertEquals(r1.hashCode(), r2.hashCode())
@@ -3145,65 +3526,72 @@ internal class ControlChartTest {
 
     @Test
     fun testWesternElectricRulesResultInequality() {
-        val base = WesternElectricRulesResult(
-            rule1 = intArrayOf(0),
-            rule2 = intArrayOf(2),
-            rule3 = intArrayOf(4),
-            rule4 = intArrayOf(7),
-        )
+        val base =
+            WesternElectricRulesResult(
+                rule1 = intArrayOf(0),
+                rule2 = intArrayOf(2),
+                rule3 = intArrayOf(4),
+                rule4 = intArrayOf(7),
+            )
 
-        val diffRule1 = WesternElectricRulesResult(
-            rule1 = intArrayOf(1),
-            rule2 = intArrayOf(2),
-            rule3 = intArrayOf(4),
-            rule4 = intArrayOf(7),
-        )
+        val diffRule1 =
+            WesternElectricRulesResult(
+                rule1 = intArrayOf(1),
+                rule2 = intArrayOf(2),
+                rule3 = intArrayOf(4),
+                rule4 = intArrayOf(7),
+            )
         assertTrue(base != diffRule1, "Different rule1 => not equal")
 
-        val diffRule2 = WesternElectricRulesResult(
-            rule1 = intArrayOf(0),
-            rule2 = intArrayOf(3),
-            rule3 = intArrayOf(4),
-            rule4 = intArrayOf(7),
-        )
+        val diffRule2 =
+            WesternElectricRulesResult(
+                rule1 = intArrayOf(0),
+                rule2 = intArrayOf(3),
+                rule3 = intArrayOf(4),
+                rule4 = intArrayOf(7),
+            )
         assertTrue(base != diffRule2, "Different rule2 => not equal")
 
-        val diffRule3 = WesternElectricRulesResult(
-            rule1 = intArrayOf(0),
-            rule2 = intArrayOf(2),
-            rule3 = intArrayOf(5),
-            rule4 = intArrayOf(7),
-        )
+        val diffRule3 =
+            WesternElectricRulesResult(
+                rule1 = intArrayOf(0),
+                rule2 = intArrayOf(2),
+                rule3 = intArrayOf(5),
+                rule4 = intArrayOf(7),
+            )
         assertTrue(base != diffRule3, "Different rule3 => not equal")
 
-        val diffRule4 = WesternElectricRulesResult(
-            rule1 = intArrayOf(0),
-            rule2 = intArrayOf(2),
-            rule3 = intArrayOf(4),
-            rule4 = intArrayOf(8),
-        )
+        val diffRule4 =
+            WesternElectricRulesResult(
+                rule1 = intArrayOf(0),
+                rule2 = intArrayOf(2),
+                rule3 = intArrayOf(4),
+                rule4 = intArrayOf(8),
+            )
         assertTrue(base != diffRule4, "Different rule4 => not equal")
     }
 
     @Test
     fun testWesternElectricRulesResultEqualsSelf() {
-        val r = WesternElectricRulesResult(
-            rule1 = intArrayOf(0),
-            rule2 = intArrayOf(),
-            rule3 = intArrayOf(),
-            rule4 = intArrayOf(),
-        )
+        val r =
+            WesternElectricRulesResult(
+                rule1 = intArrayOf(0),
+                rule2 = intArrayOf(),
+                rule3 = intArrayOf(),
+                rule4 = intArrayOf(),
+            )
         assertEquals(r, r, "equals with self")
     }
 
     @Test
     fun testWesternElectricRulesResultEqualsNonResult() {
-        val r = WesternElectricRulesResult(
-            rule1 = intArrayOf(0),
-            rule2 = intArrayOf(),
-            rule3 = intArrayOf(),
-            rule4 = intArrayOf(),
-        )
+        val r =
+            WesternElectricRulesResult(
+                rule1 = intArrayOf(0),
+                rule2 = intArrayOf(),
+                rule3 = intArrayOf(),
+                rule4 = intArrayOf(),
+            )
         assertTrue(!r.equals("not a WesternElectricRulesResult"), "equals false for non-Result")
         assertTrue(!r.equals(null), "equals false for null")
     }
@@ -3225,12 +3613,13 @@ internal class ControlChartTest {
     fun testWesternElectricRulesResultToStringRendersArrayContents() {
         // toString must use contentToString() for IntArray fields — the default data-class
         // toString would print `[I@<hash>` which is useless for diagnostics.
-        val r = WesternElectricRulesResult(
-            rule1 = intArrayOf(0, 4),
-            rule2 = intArrayOf(3),
-            rule3 = intArrayOf(),
-            rule4 = intArrayOf(7, 8),
-        )
+        val r =
+            WesternElectricRulesResult(
+                rule1 = intArrayOf(0, 4),
+                rule2 = intArrayOf(3),
+                rule3 = intArrayOf(),
+                rule4 = intArrayOf(7, 8),
+            )
         val s = r.toString()
         assertTrue(s.contains("rule1=[0, 4]"), "toString should render rule1, got: $s")
         assertTrue(s.contains("rule2=[3]"), "toString should render rule2, got: $s")

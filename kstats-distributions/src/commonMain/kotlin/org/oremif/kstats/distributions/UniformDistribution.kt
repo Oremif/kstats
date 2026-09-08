@@ -1,21 +1,21 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ln
 import kotlin.random.Random
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 /**
- * Represents the continuous uniform distribution, where all values in the interval `[min, max]`
- * are equally likely.
+ * Represents the continuous uniform distribution, where all values in the interval `[min, max]` are
+ * equally likely.
  *
- * The uniform distribution assigns constant probability density to every point within its
- * support and zero density outside it. It is the simplest continuous distribution and is often
- * used as a baseline or "uninformative" prior in Bayesian statistics, for random number
- * generation, and in simulation when every outcome in a range should be equally probable.
+ * The uniform distribution assigns constant probability density to every point within its support
+ * and zero density outside it. It is the simplest continuous distribution and is often used as a
+ * baseline or "uninformative" prior in Bayesian statistics, for random number generation, and in
+ * simulation when every outcome in a range should be equally probable.
  *
- * The distribution is parameterized by [min] and [max], which define the lower and upper
- * bounds of the support. The probability density is constant and equal to `1 / (max - min)`
- * throughout the interval. The CDF increases linearly from 0 at [min] to 1 at [max].
+ * The distribution is parameterized by [min] and [max], which define the lower and upper bounds of
+ * the support. The probability density is constant and equal to `1 / (max - min)` throughout the
+ * interval. The CDF increases linearly from 0 at [min] to 1 at [max].
  *
  * ### Example:
  * ```kotlin
@@ -35,17 +35,20 @@ import kotlin.random.Random
  *
  * @property min the lower bound of the distribution's support. Default is `0.0`.
  * @property max the upper bound of the distribution's support. Must be strictly greater than [min].
- * Default is `1.0`, which gives the standard uniform distribution on `[0, 1]`.
+ *   Default is `1.0`, which gives the standard uniform distribution on `[0, 1]`.
  */
 public class UniformDistribution(
     public val min: Double = 0.0,
-    public val max: Double = 1.0
+    public val max: Double = 1.0,
 ) : ContinuousDistribution {
 
     init {
-        if (min.isNaN() || min.isInfinite()) throw InvalidParameterException("min must be finite, got $min")
-        if (max.isNaN() || max.isInfinite()) throw InvalidParameterException("max must be finite, got $max")
-        if (min >= max) throw InvalidParameterException("min must be less than max, got min=$min, max=$max")
+        if (min.isNaN() || min.isInfinite())
+            throw InvalidParameterException("min must be finite, got $min")
+        if (max.isNaN() || max.isInfinite())
+            throw InvalidParameterException("max must be finite, got $max")
+        if (min >= max)
+            throw InvalidParameterException("min must be less than max, got min=$min, max=$max")
     }
 
     private val range = max - min
@@ -59,30 +62,32 @@ public class UniformDistribution(
     /**
      * Computes the probability density at [x].
      *
-     * Returns the constant density `1 / (max - min)` if [x] is within the support
-     * `[min, max]`, or `0.0` otherwise.
+     * Returns the constant density `1 / (max - min)` if [x] is within the support `[min, max]`, or
+     * `0.0` otherwise.
      *
      * @param x the point at which to evaluate the density.
      * @return the probability density at [x].
      */
-    override fun pdf(x: Double): Double = when {
-        x.isNaN() -> Double.NaN
-        x in min..max -> 1.0 / range
-        else -> 0.0
-    }
+    override fun pdf(x: Double): Double =
+        when {
+            x.isNaN() -> Double.NaN
+            x in min..max -> 1.0 / range
+            else -> 0.0
+        }
 
     /**
      * Computes the natural logarithm of the probability density at [x].
      *
      * @param x the point at which to evaluate the log-density.
      * @return the natural log of the density at [x], or [Double.NEGATIVE_INFINITY] if [x] is
-     * outside the support.
+     *   outside the support.
      */
-    override fun logPdf(x: Double): Double = when {
-        x.isNaN() -> Double.NaN
-        x in min..max -> -ln(range)
-        else -> Double.NEGATIVE_INFINITY
-    }
+    override fun logPdf(x: Double): Double =
+        when {
+            x.isNaN() -> Double.NaN
+            x in min..max -> -ln(range)
+            else -> Double.NEGATIVE_INFINITY
+        }
 
     /**
      * Computes the cumulative distribution function at [x].
@@ -90,20 +95,22 @@ public class UniformDistribution(
      * The CDF increases linearly from 0 at [min] to 1 at [max].
      *
      * @param x the point at which to evaluate the cumulative probability.
-     * @return the probability that a value drawn from this distribution is less than or equal to [x].
+     * @return the probability that a value drawn from this distribution is less than or equal to
+     *   [x].
      */
-    override fun cdf(x: Double): Double = when {
-        x.isNaN() -> Double.NaN
-        x <= min -> 0.0
-        x >= max -> 1.0
-        else -> (x - min) / range
-    }
+    override fun cdf(x: Double): Double =
+        when {
+            x.isNaN() -> Double.NaN
+            x <= min -> 0.0
+            x >= max -> 1.0
+            else -> (x - min) / range
+        }
 
     /**
      * Computes the quantile (inverse CDF) for the given probability [p].
      *
-     * Because the CDF is linear, the quantile is a simple linear interpolation between
-     * [min] and [max].
+     * Because the CDF is linear, the quantile is a simple linear interpolation between [min] and
+     * [max].
      *
      * @param p the cumulative probability, must be in `[0, 1]`.
      * @return the value x at which `cdf(x) = p`.
@@ -114,18 +121,29 @@ public class UniformDistribution(
     }
 
     /** The mean of this distribution, equal to the midpoint of [min] and [max]. */
-    override val mean: Double get() = (min + max) / 2.0
+    override val mean: Double
+        get() = (min + max) / 2.0
 
     /** The variance of this distribution, equal to the squared range divided by 12. */
-    override val variance: Double get() = range * range / 12.0
+    override val variance: Double
+        get() = range * range / 12.0
 
-    /** The skewness of this distribution, always zero because the uniform distribution is symmetric. */
-    override val skewness: Double get() = 0.0
+    /**
+     * The skewness of this distribution, always zero because the uniform distribution is symmetric.
+     */
+    override val skewness: Double
+        get() = 0.0
 
-    /** The excess kurtosis of this distribution, always -1.2 for any continuous uniform distribution. */
-    override val kurtosis: Double get() = -6.0 / 5.0 // excess
+    /**
+     * The excess kurtosis of this distribution, always -1.2 for any continuous uniform
+     * distribution.
+     */
+    override val kurtosis: Double
+        get() = -6.0 / 5.0 // excess
 
-    /** The differential entropy of this distribution in nats, equal to the natural log of the range. */
+    /**
+     * The differential entropy of this distribution in nats, equal to the natural log of the range.
+     */
     override val entropy: Double = ln(range)
 
     /**

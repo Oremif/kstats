@@ -1,11 +1,11 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class CentralMomentTest {
 
@@ -71,7 +71,7 @@ class CentralMomentTest {
         assertEquals(
             data1.toList().variance(PopulationKind.POPULATION),
             data1.centralMoment(2),
-            1e-15
+            1e-15,
         )
     }
 
@@ -92,8 +92,10 @@ class CentralMomentTest {
         val constant = doubleArrayOf(5.0, 5.0, 5.0, 5.0)
         for (order in 1..5) {
             assertEquals(
-                0.0, constant.centralMoment(order), 1e-15,
-                "centralMoment($order) of constant data should be 0.0"
+                0.0,
+                constant.centralMoment(order),
+                1e-15,
+                "centralMoment($order) of constant data should be 0.0",
             )
         }
     }
@@ -127,7 +129,10 @@ class CentralMomentTest {
         val data = doubleArrayOf(1e15 + 1.0, 1e15 + 2.0, 1e15 + 3.0, 1e15 + 4.0, 1e15 + 5.0)
         for (order in 2..5) {
             val result = data.centralMoment(order)
-            assertTrue(result.isFinite(), "centralMoment($order) must be finite for large-offset data, got $result")
+            assertTrue(
+                result.isFinite(),
+                "centralMoment($order) must be finite for large-offset data, got $result",
+            )
         }
     }
 
@@ -157,12 +162,16 @@ class CentralMomentTest {
         for (order in 0..5) {
             val expected = data1.centralMoment(order)
             assertEquals(
-                expected, list.centralMoment(order), 1e-15,
-                "Iterable overload differs at order $order"
+                expected,
+                list.centralMoment(order),
+                1e-15,
+                "Iterable overload differs at order $order",
             )
             assertEquals(
-                expected, seq.centralMoment(order), 1e-15,
-                "Sequence overload differs at order $order"
+                expected,
+                seq.centralMoment(order),
+                1e-15,
+                "Sequence overload differs at order $order",
             )
         }
     }

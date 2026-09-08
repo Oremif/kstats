@@ -1,29 +1,29 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.exp
 import kotlin.math.expm1
 import kotlin.math.ln
 import kotlin.math.ln1p
 import kotlin.random.Random
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 /**
- * Represents the exponential distribution, a continuous probability distribution that models
- * the time between events in a Poisson process.
+ * Represents the exponential distribution, a continuous probability distribution that models the
+ * time between events in a Poisson process.
  *
- * The exponential distribution is commonly used to model waiting times, such as the time until
- * the next customer arrives, the time until a component fails, or the time between radioactive
- * decays. It is the continuous analog of the geometric distribution and is the only continuous
- * distribution with the memoryless property: the probability of waiting an additional amount of
- * time is independent of how long you have already waited.
+ * The exponential distribution is commonly used to model waiting times, such as the time until the
+ * next customer arrives, the time until a component fails, or the time between radioactive decays.
+ * It is the continuous analog of the geometric distribution and is the only continuous distribution
+ * with the memoryless property: the probability of waiting an additional amount of time is
+ * independent of how long you have already waited.
  *
  * The distribution is parameterized by [rate] (often written as lambda), which is the average
  * number of events per unit time. A higher rate means events happen more frequently and the
- * distribution is concentrated closer to zero. The support is `[0, +infinity)` -- only
- * non-negative values have positive density.
+ * distribution is concentrated closer to zero. The support is `[0, +infinity)` -- only non-negative
+ * values have positive density.
  *
- * Random sampling uses the inverse CDF method, which transforms a single uniform random draw
- * into an exponentially distributed value.
+ * Random sampling uses the inverse CDF method, which transforms a single uniform random draw into
+ * an exponentially distributed value.
  *
  * ### Example:
  * ```kotlin
@@ -42,14 +42,13 @@ import kotlin.random.Random
  * ```
  *
  * @property rate the rate parameter (lambda), representing the average number of events per unit
- * time. Must be positive. Default is `1.0`, which gives the standard exponential distribution.
+ *   time. Must be positive. Default is `1.0`, which gives the standard exponential distribution.
  */
-public class ExponentialDistribution(
-    public val rate: Double = 1.0
-) : ContinuousDistribution {
+public class ExponentialDistribution(public val rate: Double = 1.0) : ContinuousDistribution {
 
     init {
-        if (!rate.isFinite() || rate <= 0.0) throw InvalidParameterException("rate must be finite and positive, got $rate")
+        if (!rate.isFinite() || rate <= 0.0)
+            throw InvalidParameterException("rate must be finite and positive, got $rate")
     }
 
     /** Provides the pre-built standard exponential distribution constant. */
@@ -64,53 +63,58 @@ public class ExponentialDistribution(
      * @param x the point at which to evaluate the density.
      * @return the probability density at [x], or `0.0` if [x] is negative.
      */
-    override fun pdf(x: Double): Double = when {
-        x.isNaN() -> Double.NaN
-        x >= 0.0 -> rate * exp(-rate * x)
-        else -> 0.0
-    }
+    override fun pdf(x: Double): Double =
+        when {
+            x.isNaN() -> Double.NaN
+            x >= 0.0 -> rate * exp(-rate * x)
+            else -> 0.0
+        }
 
     /**
      * Computes the natural logarithm of the probability density at [x].
      *
      * @param x the point at which to evaluate the log-density.
-     * @return the natural log of the density at [x], or [Double.NEGATIVE_INFINITY] if [x] is negative.
+     * @return the natural log of the density at [x], or [Double.NEGATIVE_INFINITY] if [x] is
+     *   negative.
      */
-    override fun logPdf(x: Double): Double = when {
-        x.isNaN() -> Double.NaN
-        x >= 0.0 -> ln(rate) - rate * x
-        else -> Double.NEGATIVE_INFINITY
-    }
+    override fun logPdf(x: Double): Double =
+        when {
+            x.isNaN() -> Double.NaN
+            x >= 0.0 -> ln(rate) - rate * x
+            else -> Double.NEGATIVE_INFINITY
+        }
 
     /**
      * Computes the cumulative distribution function at [x].
      *
      * @param x the point at which to evaluate the cumulative probability.
-     * @return the probability that a value drawn from this distribution is less than or equal to [x],
-     * or `0.0` if [x] is negative.
+     * @return the probability that a value drawn from this distribution is less than or equal to
+     *   [x], or `0.0` if [x] is negative.
      */
-    override fun cdf(x: Double): Double = when {
-        x.isNaN() -> Double.NaN
-        x >= 0.0 -> -expm1(-rate * x)
-        else -> 0.0
-    }
+    override fun cdf(x: Double): Double =
+        when {
+            x.isNaN() -> Double.NaN
+            x >= 0.0 -> -expm1(-rate * x)
+            else -> 0.0
+        }
 
     /**
      * Computes the survival function at [x].
      *
-     * This override computes the survival probability directly as an exponential decay rather
-     * than as `1 - cdf(x)`, which avoids catastrophic cancellation when [x] is large and the
-     * CDF is close to 1.
+     * This override computes the survival probability directly as an exponential decay rather than
+     * as `1 - cdf(x)`, which avoids catastrophic cancellation when [x] is large and the CDF is
+     * close to 1.
      *
      * @param x the point at which to evaluate the survival probability.
-     * @return the probability that a value drawn from this distribution is greater than [x],
-     * or `1.0` if [x] is negative.
+     * @return the probability that a value drawn from this distribution is greater than [x], or
+     *   `1.0` if [x] is negative.
      */
-    override fun sf(x: Double): Double = when {
-        x.isNaN() -> Double.NaN
-        x >= 0.0 -> exp(-rate * x)
-        else -> 1.0
-    }
+    override fun sf(x: Double): Double =
+        when {
+            x.isNaN() -> Double.NaN
+            x >= 0.0 -> exp(-rate * x)
+            else -> 1.0
+        }
 
     /**
      * Computes the quantile (inverse CDF) for the given probability [p].
@@ -127,16 +131,20 @@ public class ExponentialDistribution(
     }
 
     /** The mean of this distribution, equal to the reciprocal of [rate]. */
-    override val mean: Double get() = 1.0 / rate
+    override val mean: Double
+        get() = 1.0 / rate
 
     /** The variance of this distribution, equal to the reciprocal of [rate] squared. */
-    override val variance: Double get() = 1.0 / (rate * rate)
+    override val variance: Double
+        get() = 1.0 / (rate * rate)
 
     /** The skewness of this distribution, always 2 for any exponential distribution. */
-    override val skewness: Double get() = 2.0
+    override val skewness: Double
+        get() = 2.0
 
     /** The excess kurtosis of this distribution, always 6 for any exponential distribution. */
-    override val kurtosis: Double get() = 6.0 // excess
+    override val kurtosis: Double
+        get() = 6.0 // excess
 
     /** The differential entropy of this distribution in nats, computed from [rate]. */
     override val entropy: Double = 1.0 - ln(rate)

@@ -1,31 +1,30 @@
 package org.oremif.kstats.descriptive
 
+import kotlin.math.sqrt
 import org.oremif.kstats.core.compensatedSum
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
-import kotlin.math.sqrt
 
 // ── skewness ────────────────────────────────────────────────────────────────
 
 /**
  * Computes the skewness of the values in this iterable.
  *
- * Skewness measures the asymmetry of a distribution. A positive value indicates a longer
- * right tail, a negative value indicates a longer left tail, and zero indicates symmetry.
- * Uses a two-pass algorithm with z-normalization for numerical stability: first computes
- * the mean and variance via Welford's method, then accumulates normalized cubed deviations.
+ * Skewness measures the asymmetry of a distribution. A positive value indicates a longer right
+ * tail, a negative value indicates a longer left tail, and zero indicates symmetry. Uses a two-pass
+ * algorithm with z-normalization for numerical stability: first computes the mean and variance via
+ * Welford's method, then accumulates normalized cubed deviations.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
  * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).skewness() // 0.656...
  * ```
  *
- * @param kind whether to compute sample-adjusted (Fisher-Pearson) or population skewness.
- * Defaults to [PopulationKind.SAMPLE], which applies the bias correction factor
- * sqrt(n*(n-1)) / (n-2).
+ * @param kind whether to compute sample-adjusted (Fisher-Pearson) or population skewness. Defaults
+ *   to [PopulationKind.SAMPLE], which applies the bias correction factor sqrt(n*(n-1)) / (n-2).
  * @return the skewness, or 0.0 if variance is zero (constant data).
  */
 public fun Iterable<Double>.skewness(kind: PopulationKind = SAMPLE): Double {
@@ -38,7 +37,11 @@ public fun Iterable<Double>.skewness(kind: PopulationKind = SAMPLE): Double {
         if (variance == 0.0) return 0.0
         val sd = sqrt(variance)
 
-        val zCubed = DoubleArray(n) { val z = (list[it] - mean) / sd; z * z * z }
+        val zCubed =
+            DoubleArray(n) {
+                val z = (list[it] - mean) / sd
+                z * z * z
+            }
         val g1 = zCubed.compensatedSum() / n
 
         if (kind == SAMPLE) {
@@ -53,20 +56,19 @@ public fun Iterable<Double>.skewness(kind: PopulationKind = SAMPLE): Double {
 /**
  * Computes the skewness of the values in this array.
  *
- * Skewness measures the asymmetry of a distribution. A positive value indicates a longer
- * right tail, a negative value indicates a longer left tail, and zero indicates symmetry.
+ * Skewness measures the asymmetry of a distribution. A positive value indicates a longer right
+ * tail, a negative value indicates a longer left tail, and zero indicates symmetry.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
  * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).skewness() // 0.656...
  * ```
  *
- * @param kind whether to compute sample-adjusted (Fisher-Pearson) or population skewness.
- * Defaults to [PopulationKind.SAMPLE], which applies the bias correction factor
- * sqrt(n*(n-1)) / (n-2).
+ * @param kind whether to compute sample-adjusted (Fisher-Pearson) or population skewness. Defaults
+ *   to [PopulationKind.SAMPLE], which applies the bias correction factor sqrt(n*(n-1)) / (n-2).
  * @return the skewness, or 0.0 if variance is zero (constant data).
  */
 public fun DoubleArray.skewness(kind: PopulationKind = SAMPLE): Double {
@@ -78,7 +80,11 @@ public fun DoubleArray.skewness(kind: PopulationKind = SAMPLE): Double {
         if (variance == 0.0) return 0.0
         val sd = sqrt(variance)
 
-        val zCubed = DoubleArray(n) { val z = (this[it] - mean) / sd; z * z * z }
+        val zCubed =
+            DoubleArray(n) {
+                val z = (this[it] - mean) / sd
+                z * z * z
+            }
         val g1 = zCubed.compensatedSum() / n
 
         if (kind == SAMPLE) {
@@ -95,13 +101,13 @@ public fun DoubleArray.skewness(kind: PopulationKind = SAMPLE): Double {
 /**
  * Computes the kurtosis of the values in this iterable.
  *
- * Kurtosis measures the "tailedness" of a distribution relative to a normal distribution.
- * Higher kurtosis indicates heavier tails and a sharper peak. By default, computes excess
- * kurtosis (subtracting 3 so that a normal distribution has kurtosis 0). Uses a two-pass
- * algorithm with z-normalization for numerical stability.
+ * Kurtosis measures the "tailedness" of a distribution relative to a normal distribution. Higher
+ * kurtosis indicates heavier tails and a sharper peak. By default, computes excess kurtosis
+ * (subtracting 3 so that a normal distribution has kurtosis 0). Uses a two-pass algorithm with
+ * z-normalization for numerical stability.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -110,12 +116,15 @@ public fun DoubleArray.skewness(kind: PopulationKind = SAMPLE): Double {
  * ```
  *
  * @param kind whether to compute sample-adjusted or population kurtosis. Defaults to
- * [PopulationKind.SAMPLE], which applies bias correction.
- * @param excess whether to subtract 3 (the kurtosis of a normal distribution). Defaults to
- * `true`. Set to `false` for raw kurtosis.
+ *   [PopulationKind.SAMPLE], which applies bias correction.
+ * @param excess whether to subtract 3 (the kurtosis of a normal distribution). Defaults to `true`.
+ *   Set to `false` for raw kurtosis.
  * @return the kurtosis. Returns -3.0 (excess) or 0.0 (non-excess) if variance is zero.
  */
-public fun Iterable<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean = true): Double {
+public fun Iterable<Double>.kurtosis(
+    kind: PopulationKind = SAMPLE,
+    excess: Boolean = true,
+): Double {
     val list = toList()
     val n = list.size
     if (n < 4) throw InsufficientDataException("Kurtosis requires at least 4 elements")
@@ -125,7 +134,12 @@ public fun Iterable<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Bool
         if (variance == 0.0) return if (excess) -3.0 else 0.0
         val sd = sqrt(variance)
 
-        val zFourth = DoubleArray(n) { val z = (list[it] - mean) / sd; val z2 = z * z; z2 * z2 }
+        val zFourth =
+            DoubleArray(n) {
+                val z = (list[it] - mean) / sd
+                val z2 = z * z
+                z2 * z2
+            }
         val g2 = zFourth.compensatedSum() / n
 
         if (kind == SAMPLE) {
@@ -141,11 +155,11 @@ public fun Iterable<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Bool
 /**
  * Computes the kurtosis of the values in this array.
  *
- * Kurtosis measures the "tailedness" of a distribution relative to a normal distribution.
- * Higher kurtosis indicates heavier tails and a sharper peak.
+ * Kurtosis measures the "tailedness" of a distribution relative to a normal distribution. Higher
+ * kurtosis indicates heavier tails and a sharper peak.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -153,9 +167,9 @@ public fun Iterable<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Bool
  * ```
  *
  * @param kind whether to compute sample-adjusted or population kurtosis. Defaults to
- * [PopulationKind.SAMPLE], which applies bias correction.
- * @param excess whether to subtract 3 (the kurtosis of a normal distribution). Defaults to
- * `true`. Set to `false` for raw kurtosis.
+ *   [PopulationKind.SAMPLE], which applies bias correction.
+ * @param excess whether to subtract 3 (the kurtosis of a normal distribution). Defaults to `true`.
+ *   Set to `false` for raw kurtosis.
  * @return the kurtosis. Returns -3.0 (excess) or 0.0 (non-excess) if variance is zero.
  */
 public fun DoubleArray.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean = true): Double {
@@ -167,7 +181,12 @@ public fun DoubleArray.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean =
         if (variance == 0.0) return if (excess) -3.0 else 0.0
         val sd = sqrt(variance)
 
-        val zFourth = DoubleArray(n) { val z = (this[it] - mean) / sd; val z2 = z * z; z2 * z2 }
+        val zFourth =
+            DoubleArray(n) {
+                val z = (this[it] - mean) / sd
+                val z2 = z * z
+                z2 * z2
+            }
         val g2 = zFourth.compensatedSum() / n
 
         if (kind == SAMPLE) {
@@ -187,7 +206,8 @@ public fun DoubleArray.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean =
  *
  * The sequence is materialized internally. See [DoubleArray.skewness] for details.
  *
- * @param kind whether to compute sample-adjusted or population skewness. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample-adjusted or population skewness. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the skewness, or 0.0 if variance is zero (constant data).
  */
 public fun Sequence<Double>.skewness(kind: PopulationKind = SAMPLE): Double =
@@ -198,9 +218,12 @@ public fun Sequence<Double>.skewness(kind: PopulationKind = SAMPLE): Double =
  *
  * The sequence is materialized internally. See [DoubleArray.kurtosis] for details.
  *
- * @param kind whether to compute sample-adjusted or population kurtosis. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample-adjusted or population kurtosis. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @param excess whether to subtract 3 (the kurtosis of a normal distribution). Defaults to `true`.
  * @return the kurtosis. Returns -3.0 (excess) or 0.0 (non-excess) if variance is zero.
  */
-public fun Sequence<Double>.kurtosis(kind: PopulationKind = SAMPLE, excess: Boolean = true): Double =
-    toList().toDoubleArray().kurtosis(kind, excess)
+public fun Sequence<Double>.kurtosis(
+    kind: PopulationKind = SAMPLE,
+    excess: Boolean = true,
+): Double = toList().toDoubleArray().kurtosis(kind, excess)

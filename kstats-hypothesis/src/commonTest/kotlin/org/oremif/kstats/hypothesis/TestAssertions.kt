@@ -1,12 +1,10 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.ConfidenceInterval
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.ConfidenceInterval
 
-/**
- * Shared assertion helpers for hypothesis test files.
- */
+/** Shared assertion helpers for hypothesis test files. */
 internal object TestAssertions {
 
     /** Assert that both statistic and pValue are NaN (non-finite input propagation). */
@@ -20,7 +18,7 @@ internal object TestAssertions {
         assertEquals(
             result.pValue < alpha,
             result.isSignificant(alpha),
-            "isSignificant($alpha) should be consistent with pValue=${result.pValue}"
+            "isSignificant($alpha) should be consistent with pValue=${result.pValue}",
         )
     }
 
@@ -35,7 +33,7 @@ internal object TestAssertions {
         expectedHigh: Double,
         ci: ConfidenceInterval?,
         tol: Double = 1e-8,
-        message: String = ""
+        message: String = "",
     ) {
         requireNotNull(ci) { "CI should not be null $message" }
         assertEquals(expectedLow, ci.lower, tol, "CI lower $message")

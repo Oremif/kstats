@@ -1,26 +1,26 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.*
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random
+import org.oremif.kstats.core.*
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 /**
  * Represents the Gamma distribution, a continuous probability distribution defined on the
  * interval [0, +infinity).
  *
- * The Gamma distribution generalizes the exponential distribution to allow for a variable
- * number of waiting periods. It is commonly used to model waiting times, rainfall amounts,
- * insurance claims, and other non-negative continuous quantities. When the [shape] parameter
- * is 1, the distribution reduces to an exponential distribution with the given [rate].
+ * The Gamma distribution generalizes the exponential distribution to allow for a variable number of
+ * waiting periods. It is commonly used to model waiting times, rainfall amounts, insurance claims,
+ * and other non-negative continuous quantities. When the [shape] parameter is 1, the distribution
+ * reduces to an exponential distribution with the given [rate].
  *
- * The CDF is computed via the regularized incomplete gamma function. Quantiles are found
- * using Newton's method with a Wilson-Hilferty normal approximation as the initial guess.
- * Random samples are generated using the Marsaglia-Tsang method for shape >= 1, with a
- * transformation trick for shape < 1.
+ * The CDF is computed via the regularized incomplete gamma function. Quantiles are found using
+ * Newton's method with a Wilson-Hilferty normal approximation as the initial guess. Random samples
+ * are generated using the Marsaglia-Tsang method for shape >= 1, with a transformation trick for
+ * shape < 1.
  *
  * ### Example:
  * ```kotlin
@@ -36,23 +36,24 @@ import kotlin.random.Random
  * ```
  *
  * @property shape the shape parameter (sometimes called k or alpha). Must be positive.
- * @property rate the rate parameter (inverse of scale). Defaults to 1.0, meaning the scale is 1. Must be positive.
+ * @property rate the rate parameter (inverse of scale). Defaults to 1.0, meaning the scale is 1.
+ *   Must be positive.
  * @see ContinuousDistribution
  * @see ChiSquaredDistribution
  */
 public class GammaDistribution(
     public val shape: Double,
-    public val rate: Double = 1.0
+    public val rate: Double = 1.0,
 ) : ContinuousDistribution {
 
     init {
-        if (!shape.isFinite() || shape <= 0.0) throw InvalidParameterException("shape must be finite and positive, got $shape")
-        if (!rate.isFinite() || rate <= 0.0) throw InvalidParameterException("rate must be finite and positive, got $rate")
+        if (!shape.isFinite() || shape <= 0.0)
+            throw InvalidParameterException("shape must be finite and positive, got $shape")
+        if (!rate.isFinite() || rate <= 0.0)
+            throw InvalidParameterException("rate must be finite and positive, got $rate")
     }
 
-    private val smallShapeHelper: GammaDistribution by lazy {
-        GammaDistribution(shape + 1.0, 1.0)
-    }
+    private val smallShapeHelper: GammaDistribution by lazy { GammaDistribution(shape + 1.0, 1.0) }
 
     // Precomputed Marsaglia-Tsang constants for shape >= 1
     private val marsagliaD: Double = if (shape >= 1.0) shape - 1.0 / 3.0 else 0.0
@@ -61,20 +62,21 @@ public class GammaDistribution(
     /**
      * Computes the probability density at [x].
      *
-     * Returns zero for negative values. At x = 0, the density depends on the shape
-     * parameter: it equals [rate] when shape is 1, is infinite when shape is less than 1,
-     * and is zero when shape is greater than 1.
+     * Returns zero for negative values. At x = 0, the density depends on the shape parameter: it
+     * equals [rate] when shape is 1, is infinite when shape is less than 1, and is zero when shape
+     * is greater than 1.
      *
      * @param x the point at which to evaluate the density.
      * @return the probability density at [x]. Always non-negative.
      */
     override fun pdf(x: Double): Double {
         if (x < 0.0) return 0.0
-        if (x == 0.0) return when {
-            shape == 1.0 -> rate
-            shape < 1.0 -> Double.POSITIVE_INFINITY
-            else -> 0.0
-        }
+        if (x == 0.0)
+            return when {
+                shape == 1.0 -> rate
+                shape < 1.0 -> Double.POSITIVE_INFINITY
+                else -> 0.0
+            }
         return exp(logPdf(x))
     }
 
@@ -88,19 +90,20 @@ public class GammaDistribution(
      */
     override fun logPdf(x: Double): Double {
         if (x < 0.0) return Double.NEGATIVE_INFINITY
-        if (x == 0.0) return when {
-            shape == 1.0 -> ln(rate)
-            shape < 1.0 -> Double.POSITIVE_INFINITY
-            else -> Double.NEGATIVE_INFINITY
-        }
+        if (x == 0.0)
+            return when {
+                shape == 1.0 -> ln(rate)
+                shape < 1.0 -> Double.POSITIVE_INFINITY
+                else -> Double.NEGATIVE_INFINITY
+            }
         return (shape - 1.0) * ln(x) - x * rate + shape * ln(rate) - lnGamma(shape)
     }
 
     /**
      * Computes the cumulative distribution function at [x].
      *
-     * Returns the probability that a Gamma-distributed random variable is less than or
-     * equal to [x], evaluated via the regularized lower incomplete gamma function.
+     * Returns the probability that a Gamma-distributed random variable is less than or equal to
+     * [x], evaluated via the regularized lower incomplete gamma function.
      *
      * @param x the point at which to evaluate the CDF.
      * @return the cumulative probability at [x], in the range [0, 1].
@@ -113,8 +116,8 @@ public class GammaDistribution(
     /**
      * Computes the survival function (one minus the CDF) at [x].
      *
-     * Uses the regularized upper incomplete gamma function for improved numerical accuracy
-     * in the upper tail.
+     * Uses the regularized upper incomplete gamma function for improved numerical accuracy in the
+     * upper tail.
      *
      * @param x the point at which to evaluate the survival function.
      * @return the probability that a value exceeds [x], in the range [0, 1].
@@ -127,8 +130,8 @@ public class GammaDistribution(
     /**
      * Computes the quantile (inverse CDF) for the given probability [p].
      *
-     * Uses Newton's method seeded with a Wilson-Hilferty normal approximation for shape >= 1,
-     * or a power-law approximation for shape < 1.
+     * Uses Newton's method seeded with a Wilson-Hilferty normal approximation for shape >= 1, or a
+     * power-law approximation for shape < 1.
      *
      * @param p the cumulative probability, must be in [0, 1].
      * @return the value x >= 0 such that `cdf(x) = p`.
@@ -137,13 +140,14 @@ public class GammaDistribution(
         if (p !in 0.0..1.0) throw InvalidParameterException("p must be in [0, 1], got $p")
         if (p == 0.0) return 0.0
         if (p == 1.0) return Double.POSITIVE_INFINITY
-        val guess = if (shape >= 1.0) {
-            val z = NormalDistribution.STANDARD.quantile(p)
-            val w = 2.0 / (9.0 * shape)
-            (shape * (1.0 - w + z * sqrt(w)).pow(3.0)).coerceAtLeast(0.001) / rate
-        } else {
-            (shape * p.pow(1.0 / shape)) / rate
-        }
+        val guess =
+            if (shape >= 1.0) {
+                val z = NormalDistribution.STANDARD.quantile(p)
+                val w = 2.0 / (9.0 * shape)
+                (shape * (1.0 - w + z * sqrt(w)).pow(3.0)).coerceAtLeast(0.001) / rate
+            } else {
+                (shape * p.pow(1.0 / shape)) / rate
+            }
         return findQuantile(p, ::cdf, ::pdf, guess, lowerBound = 1e-15)
     }
 
@@ -152,22 +156,26 @@ public class GammaDistribution(
         shape - ln(rate) + lnGamma(shape) + (1.0 - shape) * digamma(shape)
 
     /** The mean of this distribution, equal to shape / rate. */
-    override val mean: Double get() = shape / rate
+    override val mean: Double
+        get() = shape / rate
 
     /** The variance of this distribution, equal to shape / rate squared. */
-    override val variance: Double get() = shape / (rate * rate)
+    override val variance: Double
+        get() = shape / (rate * rate)
 
     /** The skewness of this distribution, which decreases as shape increases. */
-    override val skewness: Double get() = 2.0 / sqrt(shape)
+    override val skewness: Double
+        get() = 2.0 / sqrt(shape)
 
     /** The excess kurtosis of this distribution, which decreases as shape increases. */
-    override val kurtosis: Double get() = 6.0 / shape // excess
+    override val kurtosis: Double
+        get() = 6.0 / shape // excess
 
     /**
      * Draws a single random value from this Gamma distribution.
      *
-     * Uses the Marsaglia-Tsang method for shape >= 1. For shape < 1, draws from
-     * Gamma(shape + 1) and applies a power transformation to correct the distribution.
+     * Uses the Marsaglia-Tsang method for shape >= 1. For shape < 1, draws from Gamma(shape + 1)
+     * and applies a power transformation to correct the distribution.
      *
      * @param random the source of randomness.
      * @return a random non-negative value drawn from this distribution.

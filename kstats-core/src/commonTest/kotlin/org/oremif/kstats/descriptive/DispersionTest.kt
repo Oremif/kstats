@@ -66,5 +66,4 @@ class DispersionTest {
         assertEquals(Double.POSITIVE_INFINITY, data.meanAbsoluteDeviation())
         assertEquals(Double.POSITIVE_INFINITY, data.toList().meanAbsoluteDeviation())
     }
-
 }

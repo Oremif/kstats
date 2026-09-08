@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class BernoulliDistributionTest : DiscreteDistributionPropertyTests() {
 
     override fun createDistribution() = BernoulliDistribution(0.7)
+
     override val testKRange = -1..2
     override val consistencyTol = 1e-15
     override val sfCdfTol = 1e-15
@@ -164,5 +165,4 @@ class BernoulliDistributionTest : DiscreteDistributionPropertyTests() {
         assertEquals(1.0 - 1e-15, d2.pmf(1), 1e-14)
         assertTrue(d2.logPmf(0).isFinite())
     }
-
 }

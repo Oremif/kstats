@@ -1,14 +1,15 @@
 package org.oremif.kstats.distributions
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class StudentTDistributionTest : ContinuousDistributionPropertyTests() {
     override fun createDistribution() = StudentTDistribution(30.0)
+
     override val testPoints = listOf(-10.0, -3.0, -1.0, 0.0, 1.0, 3.0, 10.0)
     override val roundTripTol = 1e-8
 
@@ -174,7 +175,11 @@ class StudentTDistributionTest : ContinuousDistributionPropertyTests() {
 
     @Test
     fun testEntropy() {
-        assertEquals(2.531024246969291, StudentTDistribution(1.0).entropy, 1e-10) // ln(4*pi), equals Cauchy
+        assertEquals(
+            2.531024246969291,
+            StudentTDistribution(1.0).entropy,
+            1e-10,
+        ) // ln(4*pi), equals Cauchy
         assertEquals(1.960279229160082, StudentTDistribution(2.0).entropy, 1e-10)
         assertEquals(1.627502672414396, StudentTDistribution(5.0).entropy, 1e-10)
         assertEquals(1.521262492975681, StudentTDistribution(10.0).entropy, 1e-10)
@@ -200,5 +205,4 @@ class StudentTDistributionTest : ContinuousDistributionPropertyTests() {
         // mean is NaN for df <= 1
         assertTrue(d2.mean.isNaN())
     }
-
 }

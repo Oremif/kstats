@@ -1,9 +1,9 @@
 package org.oremif.kstats.hypothesis
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.math.abs
 import kotlin.test.*
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class ChiSquaredTestTest {
 
@@ -37,7 +37,7 @@ class ChiSquaredTestTest {
         assertEquals(1.0, result.statistic, 1e-10, "chi2 statistic")
         assertTrue(
             abs(result.pValue - 0.9626) < 0.01,
-            "p-value: expected~0.9626, actual=${result.pValue}"
+            "p-value: expected~0.9626, actual=${result.pValue}",
         )
         assertEquals(5.0, result.degreesOfFreedom, 1e-10, "degrees of freedom")
         assertEquals("Chi-Squared Goodness-of-Fit Test", result.testName)
@@ -54,7 +54,7 @@ class ChiSquaredTestTest {
         assertEquals(5.0, result.statistic, 1e-10, "chi2 statistic with custom expected")
         assertTrue(
             abs(result.pValue - 0.08209) < 0.01,
-            "p-value: expected~0.0821, actual=${result.pValue}"
+            "p-value: expected~0.0821, actual=${result.pValue}",
         )
         assertEquals(2.0, result.degreesOfFreedom, 1e-10, "degrees of freedom")
         assertFalse(result.isSignificant(), "Should not be significant at alpha=0.05")
@@ -92,11 +92,11 @@ class ChiSquaredTestTest {
         val result = chiSquaredIndependenceTest(table)
         assertTrue(
             abs(result.statistic - 0.7937) < 0.01,
-            "chi2 statistic: expected~0.7937, actual=${result.statistic}"
+            "chi2 statistic: expected~0.7937, actual=${result.statistic}",
         )
         assertTrue(
             abs(result.pValue - 0.3730) < 0.02,
-            "p-value: expected~0.3730, actual=${result.pValue}"
+            "p-value: expected~0.3730, actual=${result.pValue}",
         )
         assertEquals(1.0, result.degreesOfFreedom, 1e-10, "df = (2-1)*(2-1) = 1")
         assertFalse(result.isSignificant(), "Should not be significant")
@@ -110,16 +110,17 @@ class ChiSquaredTestTest {
         // chi2 = sum((o-20)^2/20) = (100+0+100+0+25+25+100+25+225)/20 = 600/20 = 30.0
         // scipy.stats.chi2_contingency([[10,20,30],[20,15,25],[30,25,5]], correction=False)
         // → chi2=30.0, p=4.73e-6, df=4
-        val table = arrayOf(
-            intArrayOf(10, 20, 30),
-            intArrayOf(20, 15, 25),
-            intArrayOf(30, 25, 5)
-        )
+        val table =
+            arrayOf(
+                intArrayOf(10, 20, 30),
+                intArrayOf(20, 15, 25),
+                intArrayOf(30, 25, 5),
+            )
         val result = chiSquaredIndependenceTest(table)
         assertEquals(30.0, result.statistic, 1e-10, "chi2 statistic")
         assertTrue(
             result.pValue < 0.001,
-            "p-value should be very small, actual=${result.pValue}"
+            "p-value should be very small, actual=${result.pValue}",
         )
         assertEquals(4.0, result.degreesOfFreedom, 1e-10, "df = (3-1)*(3-1) = 4")
         assertTrue(result.isSignificant(), "Should be significant")
@@ -129,16 +130,12 @@ class ChiSquaredTestTest {
 
     @Test
     fun testGoodnessOfFitLessThanTwoCategories() {
-        assertFailsWith<InsufficientDataException> {
-            chiSquaredTest(intArrayOf(10))
-        }
+        assertFailsWith<InsufficientDataException> { chiSquaredTest(intArrayOf(10)) }
     }
 
     @Test
     fun testGoodnessOfFitEmptyObserved() {
-        assertFailsWith<InsufficientDataException> {
-            chiSquaredTest(intArrayOf())
-        }
+        assertFailsWith<InsufficientDataException> { chiSquaredTest(intArrayOf()) }
     }
 
     @Test
@@ -188,18 +185,14 @@ class ChiSquaredTestTest {
     @Test
     fun testIndependenceZeroRowTotal() {
         assertFailsWith<InvalidParameterException> {
-            chiSquaredIndependenceTest(
-                arrayOf(intArrayOf(0, 0), intArrayOf(10, 20))
-            )
+            chiSquaredIndependenceTest(arrayOf(intArrayOf(0, 0), intArrayOf(10, 20)))
         }
     }
 
     @Test
     fun testIndependenceZeroColumnTotal() {
         assertFailsWith<InvalidParameterException> {
-            chiSquaredIndependenceTest(
-                arrayOf(intArrayOf(10, 0), intArrayOf(20, 0))
-            )
+            chiSquaredIndependenceTest(arrayOf(intArrayOf(10, 0), intArrayOf(20, 0)))
         }
     }
 }

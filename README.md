@@ -29,9 +29,9 @@ val data = doubleArrayOf(2.0, 4.0, 4.0, 5.0, 7.0, 9.0)
 val summary = data.describe()
 // => DescriptiveStatistics(count=6, mean=5.17, median=4.5, standardDeviation=2.48, ...)
 
-data.mean()               // => 5.1667
-data.standardDeviation()  // => 2.4833
-data.skewness()           // => 0.3942
+data.mean() // => 5.1667
+data.standardDeviation() // => 2.4833
+data.skewness() // => 0.3942
 ```
 
 <!---END-->
@@ -80,13 +80,13 @@ If you only need one module: `implementation("org.oremif:kstats-core:0.5.0")`.
 ```kotlin
 val data = doubleArrayOf(2.0, 4.0, 4.0, 5.0, 7.0, 9.0)
 val summary = data.describe()
-summary.mean              // => 5.1667
-summary.median            // => 4.5
+summary.mean // => 5.1667
+summary.median // => 4.5
 summary.standardDeviation // => 2.4833
 
 val stats = OnlineStatistics()
 stats.addAll(doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0))
-stats.mean                // => 3.0
+stats.mean // => 3.0
 stats.standardDeviation() // => 1.5811
 ```
 
@@ -98,10 +98,10 @@ stats.standardDeviation() // => 1.5811
 
 ```kotlin
 val normal = NormalDistribution(mu = 0.0, sigma = 1.0)
-normal.pdf(0.0)                  // => 0.3989
-normal.cdf(1.96)                 // => 0.9750
-normal.quantile(0.975)           // => 1.9600
-normal.sample(5, Random(42))     // => [0.11, -0.87, ...]
+normal.pdf(0.0) // => 0.3989
+normal.cdf(1.96) // => 0.9750
+normal.quantile(0.975) // => 1.9600
+normal.sample(5, Random(42)) // => [0.11, -0.87, ...]
 ```
 
 <!---END-->
@@ -113,8 +113,8 @@ normal.sample(5, Random(42))     // => [0.11, -0.87, ...]
 ```kotlin
 val sample = doubleArrayOf(2.0, 4.0, 4.0, 5.0, 7.0, 9.0)
 val result = tTest(sample, mu = 5.0)
-result.statistic                 // => 0.1644
-result.pValue                    // => 0.8759
+result.statistic // => 0.1644
+result.pValue // => 0.8759
 result.isSignificant(alpha = 0.05) // => false
 ```
 
@@ -129,13 +129,13 @@ val x = doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0)
 val y = doubleArrayOf(2.1, 3.9, 6.2, 7.8, 10.1)
 
 val r = pearsonCorrelation(x, y)
-r.coefficient                    // => 0.9987
-r.pValue                         // => 0.0001
+r.coefficient // => 0.9987
+r.pValue // => 0.0001
 
 val reg = simpleLinearRegression(x, y)
-reg.slope                        // => 1.99
-reg.rSquared                     // => 0.9973
-reg.predict(6.0)                 // => 11.99
+reg.slope // => 1.99
+reg.rSquared // => 0.9973
+reg.predict(6.0) // => 11.99
 ```
 
 <!---END-->
@@ -146,13 +146,13 @@ reg.predict(6.0)                 // => 11.99
 
 ```kotlin
 val data = doubleArrayOf(3.0, 1.0, 4.0, 1.0, 5.0)
-data.rank()                      // => [3.0, 1.5, 4.0, 1.5, 5.0]
-data.zScore()                    // => [-0.16, -1.47, 0.49, -1.47, 1.14]
+data.rank() // => [3.0, 1.5, 4.0, 1.5, 5.0]
+data.zScore() // => [-0.16, -1.47, 0.49, -1.47, 1.14]
 
 listOf(1, 2, 3, 4, 5).bootstrapSample(10, Random(42))
 
 val dice = WeightedDice(mapOf("A" to 3.0, "B" to 1.0))
-dice.roll()                      // => "A" (75% probability)
+dice.roll() // => "A" (75% probability)
 ```
 
 <!---END-->

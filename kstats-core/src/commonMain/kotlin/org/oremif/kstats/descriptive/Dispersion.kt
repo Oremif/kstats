@@ -1,26 +1,26 @@
 package org.oremif.kstats.descriptive
 
+import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.sqrt
 import org.oremif.kstats.core.exceptions.DegenerateDataException
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.introSelect
 import org.oremif.kstats.core.neumaierTotal
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
-import kotlin.math.abs
-import kotlin.math.floor
-import kotlin.math.sqrt
 
 // ── variance (Welford's online algorithm) ───────────────────────────────────
 
 /**
  * Computes the variance of the values in this iterable.
  *
- * Variance measures how far values spread from their mean. Uses Welford's numerically
- * stable single-pass algorithm. Sample variance (default) divides by n-1 (Bessel's
- * correction) for an unbiased estimate; population variance divides by n.
+ * Variance measures how far values spread from their mean. Uses Welford's numerically stable
+ * single-pass algorithm. Sample variance (default) divides by n-1 (Bessel's correction) for an
+ * unbiased estimate; population variance divides by n.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -28,47 +28,53 @@ import kotlin.math.sqrt
  * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).variance(PopulationKind.POPULATION) // 4.0
  * ```
  *
- * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample or population variance. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the variance of the elements.
  */
 public fun Iterable<Double>.variance(kind: PopulationKind = SAMPLE): Double =
     welford { count, _, m2 ->
         if (count == 0) throw InsufficientDataException("Collection must not be empty")
-        val divisor = if (kind == SAMPLE) {
-            if (count <= 1) throw InsufficientDataException("Sample variance requires at least 2 elements")
-            count - 1
-        } else {
-            count
-        }
+        val divisor =
+            if (kind == SAMPLE) {
+                if (count <= 1)
+                    throw InsufficientDataException("Sample variance requires at least 2 elements")
+                count - 1
+            } else {
+                count
+            }
         m2 / divisor
     }
 
 /**
  * Computes the variance of the values in this array.
  *
- * Variance measures how far values spread from their mean. Uses Welford's numerically
- * stable single-pass algorithm.
+ * Variance measures how far values spread from their mean. Uses Welford's numerically stable
+ * single-pass algorithm.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
  * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).variance() // 4.5714...
  * ```
  *
- * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample or population variance. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the variance of the array elements.
  */
 public fun DoubleArray.variance(kind: PopulationKind = SAMPLE): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     return welford { _, m2 ->
-        val divisor = if (kind == SAMPLE) {
-            if (size <= 1) throw InsufficientDataException("Sample variance requires at least 2 elements")
-            size - 1
-        } else {
-            size
-        }
+        val divisor =
+            if (kind == SAMPLE) {
+                if (size <= 1)
+                    throw InsufficientDataException("Sample variance requires at least 2 elements")
+                size - 1
+            } else {
+                size
+            }
         m2 / divisor
     }
 }
@@ -78,18 +84,19 @@ public fun DoubleArray.variance(kind: PopulationKind = SAMPLE): Double {
 /**
  * Computes the standard deviation of the values in this iterable.
  *
- * The standard deviation is the square root of the [variance]. It has the same unit as the
- * data, making it easier to interpret than variance.
+ * The standard deviation is the square root of the [variance]. It has the same unit as the data,
+ * making it easier to interpret than variance.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
  * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).standardDeviation() // 2.1380...
  * ```
  *
- * @param kind whether to compute sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample or population standard deviation. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the standard deviation of the elements.
  */
 public fun Iterable<Double>.standardDeviation(kind: PopulationKind = SAMPLE): Double =
@@ -100,15 +107,16 @@ public fun Iterable<Double>.standardDeviation(kind: PopulationKind = SAMPLE): Do
  *
  * The standard deviation is the square root of the [variance].
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
  * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).standardDeviation() // 2.1380...
  * ```
  *
- * @param kind whether to compute sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample or population standard deviation. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the standard deviation of the array elements.
  */
 public fun DoubleArray.standardDeviation(kind: PopulationKind = SAMPLE): Double =
@@ -119,8 +127,8 @@ public fun DoubleArray.standardDeviation(kind: PopulationKind = SAMPLE): Double 
 /**
  * Computes the range of the values in this iterable.
  *
- * The range is the difference between the maximum and minimum values. It is the simplest
- * measure of spread but is sensitive to outliers.
+ * The range is the difference between the maximum and minimum values. It is the simplest measure of
+ * spread but is sensitive to outliers.
  *
  * ### Example:
  * ```kotlin
@@ -147,8 +155,8 @@ public fun Iterable<Double>.range(): Double {
  *
  * The range is the difference between the maximum and minimum values.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired.
  *
  * ### Example:
  * ```kotlin
@@ -174,9 +182,9 @@ public fun DoubleArray.range(): Double {
 /**
  * Computes the interquartile range (IQR) of the values in this iterable.
  *
- * The IQR is the difference between the third quartile (Q3, 75th percentile) and the first
- * quartile (Q1, 25th percentile). It measures the spread of the middle 50% of the data and
- * is robust to outliers.
+ * The IQR is the difference between the third quartile (Q3, 75th percentile) and the first quartile
+ * (Q1, 25th percentile). It measures the spread of the middle 50% of the data and is robust to
+ * outliers.
  *
  * ### Example:
  * ```kotlin
@@ -186,7 +194,9 @@ public fun DoubleArray.range(): Double {
  * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return the interquartile range (Q3 - Q1).
  */
-public fun Iterable<Double>.interquartileRange(method: QuantileMethod = QuantileMethod.LINEAR): Double {
+public fun Iterable<Double>.interquartileRange(
+    method: QuantileMethod = QuantileMethod.LINEAR
+): Double {
     val q = quartiles(method)
     return q.third - q.first
 }
@@ -214,8 +224,8 @@ public fun DoubleArray.interquartileRange(method: QuantileMethod = QuantileMetho
 /**
  * Computes the mean absolute deviation (MAD) of the values in this iterable.
  *
- * The MAD is the average of the absolute deviations from the mean. It is a robust measure
- * of spread that is less sensitive to outliers than standard deviation.
+ * The MAD is the average of the absolute deviations from the mean. It is a robust measure of spread
+ * that is less sensitive to outliers than standard deviation.
  *
  * ### Example:
  * ```kotlin
@@ -270,9 +280,9 @@ public fun DoubleArray.meanAbsoluteDeviation(): Double {
 /**
  * Computes the median absolute deviation (median AD) of the values in this iterable.
  *
- * This is the median of the absolute deviations from the median of the data. It is an
- * extremely robust measure of spread — even more resistant to outliers than the mean
- * absolute deviation — since both the center and spread use the median.
+ * This is the median of the absolute deviations from the median of the data. It is an extremely
+ * robust measure of spread — even more resistant to outliers than the mean absolute deviation —
+ * since both the center and spread use the median.
  *
  * ### Example:
  * ```kotlin
@@ -312,8 +322,8 @@ public fun DoubleArray.medianAbsoluteDeviation(): Double {
  * Computes the standard error of the mean for the values in this iterable.
  *
  * The standard error estimates how much the sample mean is expected to vary from the true
- * population mean. It equals the sample standard deviation divided by the square root of
- * the sample size. Smaller values indicate a more precise estimate of the population mean.
+ * population mean. It equals the sample standard deviation divided by the square root of the sample
+ * size. Smaller values indicate a more precise estimate of the population mean.
  *
  * ### Example:
  * ```kotlin
@@ -324,15 +334,16 @@ public fun DoubleArray.medianAbsoluteDeviation(): Double {
  */
 public fun Iterable<Double>.standardError(): Double {
     val list = toList()
-    if (list.size <= 1) throw InsufficientDataException("Standard error requires at least 2 elements")
+    if (list.size <= 1)
+        throw InsufficientDataException("Standard error requires at least 2 elements")
     return list.standardDeviation() / sqrt(list.size.toDouble())
 }
 
 /**
  * Computes the standard error of the mean for the values in this array.
  *
- * The standard error equals the sample standard deviation divided by the square root of
- * the sample size.
+ * The standard error equals the sample standard deviation divided by the square root of the sample
+ * size.
  *
  * ### Example:
  * ```kotlin
@@ -351,60 +362,71 @@ public fun DoubleArray.standardError(): Double {
 /**
  * Computes the coefficient of variation (CV) of the values in this iterable.
  *
- * The CV is the ratio of the standard deviation to the mean (sd / mean, not sd / |mean|).
- * It expresses variability as a proportion of the mean, which is useful for comparing
- * the spread of datasets with different units or scales. The mean must not be zero.
- * Note that the result is negative when the mean is negative, consistent with
- * scipy's `variation()`.
+ * The CV is the ratio of the standard deviation to the mean (sd / mean, not sd / |mean|). It
+ * expresses variability as a proportion of the mean, which is useful for comparing the spread of
+ * datasets with different units or scales. The mean must not be zero. Note that the result is
+ * negative when the mean is negative, consistent with scipy's `variation()`.
  *
  * ### Example:
  * ```kotlin
  * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).coefficientOfVariation() // 0.4276...
  * ```
  *
- * @param kind whether to use sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to use sample or population standard deviation. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the coefficient of variation (standard deviation / mean).
  * @throws DegenerateDataException if the mean is zero.
  */
 public fun Iterable<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double =
     welford { count, mean, m2 ->
         if (count == 0) throw InsufficientDataException("Collection must not be empty")
-        if (mean == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
-        val divisor = if (kind == SAMPLE) {
-            if (count <= 1) throw InsufficientDataException("Sample coefficient of variation requires at least 2 elements")
-            count - 1
-        } else {
-            count
-        }
+        if (mean == 0.0)
+            throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
+        val divisor =
+            if (kind == SAMPLE) {
+                if (count <= 1)
+                    throw InsufficientDataException(
+                        "Sample coefficient of variation requires at least 2 elements"
+                    )
+                count - 1
+            } else {
+                count
+            }
         sqrt(m2 / divisor) / mean
     }
 
 /**
  * Computes the coefficient of variation (CV) of the values in this array.
  *
- * The CV is the ratio of the standard deviation to the mean (sd / mean, not sd / |mean|).
- * The mean must not be zero. Note that the result is negative when the mean is negative,
- * consistent with scipy's `variation()`.
+ * The CV is the ratio of the standard deviation to the mean (sd / mean, not sd / |mean|). The mean
+ * must not be zero. Note that the result is negative when the mean is negative, consistent with
+ * scipy's `variation()`.
  *
  * ### Example:
  * ```kotlin
  * doubleArrayOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).coefficientOfVariation() // 0.4276...
  * ```
  *
- * @param kind whether to use sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to use sample or population standard deviation. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the coefficient of variation (standard deviation / mean).
  * @throws DegenerateDataException if the mean is zero.
  */
 public fun DoubleArray.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
     return welford { mean, m2 ->
-        if (mean == 0.0) throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
-        val divisor = if (kind == SAMPLE) {
-            if (size <= 1) throw InsufficientDataException("Sample coefficient of variation requires at least 2 elements")
-            size - 1
-        } else {
-            size
-        }
+        if (mean == 0.0)
+            throw DegenerateDataException("Coefficient of variation is undefined when mean is zero")
+        val divisor =
+            if (kind == SAMPLE) {
+                if (size <= 1)
+                    throw InsufficientDataException(
+                        "Sample coefficient of variation requires at least 2 elements"
+                    )
+                size - 1
+            } else {
+                size
+            }
         sqrt(m2 / divisor) / mean
     }
 }
@@ -414,20 +436,21 @@ public fun DoubleArray.coefficientOfVariation(kind: PopulationKind = SAMPLE): Do
 /**
  * Computes the variance of the values after removing a fraction from each tail.
  *
- * The trimmed variance sorts the data, discards the lowest and highest [proportion] of
- * values, and computes the variance of the remaining middle portion using Welford's
- * numerically stable algorithm. This makes it more robust to outliers than the regular
- * variance. A proportion of 0.0 gives the ordinary variance.
+ * The trimmed variance sorts the data, discards the lowest and highest [proportion] of values, and
+ * computes the variance of the remaining middle portion using Welford's numerically stable
+ * algorithm. This makes it more robust to outliers than the regular variance. A proportion of 0.0
+ * gives the ordinary variance.
  *
  * ### Example:
  * ```kotlin
  * doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedVariance(0.1) // 6.0
  * ```
  *
- * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
- * For example, 0.1 removes the lowest 10% and highest 10%.
- * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE],
- * which divides by n-1 (Bessel's correction) where n is the count after trimming.
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5). For example,
+ *   0.1 removes the lowest 10% and highest 10%.
+ * @param kind whether to compute sample or population variance. Defaults to
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) where n is the count after
+ *   trimming.
  * @return the variance of the remaining values after trimming.
  * @see trimmedMean
  * @see trimmedStd
@@ -438,14 +461,16 @@ public fun DoubleArray.trimmedVariance(proportion: Double, kind: PopulationKind 
         throw InvalidParameterException("proportion must be in [0.0, 0.5), got $proportion")
     val k = floor(size * proportion).toInt()
     val m = size - 2 * k
-    val divisor = if (kind == SAMPLE) {
-        if (m <= 1) throw InsufficientDataException(
-            "Sample variance of trimmed data requires at least 2 remaining elements, got $m"
-        )
-        m - 1
-    } else {
-        m
-    }
+    val divisor =
+        if (kind == SAMPLE) {
+            if (m <= 1)
+                throw InsufficientDataException(
+                    "Sample variance of trimmed data requires at least 2 remaining elements, got $m"
+                )
+            m - 1
+        } else {
+            m
+        }
     val work = copyOf()
     if (k > 0) {
         work.introSelect(k)
@@ -466,48 +491,54 @@ public fun DoubleArray.trimmedVariance(proportion: Double, kind: PopulationKind 
 /**
  * Computes the variance of the values after removing a fraction from each tail.
  *
- * The trimmed variance sorts the data, discards the lowest and highest [proportion] of
- * values, and computes the variance of the remaining middle portion. This makes it more
- * robust to outliers than the regular variance. A proportion of 0.0 gives the ordinary variance.
+ * The trimmed variance sorts the data, discards the lowest and highest [proportion] of values, and
+ * computes the variance of the remaining middle portion. This makes it more robust to outliers than
+ * the regular variance. A proportion of 0.0 gives the ordinary variance.
  *
  * ### Example:
  * ```kotlin
  * listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedVariance(0.1) // 6.0
  * ```
  *
- * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
- * For example, 0.1 removes the lowest 10% and highest 10%.
- * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE],
- * which divides by n-1 (Bessel's correction) where n is the count after trimming.
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5). For example,
+ *   0.1 removes the lowest 10% and highest 10%.
+ * @param kind whether to compute sample or population variance. Defaults to
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) where n is the count after
+ *   trimming.
  * @return the variance of the remaining values after trimming.
  * @see trimmedMean
  * @see trimmedStd
  */
-public fun Iterable<Double>.trimmedVariance(proportion: Double, kind: PopulationKind = SAMPLE): Double =
-    toList().toDoubleArray().trimmedVariance(proportion, kind)
+public fun Iterable<Double>.trimmedVariance(
+    proportion: Double,
+    kind: PopulationKind = SAMPLE,
+): Double = toList().toDoubleArray().trimmedVariance(proportion, kind)
 
 /**
  * Computes the variance of the values after removing a fraction from each tail.
  *
- * The trimmed variance sorts the data, discards the lowest and highest [proportion] of
- * values, and computes the variance of the remaining middle portion. This makes it more
- * robust to outliers than the regular variance. A proportion of 0.0 gives the ordinary variance.
+ * The trimmed variance sorts the data, discards the lowest and highest [proportion] of values, and
+ * computes the variance of the remaining middle portion. This makes it more robust to outliers than
+ * the regular variance. A proportion of 0.0 gives the ordinary variance.
  *
  * ### Example:
  * ```kotlin
  * sequenceOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedVariance(0.1) // 6.0
  * ```
  *
- * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
- * For example, 0.1 removes the lowest 10% and highest 10%.
- * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE],
- * which divides by n-1 (Bessel's correction) where n is the count after trimming.
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5). For example,
+ *   0.1 removes the lowest 10% and highest 10%.
+ * @param kind whether to compute sample or population variance. Defaults to
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) where n is the count after
+ *   trimming.
  * @return the variance of the remaining values after trimming.
  * @see trimmedMean
  * @see trimmedStd
  */
-public fun Sequence<Double>.trimmedVariance(proportion: Double, kind: PopulationKind = SAMPLE): Double =
-    toList().toDoubleArray().trimmedVariance(proportion, kind)
+public fun Sequence<Double>.trimmedVariance(
+    proportion: Double,
+    kind: PopulationKind = SAMPLE,
+): Double = toList().toDoubleArray().trimmedVariance(proportion, kind)
 
 // ── trimmedStd ──────────────────────────────────────────────────────────────
 
@@ -522,11 +553,11 @@ public fun Sequence<Double>.trimmedVariance(proportion: Double, kind: Population
  * doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedStd(0.1) // 2.449...
  * ```
  *
- * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
- * For example, 0.1 removes the lowest 10% and highest 10%.
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5). For example,
+ *   0.1 removes the lowest 10% and highest 10%.
  * @param kind whether to compute sample or population standard deviation. Defaults to
- * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) where n is the count
- * after trimming.
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) where n is the count after
+ *   trimming.
  * @return the standard deviation of the remaining values after trimming.
  * @see trimmedVariance
  * @see trimmedMean
@@ -545,11 +576,11 @@ public fun DoubleArray.trimmedStd(proportion: Double, kind: PopulationKind = SAM
  * listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedStd(0.1) // 2.449...
  * ```
  *
- * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
- * For example, 0.1 removes the lowest 10% and highest 10%.
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5). For example,
+ *   0.1 removes the lowest 10% and highest 10%.
  * @param kind whether to compute sample or population standard deviation. Defaults to
- * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) where n is the count
- * after trimming.
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) where n is the count after
+ *   trimming.
  * @return the standard deviation of the remaining values after trimming.
  * @see trimmedVariance
  * @see trimmedMean
@@ -568,11 +599,11 @@ public fun Iterable<Double>.trimmedStd(proportion: Double, kind: PopulationKind 
  * sequenceOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0).trimmedStd(0.1) // 2.449...
  * ```
  *
- * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5).
- * For example, 0.1 removes the lowest 10% and highest 10%.
+ * @param proportion the fraction of values to remove from each tail, in [0.0, 0.5). For example,
+ *   0.1 removes the lowest 10% and highest 10%.
  * @param kind whether to compute sample or population standard deviation. Defaults to
- * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) where n is the count
- * after trimming.
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction) where n is the count after
+ *   trimming.
  * @return the standard deviation of the remaining values after trimming.
  * @see trimmedVariance
  * @see trimmedMean
@@ -585,12 +616,12 @@ public fun Sequence<Double>.trimmedStd(proportion: Double, kind: PopulationKind 
 /**
  * Computes the semi-variance of the values on one side of a threshold.
  *
- * Semi-variance measures variability on only one side of a threshold, ignoring values on the
- * other side. It is commonly used in finance to quantify downside risk separately from upside
- * potential. The divisor uses the total number of elements (n-1 for sample, n for population),
- * not just the count on the measured side, matching the Apache Commons Math convention.
- * When the threshold equals the mean, the sum of downside and upside semi-variance equals
- * the full variance. Uses Neumaier compensated summation for numerical stability.
+ * Semi-variance measures variability on only one side of a threshold, ignoring values on the other
+ * side. It is commonly used in finance to quantify downside risk separately from upside potential.
+ * The divisor uses the total number of elements (n-1 for sample, n for population), not just the
+ * count on the measured side, matching the Apache Commons Math convention. When the threshold
+ * equals the mean, the sum of downside and upside semi-variance equals the full variance. Uses
+ * Neumaier compensated summation for numerical stability.
  *
  * ### Example:
  * ```kotlin
@@ -599,12 +630,12 @@ public fun Sequence<Double>.trimmedStd(proportion: Double, kind: PopulationKind 
  * data.semiVariance(direction = SemiVarianceDirection.UPSIDE) // 2.8571
  * ```
  *
- * @param threshold the reference point that separates downside from upside. Defaults to
- * the [mean] of the values.
+ * @param threshold the reference point that separates downside from upside. Defaults to the [mean]
+ *   of the values.
  * @param direction which side of the threshold to measure. Defaults to
- * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
+ *   [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
  * @param kind whether to compute sample or population semi-variance. Defaults to
- * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
  * @return the semi-variance on the selected side of the threshold.
  * @see variance
  */
@@ -614,21 +645,25 @@ public fun DoubleArray.semiVariance(
     kind: PopulationKind = SAMPLE,
 ): Double {
     if (isEmpty()) throw InsufficientDataException("Array must not be empty")
-    val divisor = if (kind == SAMPLE) {
-        if (size <= 1) throw InsufficientDataException("Sample semi-variance requires at least 2 elements")
-        size - 1
-    } else {
-        size
-    }
+    val divisor =
+        if (kind == SAMPLE) {
+            if (size <= 1)
+                throw InsufficientDataException("Sample semi-variance requires at least 2 elements")
+            size - 1
+        } else {
+            size
+        }
     var sum = 0.0
     var compensation = 0.0
     for (x in this) {
         val diff = x - threshold
         // NaN propagation (IEEE 754 / numpy default): include NaN diffs so the result becomes NaN
-        val include = diff.isNaN() || when (direction) {
-            SemiVarianceDirection.DOWNSIDE -> diff < 0.0
-            SemiVarianceDirection.UPSIDE -> diff > 0.0
-        }
+        val include =
+            diff.isNaN() ||
+                when (direction) {
+                    SemiVarianceDirection.DOWNSIDE -> diff < 0.0
+                    SemiVarianceDirection.UPSIDE -> diff > 0.0
+                }
         if (include) {
             val sq = diff * diff
             val t = sum + sq
@@ -642,23 +677,23 @@ public fun DoubleArray.semiVariance(
 /**
  * Computes the semi-variance of the values on one side of a threshold.
  *
- * Semi-variance measures variability on only one side of a threshold, ignoring values on the
- * other side. It is commonly used in finance to quantify downside risk separately from upside
- * potential. The divisor uses the total number of elements (n-1 for sample, n for population),
- * not just the count on the measured side. When the threshold equals the mean, the sum of
- * downside and upside semi-variance equals the full variance.
+ * Semi-variance measures variability on only one side of a threshold, ignoring values on the other
+ * side. It is commonly used in finance to quantify downside risk separately from upside potential.
+ * The divisor uses the total number of elements (n-1 for sample, n for population), not just the
+ * count on the measured side. When the threshold equals the mean, the sum of downside and upside
+ * semi-variance equals the full variance.
  *
  * ### Example:
  * ```kotlin
  * listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0).semiVariance() // 1.7143 (downside, sample)
  * ```
  *
- * @param threshold the reference point that separates downside from upside. Defaults to
- * the [mean] of the values.
+ * @param threshold the reference point that separates downside from upside. Defaults to the [mean]
+ *   of the values.
  * @param direction which side of the threshold to measure. Defaults to
- * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
+ *   [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
  * @param kind whether to compute sample or population semi-variance. Defaults to
- * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
  * @return the semi-variance on the selected side of the threshold.
  * @see variance
  */
@@ -671,13 +706,13 @@ public fun Iterable<Double>.semiVariance(
 /**
  * Computes the semi-variance using the mean as the threshold.
  *
- * This overload materializes the iterable once and computes the mean from the
- * materialized array, avoiding double iteration of single-use iterables.
+ * This overload materializes the iterable once and computes the mean from the materialized array,
+ * avoiding double iteration of single-use iterables.
  *
  * @param direction which side of the threshold to measure. Defaults to
- * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
+ *   [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
  * @param kind whether to compute sample or population semi-variance. Defaults to
- * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
  * @return the semi-variance on the selected side of the mean.
  * @see variance
  */
@@ -692,14 +727,14 @@ public fun Iterable<Double>.semiVariance(
 /**
  * Computes the semi-variance of the values on one side of a threshold.
  *
- * Semi-variance measures variability on only one side of a threshold, ignoring values on the
- * other side. It is commonly used in finance to quantify downside risk separately from upside
- * potential. The divisor uses the total number of elements (n-1 for sample, n for population),
- * not just the count on the measured side. When the threshold equals the mean, the sum of
- * downside and upside semi-variance equals the full variance.
+ * Semi-variance measures variability on only one side of a threshold, ignoring values on the other
+ * side. It is commonly used in finance to quantify downside risk separately from upside potential.
+ * The divisor uses the total number of elements (n-1 for sample, n for population), not just the
+ * count on the measured side. When the threshold equals the mean, the sum of downside and upside
+ * semi-variance equals the full variance.
  *
- * This overload uses the mean of the data as the threshold. Since sequences can only be
- * consumed once, the data is materialized internally.
+ * This overload uses the mean of the data as the threshold. Since sequences can only be consumed
+ * once, the data is materialized internally.
  *
  * ### Example:
  * ```kotlin
@@ -707,9 +742,9 @@ public fun Iterable<Double>.semiVariance(
  * ```
  *
  * @param direction which side of the threshold to measure. Defaults to
- * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
+ *   [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
  * @param kind whether to compute sample or population semi-variance. Defaults to
- * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
  * @return the semi-variance on the selected side of the threshold.
  * @see variance
  */
@@ -724,11 +759,11 @@ public fun Sequence<Double>.semiVariance(
 /**
  * Computes the semi-variance of the values on one side of a threshold.
  *
- * Semi-variance measures variability on only one side of a threshold, ignoring values on the
- * other side. It is commonly used in finance to quantify downside risk separately from upside
- * potential. The divisor uses the total number of elements (n-1 for sample, n for population),
- * not just the count on the measured side. When the threshold equals the mean, the sum of
- * downside and upside semi-variance equals the full variance.
+ * Semi-variance measures variability on only one side of a threshold, ignoring values on the other
+ * side. It is commonly used in finance to quantify downside risk separately from upside potential.
+ * The divisor uses the total number of elements (n-1 for sample, n for population), not just the
+ * count on the measured side. When the threshold equals the mean, the sum of downside and upside
+ * semi-variance equals the full variance.
  *
  * ### Example:
  * ```kotlin
@@ -737,9 +772,9 @@ public fun Sequence<Double>.semiVariance(
  *
  * @param threshold the reference point that separates downside from upside.
  * @param direction which side of the threshold to measure. Defaults to
- * [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
+ *   [SemiVarianceDirection.DOWNSIDE], measuring downside risk.
  * @param kind whether to compute sample or population semi-variance. Defaults to
- * [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
+ *   [PopulationKind.SAMPLE], which divides by n-1 (Bessel's correction).
  * @return the semi-variance on the selected side of the threshold.
  * @see variance
  */
@@ -756,7 +791,8 @@ public fun Sequence<Double>.semiVariance(
  *
  * The sequence is materialized internally. See [DoubleArray.variance] for details.
  *
- * @param kind whether to compute sample or population variance. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample or population variance. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the variance of the elements.
  */
 public fun Sequence<Double>.variance(kind: PopulationKind = SAMPLE): Double =
@@ -767,7 +803,8 @@ public fun Sequence<Double>.variance(kind: PopulationKind = SAMPLE): Double =
  *
  * The sequence is materialized internally. See [DoubleArray.standardDeviation] for details.
  *
- * @param kind whether to compute sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to compute sample or population standard deviation. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the standard deviation of the elements.
  */
 public fun Sequence<Double>.standardDeviation(kind: PopulationKind = SAMPLE): Double =
@@ -780,8 +817,7 @@ public fun Sequence<Double>.standardDeviation(kind: PopulationKind = SAMPLE): Do
  *
  * @return the range (max - min) of the elements.
  */
-public fun Sequence<Double>.range(): Double =
-    toList().toDoubleArray().range()
+public fun Sequence<Double>.range(): Double = toList().toDoubleArray().range()
 
 /**
  * Computes the interquartile range (IQR) of the values in this sequence.
@@ -791,8 +827,9 @@ public fun Sequence<Double>.range(): Double =
  * @param method the quantile estimation method. Defaults to [QuantileMethod.LINEAR] (HF7).
  * @return the interquartile range (Q3 - Q1).
  */
-public fun Sequence<Double>.interquartileRange(method: QuantileMethod = QuantileMethod.LINEAR): Double =
-    toList().toDoubleArray().interquartileRange(method)
+public fun Sequence<Double>.interquartileRange(
+    method: QuantileMethod = QuantileMethod.LINEAR
+): Double = toList().toDoubleArray().interquartileRange(method)
 
 /**
  * Computes the mean absolute deviation (MAD) of the values in this sequence.
@@ -821,15 +858,15 @@ public fun Sequence<Double>.medianAbsoluteDeviation(): Double =
  *
  * @return the standard error of the mean.
  */
-public fun Sequence<Double>.standardError(): Double =
-    toList().toDoubleArray().standardError()
+public fun Sequence<Double>.standardError(): Double = toList().toDoubleArray().standardError()
 
 /**
  * Computes the coefficient of variation (CV) of the values in this sequence.
  *
  * The sequence is materialized internally. See [DoubleArray.coefficientOfVariation] for details.
  *
- * @param kind whether to use sample or population standard deviation. Defaults to [PopulationKind.SAMPLE].
+ * @param kind whether to use sample or population standard deviation. Defaults to
+ *   [PopulationKind.SAMPLE].
  * @return the coefficient of variation (standard deviation / mean).
  */
 public fun Sequence<Double>.coefficientOfVariation(kind: PopulationKind = SAMPLE): Double =
