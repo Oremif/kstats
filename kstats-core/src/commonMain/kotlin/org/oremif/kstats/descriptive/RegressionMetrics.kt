@@ -1,11 +1,11 @@
 package org.oremif.kstats.descriptive
 
+import kotlin.math.abs
+import kotlin.math.sqrt
 import org.oremif.kstats.core.compensatedSum
 import org.oremif.kstats.core.exceptions.InsufficientDataException
 import org.oremif.kstats.core.exceptions.InvalidParameterException
 import org.oremif.kstats.core.neumaierTotal
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 /**
  * Mean of the error terms produced by [errorTerm] over paired elements of the two iterators.
@@ -43,9 +43,9 @@ private inline fun errorMean(
  * heavily than they do in [mae]. Uses compensated (Neumaier) summation for improved numerical
  * precision.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
- * An error that overflows to infinity yields [Double.POSITIVE_INFINITY].
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired. An error
+ * that overflows to infinity yields [Double.POSITIVE_INFINITY].
  *
  * ### Example:
  * ```kotlin
@@ -65,10 +65,11 @@ public fun rmse(actual: DoubleArray, predicted: DoubleArray): Double {
         throw InvalidParameterException("actual and predicted must have the same size")
     if (actual.isEmpty()) throw InsufficientDataException("Arrays must not be empty")
 
-    val squaredDiffs = DoubleArray(actual.size) { i ->
-        val diff = actual[i] - predicted[i]
-        diff * diff
-    }
+    val squaredDiffs =
+        DoubleArray(actual.size) { i ->
+            val diff = actual[i] - predicted[i]
+            diff * diff
+        }
     return sqrt(squaredDiffs.compensatedSum() / actual.size)
 }
 
@@ -79,9 +80,9 @@ public fun rmse(actual: DoubleArray, predicted: DoubleArray): Double {
  * heavily than they do in [mae]. Both iterables are consumed once, in lockstep, and must yield the
  * same number of elements. Uses compensated (Neumaier) summation for improved numerical precision.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
- * An error that overflows to infinity yields [Double.POSITIVE_INFINITY].
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired. An error
+ * that overflows to infinity yields [Double.POSITIVE_INFINITY].
  *
  * ### Example:
  * ```kotlin
@@ -104,9 +105,9 @@ public fun rmse(actual: Iterable<Double>, predicted: Iterable<Double>): Double =
  * heavily than they do in [mae]. Both sequences are consumed once, in lockstep, and must yield the
  * same number of elements. Uses compensated (Neumaier) summation for improved numerical precision.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
- * An error that overflows to infinity yields [Double.POSITIVE_INFINITY].
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired. An error
+ * that overflows to infinity yields [Double.POSITIVE_INFINITY].
  *
  * ### Example:
  * ```kotlin
@@ -131,9 +132,9 @@ public fun rmse(actual: Sequence<Double>, predicted: Sequence<Double>): Double =
  * magnitude — unlike [rmse], which penalises large errors disproportionately. Uses compensated
  * (Neumaier) summation for improved numerical precision.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
- * An error that overflows to infinity yields [Double.POSITIVE_INFINITY].
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired. An error
+ * that overflows to infinity yields [Double.POSITIVE_INFINITY].
  *
  * ### Example:
  * ```kotlin
@@ -165,9 +166,9 @@ public fun mae(actual: DoubleArray, predicted: DoubleArray): Double {
  * consumed once, in lockstep, and must yield the same number of elements. Uses compensated
  * (Neumaier) summation for improved numerical precision.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
- * An error that overflows to infinity yields [Double.POSITIVE_INFINITY].
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired. An error
+ * that overflows to infinity yields [Double.POSITIVE_INFINITY].
  *
  * ### Example:
  * ```kotlin
@@ -191,9 +192,9 @@ public fun mae(actual: Iterable<Double>, predicted: Iterable<Double>): Double =
  * consumed once, in lockstep, and must yield the same number of elements. Uses compensated
  * (Neumaier) summation for improved numerical precision.
  *
- * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN,
- * the result is NaN. Filter NaN values before calling this function if that is not desired.
- * An error that overflows to infinity yields [Double.POSITIVE_INFINITY].
+ * NaN values propagate through the computation (IEEE 754 semantics): if any element is NaN, the
+ * result is NaN. Filter NaN values before calling this function if that is not desired. An error
+ * that overflows to infinity yields [Double.POSITIVE_INFINITY].
  *
  * ### Example:
  * ```kotlin

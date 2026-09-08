@@ -1,14 +1,14 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.compensatedSum
-import org.oremif.kstats.core.neumaierTotal
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.core.introSelect
 import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.floor
 import kotlin.math.ln
+import org.oremif.kstats.core.compensatedSum
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.core.introSelect
+import org.oremif.kstats.core.neumaierTotal
 
 // ── mean ────────────────────────────────────────────────────────────────────
 
@@ -275,7 +275,8 @@ public fun Iterable<Double>.weightedMean(weights: Iterable<Double>): Double {
         count++
     }
     if (count == 0) throw InsufficientDataException("Collections must not be empty")
-    if (valueIter.hasNext() || weightIter.hasNext()) throw InvalidParameterException("Values and weights must have the same size")
+    if (valueIter.hasNext() || weightIter.hasNext())
+        throw InvalidParameterException("Values and weights must have the same size")
     val finalWeight = neumaierTotal(totalWeight, twCompensation)
     if (finalWeight <= 0.0) throw InvalidParameterException("Total weight must be positive")
     return neumaierTotal(weightedSum, wsCompensation) / finalWeight

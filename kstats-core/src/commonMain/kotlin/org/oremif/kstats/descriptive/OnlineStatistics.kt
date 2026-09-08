@@ -1,11 +1,10 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.neumaierTotal
-import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 import kotlin.math.abs
 import kotlin.math.max as kMax
 import kotlin.math.min as kMin
 import kotlin.math.sqrt
+import org.oremif.kstats.core.neumaierTotal
 import org.oremif.kstats.descriptive.PopulationKind.SAMPLE
 
 /**

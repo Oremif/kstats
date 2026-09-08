@@ -221,8 +221,7 @@ class SemiVarianceTest {
         val data = doubleArrayOf(1e200, -1e200)
         assertEquals(
             Double.POSITIVE_INFINITY,
-            data.semiVariance(threshold = 0.0, direction = SemiVarianceDirection.DOWNSIDE)
+            data.semiVariance(threshold = 0.0, direction = SemiVarianceDirection.DOWNSIDE),
         )
     }
-
 }

@@ -1,13 +1,13 @@
 package org.oremif.kstats.core
 
-import org.oremif.kstats.core.exceptions.InvalidParameterException
-import org.oremif.kstats.descriptive.OnlineStatistics
-import org.oremif.kstats.descriptive.mean
 import kotlin.math.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InvalidParameterException
+import org.oremif.kstats.descriptive.OnlineStatistics
+import org.oremif.kstats.descriptive.mean
 
 class MathUtilsTest {
 
@@ -822,7 +822,8 @@ class MathUtilsTest {
 
     @Test
     fun testMeanPreservesInfinity() {
-        // DoubleArray.mean() and OnlineStatistics.mean must agree. numpy: np.mean([1, 2, inf]) = inf
+        // DoubleArray.mean() and OnlineStatistics.mean must agree. numpy: np.mean([1, 2, inf]) =
+        // inf
         val data = doubleArrayOf(1.0, 2.0, Double.POSITIVE_INFINITY)
         assertEquals(Double.POSITIVE_INFINITY, data.mean())
         assertEquals(Double.POSITIVE_INFINITY, data.toList().mean())
@@ -834,5 +835,4 @@ class MathUtilsTest {
         // With s = -400 the term for i = 10 is 10^400, which overflows to infinity.
         assertEquals(Double.POSITIVE_INFINITY, generalizedHarmonic(10, -400.0))
     }
-
 }

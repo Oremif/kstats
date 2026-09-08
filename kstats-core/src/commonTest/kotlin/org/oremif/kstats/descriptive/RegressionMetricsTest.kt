@@ -1,11 +1,11 @@
 package org.oremif.kstats.descriptive
 
-import org.oremif.kstats.core.exceptions.InsufficientDataException
-import org.oremif.kstats.core.exceptions.InvalidParameterException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.oremif.kstats.core.exceptions.InsufficientDataException
+import org.oremif.kstats.core.exceptions.InvalidParameterException
 
 class RegressionMetricsTest {
 
@@ -15,7 +15,8 @@ class RegressionMetricsTest {
     fun testRmseKnownValues() {
         val actual = doubleArrayOf(3.0, 5.0, 2.5, 7.0)
         val predicted = doubleArrayOf(2.8, 5.2, 2.1, 6.8)
-        // numpy: np.sqrt(np.mean((np.array([3.0, 5.0, 2.5, 7.0]) - np.array([2.8, 5.2, 2.1, 6.8])) ** 2))
+        // numpy: np.sqrt(np.mean((np.array([3.0, 5.0, 2.5, 7.0]) - np.array([2.8, 5.2, 2.1, 6.8]))
+        // ** 2))
         assertEquals(0.264575131106459, rmse(actual, predicted), 1e-10)
     }
 
@@ -55,7 +56,7 @@ class RegressionMetricsTest {
         assertEquals(0.4, maeOutlier, 1e-10)
         assertTrue(
             rmseOutlier > maeOutlier,
-            "RMSE ($rmseOutlier) should exceed MAE ($maeOutlier) when one large outlier is present"
+            "RMSE ($rmseOutlier) should exceed MAE ($maeOutlier) when one large outlier is present",
         )
     }
 
@@ -76,9 +77,7 @@ class RegressionMetricsTest {
 
     @Test
     fun testRmseEmptyArraysThrows() {
-        assertFailsWith<InsufficientDataException> {
-            rmse(doubleArrayOf(), doubleArrayOf())
-        }
+        assertFailsWith<InsufficientDataException> { rmse(doubleArrayOf(), doubleArrayOf()) }
     }
 
     @Test
@@ -157,9 +156,7 @@ class RegressionMetricsTest {
 
     @Test
     fun testMaeEmptyArraysThrows() {
-        assertFailsWith<InsufficientDataException> {
-            mae(doubleArrayOf(), doubleArrayOf())
-        }
+        assertFailsWith<InsufficientDataException> { mae(doubleArrayOf(), doubleArrayOf()) }
     }
 
     @Test
@@ -213,8 +210,18 @@ class RegressionMetricsTest {
         val fromIterable = rmse(actualList, predictedList)
         val fromSequence = rmse(actualList.asSequence(), predictedList.asSequence())
 
-        assertEquals(fromArray, fromIterable, 1e-10, "Iterable overload differs from DoubleArray overload")
-        assertEquals(fromArray, fromSequence, 1e-10, "Sequence overload differs from DoubleArray overload")
+        assertEquals(
+            fromArray,
+            fromIterable,
+            1e-10,
+            "Iterable overload differs from DoubleArray overload",
+        )
+        assertEquals(
+            fromArray,
+            fromSequence,
+            1e-10,
+            "Sequence overload differs from DoubleArray overload",
+        )
     }
 
     @Test
@@ -228,8 +235,18 @@ class RegressionMetricsTest {
         val fromIterable = mae(actualList, predictedList)
         val fromSequence = mae(actualList.asSequence(), predictedList.asSequence())
 
-        assertEquals(fromArray, fromIterable, 1e-10, "Iterable overload differs from DoubleArray overload")
-        assertEquals(fromArray, fromSequence, 1e-10, "Sequence overload differs from DoubleArray overload")
+        assertEquals(
+            fromArray,
+            fromIterable,
+            1e-10,
+            "Iterable overload differs from DoubleArray overload",
+        )
+        assertEquals(
+            fromArray,
+            fromSequence,
+            1e-10,
+            "Sequence overload differs from DoubleArray overload",
+        )
     }
 
     @Test
@@ -239,7 +256,10 @@ class RegressionMetricsTest {
 
         assertEquals(Double.POSITIVE_INFINITY, rmse(actualArr, predictedArr))
         assertEquals(Double.POSITIVE_INFINITY, rmse(actualArr.toList(), predictedArr.toList()))
-        assertEquals(Double.POSITIVE_INFINITY, rmse(actualArr.asSequence(), predictedArr.asSequence()))
+        assertEquals(
+            Double.POSITIVE_INFINITY,
+            rmse(actualArr.asSequence(), predictedArr.asSequence()),
+        )
     }
 
     @Test
@@ -249,21 +269,20 @@ class RegressionMetricsTest {
 
         assertEquals(Double.POSITIVE_INFINITY, mae(actualArr, predictedArr))
         assertEquals(Double.POSITIVE_INFINITY, mae(actualArr.toList(), predictedArr.toList()))
-        assertEquals(Double.POSITIVE_INFINITY, mae(actualArr.asSequence(), predictedArr.asSequence()))
+        assertEquals(
+            Double.POSITIVE_INFINITY,
+            mae(actualArr.asSequence(), predictedArr.asSequence()),
+        )
     }
 
     @Test
     fun testRmseIterableMismatchedSizeThrows() {
-        assertFailsWith<InvalidParameterException> {
-            rmse(listOf(1.0, 2.0), listOf(1.0))
-        }
+        assertFailsWith<InvalidParameterException> { rmse(listOf(1.0, 2.0), listOf(1.0)) }
     }
 
     @Test
     fun testMaeIterableMismatchedSizeThrows() {
-        assertFailsWith<InvalidParameterException> {
-            mae(listOf(1.0, 2.0), listOf(1.0))
-        }
+        assertFailsWith<InvalidParameterException> { mae(listOf(1.0, 2.0), listOf(1.0)) }
     }
 
     @Test
@@ -284,16 +303,12 @@ class RegressionMetricsTest {
     @Test
     fun testRmseIterableMismatchedSizeThrowsWhenErrorIsNaN() {
         // A NaN error term must not short-circuit the size check either.
-        assertFailsWith<InvalidParameterException> {
-            rmse(listOf(Double.NaN, 2.0), listOf(1.0))
-        }
+        assertFailsWith<InvalidParameterException> { rmse(listOf(Double.NaN, 2.0), listOf(1.0)) }
     }
 
     @Test
     fun testMaeIterableMismatchedSizeThrowsWhenErrorIsNaN() {
-        assertFailsWith<InvalidParameterException> {
-            mae(listOf(Double.NaN, 2.0), listOf(1.0))
-        }
+        assertFailsWith<InvalidParameterException> { mae(listOf(Double.NaN, 2.0), listOf(1.0)) }
     }
 
     @Test
@@ -305,8 +320,6 @@ class RegressionMetricsTest {
 
     @Test
     fun testMaeIterableEmptyThrows() {
-        assertFailsWith<InsufficientDataException> {
-            mae(emptyList<Double>(), emptyList<Double>())
-        }
+        assertFailsWith<InsufficientDataException> { mae(emptyList<Double>(), emptyList<Double>()) }
     }
 }

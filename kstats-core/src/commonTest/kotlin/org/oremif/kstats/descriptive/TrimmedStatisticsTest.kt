@@ -222,5 +222,4 @@ class TrimmedStatisticsTest {
         val data = DoubleArray(8) { 1e308 }
         assertEquals(Double.POSITIVE_INFINITY, data.trimmedMean(0.25))
     }
-
 }
